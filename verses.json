@@ -1,0 +1,55 @@
+{
+  "presentation_title": "Bible Verses Collection",
+  "presentation_subtitle": "Selected Scriptures",
+  "sections": [
+    {
+      "section": "Bible Verses",
+      "verses": [
+        {
+          "reference": "Genesis 12:2 (KJV)",
+          "text": "And I will make of thee a great nation, and I will bless thee, and make thy name great; and thou shalt be a blessing."
+        },
+        {
+          "reference": "2 Corinthians 5:17 (KJV)",
+          "text": "Therefore if any man be in Christ, he is a new creature: old things are passed away; behold, all things are become new."
+        },
+        {
+          "reference": "Revelation 21:4 (KJV)",
+          "text": "And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away."
+        },
+        {
+          "reference": "Genesis 17:1 (KJV)",
+          "text": "And when Abram was ninety years old and nine, the Lord appeared to Abram, and said unto him, I am the Almighty God; walk before me, and be thou perfect."
+        },
+        {
+          "reference": "Genesis 17:5 (KJV)",
+          "text": "Neither shall thy name any more be called Abram, but thy name shall be Abraham; for a father of many nations have I made thee."
+        },
+        {
+          "reference": "Genesis 17:15 (KJV)",
+          "text": "And God said unto Abraham, As for Sarai thy wife, thou shalt not call her name Sarai, but Sarah shall her name be."
+        },
+        {
+          "reference": "Romans 4:13–14 (KJV)",
+          "text": "For the promise, that he should be the heir of the world, was not to Abraham, or to his seed, through the law, but through the righteousness of faith. For if they which are of the law be heirs, faith is made void, and the promise made of none effect:"
+        },
+        {
+          "reference": "Galatians 3:29 (KJV)",
+          "text": "And if ye be Christ's, then are ye Abraham's seed, and heirs according to the promise."
+        },
+        {
+          "reference": "Romans 5:19 (KJV)",
+          "text": "For as by one man's disobedience many were made sinners, so by the obedience of one shall many be made righteous."
+        },
+        {
+          "reference": "2 Corinthians 5:21 (KJV)",
+          "text": "For he hath made him to be sin for us, who knew no sin; that we might be made the righteousness of God in him."
+        },
+        {
+          "reference": "Galatians 5:4 (KJV)",
+          "text": "Christ is become of no effect unto you, whosoever of you are justified by the law; ye are fallen from grace."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "presentation_title": "Sample Bible Verses",
+  "presentation_subtitle": "A Different Collection",
+  "sections": [
+    {
+      "section": "Hope and Faith",
+      "verses": [
+        {
+          "reference": "Jeremiah 29:11 (KJV)",
+          "text": "For I know the thoughts that I think toward you, saith the Lord, thoughts of peace, and not of evil, to give you an expected end."
+        },
+        {
+          "reference": "Romans 8:28 (KJV)",
+          "text": "And we know that all things work together for good to them that love God, to them who are the called according to his purpose."
+        },
+        {
+          "reference": "Philippians 4:13 (KJV)",
+          "text": "I can do all things through Christ which strengtheneth me."
+        }
+      ]
+    }
+  ]
+}
