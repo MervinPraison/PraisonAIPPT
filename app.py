@@ -77,10 +77,11 @@ def create_bible_verses_presentation(verses_file="verses.json", output_file=None
         title.text = data.get("presentation_title", "Bible Verses Collection")
         subtitle.text = data.get("presentation_subtitle", "Selected Scriptures")
     
-    # Add slides for each verse (skip section slides when custom title is provided)
+    # Add slides for each verse with dedicated section title slides
     for section_data in verses_data:
-        # Only add section title slide if no custom title is provided
-        if not custom_title:
+        # Only create section slide if there are verses in this section
+        if section_data.get("verses") and len(section_data["verses"]) > 0:
+            # Add section title slide
             section_slide_layout = prs.slide_layouts[1]
             section_slide = prs.slides.add_slide(section_slide_layout)
             section_title = section_slide.shapes.title
@@ -89,52 +90,52 @@ def create_bible_verses_presentation(verses_file="verses.json", output_file=None
             # Style section title
             section_title.text_frame.paragraphs[0].font.size = Pt(36)
             section_title.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 51, 102)
-        
-        # Add verse slides
-        for verse in section_data["verses"]:
-            # Split long verses into multiple parts
-            verse_parts = split_long_text(verse["text"])
             
-            for i, part in enumerate(verse_parts):
-                verse_slide_layout = prs.slide_layouts[6]  # Blank layout to avoid bullets
-                verse_slide = prs.slides.add_slide(verse_slide_layout)
+            # Add verse slides
+            for verse in section_data["verses"]:
+                # Split long verses into multiple parts
+                verse_parts = split_long_text(verse["text"])
                 
-                # Add verse reference as title using textbox
-                left = Inches(1)
-                top = Inches(1)
-                width = Inches(8)
-                height = Inches(1)
-                
-                title_box = verse_slide.shapes.add_textbox(left, top, width, height)
-                title_frame = title_box.text_frame
-                title_p = title_frame.paragraphs[0]
-                
-                # Add part indicator for multi-part verses
-                if len(verse_parts) > 1:
-                    title_p.text = f"{verse['reference']} (Part {i+1}/{len(verse_parts)})"
-                else:
-                    title_p.text = verse["reference"]
+                for i, part in enumerate(verse_parts):
+                    verse_slide_layout = prs.slide_layouts[6]  # Blank layout to avoid bullets
+                    verse_slide = prs.slides.add_slide(verse_slide_layout)
                     
-                title_p.font.size = Pt(28)
-                title_p.font.bold = True
-                title_p.font.color.rgb = RGBColor(0, 51, 102)
-                title_p.alignment = PP_ALIGN.CENTER
-                
-                # Add verse text using textbox (no bullets)
-                left = Inches(1)
-                top = Inches(2.5)
-                width = Inches(8)
-                height = Inches(4)
-                
-                text_box = verse_slide.shapes.add_textbox(left, top, width, height)
-                text_frame = text_box.text_frame
-                text_frame.word_wrap = True
-                
-                text_p = text_frame.paragraphs[0]
-                text_p.text = f'"{part}"'
-                text_p.font.size = Pt(40)
-                text_p.font.color.rgb = RGBColor(51, 51, 51)
-                text_p.alignment = PP_ALIGN.CENTER
+                    # Add verse reference as title using textbox
+                    left = Inches(1)
+                    top = Inches(1)
+                    width = Inches(8)
+                    height = Inches(1)
+                    
+                    title_box = verse_slide.shapes.add_textbox(left, top, width, height)
+                    title_frame = title_box.text_frame
+                    title_p = title_frame.paragraphs[0]
+                    
+                    # Add part indicator for multi-part verses
+                    if len(verse_parts) > 1:
+                        title_p.text = f"{verse['reference']} (Part {i+1}/{len(verse_parts)})"
+                    else:
+                        title_p.text = verse["reference"]
+                        
+                    title_p.font.size = Pt(28)
+                    title_p.font.bold = True
+                    title_p.font.color.rgb = RGBColor(0, 51, 102)
+                    title_p.alignment = PP_ALIGN.CENTER
+                    
+                    # Add verse text using textbox (no bullets)
+                    left = Inches(1)
+                    top = Inches(2.5)
+                    width = Inches(8)
+                    height = Inches(4)
+                    
+                    text_box = verse_slide.shapes.add_textbox(left, top, width, height)
+                    text_frame = text_box.text_frame
+                    text_frame.word_wrap = True
+                    
+                    text_p = text_frame.paragraphs[0]
+                    text_p.text = f'"{part}"'
+                    text_p.font.size = Pt(40)
+                    text_p.font.color.rgb = RGBColor(51, 51, 51)
+                    text_p.alignment = PP_ALIGN.CENTER
     
     # Save presentation
     if output_file is None:
