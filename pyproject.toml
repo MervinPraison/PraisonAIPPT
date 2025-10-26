@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pptx-bible-verses"
+version = "1.0.0"
+description = "Create beautiful PowerPoint presentations from Bible verses in JSON format"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["powerpoint", "pptx", "bible", "verses", "presentation", "generator"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Religion",
+    "Topic :: Office/Business :: Office Suites",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "python-pptx>=0.6.21",
+]
+
+[project.urls]
+Homepage = "https://github.com/MervinPraison/ppt-package"
+"Bug Reports" = "https://github.com/MervinPraison/ppt-package/issues"
+"Source" = "https://github.com/MervinPraison/ppt-package"
+
+[project.scripts]
+pptx-bible-verses = "pptx_bible_verses.cli:main"
+
+[tool.setuptools]
+packages = ["pptx_bible_verses"]
+
+[tool.setuptools.package-data]
+"*" = ["examples/*.json"]

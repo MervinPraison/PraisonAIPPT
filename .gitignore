@@ -25,6 +25,15 @@ wheels/
 *.egg
 MANIFEST
 
+# Generated PowerPoint files
+*.pptx
+
+# Output directory
+output/
+
+# Keep example files
+!examples/*.pptx
+
 # PyInstaller
 *.manifest
 *.spec

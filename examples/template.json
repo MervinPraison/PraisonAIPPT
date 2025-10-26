@@ -1,0 +1,28 @@
+{
+  "presentation_title": "Your Presentation Title Here",
+  "presentation_subtitle": "Your Subtitle Here",
+  "sections": [
+    {
+      "section": "Section 1 Name",
+      "verses": [
+        {
+          "reference": "Book Chapter:Verse (Version)",
+          "text": "Your verse text goes here."
+        },
+        {
+          "reference": "Book Chapter:Verse (Version)",
+          "text": "Another verse text goes here."
+        }
+      ]
+    },
+    {
+      "section": "Section 2 Name",
+      "verses": [
+        {
+          "reference": "Book Chapter:Verse (Version)",
+          "text": "More verse text goes here."
+        }
+      ]
+    }
+  ]
+}
