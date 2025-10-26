@@ -27,9 +27,13 @@ MANIFEST
 
 # Generated PowerPoint files
 *.pptx
+~$*.pptx
 
 # Output directory
 output/
+
+# Legacy files
+legacy/
 
 # Keep example files
 !examples/*.pptx
