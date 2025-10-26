@@ -1,10 +1,10 @@
 #!/bin/bash
-# Quick installation script for pptx-bible-verses package
+# Quick installation script for praisonaippt package
 
 set -e
 
 echo "=========================================="
-echo "PowerPoint Bible Verses Generator"
+echo "PraisonAI PPT - PowerPoint Bible Verses Generator"
 echo "Installation Script"
 echo "=========================================="
 echo ""
@@ -25,7 +25,7 @@ echo "✓ uv is installed"
 echo ""
 
 # Install the package
-echo "Installing pptx-bible-verses package..."
+echo "Installing praisonaippt package..."
 uv pip install -e .
 
 echo ""
@@ -34,13 +34,13 @@ echo "✓ Installation Complete!"
 echo "=========================================="
 echo ""
 echo "Quick Start:"
-echo "  1. List examples:     pptx-bible-verses --list-examples"
-echo "  2. Use an example:    pptx-bible-verses --use-example verses"
-echo "  3. Create from file:  pptx-bible-verses -i my_verses.json"
-echo "  4. Show help:         pptx-bible-verses --help"
+echo "  1. List examples:     praisonaippt --list-examples"
+echo "  2. Use an example:    praisonaippt --use-example verses"
+echo "  3. Create from file:  praisonaippt -i my_verses.json"
+echo "  4. Show help:         praisonaippt --help"
 echo ""
 echo "To create your own presentation:"
 echo "  cp examples/template.json my_verses.json"
 echo "  # Edit my_verses.json with your verses"
-echo "  pptx-bible-verses -i my_verses.json"
+echo "  praisonaippt -i my_verses.json"
 echo ""

@@ -3,43 +3,43 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pptx-bible-verses"
+name = "praisonaippt"
 version = "1.0.0"
-description = "Create beautiful PowerPoint presentations from Bible verses in JSON format"
+description = "PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON format"
 readme = "README.md"
 requires-python = ">=3.7"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "MervinPraison"}
 ]
-keywords = ["powerpoint", "pptx", "bible", "verses", "presentation", "generator"]
+keywords = ["powerpoint", "pptx", "bible", "verses", "presentation", "generator", "praisonai"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: End Users/Desktop",
     "Topic :: Religion",
     "Topic :: Office/Business :: Office Suites",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
     "python-pptx>=0.6.21",
 ]
 
 [project.urls]
-Homepage = "https://github.com/MervinPraison/ppt-package"
-"Bug Reports" = "https://github.com/MervinPraison/ppt-package/issues"
-"Source" = "https://github.com/MervinPraison/ppt-package"
+Homepage = "https://github.com/MervinPraison/PraisonAIPPT"
+"Bug Reports" = "https://github.com/MervinPraison/PraisonAIPPT/issues"
+"Source" = "https://github.com/MervinPraison/PraisonAIPPT"
 
 [project.scripts]
-pptx-bible-verses = "pptx_bible_verses.cli:main"
+praisonaippt = "praisonaippt.cli:main"
 
 [tool.setuptools]
-packages = ["pptx_bible_verses"]
+packages = ["praisonaippt"]
 
 [tool.setuptools.package-data]
 "*" = ["examples/*.json"]

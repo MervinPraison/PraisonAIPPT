@@ -1,5 +1,5 @@
 """
-Setup file for pptx-bible-verses package.
+Setup file for PraisonAI PPT package.
 """
 
 from setuptools import setup, find_packages
@@ -10,27 +10,26 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding='utf-8')
 
 setup(
-    name="pptx-bible-verses",
+    name="praisonaippt",
     version="1.0.0",
-    author="Your Name",
-    author_email="your.email@example.com",
-    description="Create beautiful PowerPoint presentations from Bible verses in JSON format",
+    author="MervinPraison",
+    description="PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON format",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/MervinPraison/ppt-package",
+    url="https://github.com/MervinPraison/PraisonAIPPT",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: End Users/Desktop",
         "Topic :: Religion",
         "Topic :: Office/Business :: Office Suites",
-        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     python_requires=">=3.7",
     install_requires=[
@@ -38,16 +37,16 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "pptx-bible-verses=pptx_bible_verses.cli:main",
+            "praisonaippt=praisonaippt.cli:main",
         ],
     },
     include_package_data=True,
     package_data={
         "": ["examples/*.json"],
     },
-    keywords="powerpoint pptx bible verses presentation generator",
+    keywords="powerpoint pptx bible verses presentation generator praisonai",
     project_urls={
-        "Bug Reports": "https://github.com/MervinPraison/ppt-package/issues",
-        "Source": "https://github.com/MervinPraison/ppt-package",
+        "Bug Reports": "https://github.com/MervinPraison/PraisonAIPPT/issues",
+        "Source": "https://github.com/MervinPraison/PraisonAIPPT",
     },
 )

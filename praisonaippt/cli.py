@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Command-line interface for PowerPoint Bible Verses Generator.
+Command-line interface for PraisonAI PPT - PowerPoint Bible Verses Generator.
 """
 
 import argparse
@@ -81,7 +81,7 @@ def main():
             print("Available examples:")
             for example in examples:
                 print(f"  - {example.replace('.json', '')}")
-            print("\nUse with: pptx-bible-verses --use-example <name>")
+            print("\nUse with: praisonaippt --use-example <name>")
         else:
             print("No examples found.")
         return 0

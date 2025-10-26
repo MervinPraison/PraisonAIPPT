@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get started with PowerPoint Bible Verses Generator in 3 easy steps!
+Get started with PraisonAI PPT - PowerPoint Bible Verses Generator in 3 easy steps!
 
 ## 🚀 Installation (One Command)
 
@@ -25,10 +25,10 @@ pip install -e .
 
 ```bash
 # List available examples
-pptx-bible-verses --list-examples
+praisonaippt --list-examples
 
 # Use an example
-pptx-bible-verses --use-example verses
+praisonaippt --use-example verses
 ```
 
 ### Option 2: Start from Template
@@ -41,30 +41,30 @@ cp examples/template.json my_verses.json
 nano my_verses.json  # or code, vim, etc.
 
 # Generate presentation
-pptx-bible-verses -i my_verses.json
+praisonaippt -i my_verses.json
 ```
 
 ### Option 3: Use Existing JSON File
 
 ```bash
-pptx-bible-verses -i path/to/your/verses.json
+praisonaippt -i path/to/your/verses.json
 ```
 
 ## 🎨 Customization Options
 
 ### Custom Title
 ```bash
-pptx-bible-verses -i verses.json -t "My Custom Title"
+praisonaippt -i verses.json -t "My Custom Title"
 ```
 
 ### Custom Output Filename
 ```bash
-pptx-bible-verses -i verses.json -o my_presentation.pptx
+praisonaippt -i verses.json -o my_presentation.pptx
 ```
 
 ### Combine Options
 ```bash
-pptx-bible-verses -i verses.json -t "God's Promises" -o promises.pptx
+praisonaippt -i verses.json -t "God's Promises" -o promises.pptx
 ```
 
 ## 📖 JSON Format (Simple Example)
@@ -90,7 +90,7 @@ pptx-bible-verses -i verses.json -t "God's Promises" -o promises.pptx
 ## 🐍 Python API (Advanced)
 
 ```python
-from pptx_bible_verses import create_presentation, load_verses_from_file
+from praisonaippt import create_presentation, load_verses_from_file
 
 # Load and create
 data = load_verses_from_file("verses.json")
@@ -110,13 +110,13 @@ if data:
 
 ```bash
 # Show all options
-pptx-bible-verses --help
+praisonaippt --help
 
 # Check version
-pptx-bible-verses --version
+praisonaippt --version
 
 # List examples
-pptx-bible-verses --list-examples
+praisonaippt --list-examples
 ```
 
 ## 📚 More Information

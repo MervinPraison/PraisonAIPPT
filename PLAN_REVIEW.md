@@ -118,12 +118,12 @@
 ## 📋 REVISED IMPLEMENTATION CHECKLIST
 
 ### Phase 1: Structure Setup (REQUIRED)
-- [ ] Create `pptx_bible_verses/` package directory
-- [ ] Create `pptx_bible_verses/__init__.py`
-- [ ] Create `pptx_bible_verses/core.py` (empty)
-- [ ] Create `pptx_bible_verses/utils.py` (empty)
-- [ ] Create `pptx_bible_verses/loader.py` (empty)
-- [ ] Create `pptx_bible_verses/cli.py` (empty)
+- [ ] Create `praisonaippt/` package directory
+- [ ] Create `praisonaippt/__init__.py`
+- [ ] Create `praisonaippt/core.py` (empty)
+- [ ] Create `praisonaippt/utils.py` (empty)
+- [ ] Create `praisonaippt/loader.py` (empty)
+- [ ] Create `praisonaippt/cli.py` (empty)
 - [ ] Create `examples/` directory
 - [ ] Create `setup.py`
 - [ ] Create `pyproject.toml`
@@ -171,8 +171,8 @@
 - [ ] Move or delete generated `.pptx` files
 - [ ] Keep `app.py` as legacy wrapper with deprecation notice (optional)
 - [ ] Test package installation: `pip install -e .`
-- [ ] Test CLI: `pptx-bible-verses --help`
-- [ ] Test with example: `pptx-bible-verses --use-example verses`
+- [ ] Test CLI: `praisonaippt --help`
+- [ ] Test with example: `praisonaippt --use-example verses`
 
 ---
 
@@ -251,7 +251,7 @@ The plan is **SOLID** and ready for implementation with minor adjustments:
 
 ### User Experience Priority:
 1. Installation must be simple: `pip install -e .`
-2. CLI must be intuitive: `pptx-bible-verses -i myfile.json`
+2. CLI must be intuitive: `praisonaippt -i myfile.json`
 3. Examples must work out of the box
 4. Documentation must be clear and complete
 

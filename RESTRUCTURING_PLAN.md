@@ -29,7 +29,7 @@
 
 ```
 ppt-package/
-├── pptx_bible_verses/              # Main package directory
+├── praisonaippt/              # Main package directory
 │   ├── __init__.py                 # Package initialization & version
 │   ├── core.py                     # Core presentation creation logic
 │   ├── utils.py                    # Utility functions (split_long_text, etc.)
@@ -68,14 +68,14 @@ ppt-package/
 
 ## 3. DETAILED MODULE BREAKDOWN
 
-### 3.1 `pptx_bible_verses/__init__.py`
+### 3.1 `praisonaippt/__init__.py`
 **Purpose**: Package initialization and public API exposure
 **Contents**:
 - Package version (`__version__ = "1.0.0"`)
 - Import main functions for easy access
 - Public API: `create_presentation()`, `load_verses()`
 
-### 3.2 `pptx_bible_verses/core.py`
+### 3.2 `praisonaippt/core.py`
 **Purpose**: Core presentation creation logic
 **Functions**:
 - `create_presentation(data, output_file=None, custom_title=None)` - Main function
@@ -84,21 +84,21 @@ ppt-package/
 - `add_verse_slide(prs, verse_text, reference, part_num=None)` - Create verse slide
 - `style_text_frame(text_frame, font_size, color, alignment)` - Apply styling
 
-### 3.3 `pptx_bible_verses/utils.py`
+### 3.3 `praisonaippt/utils.py`
 **Purpose**: Utility functions
 **Functions**:
 - `split_long_text(text, max_length=200)` - Split long text
 - `sanitize_filename(filename)` - Clean filename for output
 - `validate_verse_data(data)` - Validate JSON structure
 
-### 3.4 `pptx_bible_verses/loader.py`
+### 3.4 `praisonaippt/loader.py`
 **Purpose**: Data loading and validation
 **Functions**:
 - `load_verses_from_file(filepath)` - Load and validate JSON
 - `load_verses_from_dict(data)` - Load from dictionary
 - `get_example_path(example_name)` - Get path to example files
 
-### 3.5 `pptx_bible_verses/cli.py`
+### 3.5 `praisonaippt/cli.py`
 **Purpose**: Command-line interface
 **Functions**:
 - `main()` - CLI entry point with argparse
@@ -120,13 +120,13 @@ ppt-package/
 from setuptools import setup, find_packages
 
 setup(
-    name="pptx-bible-verses",
+    name="praisonaippt",
     version="1.0.0",
     packages=find_packages(),
     install_requires=["python-pptx>=0.6.21"],
     entry_points={
         "console_scripts": [
-            "pptx-bible-verses=pptx_bible_verses.cli:main",
+            "praisonaippt=praisonaippt.cli:main",
         ],
     },
     # ... metadata
@@ -159,7 +159,7 @@ pip install -e .
 
 **Method 2: From PyPI (Future)**
 ```bash
-pip install pptx-bible-verses
+pip install praisonaippt
 ```
 
 ### 5.2 Usage Methods
@@ -167,36 +167,36 @@ pip install pptx-bible-verses
 **Method 1: Command Line**
 ```bash
 # Use default verses.json in current directory
-pptx-bible-verses
+praisonaippt
 
 # Use specific input file
-pptx-bible-verses -i my_verses.json -o my_presentation.pptx
+praisonaippt -i my_verses.json -o my_presentation.pptx
 
 # Use built-in example
-pptx-bible-verses --use-example tamil_verses
+praisonaippt --use-example tamil_verses
 
 # List available examples
-pptx-bible-verses --list-examples
+praisonaippt --list-examples
 ```
 
 **Method 2: Python API**
 ```python
-from pptx_bible_verses import create_presentation, load_verses
+from praisonaippt import create_presentation, load_verses
 
 # Load and create
 data = load_verses("verses.json")
 create_presentation(data, output_file="output.pptx")
 
 # Or in one step
-from pptx_bible_verses import create_presentation_from_file
+from praisonaippt import create_presentation_from_file
 create_presentation_from_file("verses.json", "output.pptx")
 ```
 
 ### 5.3 Quick Start for New Users
 1. Install package: `pip install -e .`
-2. Copy template: `pptx-bible-verses --create-template`
+2. Copy template: `praisonaippt --create-template`
 3. Edit `my_verses.json` with your verses
-4. Generate: `pptx-bible-verses -i my_verses.json`
+4. Generate: `praisonaippt -i my_verses.json`
 
 ---
 

@@ -51,7 +51,7 @@ def add_section_slide(prs, section_name):
     section_title.text = section_name
     
     # Style section title
-    section_title.text_frame.paragraphs[0].font.size = Pt(36)
+    section_title.text_frame.paragraphs[0].font.size = Pt(44)
     section_title.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 51, 102)
     
     return section_slide
@@ -96,7 +96,7 @@ def _apply_highlights(paragraph, text, highlights):
     if not filtered_matches:
         # No matches found, just add plain text
         paragraph.text = text
-        paragraph.font.size = Pt(24)
+        paragraph.font.size = Pt(32)
         paragraph.font.color.rgb = RGBColor(0, 0, 0)
         return
     
@@ -114,7 +114,7 @@ def _apply_highlights(paragraph, text, highlights):
             else:
                 run = paragraph.add_run()
                 run.text = text[current_pos:start]
-            run.font.size = Pt(24)
+            run.font.size = Pt(32)
             run.font.color.rgb = RGBColor(0, 0, 0)
         
         # Add the highlighted text
@@ -127,7 +127,7 @@ def _apply_highlights(paragraph, text, highlights):
             run.text = matched_text
         
         # Apply highlight formatting (bold + color)
-        run.font.size = Pt(24)
+        run.font.size = Pt(32)
         run.font.bold = True
         run.font.color.rgb = RGBColor(255, 140, 0)  # Orange color for highlights
         
@@ -137,7 +137,7 @@ def _apply_highlights(paragraph, text, highlights):
     if current_pos < len(text):
         run = paragraph.add_run()
         run.text = text[current_pos:]
-        run.font.size = Pt(24)
+        run.font.size = Pt(32)
         run.font.color.rgb = RGBColor(0, 0, 0)
 
 
@@ -179,7 +179,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None):
     else:
         # No highlights, just add plain text
         p.text = verse_text
-        p.font.size = Pt(24)
+        p.font.size = Pt(32)
         p.font.color.rgb = RGBColor(0, 0, 0)
     
     # Add reference
@@ -198,7 +198,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None):
     ref_p = ref_text_frame.paragraphs[0]
     ref_p.text = reference_text
     ref_p.alignment = PP_ALIGN.CENTER
-    ref_p.font.size = Pt(18)
+    ref_p.font.size = Pt(22)
     ref_p.font.color.rgb = RGBColor(100, 100, 100)
     ref_p.font.italic = True
     

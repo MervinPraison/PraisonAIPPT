@@ -1,11 +1,11 @@
 """
-PowerPoint Bible Verses Generator
+PraisonAI PPT - PowerPoint Bible Verses Generator
 
 A Python package for creating beautiful PowerPoint presentations from Bible verses.
 """
 
 __version__ = "1.0.0"
-__author__ = "Your Name"
+__author__ = "MervinPraison"
 __license__ = "MIT"
 
 from .core import create_presentation

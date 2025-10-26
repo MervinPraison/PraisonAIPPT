@@ -1,4 +1,4 @@
-# PowerPoint Bible Verses Generator
+# PraisonAI PPT - PowerPoint Bible Verses Generator
 
 [![Python Version](https://img.shields.io/badge/python-3.7%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -10,6 +10,7 @@ A professional Python package for creating beautiful PowerPoint presentations fr
 - 📦 **Proper Python Package** - Installable via pip with entry points
 - 📖 **Dynamic verse loading** from JSON files
 - 🎨 **Professional slide formatting** with proper placeholders
+- 🎨 **Text highlighting** - Highlight specific words or phrases in verses
 - 📑 **Multi-part verse support** for long verses
 - 🔧 **Command-line interface** with flexible options
 - 🐍 **Python API** for programmatic use
@@ -71,7 +72,7 @@ uv pip install -r requirements.txt
 
 ```
 ppt-package/
-├── pptx_bible_verses/          # Main package
+├── praisonaippt/          # Main package
 │   ├── __init__.py            # Package initialization
 │   ├── core.py                # Presentation creation logic
 │   ├── utils.py               # Utility functions
@@ -106,13 +107,33 @@ Create your verses in JSON format following this structure:
       "verses": [
         {
           "reference": "Book Chapter:Verse (Version)",
-          "text": "The actual verse text here."
+          "text": "The actual verse text here.",
+          "highlights": ["word1", "phrase to highlight"]
         }
       ]
     }
   ]
 }
 ```
+
+### Highlighting Feature (New! 🎨)
+
+You can now highlight specific words or phrases in your verses:
+- Add a `"highlights"` array to any verse (optional)
+- Highlighted text appears in **bold orange** color
+- Case-insensitive matching
+- Supports both single words and phrases
+
+**Example:**
+```json
+{
+  "reference": "John 3:16 (NIV)",
+  "text": "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+  "highlights": ["loved", "eternal life"]
+}
+```
+
+**See full documentation:** [docs/HIGHLIGHTS_FEATURE.md](docs/HIGHLIGHTS_FEATURE.md)
 
 ### Quick Start Template
 
@@ -126,7 +147,7 @@ cp examples/template.json my_verses.json
 nano my_verses.json  # or use your favorite editor
 
 # Generate presentation
-pptx-bible-verses -i my_verses.json
+praisonaippt -i my_verses.json
 ```
 
 ## 💻 Usage
@@ -137,48 +158,48 @@ pptx-bible-verses -i my_verses.json
 
 Use default `verses.json` in current directory:
 ```bash
-pptx-bible-verses
+praisonaippt
 ```
 
 #### Specify Input File
 
 ```bash
-pptx-bible-verses -i my_verses.json
+praisonaippt -i my_verses.json
 ```
 
 #### Specify Output File
 
 ```bash
-pptx-bible-verses -i verses.json -o my_presentation.pptx
+praisonaippt -i verses.json -o my_presentation.pptx
 ```
 
 #### Use Custom Title
 
 ```bash
-pptx-bible-verses -i verses.json -t "My Custom Title"
+praisonaippt -i verses.json -t "My Custom Title"
 ```
 
 #### Use Built-in Examples
 
 ```bash
 # List available examples
-pptx-bible-verses --list-examples
+praisonaippt --list-examples
 
 # Use a specific example
-pptx-bible-verses --use-example tamil_verses
-pptx-bible-verses --use-example sample_verses
+praisonaippt --use-example tamil_verses
+praisonaippt --use-example sample_verses
 ```
 
 #### Show Version
 
 ```bash
-pptx-bible-verses --version
+praisonaippt --version
 ```
 
 #### Show Help
 
 ```bash
-pptx-bible-verses --help
+praisonaippt --help
 ```
 
 ### Python API
@@ -186,7 +207,7 @@ pptx-bible-verses --help
 You can also use the package programmatically in your Python code:
 
 ```python
-from pptx_bible_verses import create_presentation, load_verses_from_file
+from praisonaippt import create_presentation, load_verses_from_file
 
 # Load verses from file
 data = load_verses_from_file("verses.json")
@@ -204,8 +225,8 @@ if data:
 #### Using Built-in Examples
 
 ```python
-from pptx_bible_verses import create_presentation
-from pptx_bible_verses.loader import get_example_path, load_verses_from_file
+from praisonaippt import create_presentation
+from praisonaippt.loader import get_example_path, load_verses_from_file
 
 # Get path to example
 example_path = get_example_path("tamil_verses")
@@ -218,7 +239,7 @@ create_presentation(data, output_file="tamil_presentation.pptx")
 #### List Available Examples
 
 ```python
-from pptx_bible_verses.loader import list_examples
+from praisonaippt.loader import list_examples
 
 examples = list_examples()
 for example in examples:
@@ -229,12 +250,12 @@ for example in examples:
 
 **Combine multiple options:**
 ```bash
-pptx-bible-verses -i verses.json -o output.pptx -t "Amazing Grace"
+praisonaippt -i verses.json -o output.pptx -t "Amazing Grace"
 ```
 
 **Use example with custom output:**
 ```bash
-pptx-bible-verses --use-example tamil_verses -o tamil_output.pptx
+praisonaippt --use-example tamil_verses -o tamil_output.pptx
 ```
 
 ## 📊 Output
@@ -265,7 +286,7 @@ The package creates a PowerPoint presentation with:
 uv pip install -e .
 
 # Use built-in example
-pptx-bible-verses --use-example verses
+praisonaippt --use-example verses
 ```
 
 ### Example 2: Create from Template
@@ -275,17 +296,17 @@ cp examples/template.json my_verses.json
 
 # Edit the file with your verses
 # Then generate
-pptx-bible-verses -i my_verses.json
+praisonaippt -i my_verses.json
 ```
 
 ### Example 3: Custom Title
 ```bash
-pptx-bible-verses -i verses.json -t "God's Promises"
+praisonaippt -i verses.json -t "God's Promises"
 ```
 
 ### Example 4: Python Script
 ```python
-from pptx_bible_verses import create_presentation, load_verses_from_file
+from praisonaippt import create_presentation, load_verses_from_file
 
 # Load your verses
 data = load_verses_from_file("my_verses.json")
@@ -293,6 +314,15 @@ data = load_verses_from_file("my_verses.json")
 # Create presentation
 if data:
     create_presentation(data, output_file="output.pptx")
+```
+
+### Example 5: With Text Highlighting
+```bash
+# Use the highlights example
+praisonaippt --use-example highlights_example
+
+# Or create your own with highlights in the JSON
+praisonaippt -i my_highlighted_verses.json
 ```
 
 ## 🔧 Development
@@ -319,13 +349,13 @@ pytest tests/
 
 ### Common Issues:
 
-1. **"Command not found: pptx-bible-verses"**
+1. **"Command not found: praisonaippt"**
    - Make sure you installed the package: `uv pip install -e .` or `pip install -e .`
    - Check that your Python scripts directory is in PATH
 
 2. **"File not found" error**
    - Verify the JSON file exists
-   - Use absolute path if needed: `pptx-bible-verses -i /full/path/to/verses.json`
+   - Use absolute path if needed: `praisonaippt -i /full/path/to/verses.json`
 
 3. **"Invalid JSON" error**
    - Validate your JSON syntax using a JSON validator
@@ -376,19 +406,19 @@ uv pip install -e .
 pip install -e .
 
 # Basic usage
-pptx-bible-verses
+praisonaippt
 
 # With custom file
-pptx-bible-verses -i my_verses.json
+praisonaippt -i my_verses.json
 
 # Use example
-pptx-bible-verses --use-example tamil_verses
+praisonaippt --use-example tamil_verses
 
 # List examples
-pptx-bible-verses --list-examples
+praisonaippt --list-examples
 
 # Help
-pptx-bible-verses --help
+praisonaippt --help
 ```
 
 ---
