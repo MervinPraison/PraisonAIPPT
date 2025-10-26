@@ -57,7 +57,91 @@ def add_section_slide(prs, section_name):
     return section_slide
 
 
-def add_verse_slide(prs, verse_text, reference, part_num=None):
+def _apply_highlights(paragraph, text, highlights):
+    """
+    Apply highlighting to specific words or phrases in a paragraph.
+    
+    Args:
+        paragraph: Paragraph object from text frame
+        text (str): The full text to display
+        highlights (list): List of words/phrases to highlight
+    
+    Returns:
+        None (modifies paragraph in place)
+    """
+    # Create a case-insensitive search pattern for each highlight
+    import re
+    
+    # Build a list of (start, end, highlight_text) tuples for all matches
+    matches = []
+    for highlight in highlights:
+        # Escape special regex characters in the highlight text
+        pattern = re.escape(highlight)
+        # Find all occurrences (case-insensitive)
+        for match in re.finditer(pattern, text, re.IGNORECASE):
+            matches.append((match.start(), match.end(), match.group()))
+    
+    # Sort matches by start position
+    matches.sort(key=lambda x: x[0])
+    
+    # Remove overlapping matches (keep first occurrence)
+    filtered_matches = []
+    last_end = -1
+    for start, end, matched_text in matches:
+        if start >= last_end:
+            filtered_matches.append((start, end, matched_text))
+            last_end = end
+    
+    # Build the paragraph with highlighted sections
+    if not filtered_matches:
+        # No matches found, just add plain text
+        paragraph.text = text
+        paragraph.font.size = Pt(24)
+        paragraph.font.color.rgb = RGBColor(0, 0, 0)
+        return
+    
+    # Add text segments with appropriate formatting
+    current_pos = 0
+    first_run = True
+    
+    for start, end, matched_text in filtered_matches:
+        # Add text before the highlight
+        if start > current_pos:
+            if first_run:
+                paragraph.text = text[current_pos:start]
+                run = paragraph.runs[0]
+                first_run = False
+            else:
+                run = paragraph.add_run()
+                run.text = text[current_pos:start]
+            run.font.size = Pt(24)
+            run.font.color.rgb = RGBColor(0, 0, 0)
+        
+        # Add the highlighted text
+        if first_run:
+            paragraph.text = matched_text
+            run = paragraph.runs[0]
+            first_run = False
+        else:
+            run = paragraph.add_run()
+            run.text = matched_text
+        
+        # Apply highlight formatting (bold + color)
+        run.font.size = Pt(24)
+        run.font.bold = True
+        run.font.color.rgb = RGBColor(255, 140, 0)  # Orange color for highlights
+        
+        current_pos = end
+    
+    # Add any remaining text after the last highlight
+    if current_pos < len(text):
+        run = paragraph.add_run()
+        run.text = text[current_pos:]
+        run.font.size = Pt(24)
+        run.font.color.rgb = RGBColor(0, 0, 0)
+
+
+def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None):
     """
     Add a verse slide to the presentation.
     
@@ -66,6 +150,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None):
         verse_text (str): The verse text
         reference (str): The verse reference
         part_num (int): Part number if verse is split (optional)
+        highlights (list): List of words/phrases to highlight (optional)
     
     Returns:
         Slide object
@@ -84,12 +169,18 @@ def add_verse_slide(prs, verse_text, reference, part_num=None):
     text_frame.word_wrap = True
     text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
     
-    # Add verse text
+    # Add verse text with highlighting
     p = text_frame.paragraphs[0]
-    p.text = verse_text
     p.alignment = PP_ALIGN.CENTER
-    p.font.size = Pt(24)
-    p.font.color.rgb = RGBColor(0, 0, 0)
+    
+    if highlights and len(highlights) > 0:
+        # Apply highlighting to specific words/phrases
+        _apply_highlights(p, verse_text, highlights)
+    else:
+        # No highlights, just add plain text
+        p.text = verse_text
+        p.font.size = Pt(24)
+        p.font.color.rgb = RGBColor(0, 0, 0)
     
     # Add reference
     reference_text = reference
@@ -171,9 +262,12 @@ def create_presentation(data, output_file=None, custom_title=None):
                 # Split long verses into multiple parts
                 verse_parts = split_long_text(verse["text"])
                 
+                # Get highlights if specified
+                highlights = verse.get("highlights", None)
+                
                 for i, part in enumerate(verse_parts):
                     part_num = i + 1 if len(verse_parts) > 1 else None
-                    add_verse_slide(prs, part, verse["reference"], part_num)
+                    add_verse_slide(prs, part, verse["reference"], part_num, highlights)
     
     # Generate output filename if not provided
     if not output_file:

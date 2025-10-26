@@ -1,0 +1,36 @@
+{
+  "presentation_title": "Highlighted Verses Example",
+  "presentation_subtitle": "Demonstrating Text Highlighting",
+  "sections": [
+    {
+      "section": "Examples with Highlights",
+      "verses": [
+        {
+          "reference": "John 3:16 (NIV)",
+          "text": "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+          "highlights": ["loved", "eternal life"]
+        },
+        {
+          "reference": "Philippians 4:13 (NIV)",
+          "text": "I can do all things through Christ who strengthens me.",
+          "highlights": ["all things", "strengthens"]
+        },
+        {
+          "reference": "Psalm 23:1 (KJV)",
+          "text": "The Lord is my shepherd; I shall not want.",
+          "highlights": ["shepherd", "not want"]
+        },
+        {
+          "reference": "Romans 8:28 (NIV)",
+          "text": "And we know that in all things God works for the good of those who love him, who have been called according to his purpose.",
+          "highlights": ["all things", "good", "purpose"]
+        },
+        {
+          "reference": "Jeremiah 29:11 (NIV)",
+          "text": "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future.",
+          "highlights": ["plans", "hope and a future"]
+        }
+      ]
+    }
+  ]
+}
