@@ -5,17 +5,19 @@ Get started with PraisonAI PPT - PowerPoint Bible Verses Generator in 3 easy ste
 ## 🚀 Installation (One Command)
 
 ```bash
-# Run the installation script
-./install.sh
+# Install from PyPI (recommended)
+pip install praisonaippt
+
+# Or with uv (faster)
+uv pip install praisonaippt
 ```
 
-Or manually:
+**For development:**
 
 ```bash
-# Install with uv (recommended - faster)
-uv pip install -e .
-
-# Or with pip
+# Clone and install in editable mode
+git clone https://github.com/MervinPraison/PraisonAIPPT.git
+cd PraisonAIPPT
 pip install -e .
 ```
 

@@ -1,5 +1,7 @@
 # PraisonAI PPT - Documentation
 
+[![PyPI version](https://badge.fury.io/py/praisonaippt.svg)](https://badge.fury.io/py/praisonaippt)
+
 Welcome to the PraisonAI PPT documentation directory!
 
 ## 📚 Documentation Index
@@ -82,6 +84,7 @@ For development setup and contribution guidelines, see the main [README](../READ
 
 ## 📞 Support
 
+- **PyPI**: https://pypi.org/project/praisonaippt/
 - **Repository**: https://github.com/MervinPraison/PraisonAIPPT
 - **Issues**: https://github.com/MervinPraison/PraisonAIPPT/issues
 

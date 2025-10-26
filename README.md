@@ -1,5 +1,6 @@
 # PraisonAI PPT - PowerPoint Bible Verses Generator
 
+[![PyPI version](https://badge.fury.io/py/praisonaippt.svg)](https://pypi.org/project/praisonaippt/)
 [![Python Version](https://img.shields.io/badge/python-3.7%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -26,46 +27,41 @@ A professional Python package for creating beautiful PowerPoint presentations fr
 
 ## 🚀 Installation
 
-### Prerequisites
+### Method 1: Install from PyPI (Recommended)
 
-Install `uv` (fast Python package installer):
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# Using pip
+pip install praisonaippt
+
+# Or using uv (faster)
+uv pip install praisonaippt
 ```
 
-### Method 1: Install with uv (Recommended)
+### Method 2: Install from Source
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd ppt-package
+git clone https://github.com/MervinPraison/PraisonAIPPT.git
+cd PraisonAIPPT
 
-# Install in editable mode with uv
-uv pip install -e .
-```
+# Install with pip
+pip install .
 
-### Method 2: Install from Source (Standard)
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd ppt-package
-
-# Install the package with uv
+# Or with uv (faster)
 uv pip install .
 ```
 
-### Method 3: Traditional pip Installation
+### Method 3: Development Installation
 
 ```bash
-# If you prefer pip over uv
+# Clone the repository
+git clone https://github.com/MervinPraison/PraisonAIPPT.git
+cd PraisonAIPPT
+
+# Install in editable mode
 pip install -e .
-```
-
-### Method 4: Install Dependencies Only
-
-```bash
-uv pip install -r requirements.txt
+# Or with uv
+uv pip install -e .
 ```
 
 ## 📁 Package Structure
