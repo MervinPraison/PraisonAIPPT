@@ -3,30 +3,48 @@ Data loading and validation functions for Bible verses.
 """
 
 import json
+import yaml
 from pathlib import Path
 
 
 def load_verses_from_file(filepath):
     """
-    Load verses data from a JSON file.
+    Load verses data from a JSON or YAML file.
     
     Args:
-        filepath (str): Path to the JSON file
+        filepath (str): Path to the JSON or YAML file
     
     Returns:
         dict: Verses data dictionary, or None if error
     """
     try:
+        file_path = Path(filepath)
+        file_extension = file_path.suffix.lower()
+        
         with open(filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+            # Detect file format and load accordingly
+            if file_extension in ['.yaml', '.yml']:
+                data = yaml.safe_load(f)
+            elif file_extension == '.json':
+                data = json.load(f)
+            else:
+                # Try to auto-detect format
+                content = f.read()
+                f.seek(0)
+                try:
+                    # Try YAML first (more forgiving)
+                    data = yaml.safe_load(content)
+                except yaml.YAMLError:
+                    # Fall back to JSON
+                    data = json.loads(content)
         
         # Basic validation
         if not isinstance(data, dict):
-            print("Error: JSON file must contain an object/dictionary")
+            print("Error: File must contain an object/dictionary")
             return None
         
         if "sections" not in data:
-            print("Warning: No 'sections' key found in JSON file")
+            print("Warning: No 'sections' key found in file")
             data["sections"] = []
         
         return data
@@ -34,8 +52,8 @@ def load_verses_from_file(filepath):
     except FileNotFoundError:
         print(f"Error: File '{filepath}' not found.")
         return None
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON format in '{filepath}': {e}")
+    except (json.JSONDecodeError, yaml.YAMLError) as e:
+        print(f"Error: Invalid format in '{filepath}': {e}")
         return None
     except Exception as e:
         print(f"Error loading file '{filepath}': {e}")
@@ -66,25 +84,29 @@ def get_example_path(example_name):
     Get the full path to an example file.
     
     Args:
-        example_name (str): Name of the example file (with or without .json)
+        example_name (str): Name of the example file (with or without extension)
     
     Returns:
         str: Full path to the example file, or None if not found
     """
-    # Add .json extension if not present
-    if not example_name.endswith('.json'):
-        example_name += '.json'
-    
     # Get the package directory
     package_dir = Path(__file__).parent.parent
     examples_dir = package_dir / 'examples'
     
-    example_path = examples_dir / example_name
-    
-    if example_path.exists():
-        return str(example_path)
+    # If no extension, try YAML first, then JSON
+    if not any(example_name.endswith(ext) for ext in ['.json', '.yaml', '.yml']):
+        # Try YAML first
+        for ext in ['.yaml', '.yml', '.json']:
+            example_path = examples_dir / (example_name + ext)
+            if example_path.exists():
+                return str(example_path)
     else:
-        return None
+        # Extension provided, use as-is
+        example_path = examples_dir / example_name
+        if example_path.exists():
+            return str(example_path)
+    
+    return None
 
 
 def list_examples():

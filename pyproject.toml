@@ -28,6 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "python-pptx>=0.6.21",
+    "PyYAML>=6.0",
 ]
 
 [project.urls]

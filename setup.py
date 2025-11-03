@@ -34,6 +34,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "python-pptx>=0.6.21",
+        "PyYAML>=6.0",
     ],
     entry_points={
         "console_scripts": [
