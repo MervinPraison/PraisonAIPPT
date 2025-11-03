@@ -9,9 +9,10 @@ A professional Python package for creating beautiful PowerPoint presentations fr
 ## ✨ Features
 
 - 📦 **Proper Python Package** - Installable via pip with entry points
-- 📖 **Dynamic verse loading** from JSON files
+- 📖 **Dynamic verse loading** from JSON or YAML files
 - 🎨 **Professional slide formatting** with proper placeholders
-- 🎨 **Text highlighting** - Highlight specific words or phrases in verses
+- 🎨 **Text highlighting** - Highlight specific words or phrases in verses (bold + orange)
+- 🔤 **Custom font sizes** - Set custom font sizes for specific words (large_text feature)
 - 📑 **Multi-part verse support** for long verses
 - 🔧 **Command-line interface** with flexible options
 - 🐍 **Python API** for programmatic use
@@ -19,11 +20,13 @@ A professional Python package for creating beautiful PowerPoint presentations fr
 - 📝 **Template file** for quick start
 - ✨ **Auto-generated filenames** or custom output names
 - 🎯 **Error handling** and user-friendly feedback
+- 📄 **YAML support** - User-friendly YAML format alongside JSON
 
 ## 📋 Requirements
 
 - Python 3.7 or higher
 - python-pptx library (automatically installed)
+- PyYAML library (automatically installed)
 
 ## 🚀 Installation
 
@@ -89,9 +92,31 @@ ppt-package/
 └── README.md                  # This file
 ```
 
-## 📖 JSON File Format
+## 📖 File Format (JSON or YAML)
 
-Create your verses in JSON format following this structure:
+### YAML Format (Recommended! 📄)
+
+YAML is more user-friendly and easier to edit:
+
+```yaml
+presentation_title: Your Presentation Title
+presentation_subtitle: Your Subtitle
+
+sections:
+  - section: Section Name
+    verses:
+      - reference: Book Chapter:Verse (Version)
+        text: The actual verse text here.
+        highlights:
+          - word1
+          - phrase to highlight
+        large_text:
+          special_word: 200  # Custom font size
+```
+
+### JSON Format
+
+Traditional JSON format is also supported:
 
 ```json
 {
@@ -104,7 +129,8 @@ Create your verses in JSON format following this structure:
         {
           "reference": "Book Chapter:Verse (Version)",
           "text": "The actual verse text here.",
-          "highlights": ["word1", "phrase to highlight"]
+          "highlights": ["word1", "phrase to highlight"],
+          "large_text": {"special_word": 200}
         }
       ]
     }
@@ -112,13 +138,21 @@ Create your verses in JSON format following this structure:
 }
 ```
 
-### Highlighting Feature (New! 🎨)
+### Text Highlighting Feature 🎨
 
-You can now highlight specific words or phrases in your verses:
-- Add a `"highlights"` array to any verse (optional)
+Highlight specific words or phrases in your verses:
+- Add a `highlights` array to any verse (optional)
 - Highlighted text appears in **bold orange** color
 - Case-insensitive matching
 - Supports both single words and phrases
+
+### Large Text Feature 🔤 (New in v1.1.0!)
+
+Set custom font sizes for specific words:
+- Add a `large_text` dictionary mapping words to font sizes
+- Text appears at the specified font size in **black** color
+- Perfect for emphasizing Hebrew/Greek words or key terms
+- Example: `large_text: {"לֶחֶם": 200}` (YAML) or `"large_text": {"לֶחֶם": 200}` (JSON)
 
 **Example:**
 ```json
@@ -136,13 +170,14 @@ You can now highlight specific words or phrases in your verses:
 Use the included template to get started:
 
 ```bash
-# Copy the template from examples
+# For YAML (recommended)
+cp examples/template.yaml my_verses.yaml  # or create from scratch
+nano my_verses.yaml  # Edit with your verses
+praisonaippt -i my_verses.yaml  # Generate presentation
+
+# For JSON
 cp examples/template.json my_verses.json
-
-# Edit with your verses
-nano my_verses.json  # or use your favorite editor
-
-# Generate presentation
+nano my_verses.json
 praisonaippt -i my_verses.json
 ```
 
@@ -160,7 +195,11 @@ praisonaippt
 #### Specify Input File
 
 ```bash
+# JSON format
 praisonaippt -i my_verses.json
+
+# YAML format (recommended)
+praisonaippt -i my_verses.yaml
 ```
 
 #### Specify Output File

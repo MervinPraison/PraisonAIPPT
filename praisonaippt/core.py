@@ -57,29 +57,40 @@ def add_section_slide(prs, section_name):
     return section_slide
 
 
-def _apply_highlights(paragraph, text, highlights):
+def _apply_highlights(paragraph, text, highlights, large_text=None):
     """
-    Apply highlighting to specific words or phrases in a paragraph.
+    Apply highlighting and/or large text formatting to specific words or phrases in a paragraph.
     
     Args:
         paragraph: Paragraph object from text frame
         text (str): The full text to display
-        highlights (list): List of words/phrases to highlight
+        highlights (list): List of words/phrases to highlight (bold + orange)
+        large_text (dict): Dictionary mapping words/phrases to font sizes, e.g. {"word": 200}
     
     Returns:
         None (modifies paragraph in place)
     """
-    # Create a case-insensitive search pattern for each highlight
+    # Create a case-insensitive search pattern for each highlight and large_text
     import re
     
-    # Build a list of (start, end, highlight_text) tuples for all matches
+    # Build a list of (start, end, matched_text, format_type, font_size) tuples for all matches
     matches = []
-    for highlight in highlights:
-        # Escape special regex characters in the highlight text
-        pattern = re.escape(highlight)
-        # Find all occurrences (case-insensitive)
-        for match in re.finditer(pattern, text, re.IGNORECASE):
-            matches.append((match.start(), match.end(), match.group()))
+    
+    # Add highlights
+    if highlights:
+        for highlight in highlights:
+            # Escape special regex characters in the highlight text
+            pattern = re.escape(highlight)
+            # Find all occurrences (case-insensitive)
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                matches.append((match.start(), match.end(), match.group(), 'highlight', None))
+    
+    # Add large_text entries
+    if large_text:
+        for word, font_size in large_text.items():
+            pattern = re.escape(word)
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                matches.append((match.start(), match.end(), match.group(), 'large', font_size))
     
     # Sort matches by start position
     matches.sort(key=lambda x: x[0])
@@ -87,9 +98,9 @@ def _apply_highlights(paragraph, text, highlights):
     # Remove overlapping matches (keep first occurrence)
     filtered_matches = []
     last_end = -1
-    for start, end, matched_text in matches:
+    for start, end, matched_text, format_type, font_size in matches:
         if start >= last_end:
-            filtered_matches.append((start, end, matched_text))
+            filtered_matches.append((start, end, matched_text, format_type, font_size))
             last_end = end
     
     # Build the paragraph with highlighted sections
@@ -104,8 +115,8 @@ def _apply_highlights(paragraph, text, highlights):
     current_pos = 0
     first_run = True
     
-    for start, end, matched_text in filtered_matches:
-        # Add text before the highlight
+    for start, end, matched_text, format_type, font_size in filtered_matches:
+        # Add text before the formatted text
         if start > current_pos:
             if first_run:
                 paragraph.text = text[current_pos:start]
@@ -117,7 +128,7 @@ def _apply_highlights(paragraph, text, highlights):
             run.font.size = Pt(32)
             run.font.color.rgb = RGBColor(0, 0, 0)
         
-        # Add the highlighted text
+        # Add the formatted text
         if first_run:
             paragraph.text = matched_text
             run = paragraph.runs[0]
@@ -126,10 +137,16 @@ def _apply_highlights(paragraph, text, highlights):
             run = paragraph.add_run()
             run.text = matched_text
         
-        # Apply highlight formatting (bold + color)
-        run.font.size = Pt(32)
-        run.font.bold = True
-        run.font.color.rgb = RGBColor(255, 140, 0)  # Orange color for highlights
+        # Apply formatting based on type
+        if format_type == 'highlight':
+            # Apply highlight formatting (bold + orange color)
+            run.font.size = Pt(32)
+            run.font.bold = True
+            run.font.color.rgb = RGBColor(255, 140, 0)  # Orange color for highlights
+        elif format_type == 'large':
+            # Apply large text formatting (custom font size, keep black color)
+            run.font.size = Pt(font_size)
+            run.font.color.rgb = RGBColor(0, 0, 0)  # Keep black color
         
         current_pos = end
     
@@ -141,7 +158,7 @@ def _apply_highlights(paragraph, text, highlights):
         run.font.color.rgb = RGBColor(0, 0, 0)
 
 
-def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None):
+def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None, large_text=None):
     """
     Add a verse slide to the presentation.
     
@@ -151,6 +168,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None):
         reference (str): The verse reference
         part_num (int): Part number if verse is split (optional)
         highlights (list): List of words/phrases to highlight (optional)
+        large_text (dict): Dictionary mapping words to custom font sizes (optional)
     
     Returns:
         Slide object
@@ -173,11 +191,11 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None):
     p = text_frame.paragraphs[0]
     p.alignment = PP_ALIGN.CENTER
     
-    if highlights and len(highlights) > 0:
-        # Apply highlighting to specific words/phrases
-        _apply_highlights(p, verse_text, highlights)
+    if (highlights and len(highlights) > 0) or (large_text and len(large_text) > 0):
+        # Apply highlighting and/or large text formatting
+        _apply_highlights(p, verse_text, highlights, large_text)
     else:
-        # No highlights, just add plain text
+        # No formatting, just add plain text
         p.text = verse_text
         p.font.size = Pt(32)
         p.font.color.rgb = RGBColor(0, 0, 0)
@@ -261,12 +279,13 @@ def create_presentation(data, output_file=None, custom_title=None):
                 # Split long verses into multiple parts
                 verse_parts = split_long_text(verse["text"])
                 
-                # Get highlights if specified
+                # Get highlights and large_text if specified
                 highlights = verse.get("highlights", None)
+                large_text = verse.get("large_text", None)
                 
                 for i, part in enumerate(verse_parts):
                     part_num = i + 1 if len(verse_parts) > 1 else None
-                    add_verse_slide(prs, part, verse["reference"], part_num, highlights)
+                    add_verse_slide(prs, part, verse["reference"], part_num, highlights, large_text)
     
     # Generate output filename if not provided
     if not output_file:

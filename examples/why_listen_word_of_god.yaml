@@ -1,4 +1,4 @@
-presentation_title: Why should we come hear the Word of God every sunday?
+presentation_title: Why should we come hear the Word of God?
 presentation_subtitle: ""
 
 sections:
@@ -27,6 +27,9 @@ sections:
         highlights:
           - Lechem
           - Lacham
+        large_text:
+          לֶחֶם: 200
+          לָחַם: 200
 
   - section: ""
     verses:
@@ -40,9 +43,6 @@ sections:
         text: Resist the devil and he will flee from you.
         highlights:
           - Resist the devil
-
-  - section: Why Should We Hear the Word of God?
-    verses: []
 
   - section: To Become Noble
     verses:

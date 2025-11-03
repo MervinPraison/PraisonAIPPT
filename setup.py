@@ -11,7 +11,7 @@ long_description = (this_directory / "README.md").read_text(encoding='utf-8')
 
 setup(
     name="praisonaippt",
-    version="1.0.0",
+    version="1.1.0",
     author="MervinPraison",
     description="PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON format",
     long_description=long_description,
