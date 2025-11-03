@@ -1,6 +1,6 @@
 {
   "presentation_title": "Why Should We Listen to the Word of God?",
-  "presentation_subtitle": "Theme Verse: 2 Kings 3:17 (NKJV)",
+  "presentation_subtitle": "",
   "sections": [
     {
       "section": "Promise Verse",
@@ -9,8 +9,46 @@
           "reference": "2 Kings 3:17 (NKJV)",
           "text": "For thus says the Lord: \"You shall not see wind, nor shall you see rain; yet that valley shall be filled with water, so that you, your cattle, and your animals may drink.\"",
           "highlights": ["that valley shall be filled with water"]
+        },
+        {
+          "reference": "2 Kings 3:11 (NIV)",
+          "text": "But Jehoshaphat asked, \"Is there no prophet of the Lord here, through whom we may inquire of the Lord?\"",
+          "highlights": ["inquire"]
         }
       ]
+    },
+    {
+      "section": "To be Victorious",
+      "verses": []
+    },
+    {
+      "section": "",
+      "verses": [
+        {
+          "reference": "",
+          "text": "Lechem (לֶחֶם)\n\nLacham (לָחַם)",
+          "highlights": ["Lechem", "Lacham"]
+        }
+      ]
+    },
+    {
+      "section": "",
+      "verses": [
+        {
+          "reference": "John 6:51 (NKJV)",
+          "text": "I am the living bread which came down from heaven. If anyone eats of this bread, he will live forever; and the bread that I shall give is My flesh, which I shall give for the life of the world.",
+          "highlights": ["living bread", "live forever"]
+        },
+        {
+          "reference": "James 4:7",
+          "text": "Resist the devil and he will flee from you.",
+          "highlights": ["Resist the devil"]
+        }
+      ]
+    },
+    {
+      "section": "Why Should We Hear the Word of God?",
+      "verses": []
     },
     {
       "section": "To Become Noble",
@@ -51,14 +89,14 @@
       "section": "To Receive Healing",
       "verses": [
         {
-          "reference": "John 14:27 (NKJV)",
-          "text": "Peace I leave with you, My peace I give to you; not as the world gives do I give to you. Let not your heart be troubled, neither let it be afraid.",
-          "highlights": ["My peace I give to you", "Let not your heart be troubled"]
+          "reference": "Acts 14:8–10 (NKJV) - Part 1",
+          "text": "And in Lystra a certain man without strength in his feet was sitting, a cripple from his mother's womb, who had never walked. This man heard Paul speaking.",
+          "highlights": ["heard Paul speaking"]
         },
         {
-          "reference": "Acts 14:8–10 (NKJV)",
-          "text": "And in Lystra a certain man without strength in his feet was sitting, a cripple from his mother's womb, who had never walked. This man heard Paul speaking. Paul, observing him intently and seeing that he had faith to be healed, said with a loud voice, \"Stand up straight on your feet!\" And he leaped and walked.",
-          "highlights": ["heard Paul speaking", "faith to be healed", "he leaped and walked"]
+          "reference": "Acts 14:8–10 (NKJV) - Part 2",
+          "text": "Paul, observing him intently and seeing that he had faith to be healed, said with a loud voice, \"Stand up straight on your feet!\" And he leaped and walked.",
+          "highlights": ["faith to be healed", "he leaped and walked"]
         },
         {
           "reference": "Mark 5:27 (NKJV)",
@@ -66,6 +104,10 @@
           "highlights": ["heard about Jesus"]
         }
       ]
+    },
+    {
+      "section": "People of Israelites",
+      "verses": []
     },
     {
       "section": "What to Hear?",

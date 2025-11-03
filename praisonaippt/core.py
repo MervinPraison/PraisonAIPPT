@@ -251,13 +251,12 @@ def create_presentation(data, output_file=None, custom_title=None):
     
     # Add slides for each verse with section slides
     for section_data in verses_data:
-        # Only create section slide if there are verses and no custom title
+        # Add section title slide if section name exists (skip if custom title is provided)
+        if section_data.get("section") and not custom_title:
+            add_section_slide(prs, section_data["section"])
+        
+        # Add verse slides if there are any verses
         if section_data.get("verses") and len(section_data["verses"]) > 0:
-            # Add section title slide (skip if custom title is provided)
-            if not custom_title:
-                add_section_slide(prs, section_data["section"])
-            
-            # Add verse slides
             for verse in section_data["verses"]:
                 # Split long verses into multiple parts
                 verse_parts = split_long_text(verse["text"])
