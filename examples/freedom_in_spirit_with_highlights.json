@@ -1,7 +1,17 @@
 {
-  "presentation_title": "Freedom in the Spirit",
-  "presentation_subtitle": "Biblical Verses on Spiritual Freedom",
+  "presentation_title": "Freedom",
+  "presentation_subtitle": "",
   "sections": [
+    {
+      "section": "",
+      "verses": [
+        {
+          "reference": "Galatians 5:4 (KJV)",
+          "text": "Christ is become of no effect unto you, whosoever of you are justified by the law; ye are fallen from grace.",
+          "highlights": ["no effect", "justified by the law", "fallen from grace"]
+        }
+      ]
+    },
     {
       "section": "Freedom Through the Spirit",
       "verses": [
@@ -9,11 +19,6 @@
           "reference": "2 Corinthians 3:17 (ESV)",
           "text": "Now the Lord is the Spirit, and where the Spirit of the Lord is, there is freedom.",
           "highlights": ["Spirit", "freedom"]
-        },
-        {
-          "reference": "Acts 10:43 (ESV)",
-          "text": "To him all the prophets bear witness that everyone who believes in him receives forgiveness of sins through his name.",
-          "highlights": ["believes", "forgiveness of sins"]
         },
         {
           "reference": "Acts 10:44 (ESV)",
@@ -29,16 +34,21 @@
           "reference": "Galatians 3:5 (ESV)",
           "text": "Does he who supplies the Spirit to you and works miracles among you do so by works of the law, or by hearing with faith?",
           "highlights": ["Spirit", "miracles", "hearing with faith"]
+        }
+      ]
+    },
+    {
+      "section": "Freedom Through The Son",
+      "verses": [
+        {
+          "reference": "John 8:36 (ESV)",
+          "text": "So if the Son sets you free, you will be free indeed.",
+          "highlights": ["Son", "free indeed"]
         },
         {
           "reference": "John 8:31–32 (ESV)",
           "text": "If you abide in my word, you are truly my disciples, and you will know the truth, and the truth will set you free.",
           "highlights": ["abide in my word", "truth", "set you free"]
-        },
-        {
-          "reference": "John 8:36 (ESV)",
-          "text": "So if the Son sets you free, you will be free indeed.",
-          "highlights": ["Son", "free indeed"]
         },
         {
           "reference": "Galatians 5:1 (ESV)",
@@ -54,6 +64,36 @@
           "reference": "John 5:24 (ESV)",
           "text": "Truly, truly, I say to you, whoever hears my word and believes him who sent me has eternal life. He does not come into judgment, but has passed from death to life.",
           "highlights": ["hears my word", "believes", "eternal life"]
+        }
+      ]
+    },
+    {
+      "section": "Freedom Through the Father",
+      "verses": [
+        {
+          "reference": "Luke 15:14,17 (ESV)",
+          "text": "And when he had spent everything, a severe famine arose in that country, and he began to be in need. But when he came to himself, he said, 'How many of my father's hired servants have more than enough bread, but I perish here with hunger!",
+          "highlights": ["came to himself", "father's hired servants", "more than enough bread"]
+        },
+        {
+          "reference": "Acts 10:43 (ESV)",
+          "text": "To him all the prophets bear witness that everyone who believes in him receives forgiveness of sins through his name.",
+          "highlights": ["believes", "forgiveness of sins"]
+        }
+      ]
+    },
+    {
+      "section": "Hear about Jesus ONLY",
+      "verses": [
+        {
+          "reference": "Jeremiah 17:10",
+          "text": "I the LORD search the heart and examine the mind, to reward each person according to his conduct, according to what his deeds deserve.",
+          "highlights": ["search the heart", "according to his conduct", "deeds deserve"]
+        },
+        {
+          "reference": "Psalm 103:10",
+          "text": "He has not dealt with us according to our sins, Nor punished us according to our iniquities.",
+          "highlights": ["not dealt with us according to our sins", "Nor punished us"]
         }
       ]
     }
