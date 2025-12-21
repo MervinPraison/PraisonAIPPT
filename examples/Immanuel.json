@@ -1,0 +1,130 @@
+{
+  "presentation_title": "Immanuel",
+  "presentation_subtitle": "",
+  "sections": [
+    {
+      "section": "Immanuel — God With Us",
+      "verses": [
+        {
+          "reference": "Isaiah 7:14 (ESV)",
+          "text": "Therefore the Lord himself will give you a sign. Behold, the virgin shall conceive and bear a son, and shall call his name Immanuel.",
+          "highlights": ["Immanuel"]
+        },
+        {
+          "reference": "Matthew 1:23 (ESV)",
+          "text": "Behold, the virgin shall conceive and bear a son, and they shall call his name Immanuel (which means, God with us).",
+          "highlights": ["Immanuel", "God with us"]
+        }
+      ]
+    },
+    {
+      "section": "Separated From Christ",
+      "verses": [
+        {
+          "reference": "Galatians 5:4 (ESV)",
+          "text": "You are severed from Christ, …; you have fallen away from grace.",
+          "highlights": ["severed from Christ", "fallen away from grace"]
+        },
+        {
+          "reference": "Galatians 5:4 (KJV)",
+          "text": "Christ is become of no effect unto you, …; ye are fallen from grace.",
+          "highlights": ["no effect", "fallen from grace"]
+        }
+      ]
+    },
+    {
+      "section": "What It Means to Be \"God With Us\"",
+      "verses": []
+    },
+    {
+      "section": "1. No Lack",
+      "verses": [
+        {
+          "reference": "Psalms 91:9–10 (KJV)",
+          "text": "Because thou hast made the LORD, which is my refuge, even the most High, thy habitation; There shall no evil befall thee, neither shall any plague come nigh thy dwelling.",
+          "highlights": ["refuge", "no evil befall thee", "no plague"]
+        },
+        {
+          "reference": "Jeremiah 17:8 (KJV)",
+          "text": "For he shall be as a tree planted by the waters, and that spreadeth out her roots by the river, and shall not see when heat cometh, but her leaf shall be green; and shall not be careful in the year of drought, neither shall cease from yielding fruit.",
+          "highlights": ["tree planted by the waters", "leaf shall be green", "yielding fruit"]
+        },
+        {
+          "reference": "Psalms 121:5–7 (NIV)",
+          "text": "The LORD watches over you— the LORD is your shade at your right hand; the sun will not harm you by day, nor the moon by night. The LORD will keep you from all harm— he will watch over your life.",
+          "highlights": ["watches over you", "keep you from all harm"]
+        }
+      ]
+    },
+    {
+      "section": "2. Whatever You Do Shall Prosper",
+      "verses": [
+        {
+          "reference": "Genesis 39:2–3 (Part 1)",
+          "text": "And the LORD was with Joseph, and he was a prosperous man; and he was in the house of his master the Egyptian.",
+          "highlights": ["LORD was with Joseph", "prosperous"]
+        },
+        {
+          "reference": "Genesis 39:2–3 (Part 2)",
+          "text": "His master saw that the LORD was with him and that the LORD caused all that he did to succeed in his hands.",
+          "highlights": ["LORD was with him", "succeed"]
+        }
+      ]
+    },
+    {
+      "section": "3. Authority and Leadership",
+      "verses": [
+        {
+          "reference": "Genesis 39:21–22 (ESV) (Part 1)",
+          "text": "But the LORD was with Joseph and showed him steadfast love and gave him favor in the sight of the keeper of the prison.",
+          "highlights": ["LORD was with Joseph", "favor"]
+        },
+        {
+          "reference": "Genesis 39:21–22 (ESV) (Part 2)",
+          "text": "And the keeper of the prison put Joseph in charge of all the prisoners who were in the prison.Whatever was done there, he was the one who did it.",
+          "highlights": ["in charge"]
+        },
+        {
+          "reference": "Genesis 41:41 (ESV)",
+          "text": "And Pharaoh said to Joseph, 'See, I have set you over all the land of Egypt.'",
+          "highlights": ["set you over all the land of Egypt"]
+        }
+      ]
+    },
+    {
+      "section": "4. Enemies Became Helpers",
+      "verses": [
+        {
+          "reference": "Genesis 50:18, 20 (ESV)",
+          "text": "His brothers also came and fell down before him and said, 'Behold, we are your servants.' As for you, you meant evil against me, but God meant it for good, to bring it about that many people should be kept alive, as they are today.",
+          "highlights": ["we are your servants", "God meant it for good"]
+        },
+        {
+          "reference": "Proverbs 16:7 (NKJV)",
+          "text": "When a man's ways please the LORD, He makes even his enemies to be at peace with him.",
+          "highlights": ["enemies to be at peace"]
+        }
+      ]
+    },
+    {
+      "section": "Separated From Christ",
+      "verses": [
+        {
+          "reference": "Galatians 5:4 (ESV)",
+          "text": "You are severed from Christ, you who would be justified by the law; you have fallen away from grace.",
+          "highlights": ["severed from Christ", "fallen away from grace"]
+        },
+        {
+          "reference": "Galatians 5:4 (KJV)",
+          "text": "Christ is become of no effect unto you, whosoever of you are justified by the law; ye are fallen from grace.",
+          "highlights": ["no effect", "fallen from grace"]
+        },
+        {
+          "reference": "Colossians 2:14 (NKJV)",
+          "text": "Having wiped out the handwriting of requirements that was against us, which was contrary to us. And He has taken it out of the way, having nailed it to the cross.",
+          "highlights": ["wiped out", "nailed it to the cross"]
+        }
+      ]
+    }
+  ]
+}
