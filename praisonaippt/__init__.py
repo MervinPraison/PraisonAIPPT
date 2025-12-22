@@ -12,6 +12,7 @@ __license__ = "MIT"
 from .core import create_presentation
 from .loader import load_verses_from_file, load_verses_from_dict
 from .pdf_converter import convert_pptx_to_pdf, PDFOptions
+from .lazy_loader import lazy_import, check_optional_dependency
 
 __all__ = [
     "create_presentation",
@@ -19,4 +20,6 @@ __all__ = [
     "load_verses_from_dict",
     "convert_pptx_to_pdf",
     "PDFOptions",
+    "lazy_import",
+    "check_optional_dependency",
 ]

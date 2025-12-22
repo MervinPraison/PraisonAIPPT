@@ -86,6 +86,27 @@ Examples:
     )
     
     parser.add_argument(
+        '--upload-gdrive',
+        action='store_true',
+        help='Upload the generated PowerPoint to Google Drive'
+    )
+    
+    parser.add_argument(
+        '--gdrive-credentials',
+        help='Path to Google Drive service account credentials JSON file'
+    )
+    
+    parser.add_argument(
+        '--gdrive-folder-id',
+        help='Google Drive folder ID to upload to (optional, uploads to root if not specified)'
+    )
+    
+    parser.add_argument(
+        '--gdrive-folder-name',
+        help='Google Drive folder name to upload to (creates if doesn\'t exist)'
+    )
+    
+    parser.add_argument(
         'command',
         nargs='?',
         choices=['convert-pdf'],
@@ -160,6 +181,46 @@ def handle_convert_pdf_command(args):
     except Exception as e:
         print(f"Error: {e}")
         return 1
+
+
+def handle_gdrive_upload(output_file, args):
+    """Handle Google Drive upload if requested"""
+    if not args.upload_gdrive:
+        return
+    
+    try:
+        from .gdrive_uploader import upload_to_gdrive, is_gdrive_available
+        
+        # Check if dependencies are available
+        if not is_gdrive_available():
+            print("\nWarning: Google Drive dependencies not installed.")
+            print("To enable Google Drive upload, install with:")
+            print("  pip install praisonaippt[gdrive]")
+            return
+        
+        # Check credentials
+        if not args.gdrive_credentials:
+            print("\nError: --gdrive-credentials is required for Google Drive upload")
+            print("Please provide the path to your service account credentials JSON file")
+            return
+        
+        print("\nUploading to Google Drive...")
+        result = upload_to_gdrive(
+            output_file,
+            credentials_path=args.gdrive_credentials,
+            folder_id=args.gdrive_folder_id,
+            folder_name=args.gdrive_folder_name
+        )
+        
+        print("✓ Successfully uploaded to Google Drive")
+        print(f"  File ID: {result['id']}")
+        print(f"  File Name: {result['name']}")
+        if 'webViewLink' in result:
+            print(f"  View Link: {result['webViewLink']}")
+        
+    except Exception as e:
+        print(f"\nWarning: Google Drive upload failed: {e}")
+        print("Presentation was created successfully at:", output_file)
 
 
 def main():
@@ -237,6 +298,9 @@ def main():
         except Exception as e:
             print(f"Warning: PDF conversion failed: {e}")
             print("Presentation was created successfully at:", output_file)
+    
+    # Upload to Google Drive if requested
+    handle_gdrive_upload(output_file, args)
     
     return 0
 

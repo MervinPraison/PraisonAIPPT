@@ -39,6 +39,8 @@ setup(
     extras_require={
         'pdf-aspose': ['aspose.slides>=24.0.0'],
         'pdf-all': ['aspose.slides>=24.0.0', 'psutil>=5.9.0', 'tqdm>=4.64.0'],
+        'gdrive': ['google-auth>=2.16.0', 'google-auth-oauthlib>=1.0.0', 'google-api-python-client>=2.80.0'],
+        'all': ['aspose.slides>=24.0.0', 'psutil>=5.9.0', 'tqdm>=4.64.0', 'google-auth>=2.16.0', 'google-auth-oauthlib>=1.0.0', 'google-api-python-client>=2.80.0'],
     },
     entry_points={
         "console_scripts": [
