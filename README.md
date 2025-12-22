@@ -11,6 +11,10 @@ A professional Python package for creating beautiful PowerPoint presentations fr
 - [Features](#-features)
 - [Quick Start](#-quick-start)
 - [Installation](#-installation)
+- [Configuration](#️-configuration)
+  - [Quick Setup](#quick-setup)
+  - [Configuration Options](#configuration-options)
+  - [Configuration Examples](#configuration-examples)
 - [Usage Guide](#-usage-guide)
   - [File Format](#file-format-json-or-yaml)
   - [CLI Usage](#cli-usage)
@@ -151,6 +155,294 @@ pip install praisonaippt[all]
 
 ---
 
+## ⚙️ Configuration
+
+PraisonAI PPT supports persistent configuration stored in `~/.praisonaippt/config.yaml`. This eliminates the need to specify credentials and settings every time you run commands.
+
+### Quick Setup
+
+Initialize your configuration interactively:
+
+```bash
+praisonaippt --config-init
+```
+
+Or use the config command:
+
+```bash
+praisonaippt config init
+```
+
+### Configuration File Location
+
+- **Path**: `~/.praisonaippt/config.yaml`
+- **Format**: YAML (user-friendly, easy to edit)
+- **Auto-created**: On first `--config-init` run
+
+### Configuration Structure
+
+```yaml
+gdrive:
+  credentials_path: ~/gdrive-credentials.json
+  folder_id: null
+  folder_name: Bible Presentations
+  use_date_folders: false
+  date_format: YYYY/MM
+
+pdf:
+  backend: auto
+  quality: high
+  compression: true
+
+defaults:
+  output_format: pptx
+  auto_convert_pdf: false
+  auto_upload_gdrive: false
+```
+
+### Configuration Options
+
+#### Google Drive Settings (`gdrive`)
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `credentials_path` | Path to service account JSON | `"~/gdrive-credentials.json"` |
+| `folder_id` | Google Drive folder ID | `"1a2b3c4d5e6f7g8h9i0j"` |
+| `folder_name` | Folder name (auto-creates if missing) | `"Bible Presentations"` |
+| `use_date_folders` | Create date-based subfolders | `true` or `false` |
+| `date_format` | Date folder format pattern | `"YYYY/MM"`, `"YYYY-MM"`, `"YYYY/MM/DD"` |
+
+#### PDF Settings (`pdf`)
+
+| Option | Description | Values |
+|--------|-------------|--------|
+| `backend` | PDF conversion backend | `"aspose"`, `"libreoffice"`, `"auto"` |
+| `quality` | PDF quality | `"low"`, `"medium"`, `"high"` |
+| `compression` | Enable image compression | `true`, `false` |
+
+#### Default Behaviors (`defaults`)
+
+| Option | Description | Values |
+|--------|-------------|--------|
+| `auto_convert_pdf` | Auto-convert to PDF | `true`, `false` |
+| `auto_upload_gdrive` | Auto-upload to Google Drive | `true`, `false` |
+
+### Using Configuration
+
+Once configured, commands become simpler:
+
+#### Without Configuration
+```bash
+praisonaippt -i verses.json \
+  --upload-gdrive \
+  --gdrive-credentials ~/gdrive-credentials.json \
+  --gdrive-folder-name "Bible Presentations"
+```
+
+#### With Configuration
+```bash
+# Just this! Config handles the rest
+praisonaippt -i verses.json --upload-gdrive
+```
+
+### Configuration Priority
+
+Settings are applied in this order (later overrides earlier):
+
+1. **Default values** (built-in)
+2. **Configuration file** (`~/.praisonaippt/config.yaml`)
+3. **Command-line arguments** (highest priority)
+
+**Example:**
+```bash
+# Config has: "folder_name": "Bible Presentations"
+# This command overrides it:
+praisonaippt -i verses.json --upload-gdrive --gdrive-folder-name "Sunday Service"
+```
+
+### Configuration Commands
+
+```bash
+# Initialize configuration (interactive)
+praisonaippt --config-init
+praisonaippt config init
+
+# Show current configuration
+praisonaippt --config-show
+praisonaippt config show
+
+# Edit configuration manually (YAML is easy to edit!)
+nano ~/.praisonaippt/config.yaml
+vim ~/.praisonaippt/config.yaml
+code ~/.praisonaippt/config.yaml
+```
+
+### Manual Configuration
+
+Create `~/.praisonaippt/config.yaml` manually:
+
+```bash
+mkdir -p ~/.praisonaippt
+cat > ~/.praisonaippt/config.yaml << 'EOF'
+gdrive:
+  credentials_path: ~/gdrive-credentials.json
+  folder_name: Bible Presentations
+
+pdf:
+  backend: auto
+  quality: high
+
+defaults:
+  auto_convert_pdf: false
+  auto_upload_gdrive: false
+EOF
+```
+
+**YAML Benefits:**
+- ✅ No quotes needed for most values
+- ✅ No commas or brackets
+- ✅ Clean, readable format
+- ✅ Easy to comment with `#`
+- ✅ Indentation-based (like Python)
+
+### Python API with Configuration
+
+```python
+from praisonaippt import create_presentation, load_config
+from praisonaippt.gdrive_uploader import upload_to_gdrive
+
+# Load configuration
+config = load_config()
+
+# Create presentation
+data = load_verses_from_file("verses.json")
+output = create_presentation(data)
+
+# Upload using config credentials
+if config.get_gdrive_credentials():
+    result = upload_to_gdrive(
+        output,
+        credentials_path=config.get_gdrive_credentials(),
+        folder_name=config.get_gdrive_folder_name()
+    )
+    print(f"Uploaded: {result['webViewLink']}")
+```
+
+### Configuration Examples
+
+#### Example 1: Google Drive Only
+```yaml
+gdrive:
+  credentials_path: ~/secrets/gdrive-creds.json
+  folder_name: Church Presentations
+```
+
+#### Example 2: Auto-Convert to PDF
+```yaml
+pdf:
+  backend: libreoffice
+  quality: high
+  compression: false
+
+defaults:
+  auto_convert_pdf: true
+```
+
+#### Example 3: Complete Automation
+```yaml
+gdrive:
+  credentials_path: ~/gdrive-credentials.json
+  folder_name: Bible Study
+
+pdf:
+  backend: auto
+  quality: high
+
+defaults:
+  auto_convert_pdf: true
+  auto_upload_gdrive: true
+```
+
+#### Example 4: With Date-Based Folders
+```yaml
+gdrive:
+  credentials_path: ~/.praisonaippt/gdrive-credentials.json
+  folder_name: Bible Presentations
+  use_date_folders: true    # Creates subfolders like 2024/12
+  date_format: YYYY/MM      # Format: YYYY/MM, YYYY-MM, YYYY/MM/DD, etc.
+
+defaults:
+  auto_upload_gdrive: true
+```
+
+**Result**: Files uploaded to `Bible Presentations/2024/12/presentation.pptx`
+
+#### Example 5: With Comments (YAML supports comments!)
+```yaml
+# Google Drive Settings
+gdrive:
+  credentials_path: ~/gdrive-credentials.json  # Path to service account JSON
+  folder_name: Bible Presentations             # Auto-creates if doesn't exist
+  use_date_folders: false                      # Set to true for date organization
+  date_format: YYYY/MM                         # Date folder pattern (YYYY/MM, YYYY/MM/DD, etc.)
+
+# PDF Settings
+pdf:
+  backend: auto      # Options: aspose, libreoffice, auto
+  quality: high      # Options: low, medium, high
+  compression: true  # Reduce file size
+
+# Automation
+defaults:
+  auto_convert_pdf: false     # Set to true for automatic PDF conversion
+  auto_upload_gdrive: false   # Set to true for automatic upload
+```
+
+With this config, just run:
+```bash
+praisonaippt -i verses.json
+# Automatically creates PPTX, converts to PDF, and uploads to Google Drive!
+```
+
+### Benefits of Configuration
+
+✅ **No Repetition** - Set credentials once, use everywhere  
+✅ **Faster Commands** - Less typing, fewer arguments  
+✅ **Consistent Settings** - Same quality/backend every time  
+✅ **Secure** - Credentials stored in home directory (not in commands)  
+✅ **Flexible** - Override config with CLI args when needed  
+
+---
+
+## 🚀 Quick Command Reference
+
+```bash
+# Setup
+praisonaippt config init              # Initialize configuration
+praisonaippt setup-oauth              # Setup OAuth (personal Drive)
+praisonaippt setup-credentials        # Setup service account
+praisonaippt secure-credentials       # Secure credential files
+
+# Create Presentations
+praisonaippt -i verses.json           # Create from JSON/YAML
+praisonaippt --use-example verses     # Use built-in example
+praisonaippt --list-examples          # List available examples
+
+# With Features
+praisonaippt -i verses.json --convert-pdf              # Create + PDF
+praisonaippt -i verses.json --upload-gdrive            # Create + Upload
+praisonaippt -i verses.json --convert-pdf --upload-gdrive  # All features
+
+# Configuration
+praisonaippt config show              # Show current config
+praisonaippt --config-show            # Alternative syntax
+
+# Convert Existing
+praisonaippt convert-pdf input.pptx   # Convert PPTX to PDF
+```
+
+---
+
 ## 📖 Usage Guide
 
 ### File Format (JSON or YAML)
@@ -215,6 +507,25 @@ praisonaippt -i my_verses.json
 
 ### CLI Usage
 
+#### Setup Commands
+
+```bash
+# Initialize configuration (interactive)
+praisonaippt config init
+
+# Show current configuration
+praisonaippt config show
+
+# Setup OAuth for personal Google Drive
+praisonaippt setup-oauth
+
+# Setup service account credentials
+praisonaippt setup-credentials
+
+# Secure credential files (move to ~/.praisonaippt and set permissions)
+praisonaippt secure-credentials
+```
+
 #### Basic Commands
 
 ```bash
@@ -264,12 +575,20 @@ praisonaippt -i verses.json \
   --gdrive-credentials credentials.json \
   --gdrive-folder-name "Presentations"
 
-# Complete workflow: Create + PDF + Upload
+# Upload with date-based folders (e.g., Presentations/2024/12/)
+praisonaippt -i verses.json \
+  --upload-gdrive \
+  --gdrive-credentials credentials.json \
+  --gdrive-folder-name "Presentations" \
+  --gdrive-date-folders
+
+# Complete workflow: Create + PDF + Upload with date folders
 praisonaippt -i verses.json \
   --convert-pdf \
   --upload-gdrive \
   --gdrive-credentials credentials.json \
-  --gdrive-folder-name "Bible Study"
+  --gdrive-folder-name "Bible Study" \
+  --gdrive-date-folders
 ```
 
 ### Python API
@@ -339,7 +658,7 @@ from praisonaippt.gdrive_uploader import upload_to_gdrive, is_gdrive_available
 # Create presentation
 output = create_presentation(data)
 
-# Upload if available
+# Basic upload
 if is_gdrive_available():
     result = upload_to_gdrive(
         output,
@@ -347,8 +666,17 @@ if is_gdrive_available():
         folder_name='Presentations'
     )
     print(f"Uploaded: {result['webViewLink']}")
-else:
-    print("Install with: pip install praisonaippt[gdrive]")
+
+# Upload with date-based folders (e.g., Presentations/2024/12/)
+if is_gdrive_available():
+    result = upload_to_gdrive(
+        output,
+        credentials_path='credentials.json',
+        folder_name='Presentations',
+        use_date_folders=True,
+        date_format='YYYY/MM'  # Default format
+    )
+    print(f"Uploaded to date folder: {result['webViewLink']}")
 ```
 
 #### Using Built-in Examples
@@ -548,6 +876,27 @@ Google Drive Options:
                         Google Drive folder ID to upload to (optional)
   --gdrive-folder-name NAME
                         Google Drive folder name to search/create (optional)
+  --gdrive-date-folders
+                        Create date-based subfolders (e.g., 2024/12) within target folder
+```
+
+#### Configuration Options
+
+```bash
+Configuration:
+  --config-init         Initialize configuration file interactively
+  --config-show         Show current configuration
+```
+
+#### Setup Commands
+
+```bash
+Setup Commands:
+  praisonaippt config init              Initialize configuration
+  praisonaippt config show              Show current configuration
+  praisonaippt setup-oauth              Setup OAuth for personal Google Drive
+  praisonaippt setup-credentials        Setup service account credentials
+  praisonaippt secure-credentials       Secure credential files with proper permissions
 ```
 
 #### Convert-PDF Command Options
