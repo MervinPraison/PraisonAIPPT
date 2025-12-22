@@ -48,6 +48,7 @@ setup(
     include_package_data=True,
     package_data={
         "": ["examples/*.json"],
+        "tests": ["*.py"],
     },
     keywords="powerpoint pptx bible verses presentation generator praisonai",
     project_urls={

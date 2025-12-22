@@ -79,32 +79,33 @@ cd PraisonAIPPT
 # Install in editable mode
 pip install -e .
 # Or with uv
-uv pip install -e .
+uv install -e .
 ```
 
-## 📁 Package Structure
+## 📁 Project Structure
 
 ```
-ppt-package/
-├── praisonaippt/          # Main package
-│   ├── __init__.py            # Package initialization
-│   ├── core.py                # Presentation creation logic
-│   ├── utils.py               # Utility functions
-│   ├── loader.py              # JSON loading & validation
-│   └── cli.py                 # Command-line interface
-├── examples/                   # Example JSON files
-│   ├── verses.json            # Default example
-│   ├── tamil_verses.json      # Tamil verses example
-│   ├── sample_verses.json     # Simple example
-│   ├── only_one_reason_sickness.json
-│   └── template.json          # Empty template
-├── docs/                       # Documentation
-├── tests/                      # Test suite (optional)
-├── setup.py                    # Package setup
-├── pyproject.toml             # Modern Python config
-├── requirements.txt           # Dependencies
-├── LICENSE                    # MIT License
-└── README.md                  # This file
+praisonaippt/
+├── praisonaippt/                 # Main package
+│   ├── __init__.py              # Package initialization
+│   ├── cli.py                   # Command-line interface
+│   ├── core.py                  # Core presentation creation logic
+│   ├── loader.py                # JSON/YAML loading utilities
+│   ├── pdf_converter.py         # PDF conversion functionality
+│   └── utils.py                 # Helper functions
+├── tests/                       # Test suite
+│   ├── __init__.py              # Test package initialization
+│   └── test_pdf_conversion.py   # PDF conversion tests
+├── examples/                    # Example JSON files
+│   ├── verses.json              # Basic example
+│   ├── tamil_verses.json        # Tamil language example
+│   ├── job_sickness.json        # Job suffering study example
+│   └── template.json            # Empty template
+├── setup.py                     # Package setup
+├── pyproject.toml              # Modern Python config
+├── requirements.txt            # Dependencies
+├── LICENSE                     # MIT License
+└── README.md                   # This file
 ```
 
 ## 📖 File Format (JSON or YAML)
