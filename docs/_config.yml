@@ -1,0 +1,67 @@
+# Site settings
+title: "PraisonAI PPT Documentation"
+description: "Create beautiful PowerPoint presentations from Bible verses with integrated PDF conversion"
+baseurl: "/PraisonAIPPT"
+url: "https://mervinpraison.github.io"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Navigation
+nav:
+  - title: "Home"
+    url: "/"
+  - title: "Installation"
+    url: "/installation"
+  - title: "Quick Start"
+    url: "/quickstart"
+  - title: "Commands"
+    url: "/commands"
+  - title: "Python API"
+    url: "/python-api"
+  - title: "PDF Conversion"
+    url: "/pdf-conversion"
+  - title: "Examples"
+    url: "/examples"
+  - title: "Troubleshooting"
+    url: "/troubleshooting"
+
+# Collections
+collections:
+  examples:
+    output: true
+    permalink: /:collection/:name/
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+# Code highlighting
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# SEO
+twitter:
+  username: mervinpraison
+  card: summary
+
+social:
+  name: MervinPraison
+  links:
+    - https://github.com/MervinPraison
+    - https://twitter.com/mervinpraison
