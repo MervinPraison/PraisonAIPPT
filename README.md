@@ -21,12 +21,27 @@ A professional Python package for creating beautiful PowerPoint presentations fr
 - ✨ **Auto-generated filenames** or custom output names
 - 🎯 **Error handling** and user-friendly feedback
 - 📄 **YAML support** - User-friendly YAML format alongside JSON
+- 📄 **PDF Conversion** - Convert presentations to PDF with multiple backends
+- 🔄 **Multiple PDF Backends** - Support for Aspose.Slides (commercial) and LibreOffice (free)
+- ⚙️ **Advanced PDF Options** - Quality settings, password protection, and more
 
 ## 📋 Requirements
 
 - Python 3.7 or higher
 - python-pptx library (automatically installed)
 - PyYAML library (automatically installed)
+
+### Optional for PDF Conversion
+
+Choose one of the following:
+
+- **Aspose.Slides (Recommended)**: Commercial library with high-quality conversion
+  ```bash
+  pip install praisonaippt[pdf-aspose]
+  ```
+- **LibreOffice (Free)**: Requires LibreOffice installation on your system
+  - Download from [libreoffice.org](https://www.libreoffice.org/)
+  - Works on Windows, macOS, and Linux
 
 ## 🚀 Installation
 
@@ -237,6 +252,59 @@ praisonaippt --version
 praisonaippt --help
 ```
 
+### PDF Conversion
+
+#### Convert Existing PPTX to PDF
+
+```bash
+# Convert existing presentation to PDF
+praisonaippt convert-pdf presentation.pptx
+
+# Specify output filename
+praisonaippt convert-pdf presentation.pptx --pdf-output output.pdf
+
+# Choose backend
+praisonaippt convert-pdf presentation.pptx --pdf-backend libreoffice
+```
+
+#### Generate PPTX and Convert to PDF in One Step
+
+```bash
+# Create presentation and convert to PDF
+praisonaippt -i verses.json --convert-pdf
+
+# Custom PDF output filename
+praisonaippt -i verses.json --convert-pdf --pdf-output custom.pdf
+
+# Advanced PDF options
+praisonaippt -i verses.json --convert-pdf --pdf-options '{"quality":"high","include_hidden_slides":true}'
+```
+
+#### PDF Options
+
+Available PDF conversion options:
+
+```json
+{
+  "backend": "auto",                    // "aspose", "libreoffice", "auto"
+  "quality": "high",                    // "low", "medium", "high"
+  "include_hidden_slides": false,       // Include hidden slides in PDF
+  "password_protect": false,            // Password protect PDF
+  "password": null,                     // PDF password
+  "compression": true,                  // Compress PDF images
+  "notes_pages": false,                 // Include notes pages
+  "slide_range": null,                  // [start, end] slide range
+  "compliance": null                    // "PDF/A", "PDF/UA" compliance
+}
+```
+
+#### PDF Backend Comparison
+
+| Backend | Quality | Cost | Dependencies | Best For |
+|---------|---------|------|--------------|----------|
+| **Aspose.Slides** | Excellent | Commercial | Python package | Professional quality |
+| **LibreOffice** | Good | Free | LibreOffice install | Free option |
+
 ### Python API
 
 You can also use the package programmatically in your Python code:
@@ -256,6 +324,50 @@ if data:
     )
     print(f"Created: {output_file}")
 ```
+
+#### PDF Conversion with Python API
+
+**PDF conversion is fully integrated into the SDK** - all functions accessible from main package import:
+
+```python
+# All PDF functions available from main package
+from praisonaippt import (
+    create_presentation,
+    load_verses_from_file,
+    convert_pptx_to_pdf,  # Integrated PDF conversion
+    PDFOptions            # Integrated PDF options
+)
+
+# Method 1: Create presentation and convert to PDF in one step
+data = load_verses_from_file("verses.json")
+if data:
+    result = create_presentation(
+        data,
+        output_file="my_presentation.pptx",
+        convert_to_pdf=True  # PDF conversion integrated into core function
+    )
+    if isinstance(result, dict):
+        print(f"PPTX: {result['pptx']}")
+        print(f"PDF: {result['pdf']}")
+
+# Method 2: Convert existing PPTX to PDF (standalone function)
+pdf_file = convert_pptx_to_pdf("presentation.pptx", "output.pdf")
+
+# Method 3: Advanced PDF options (integrated configuration)
+pdf_options = PDFOptions(
+    quality='high',
+    include_hidden_slides=True,
+    compression=True
+)
+pdf_file = convert_pptx_to_pdf(
+    "presentation.pptx", 
+    "output.pdf", 
+    options=pdf_options,
+    backend='aspose'
+)
+```
+
+**Note**: No need to import from submodules - all PDF functionality is part of the main SDK.
 
 #### Using Built-in Examples
 
@@ -405,6 +517,282 @@ pytest tests/
    - Reinstall the package: `uv pip install -e .`
    - Check that python-pptx is installed: `uv pip install python-pptx`
 
+---
+
+## 🔧 SDK Integration Verification
+
+### ✅ PDF Conversion Feature - Fully Integrated into praisonaippt SDK
+
+The PDF conversion functionality is **fully integrated** into the praisonaippt SDK, not as separate files or external functionality.
+
+#### Integration Architecture
+
+**Package Structure:**
+```
+praisonaippt/
+├── __init__.py           # Main package exports (includes PDF functions)
+├── core.py               # Core presentation creation (with PDF support)
+├── loader.py             # Verse loading utilities
+├── utils.py              # Helper utilities
+├── cli.py                # Command-line interface (with PDF commands)
+└── pdf_converter.py      # PDF conversion module (integrated)
+```
+
+**SDK Exports (`__init__.py`):**
+The PDF conversion functionality is **directly exported** from the main package:
+
+```python
+from praisonaippt import (
+    create_presentation,      # Core function with PDF support
+    convert_pptx_to_pdf,      # Standalone PDF conversion
+    PDFOptions,               # PDF configuration options
+    load_verses_from_file,    # Verse loading
+    load_verses_from_dict     # Verse loading
+)
+```
+
+**All functions are accessible from the main package import** - no need to import from submodules.
+
+#### Verification Tests
+
+**✅ Test 1: Main Package Import**
+```python
+import praisonaippt
+
+# All PDF functions available at package level
+assert 'convert_pptx_to_pdf' in praisonaippt.__all__
+assert 'PDFOptions' in praisonaippt.__all__
+```
+
+**✅ Test 2: Integrated PDF Conversion**
+```python
+from praisonaippt import create_presentation
+
+# PDF conversion integrated into core function
+result = create_presentation(data, convert_to_pdf=True)
+
+# Returns both PPTX and PDF paths
+assert isinstance(result, dict)
+assert 'pptx' in result
+assert 'pdf' in result
+```
+
+**✅ Test 3: Standalone PDF Conversion**
+```python
+from praisonaippt import convert_pptx_to_pdf
+
+# Direct PDF conversion accessible from main package
+pdf_file = convert_pptx_to_pdf('presentation.pptx')
+```
+
+**✅ Test 4: PDF Options Configuration**
+```python
+from praisonaippt import PDFOptions
+
+# PDF options accessible from main package
+options = PDFOptions(quality='high', compression=True)
+```
+
+#### SDK Usage Examples
+
+**Example 1: Simple Integrated Usage**
+```python
+import praisonaippt
+
+# Load verses
+data = praisonaippt.load_verses_from_file('verses.json')
+
+# Create presentation with PDF in one step
+result = praisonaippt.create_presentation(
+    data,
+    convert_to_pdf=True  # PDF conversion integrated
+)
+
+print(f"Created: {result['pptx']} and {result['pdf']}")
+```
+
+**Example 2: Advanced Integrated Usage**
+```python
+from praisonaippt import create_presentation, PDFOptions
+
+# Configure PDF options
+pdf_opts = PDFOptions(
+    quality='high',
+    compression=True,
+    include_hidden_slides=False
+)
+
+# Create with custom PDF settings
+result = create_presentation(
+    data,
+    output_file='presentation.pptx',
+    convert_to_pdf=True,
+    pdf_options=pdf_opts,
+    pdf_backend='auto'
+)
+```
+
+#### Integration Benefits
+
+**✅ Seamless User Experience**
+- **Single import**: All functionality from `praisonaippt` package
+- **No submodule imports**: Users don't need to know internal structure
+- **Consistent API**: PDF conversion follows same patterns as core functions
+
+**✅ Backward Compatibility**
+- **Existing code works**: `create_presentation()` still works without PDF
+- **Optional feature**: PDF conversion is opt-in via `convert_to_pdf=True`
+- **Graceful degradation**: Works without PDF backends installed
+
+#### Backend Detection
+
+The SDK automatically detects available PDF backends:
+
+```python
+from praisonaippt import convert_pptx_to_pdf
+
+# Automatically uses best available backend
+pdf_file = convert_pptx_to_pdf('presentation.pptx')
+
+# Backend selection priority:
+# 1. Aspose.Slides (if installed)
+# 2. LibreOffice (if installed)
+# 3. Error with helpful message
+```
+
+---
+
+## 📋 Complete Command Reference
+
+### Basic Commands
+
+#### Create Presentation
+```bash
+# Use default verses.json
+praisonaippt
+
+# Specify input file
+praisonaippt -i my_verses.json
+
+# Specify output file
+praisonaippt -i verses.json -o output.pptx
+
+# Use custom title
+praisonaippt -i verses.json -t "My Custom Title"
+
+# Use built-in example
+praisonaippt --use-example tamil_verses
+
+# List available examples
+praisonaippt --list-examples
+```
+
+### PDF Conversion Commands
+
+#### Convert Existing PPTX to PDF
+```bash
+# Basic conversion
+praisonaippt convert-pdf presentation.pptx
+
+# Specify output filename
+praisonaippt convert-pdf presentation.pptx --pdf-output output.pdf
+
+# Choose backend
+praisonaippt convert-pdf presentation.pptx --pdf-backend libreoffice
+
+# Advanced options
+praisonaippt convert-pdf presentation.pptx \
+  --pdf-options '{"quality":"high","compression":true}'
+```
+
+#### Create PPTX and Convert to PDF in One Step
+```bash
+# Basic integrated conversion
+praisonaippt -i verses.json --convert-pdf
+
+# Custom PDF output filename
+praisonaippt -i verses.json --convert-pdf --pdf-output custom.pdf
+
+# Advanced PDF options
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"quality":"high","include_hidden_slides":true}'
+
+# Choose backend and options
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-backend aspose \
+  --pdf-options '{"quality":"high","compression":false}'
+```
+
+### PDF Options Reference
+
+#### Available Options
+```json
+{
+  "backend": "auto",                    // "aspose", "libreoffice", "auto"
+  "quality": "high",                    // "low", "medium", "high"
+  "include_hidden_slides": false,       // Include hidden slides in PDF
+  "password_protect": false,            // Password protect PDF
+  "password": null,                     // PDF password
+  "compression": true,                  // Compress PDF images
+  "notes_pages": false,                 // Include notes pages
+  "slide_range": null,                  // [start, end] slide range
+  "compliance": null                    // "PDF/A", "PDF/UA" compliance
+}
+```
+
+#### PDF Backend Comparison
+| Backend | Quality | Cost | Dependencies | Best For |
+|---------|---------|------|--------------|----------|
+| **Aspose.Slides** | Excellent | Commercial | Python package | Professional quality |
+| **LibreOffice** | Good | Free | LibreOffice install | Free option |
+
+### Advanced Command Examples
+
+#### Batch Processing
+```bash
+# Create multiple presentations with PDF
+for file in *.json; do
+  praisonaippt -i "$file" --convert-pdf
+done
+```
+
+#### Custom Quality Settings
+```bash
+# High quality PDF (no compression)
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"quality":"high","compression":false}'
+
+# Low quality PDF (smaller file size)
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"quality":"low","compression":true}'
+```
+
+#### Password Protected PDF
+```bash
+# Create password-protected PDF
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"password_protect":true,"password":"secret123"}'
+```
+
+#### Slide Range Export
+```bash
+# Export specific slides to PDF
+praisonaippt convert-pdf presentation.pptx \
+  --pdf-options '{"slide_range":[1,5]}'
+```
+
+### Help and Version Commands
+```bash
+# Show help
+praisonaippt --help
+praisonaippt convert-pdf --help
+
+# Show version
+praisonaippt --version
+```
+
+---
+
 ## 💡 Tips
 
 - Keep verse text concise for better readability
@@ -414,6 +802,9 @@ pytest tests/
 - Use the template file as a starting point
 - Check available examples with `--list-examples`
 - Long verses are automatically split across multiple slides
+- For PDF conversion, ensure Aspose.Slides or LibreOffice is installed
+- Use `--pdf-backend auto` for automatic backend detection
+- High quality PDFs create larger files but better visual quality
 
 ## 📄 License
 

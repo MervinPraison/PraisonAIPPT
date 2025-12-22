@@ -11,7 +11,7 @@ long_description = (this_directory / "README.md").read_text(encoding='utf-8')
 
 setup(
     name="praisonaippt",
-    version="1.1.0",
+    version="1.2.0",
     author="MervinPraison",
     description="PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON format",
     long_description=long_description,
@@ -36,6 +36,10 @@ setup(
         "python-pptx>=0.6.21",
         "PyYAML>=6.0",
     ],
+    extras_require={
+        'pdf-aspose': ['aspose.slides>=24.0.0'],
+        'pdf-all': ['aspose.slides>=24.0.0', 'psutil>=5.9.0', 'tqdm>=4.64.0'],
+    },
     entry_points={
         "console_scripts": [
             "praisonaippt=praisonaippt.cli:main",

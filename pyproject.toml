@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "praisonaippt"
-version = "1.1.0"
+version = "1.2.0"
 description = "PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON format"
 readme = "README.md"
 requires-python = ">=3.7"

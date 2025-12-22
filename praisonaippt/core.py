@@ -7,6 +7,7 @@ from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from .utils import split_long_text, sanitize_filename
+from .pdf_converter import PDFOptions, convert_pptx_to_pdf
 
 
 def add_title_slide(prs, title, subtitle=""):
@@ -223,7 +224,8 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None, 
     return verse_slide
 
 
-def create_presentation(data, output_file=None, custom_title=None):
+def create_presentation(data, output_file=None, custom_title=None, 
+                        convert_to_pdf=False, pdf_options=None, pdf_backend='auto'):
     """
     Create a PowerPoint presentation from Bible verses data.
     
@@ -243,9 +245,13 @@ def create_presentation(data, output_file=None, custom_title=None):
                      }
         output_file (str): Output filename (optional, auto-generated if not provided)
         custom_title (str): Custom presentation title (optional, overrides JSON title)
+        convert_to_pdf (bool): Whether to also convert to PDF (default: False)
+        pdf_options (PDFOptions): PDF conversion options (optional)
+        pdf_backend (str): PDF conversion backend ('aspose', 'libreoffice', 'auto')
     
     Returns:
-        str: Path to the created presentation file, or None if error
+        str or dict: Path to the created presentation file, or dict with both PPTX and PDF paths
+                    if convert_to_pdf is True, or None if error
     """
     if not data:
         print("Error: No data provided")
@@ -303,7 +309,41 @@ def create_presentation(data, output_file=None, custom_title=None):
     try:
         prs.save(output_file)
         print(f"✓ Presentation created successfully: {output_file}")
+        
+        # Convert to PDF if requested
+        if convert_to_pdf:
+            try:
+                # Use default PDF options if none provided
+                if pdf_options is None:
+                    pdf_options = PDFOptions()
+                
+                # Generate PDF filename
+                from pathlib import Path
+                pdf_file = str(Path(output_file).with_suffix('.pdf'))
+                
+                # Convert to PDF
+                pdf_result = convert_pptx_to_pdf(
+                    output_file, 
+                    pdf_file, 
+                    backend=pdf_backend, 
+                    options=pdf_options
+                )
+                
+                print(f"✓ PDF created successfully: {pdf_result}")
+                
+                # Return both files
+                return {
+                    'pptx': output_file,
+                    'pdf': pdf_result
+                }
+                
+            except Exception as e:
+                print(f"Warning: PDF conversion failed: {e}")
+                print("Presentation was created successfully at:", output_file)
+                return output_file
+        
         return output_file
+        
     except Exception as e:
         print(f"Error saving presentation: {e}")
         return None
