@@ -197,94 +197,115 @@ nano my_verses.json
 praisonaippt -i my_verses.json
 ```
 
-## 💻 Usage
+## 💻 Complete CLI Reference
 
-### Command-Line Interface
+### Main Commands
 
-#### Basic Usage
-
-Use default `verses.json` in current directory:
+#### Create Presentation
 ```bash
+# Basic usage (uses default verses.json)
 praisonaippt
-```
 
-#### Specify Input File
-
-```bash
-# JSON format
+# Specify input file
 praisonaippt -i my_verses.json
-
-# YAML format (recommended)
 praisonaippt -i my_verses.yaml
-```
 
-#### Specify Output File
-
-```bash
+# Specify output file
 praisonaippt -i verses.json -o my_presentation.pptx
-```
 
-#### Use Custom Title
-
-```bash
+# Use custom title
 praisonaippt -i verses.json -t "My Custom Title"
-```
 
-#### Use Built-in Examples
-
-```bash
-# List available examples
-praisonaippt --list-examples
-
-# Use a specific example
+# Use built-in examples
 praisonaippt --use-example tamil_verses
 praisonaippt --use-example sample_verses
+
+# List available examples
+praisonaippt --list-examples
 ```
 
-#### Show Version
-
+#### PDF Conversion Commands
 ```bash
-praisonaippt --version
-```
-
-#### Show Help
-
-```bash
-praisonaippt --help
-```
-
-### PDF Conversion
-
-#### Convert Existing PPTX to PDF
-
-```bash
-# Convert existing presentation to PDF
+# Convert existing PPTX to PDF
 praisonaippt convert-pdf presentation.pptx
 
-# Specify output filename
+# Convert with custom output filename
 praisonaippt convert-pdf presentation.pptx --pdf-output output.pdf
 
-# Choose backend
+# Convert with specific backend
+praisonaippt convert-pdf presentation.pptx --pdf-backend aspose
 praisonaippt convert-pdf presentation.pptx --pdf-backend libreoffice
+praisonaippt convert-pdf presentation.pptx --pdf-backend auto
+
+# Convert with advanced options
+praisonaippt convert-pdf presentation.pptx \
+  --pdf-options '{"quality":"high","compression":true}'
 ```
 
-#### Generate PPTX and Convert to PDF in One Step
-
+#### Integrated Creation and PDF Conversion
 ```bash
-# Create presentation and convert to PDF
+# Create PPTX and convert to PDF in one step
 praisonaippt -i verses.json --convert-pdf
 
-# Custom PDF output filename
+# With custom PDF output filename
 praisonaippt -i verses.json --convert-pdf --pdf-output custom.pdf
 
-# Advanced PDF options
-praisonaippt -i verses.json --convert-pdf --pdf-options '{"quality":"high","include_hidden_slides":true}'
+# With PDF backend selection
+praisonaippt -i verses.json --convert-pdf --pdf-backend aspose
+
+# With advanced PDF options
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"quality":"high","include_hidden_slides":true}'
 ```
 
-#### PDF Options
+### Complete Command Options
 
-Available PDF conversion options:
+#### Global Options
+```bash
+Options:
+  -h, --help            Show help message
+  -v, --version         Show version number
+  -i INPUT, --input INPUT
+                        Input JSON/YAML file (default: verses.json)
+  -o OUTPUT, --output OUTPUT
+                        Output PowerPoint file (auto-generated if not specified)
+  -t TITLE, --title TITLE
+                        Custom presentation title (overrides JSON title)
+  --use-example NAME    Use a built-in example file
+  --list-examples       List all available example files
+```
 
+#### PDF Conversion Options
+```bash
+PDF Options:
+  --convert-pdf         Convert the generated PowerPoint to PDF
+  --pdf-backend {aspose,libreoffice,auto}
+                        PDF conversion backend (default: auto)
+  --pdf-options PDF_OPTIONS
+                        PDF conversion options as JSON string
+  --pdf-output PDF_OUTPUT
+                        Custom PDF output filename
+```
+
+#### Convert-PDF Command Options
+```bash
+Convert-PDF Command:
+  positional arguments:
+    input_file            Input PPTX file to convert
+
+  options:
+    -h, --help            Show help message
+    --pdf-backend {aspose,libreoffice,auto}
+                        PDF conversion backend (default: auto)
+    --pdf-options PDF_OPTIONS
+                        PDF conversion options as JSON string
+    --pdf-output PDF_OUTPUT
+                        Custom PDF output filename
+```
+
+### PDF Options Reference
+
+#### Available Options
 ```json
 {
   "backend": "auto",                    // "aspose", "libreoffice", "auto"
@@ -294,6 +315,130 @@ Available PDF conversion options:
   "password": null,                     // PDF password
   "compression": true,                  // Compress PDF images
   "notes_pages": false,                 // Include notes pages
+  "slide_range": null,                  // [start, end] slide range
+  "compliance": null                    // "PDF/A", "PDF/UA" compliance
+}
+```
+
+#### Quality Settings
+- **"low"**: Smaller file size, basic quality
+- **"medium"**: Balanced file size and quality  
+- **"high"**: Best quality, larger file size
+
+#### Backend Comparison
+| Backend | Quality | Cost | Dependencies | Best For |
+|---------|---------|------|--------------|----------|
+| **Aspose.Slides** | Excellent | Commercial | Python package | Professional quality |
+| **LibreOffice** | Good | Free | LibreOffice install | Free option |
+| **Auto** | Varies | Varies | Auto-detected | Convenience |
+
+### Advanced Command Examples
+
+#### Batch Processing
+```bash
+# Create multiple presentations with PDF
+for file in *.json; do
+  praisonaippt -i "$file" --convert-pdf
+done
+
+# Convert all PPTX files to PDF
+for file in *.pptx; do
+  praisonaippt convert-pdf "$file"
+done
+```
+
+#### Custom Quality Settings
+```bash
+# High quality PDF (no compression)
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"quality":"high","compression":false}'
+
+# Low quality PDF (smaller file size)
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"quality":"low","compression":true}'
+```
+
+#### Password Protected PDF
+```bash
+# Create password-protected PDF
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"password_protect":true,"password":"secret123"}'
+```
+
+#### Slide Range Export
+```bash
+# Export specific slides to PDF
+praisonaippt convert-pdf presentation.pptx \
+  --pdf-options '{"slide_range":[1,5]}'
+
+# Export slides 10-20
+praisonaippt convert-pdf presentation.pptx \
+  --pdf-options '{"slide_range":[10,20]}'
+```
+
+#### Compliance Standards
+```bash
+# PDF/A compliance (archival)
+praisonaippt convert-pdf presentation.pptx \
+  --pdf-options '{"compliance":"PDF/A"}'
+
+# PDF/UA compliance (accessibility)
+praisonaippt convert-pdf presentation.pptx \
+  --pdf-options '{"compliance":"PDF/UA"}'
+```
+
+### Help and Version Commands
+```bash
+# Show main help
+praisonaippt --help
+
+# Show convert-pdf help
+praisonaippt convert-pdf --help
+
+# Show version
+praisonaippt --version
+```
+
+### Command Examples by Use Case
+
+#### Quick Presentation Creation
+```bash
+# Fastest way to create presentation
+praisonaippt
+
+# With custom title
+praisonaippt -t "Sunday Service"
+
+# From specific file
+praisonaippt -i easter_verses.json
+```
+
+#### Professional PDF Export
+```bash
+# High quality PDF for printing
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"quality":"high","compression":false}'
+
+# PDF for web (smaller file)
+praisonaippt -i verses.json --convert-pdf \
+  --pdf-options '{"quality":"medium","compression":true}'
+```
+
+#### Development and Testing
+```bash
+# Use example for testing
+praisonaippt --use-example tamil_verses
+
+# Create test presentation with PDF
+praisonaippt --use-example sample_verses --convert-pdf --pdf-output test.pdf
+
+# List all available examples
+praisonaippt --list-examples
+```
+
+### PDF Conversion
+
+PDF conversion is fully integrated into the CLI and Python API. See the complete command reference above for all PDF conversion options and examples.
   "slide_range": null,                  // [start, end] slide range
   "compliance": null                    // "PDF/A", "PDF/UA" compliance
 }
