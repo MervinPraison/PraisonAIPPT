@@ -1,8 +1,8 @@
 # Site settings
 title: "PraisonAI PPT Documentation"
 description: "Create beautiful PowerPoint presentations from Bible verses with integrated PDF conversion"
-baseurl: "/PraisonAIPPT"
-url: "https://mervinpraison.github.io"
+baseurl: ""
+url: "https://ppt.praison.ai"
 
 # Build settings
 markdown: kramdown
