@@ -82,7 +82,7 @@ class GDriveUploader:
         Raises:
             ValueError: If neither credentials_path nor credentials_dict is provided
         """
-        scopes = ['https://www.googleapis.com/auth/drive.file']
+        scopes = ['https://www.googleapis.com/auth/drive']
         
         if credentials_path:
             if not os.path.exists(credentials_path):
@@ -94,31 +94,48 @@ class GDriveUploader:
                 creds_data = json.load(f)
             
             # Service account has 'type': 'service_account'
+            # Service accounts have no personal Drive storage quota, so fall back
+            # to gcloud Application Default Credentials (user's own Google login)
             if creds_data.get('type') == 'service_account':
-                return self.service_account.Credentials.from_service_account_file(
-                    credentials_path,
-                    scopes=scopes
-                )
+                return self._get_adc_credentials(scopes)
             else:
                 # OAuth credentials - use installed app flow
                 return self._get_oauth_credentials(credentials_path, scopes)
         elif credentials_dict:
             if credentials_dict.get('type') == 'service_account':
-                return self.service_account.Credentials.from_service_account_info(
-                    credentials_dict,
-                    scopes=scopes
-                )
+                return self._get_adc_credentials(scopes)
             else:
                 raise ValueError("OAuth credentials must be provided as a file path")
         else:
-            raise ValueError(
-                "Either credentials_path or credentials_dict must be provided.\n"
-                "To use Google Drive upload, you need to:\n"
-                "1. Create a service account in Google Cloud Console\n"
-                "2. Download the JSON credentials file\n"
-                "3. Provide the path using --gdrive-credentials option"
-            )
+            # No credentials provided — try ADC as last resort
+            return self._get_adc_credentials(scopes)
     
+    def _get_adc_credentials(self, scopes: list):
+        """
+        Get credentials from gcloud Application Default Credentials (ADC).
+        Explicitly loads from ~/.config/gcloud/application_default_credentials.json
+        to bypass any GOOGLE_APPLICATION_CREDENTIALS env var (which may point to a
+        service account key that has no personal Drive storage quota).
+        """
+        from google.oauth2.credentials import Credentials as UserCredentials
+        from google.auth.transport.requests import Request
+
+        adc_path = os.path.expanduser('~/.config/gcloud/application_default_credentials.json')
+        if os.path.exists(adc_path):
+            import json
+            with open(adc_path) as f:
+                adc_data = json.load(f)
+            if adc_data.get('type') != 'service_account':
+                creds = UserCredentials.from_authorized_user_file(adc_path, scopes)
+                if creds.expired and creds.refresh_token:
+                    creds.refresh(Request())
+                return creds
+
+        # Fallback to google.auth.default (may still use service account)
+        import google.auth
+        creds, _ = google.auth.default(scopes=scopes)
+        return creds
+
     def _get_oauth_credentials(self, credentials_path: str, scopes: list):
         """
         Get OAuth credentials using installed app flow.
