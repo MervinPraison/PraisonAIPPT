@@ -20,7 +20,7 @@
             "verses": [
                 {
                     "reference": "Romans 1:16–17 (NKJV)",
-                    "text": "For I am not ashamed of the gospel of Christ, for it is the power of God to salvation for everyone who believes, for the Jew first and also for the Greek.",
+                    "text": "16 For I am not ashamed of the gospel of Christ, for it is the power of God to salvation for everyone who believes, for the Jew first and also for the Greek.",
                     "highlights": [
                         {
                             "text": "the gospel",
@@ -42,7 +42,7 @@
                 },
                 {
                     "reference": "Romans 1:16–17 (NKJV)",
-                    "text": "For in it the righteousness of God is revealed from faith to faith; as it is written, 'The just shall live by faith.'",
+                    "text": "17 For in it the righteousness of God is revealed from faith to faith; as it is written, 'The just shall live by faith.'",
                     "highlights": [
                         {
                             "text": "righteousness of God",
@@ -65,7 +65,7 @@
             "verses": [
                 {
                     "reference": "Matthew 8:5–10 (NKJV)",
-                    "text": "When Jesus heard it, He marveled, and said to those who followed, 'Assuredly, I say to you, I have not found such great faith, not even in Israel!'",
+                    "text": "10 When Jesus heard it, He marveled, and said to those who followed, 'Assuredly, I say to you, I have not found such great faith, not even in Israel!'",
                     "highlights": [
                         "I have not found such great faith",
                         "not even in Israel"
@@ -91,7 +91,7 @@
             "verses": [
                 {
                     "reference": "Matthew 15:22–28 (NKJV)",
-                    "text": "And behold, a woman of Canaan came from that region and cried out to Him, saying, \"Have mercy on me, O Lord, Son of David! My daughter is severely demon-possessed.\"",
+                    "text": "22 And behold, a woman of Canaan came from that region and cried out to Him, saying, \"Have mercy on me, O Lord, Son of David! My daughter is severely demon-possessed.\"",
                     "highlights": [
                         "came from that region and cried out to Him",
                         "Have mercy on me, O Lord, Son of David"
@@ -99,7 +99,7 @@
                 },
                 {
                     "reference": "Matthew 15:22–28 (NKJV)",
-                    "text": "But He answered her not a word. And His disciples came and urged Him, saying, 'Send her away, for she cries out after us.' But He answered and said, 'I was not sent except to the lost sheep of the house of Israel.' Then she came and worshiped Him, saying, 'Lord, help me!'",
+                    "text": "23 But He answered her not a word. And His disciples came and urged Him, saying, 'Send her away, for she cries out after us.'\n24 But He answered and said, 'I was not sent except to the lost sheep of the house of Israel.'\n25 Then she came and worshiped Him, saying, 'Lord, help me!'",
                     "highlights": [
                         "He answered her not a word",
                         "she cries out after us",
@@ -108,7 +108,7 @@
                 },
                 {
                     "reference": "Matthew 15:22–28 (NKJV)",
-                    "text": "But He answered and said, 'It is not good to take the children's bread and throw it to the little dogs.' And she said, 'Yes, Lord, yet even the little dogs eat the crumbs which fall from their masters' table.' Then Jesus answered and said to her, 'O woman, great is your faith! Let it be to you as you desire.' And her daughter was healed from that very hour.",
+                    "text": "26 But He answered and said, 'It is not good to take the children's bread and throw it to the little dogs.'\n27 And she said, 'Yes, Lord, yet even the little dogs eat the crumbs which fall from their masters' table.'\n28 Then Jesus answered and said to her, 'O woman, great is your faith! Let it be to you as you desire.' And her daughter was healed from that very hour.",
                     "highlights": [
                         "even the little dogs eat the crumbs",
                         "great is your faith",
@@ -127,7 +127,7 @@
                 },
                 {
                     "reference": "Mark 5:27–29 (NKJV)",
-                    "text": "When she heard about Jesus, she came behind Him in the crowd and touched His garment. For she said, 'If only I may touch His clothes, I shall be made well.' Immediately the fountain of her blood was dried up, and she felt in her body that she was healed of the affliction.",
+                    "text": "27 When she heard about Jesus, she came behind Him in the crowd and touched His garment.\n28 For she said, 'If only I may touch His clothes, I shall be made well.'\n29 Immediately the fountain of her blood was dried up, and she felt in her body that she was healed of the affliction.",
                     "highlights": [
                         "she came behind Him in the crowd and touched His garment"
                     ]
@@ -157,12 +157,12 @@
                 },
                 {
                     "reference": "Romans 5:20–21 (NKJV)",
-                    "text": "Moreover the law entered that the offense might abound.",
+                    "text": "20 Moreover the law entered that the offense might abound.",
                     "highlights": []
                 },
                 {
                     "reference": "Romans 5:20–21 (NKJV)",
-                    "text": "But where sin abounded, grace abounded much more, so that as sin reigned in death, even so grace might reign through righteousness to eternal life through Jesus Christ our Lord.",
+                    "text": "21 But where sin abounded, grace abounded much more, so that as sin reigned in death, even so grace might reign through righteousness to eternal life through Jesus Christ our Lord.",
                     "highlights": [
                         "where sin abounded, grace abounded much more",
                         "grace might reign through righteousness to eternal life"
