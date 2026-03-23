@@ -186,9 +186,9 @@ def _resolve_theme(style: dict) -> dict:
         'section':          _rc('section_title_color', '#003366', '#FFFFFF'),
         'highlight':        _rc('highlight_color',     '#FF8C00', '#FFD700'),
         'annotation':       _rc('annotation_color',    '#1E50C8', '#1E50C8'),
-        'ref_position':     style.get('reference_position', 'bottom'),
-        'global_alignment': style.get('alignment', ''),
-        'font_name':        style.get('font_name', None),
+        'ref_position':     style.get('reference_position', 'top'),
+        'global_alignment': style.get('alignment', 'left'),
+        'font_name':        style.get('font_name', 'Palatino'),
     }
 
 
