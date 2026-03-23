@@ -7,7 +7,7 @@
             "verses": [
                 {
                     "reference": "Ephesians 2:8-9 (NKJV)",
-                    "text": "For by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not by works, so that no one may boast.",
+                    "text": "8 For by grace you have been saved through faith, and that not of yourselves; it is the gift of God,\n9 not by works, so that no one may boast.",
                     "highlights": [
                         "by grace you have been saved through faith",
                         "gift of God"
@@ -51,7 +51,7 @@
             "verses": [
                 {
                     "reference": "Genesis 12:2–3 (NKJV)",
-                    "text": "I will make you a great nation; I will bless you And make your name great; And you shall be a blessing. I will bless those who bless you, And I will curse him who curses you; And in you all the families of the earth shall be blessed.",
+                    "text": "2 I will make you a great nation; I will bless you And make your name great; And you shall be a blessing.\n3 I will bless those who bless you, And I will curse him who curses you; And in you all the families of the earth shall be blessed.",
                     "highlights": [
                         "I will bless you",
                         "you shall be a blessing",
@@ -74,7 +74,7 @@
                 },
                 {
                     "reference": "Genesis 26:12–14 (NKJV)",
-                    "text": "Then Isaac sowed in that land, and reaped in the same year a hundredfold; and the Lord blessed him. The man began to prosper, and continued prospering until he became very prosperous; for he had possessions of flocks and possessions of herds and a great number of servants. So the Philistines envied him.",
+                    "text": "12 Then Isaac sowed in that land, and reaped in the same year a hundredfold; and the Lord blessed him.\n13 The man began to prosper, and continued prospering until he became very prosperous;\n14 for he had possessions of flocks and possessions of herds and a great number of servants. So the Philistines envied him.",
                     "highlights": [
                         "a hundredfold",
                         "the Lord blessed him",
@@ -129,7 +129,7 @@
                 },
                 {
                     "reference": "Genesis 45:26–28 (NKJV)",
-                    "text": "And they told him, saying, \"Joseph is still alive, and he is governor over all the land of Egypt.\" And Jacob's heart stood still, because he did not believe them. But when they told him all the words which Joseph had said to them, and when he saw the carts which Joseph had sent to carry him, the spirit of Jacob their father revived. Then Israel said, \"It is enough. Joseph my son is still alive. I will go and see him before I die.\"",
+                    "text": "26 And they told him, saying, \"Joseph is still alive, and he is governor over all the land of Egypt.\" And Jacob's heart stood still, because he did not believe them.\n27 But when they told him all the words which Joseph had said to them, and when he saw the carts which Joseph had sent to carry him, the spirit of Jacob their father revived.\n28 Then Israel said, \"It is enough. Joseph my son is still alive. I will go and see him before I die.\"",
                     "highlights": [
                         "Joseph is still alive",
                         "he is governor over all the land of Egypt",
@@ -138,7 +138,7 @@
                 },
                 {
                     "reference": "Psalm 67:1–2 (NKJV)",
-                    "text": "God be merciful to us and bless us, And cause His face to shine upon us, Selah That Your way may be known on earth, Your salvation among all nations.",
+                    "text": "1 God be merciful to us and bless us, And cause His face to shine upon us, Selah\n2 That Your way may be known on earth, Your salvation among all nations.",
                     "highlights": [
                         "bless us",
                         "Your way may be known on earth"
@@ -161,8 +161,8 @@
                         "עָשַׁר"
                     ],
                     "large_text": {
-                        "מַעֲשֵׂר": 200,
-                        "עָשַׁר": 200
+                        "מַעֲשֵׂר": 80,
+                        "עָשַׁר": 80
                     }
                 },
                 {
@@ -176,7 +176,7 @@
                 },
                 {
                     "reference": "Proverbs 3:9–10 (NKJV)",
-                    "text": "Honor the Lord with your possessions, And with the firstfruits of all your increase; So your barns will be filled with plenty, And your vats will overflow with new wine.",
+                    "text": "9 Honor the Lord with your possessions, And with the firstfruits of all your increase;\n10 So your barns will be filled with plenty, And your vats will overflow with new wine.",
                     "highlights": [
                         "Honor the Lord with your possessions",
                         "your barns will be filled with plenty"
@@ -237,7 +237,7 @@
                 },
                 {
                     "reference": "Genesis 14:18–20 (NKJV)",
-                    "text": "Then Melchizedek king of Salem brought out bread and wine; he was the priest of God Most High. And he blessed him and said: \"Blessed be Abram of God Most High, Possessor of heaven and earth; And blessed be God Most High, Who has delivered your enemies into your hand.\" And he gave him a tithe of all.",
+                    "text": "18 Then Melchizedek king of Salem brought out bread and wine; he was the priest of God Most High.\n19 And he blessed him and said: \"Blessed be Abram of God Most High, Possessor of heaven and earth;\n20 And blessed be God Most High, Who has delivered your enemies into your hand.\" And he gave him a tithe of all.",
                     "highlights": [
                         "Melchizedek",
                         "priest of God Most High",
@@ -251,7 +251,7 @@
             "verses": [
                 {
                     "reference": "Genesis 14:22–23 (NKJV)",
-                    "text": "But Abram said to the king of Sodom, \"I have raised my hand to the Lord, God Most High, the Possessor of heaven and earth, that I will take nothing, from a thread to a sandal strap, and that I will not take anything that is yours, lest you should say, 'I have made Abram rich'—",
+                    "text": "22 But Abram said to the king of Sodom, \"I have raised my hand to the Lord, God Most High, the Possessor of heaven and earth,\n23 that I will take nothing, from a thread to a sandal strap, and that I will not take anything that is yours, lest you should say, 'I have made Abram rich'\"",
                     "highlights": [
                         "the Possessor of heaven and earth",
                         "I have made Abram rich"
@@ -285,7 +285,7 @@
                 },
                 {
                     "reference": "Mark 12:41–44 (NKJV) - Part 1",
-                    "text": "Now Jesus sat opposite the treasury and saw how the people put money into the treasury. And many who were rich put in much. Then one poor widow came and threw in two mites, which make a quadrans.",
+                    "text": "41 Now Jesus sat opposite the treasury and saw how the people put money into the treasury. And many who were rich put in much.\n42 Then one poor widow came and threw in two mites, which make a quadrans.",
                     "highlights": [
                         "saw how the people put money",
                         "one poor widow",
@@ -294,7 +294,7 @@
                 },
                 {
                     "reference": "Mark 12:41–44 (NKJV) - Part 2",
-                    "text": "So He called His disciples to Himself and said to them, \"Assuredly, I say to you that this poor widow has put in more than all those who have given to the treasury; for they all put in out of their abundance, but she out of her poverty put in all that she had, her whole livelihood.\"",
+                    "text": "43 So He called His disciples to Himself and said to them, \"Assuredly, I say to you that this poor widow has put in more than all those who have given to the treasury;\n44 for they all put in out of their abundance, but she out of her poverty put in all that she had, her whole livelihood.\"",
                     "highlights": [
                         "this poor widow has put in more",
                         "she out of her poverty put in all that she had"
@@ -307,7 +307,7 @@
             "verses": [
                 {
                     "reference": "Proverbs 3:9–10 (NKJV)",
-                    "text": "Honor the Lord with your possessions, And with the firstfruits of all your increase; So your barns will be filled with plenty, And your vats will overflow with new wine.",
+                    "text": "9 Honor the Lord with your possessions, And with the firstfruits of all your increase;\n10 So your barns will be filled with plenty, And your vats will overflow with new wine.",
                     "highlights": [
                         "Honor the Lord with your possessions",
                         "firstfruits of all your increase"
@@ -320,7 +320,7 @@
             "verses": [
                 {
                     "reference": "2 Kings 4:6–7 (NKJV)",
-                    "text": "Now it came to pass, when the vessels were full, that she said to her son, \"Bring me another vessel.\" And he said to her, \"There is not another vessel.\" So the oil ceased. Then she came and told the man of God. And he said, \"Go, sell the oil and pay your debt; and you and your sons live on the rest.\"",
+                    "text": "6 Now it came to pass, when the vessels were full, that she said to her son, \"Bring me another vessel.\" And he said to her, \"There is not another vessel.\" So the oil ceased.\n7 And she came and told the man of God. And he said, \"Go, sell the oil and pay your debt; and you and your sons live on the rest.\"",
                     "highlights": [
                         "the vessels were full",
                         "Go, sell the oil and pay your debt"
@@ -337,7 +337,7 @@
             "verses": [
                 {
                     "reference": "1 Corinthians 3:1–2 (NKJV)",
-                    "text": "And I, brethren, could not speak to you as to spiritual people but as to carnal, as to babes in Christ. I fed you with milk and not with solid food; for until now you were not able to receive it, and even now you are still not able;",
+                    "text": "1 And I, brethren, could not speak to you as to spiritual people but as to carnal, as to babes in Christ.\n2 I fed you with milk and not with solid food; for until now you were not able to receive it, and even now you are still not able;",
                     "highlights": [
                         "babes in Christ",
                         "milk and not with solid food"
@@ -345,7 +345,7 @@
                 },
                 {
                     "reference": "Hebrews 5:13–14 (NKJV)",
-                    "text": "For everyone who partakes only of milk is unskilled in the word of righteousness, for he is a babe. But solid food belongs to those who are of full age, that is, those who by reason of use have their senses exercised to discern both good and evil.",
+                    "text": "13 For everyone who partakes only of milk is unskilled in the word of righteousness, for he is a babe.\n14 But solid food belongs to those who are of full age, that is, those who by reason of use have their senses exercised to discern both good and evil.",
                     "highlights": [
                         "solid food belongs to those who are of full age"
                     ]
@@ -369,21 +369,21 @@
             "verses": [
                 {
                     "reference": "1 Timothy 6:6–8 (NKJV)",
-                    "text": "Now godliness with contentment is great gain. For we brought nothing into this world, and it is certain we can carry nothing out. And having food and clothing, with these we shall be content.",
+                    "text": "6 Now godliness with contentment is great gain.\n7 For we brought nothing into this world, and it is certain we can carry nothing out.\n8 And having food and clothing, with these we shall be content.",
                     "highlights": [
                         "godliness with contentment is great gain"
                     ]
                 },
                 {
                     "reference": "1 Timothy 6:9–10 (NKJV)",
-                    "text": "But those who desire to be rich fall into temptation and a snare, and into many foolish and harmful lusts which drown men in destruction and perdition. For the love of money is a root of all kinds of evil, for which some have strayed from the faith in their greediness, and pierced themselves through with many sorrows.",
+                    "text": "9 But those who desire to be rich fall into temptation and a snare, and into many foolish and harmful lusts which drown men in destruction and perdition.\n10 For the love of money is a root of all kinds of evil, for which some have strayed from the faith in their greediness, and pierced themselves through with many sorrows.",
                     "highlights": [
                         "the love of money is a root of all kinds of evil"
                     ]
                 },
                 {
                     "reference": "1 Timothy 6:17–19 (NKJV)",
-                    "text": "Command those who are rich in this present age not to be haughty, nor to trust in uncertain riches but in the living God, who gives us richly all things to enjoy. Let them do good, that they be rich in good works, ready to give, willing to share, storing up for themselves a good foundation for the time to come, that they may lay hold on eternal life.",
+                    "text": "17 Command those who are rich in this present age not to be haughty, nor to trust in uncertain riches but in the living God, who gives us richly all things to enjoy.\n18 Let them do good, that they be rich in good works, ready to give, willing to share,\n19 storing up for themselves a good foundation for the time to come, that they may lay hold on eternal life.",
                     "highlights": [
                         "the living God, who gives us richly all things to enjoy",
                         "rich in good works",
@@ -405,7 +405,7 @@
                 },
                 {
                     "reference": "Galatians 6:6–7 (NKJV)",
-                    "text": "Let him who is taught the word share in all good things with him who teaches. Do not be deceived, God is not mocked; for whatever a man sows, that he will also reap.",
+                    "text": "6 Let him who is taught the word share in all good things with him who teaches.\n7 Do not be deceived, God is not mocked; for whatever a man sows, that he will also reap.",
                     "highlights": [
                         "him who teaches",
                         "whatever a man sows, that he will also reap"
@@ -430,5 +430,8 @@
                 }
             ]
         }
-    ]
+    ],
+    "slide_style": {
+        "background_image": "assets/background_alt.jpg"
+    }
 }

@@ -24,7 +24,8 @@ from praisonaippt import (
     load_verses_from_file,    # Load verses from file
     load_verses_from_dict,    # Load verses from dictionary
     convert_pptx_to_pdf,      # PDF conversion
-    PDFOptions                # PDF configuration options
+    PDFOptions,               # PDF configuration options
+    pptx_to_json              # PPTX → JSON extraction
 )
 ```
 
@@ -224,6 +225,61 @@ data = {
 
 validated_data = load_verses_from_dict(data)
 ```
+
+## 🔁 PPTX → JSON Extraction
+
+### pptx_to_json()
+
+Extract slide content from an existing PPTX back into the praisonaippt JSON schema.
+This is the **inverse of `create_presentation()`**.
+
+#### Signature
+```python
+def pptx_to_json(
+    pptx_path: str,
+    output_path: Optional[str] = None,
+    pretty: bool = True,
+) -> dict:
+```
+
+#### Parameters
+- `pptx_path` (str): Path to `.pptx` or `.ppt` file
+- `output_path` (str, optional): If set, writes JSON to this file
+- `pretty` (bool, optional): Indent JSON output (default: True)
+
+#### Returns
+- `dict`: conforms to the praisonaippt JSON schema
+
+#### Raises
+- `FileNotFoundError`: if `pptx_path` does not exist
+- `ValueError`: if file is not `.pptx` or `.ppt`
+
+#### Examples
+```python
+from praisonaippt import pptx_to_json
+
+# In-memory dict
+data = pptx_to_json("presentation.pptx")
+print(data["presentation_title"])
+
+# Save to file
+pptx_to_json("presentation.pptx", output_path="output.json")
+
+# Compact JSON
+pptx_to_json("presentation.pptx", output_path="out.json", pretty=False)
+
+# Error handling
+try:
+    data = pptx_to_json("missing.pptx")
+except FileNotFoundError:
+    print("File not found")
+except ValueError:
+    print("Not a PPTX file")
+```
+
+> 📖 Full reference: [PPTX to JSON Guide]({{ '/pptx-to-json' | relative_url }})
+
+---
 
 ## 📄 PDF Conversion Functions
 
@@ -641,6 +697,7 @@ else:
 - [Installation Guide]({{ '/installation' | relative_url }})
 - [Command Reference]({{ '/commands' | relative_url }})
 - [PDF Conversion Guide]({{ '/pdf-conversion' | relative_url }})
+- [PPTX to JSON Guide]({{ '/pptx-to-json' | relative_url }})
 - [Examples and Templates]({{ '/examples' | relative_url }})
 
 ---

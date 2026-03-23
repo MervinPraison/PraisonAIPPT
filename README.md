@@ -21,6 +21,7 @@ A professional Python package for creating beautiful PowerPoint presentations fr
   - [Python API](#python-api)
 - [Advanced Features](#-advanced-features)
   - [PDF Conversion](#pdf-conversion)
+  - [PPTX to JSON Extraction](#pptx-to-json-extraction)
   - [Google Drive Upload](#google-drive-upload)
   - [Text Highlighting](#text-highlighting)
   - [Lazy Loading](#lazy-loading)
@@ -57,6 +58,7 @@ A professional Python package for creating beautiful PowerPoint presentations fr
 - 🔄 **Multiple PDF Backends** - Support for Aspose.Slides (commercial) and LibreOffice (free)
 - ⚙️ **Advanced PDF Options** - Quality settings, password protection, and more
 - ☁️ **Google Drive Upload** - Upload presentations directly to Google Drive
+- 🔁 **PPTX to JSON Extraction** - Convert any PPTX back to editable JSON schema
 - 🔌 **Lazy Loading** - Optional dependencies loaded only when needed
 
 ---
@@ -805,6 +807,43 @@ large_text:
 Perfect for emphasizing Hebrew/Greek words or key terms.
 
 **Full Documentation**: [`docs/HIGHLIGHTS_FEATURE.md`](docs/HIGHLIGHTS_FEATURE.md)
+
+### PPTX to JSON Extraction
+
+Convert any `.pptx` file back into the praisonaippt JSON schema — the inverse of `create_presentation()`.
+
+#### CLI
+
+```bash
+# Auto-named output
+praisonaippt convert-json presentation.pptx
+
+# Named output
+praisonaippt convert-json presentation.pptx --json-output output.json
+
+# Compact JSON
+praisonaippt convert-json presentation.pptx --json-output out.json --no-pretty
+```
+
+#### Python API
+
+```python
+from praisonaippt import pptx_to_json
+
+# In-memory dict
+data = pptx_to_json("presentation.pptx")
+
+# Save to file
+pptx_to_json("presentation.pptx", output_path="output.json")
+
+# Round-trip test
+from praisonaippt import create_presentation
+create_presentation(pptx_to_json("slides.pptx"), output_file="roundtrip.pptx")
+```
+
+> **Note**: `background_image` paths and highlight annotation numbers (❶❷) cannot be recovered from the PPTX binary. All other features are extracted losslessly.
+
+**Full Documentation**: [`docs/pptx-to-json.md`](docs/pptx-to-json.md)
 
 ### Lazy Loading
 

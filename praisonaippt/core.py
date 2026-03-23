@@ -411,7 +411,7 @@ def _add_superscript_num_run(paragraph, num_str, font_size, body_rgb, font_name)
 
 
 def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
-                    large_text=None, alignment='center', font_size=32, style=None):
+                    large_text=None, alignment='left', font_size=32, style=None):
     """
     Add a verse slide. All colors and font resolved via slide_style.
     Supported slide_style keys: background_image, background_color,
@@ -578,7 +578,7 @@ def create_presentation(data, output_file=None, custom_title=None,
                 large_text = verse.get('large_text', None)
                 list_type  = verse.get('list_type', None)
                 list_alignment = verse.get('alignment', slide_style.get('alignment', 'left'))
-                verse_alignment = verse.get('alignment', slide_style.get('alignment', 'center'))
+                verse_alignment = verse.get('alignment', slide_style.get('alignment', 'left'))
                 font_size  = verse.get('font_size', 32)
 
                 if list_type in ('bullet', 'numbered'):

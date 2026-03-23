@@ -14,6 +14,7 @@ from .loader import load_verses_from_file, load_verses_from_dict
 from .pdf_converter import convert_pptx_to_pdf, PDFOptions
 from .lazy_loader import lazy_import, check_optional_dependency
 from .config import load_config, init_config, Config
+from .pptx_to_json import pptx_to_json
 
 __all__ = [
     "create_presentation",
@@ -26,4 +27,5 @@ __all__ = [
     "load_config",
     "init_config",
     "Config",
+    "pptx_to_json",
 ]

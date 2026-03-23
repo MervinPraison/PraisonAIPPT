@@ -128,14 +128,34 @@ Examples:
     parser.add_argument(
         'command',
         nargs='?',
-        choices=['convert-pdf', 'config', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
-        help='Command to execute (e.g., convert-pdf, config, setup-oauth, setup-credentials, secure-credentials)'
+        choices=['convert-pdf', 'convert-json', 'config', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
+        help='Command to execute (e.g., convert-pdf, convert-json, config, setup-oauth)'
     )
     
     parser.add_argument(
         'input_file',
         nargs='?',
-        help='Input file for convert-pdf command'
+        help='Input file for convert-pdf or convert-json command'
+    )
+
+    parser.add_argument(
+        '--json-output',
+        metavar='PATH',
+        help='Output JSON file path for convert-json command (default: <input>.json)'
+    )
+
+    parser.add_argument(
+        '--pretty',
+        action='store_true',
+        default=True,
+        help='Output pretty-printed JSON for convert-json (default: True)'
+    )
+
+    parser.add_argument(
+        '--no-pretty',
+        dest='pretty',
+        action='store_false',
+        help='Output compact JSON for convert-json'
     )
     
     parser.add_argument(
@@ -159,6 +179,47 @@ def parse_pdf_options(options_str: str) -> PDFOptions:
         raise ValueError(f"Invalid JSON in PDF options: {e}")
     except TypeError as e:
         raise ValueError(f"Invalid PDF options: {e}")
+
+
+def handle_convert_json_command(args):
+    """Handle convert-json command: extract JSON dict from a PPTX file."""
+    from .pptx_to_json import pptx_to_json
+
+    if not args.input_file:
+        print("Error: Input file required for convert-json command")
+        print("Usage: praisonaippt convert-json <input.pptx> [--json-output output.json]")
+        return 1
+
+    if not Path(args.input_file).exists():
+        print(f"Error: Input file not found: {args.input_file}")
+        return 1
+
+    if not args.input_file.lower().endswith(('.pptx', '.ppt')):
+        print("Error: Input file must be a PowerPoint file (.pptx or .ppt)")
+        return 1
+
+    try:
+        # Determine output path
+        if hasattr(args, 'json_output') and args.json_output:
+            output_path = args.json_output
+        else:
+            output_path = str(Path(args.input_file).with_suffix('.json'))
+
+        pretty = getattr(args, 'pretty', True)
+
+        print(f"Extracting JSON from {args.input_file}...")
+        pptx_to_json(args.input_file, output_path=output_path, pretty=pretty)
+        return 0
+
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        return 1
+    except ValueError as e:
+        print(f"Error: {e}")
+        return 1
+    except Exception as e:
+        print(f"Error during JSON extraction: {e}")
+        return 1
 
 
 def handle_convert_pdf_command(args):
@@ -796,6 +857,10 @@ def main():
     # Handle standalone convert-pdf command
     if args.command == 'convert-pdf':
         return handle_convert_pdf_command(args)
+
+    # Handle convert-json command
+    if args.command == 'convert-json':
+        return handle_convert_json_command(args)
     
     # List examples if requested
     if args.list_examples:

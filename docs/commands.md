@@ -13,6 +13,7 @@ PraisonAI PPT provides a comprehensive command-line interface for creating prese
 ### Main Commands
 - `praisonaippt` - Create PowerPoint presentations
 - `praisonaippt convert-pdf` - Convert existing PPTX to PDF
+- `praisonaippt convert-json` - Extract slide content from PPTX to JSON
 
 ## 🚀 Basic Commands
 
@@ -122,6 +123,44 @@ praisonaippt -i verses.json --convert-pdf \
   --pdf-backend aspose \
   --pdf-options '{"quality":"high","compression":false}'
 ```
+
+## 🔄 PPTX → JSON Extraction Command
+
+Extract slide content from a `.pptx` file back into the praisonaippt JSON schema.
+
+### Basic Extraction
+```bash
+# Auto-named output (<input>.json)
+praisonaippt convert-json presentation.pptx
+
+# Specify output file
+praisonaippt convert-json presentation.pptx --json-output extracted.json
+
+# Compact JSON (no indentation)
+praisonaippt convert-json presentation.pptx --json-output data.json --no-pretty
+```
+
+### Convert-JSON Command Options
+```
+Convert-JSON Command:
+  positional arguments:
+    input_file              Input file to extract (.pptx or .ppt)
+
+  options:
+    --json-output PATH      Output JSON file path (default: <input>.json)
+    --pretty                Write indented JSON (default: enabled)
+    --no-pretty             Write compact single-line JSON
+```
+
+### Batch Extraction
+```bash
+# Extract all PPTX files in the current directory
+for file in *.pptx; do
+  praisonaippt convert-json "$file"
+done
+```
+
+> 📖 Full reference: [PPTX to JSON Guide]({{ '/pptx-to-json' | relative_url }})
 
 ## ⚙️ Command Options Reference
 
