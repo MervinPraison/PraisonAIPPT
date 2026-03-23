@@ -232,6 +232,79 @@ Useful for longer verses that overflow a single slide, or for emphasis slides wi
 
 ---
 
+## Slide Style (Background, Colors, Font)
+
+Add a `"slide_style"` key at the **top level** of your JSON to control the appearance of every slide. All fields are optional. When a background is set, text colors automatically default to white.
+
+```json
+{
+    "presentation_title": "Great Faith",
+    "slide_style": {
+        "background_image": "assets/background_dark.png",
+        "background_color": "#1A1A2E",
+        "text_color": "#FFFFFF",
+        "reference_color": "#CCCCCC",
+        "title_color": "#FFFFFF",
+        "subtitle_color": "#AAAAAA",
+        "section_title_color": "#FFFFFF",
+        "highlight_color": "#FF8C00",
+        "annotation_color": "#1E50C8",
+        "font_name": "Spectral",
+        "alignment": "left",
+        "reference_position": "top"
+    },
+    "sections": [...]
+}
+```
+
+### slide_style Fields
+
+| Field | Default (no bg) | Auto-dark default | Description |
+|---|---|---|---|
+| `background_image` | — | — | Path to a background image file |
+| `background_color` | — | — | Hex background color e.g. `"#1A1A2E"` |
+| `text_color` | `#1A1A2E` dark | `#FFFFFF` white | Body / verse text |
+| `reference_color` | `#404040` gray | `#CCCCCC` light gray | Verse reference line |
+| `title_color` | theme default | `#FFFFFF` white | Title slide title |
+| `subtitle_color` | theme default | `#AAAAAA` | Title slide subtitle |
+| `section_title_color` | `#003366` dark blue | `#FFFFFF` white | Section heading slides |
+| `highlight_color` | `#FF8C00` orange | `#FF8C00` orange | Default color for simple string highlights |
+| `annotation_color` | `#1E50C8` blue | `#1E50C8` blue | Numbered bubble annotations (❶❷❸…) |
+| `font_name` | (system default) | (system default) | Font family for all text, e.g. `"Spectral"` |
+| `alignment` | `"center"` (verses), `"left"` (lists) | same | Default text alignment |
+| `reference_position` | `"bottom"` | `"bottom"` | `"top"` or `"bottom"` for verse reference |
+
+!!! note
+    **Font names**: any font installed on your system works (including Google Fonts after installation). The font name is stored in the PPTX file — PowerPoint will use it automatically.
+
+!!! tip
+    **Zero regression**: if you omit `slide_style` entirely, all slides use default styling (dark text, white background). `slide_style` only activates when present.
+
+### Dark Background — Quick Start
+
+```json
+"slide_style": {
+    "background_image": "assets/background_dark.png",
+    "text_color": "white",
+    "reference_position": "top",
+    "font_name": "Spectral"
+}
+```
+
+This will auto-set all text (body, reference, title, section) to white/light variants automatically.
+
+### Custom Colors Only (No Background)
+
+```json
+"slide_style": {
+    "highlight_color": "#FFD700",
+    "annotation_color": "#E53935",
+    "font_name": "Lato"
+}
+```
+
+---
+
 ## Related
 
 - [Examples and Templates]({{ '/examples' | relative_url }})

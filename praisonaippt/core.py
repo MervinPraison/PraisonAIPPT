@@ -48,52 +48,74 @@ def _apply_slide_background(slide, style: dict, prs=None):
 
 
 
-def add_title_slide(prs, title, subtitle=""):
+def add_title_slide(prs, title, subtitle="", style=None):
     """
-    Add a title slide to the presentation.
-    
-    Args:
-        prs: Presentation object
-        title (str): Title text
-        subtitle (str): Subtitle text (optional)
-    
-    Returns:
-        Slide object
+    Add a title slide. When slide_style contains a background, the slide uses
+    a blank layout for full text-color control. Otherwise uses the default
+    template layout (zero regression).
     """
-    title_slide_layout = prs.slide_layouts[0]
-    slide = prs.slides.add_slide(title_slide_layout)
-    
-    title_shape = slide.shapes.title
-    title_shape.text = title
-    
-    if subtitle and len(slide.placeholders) > 1:
-        subtitle_shape = slide.placeholders[1]
-        subtitle_shape.text = subtitle
-    
+    style = style or {}
+    has_background = bool(style.get('background_image') or style.get('background_color'))
+
+    if has_background:
+        theme = _resolve_theme(style)
+        slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
+        _apply_slide_background(slide, style, prs)
+        # Title
+        tb = slide.shapes.add_textbox(Inches(0.6), Inches(2.5), Inches(9), Inches(1.5))
+        p = tb.text_frame.paragraphs[0]
+        p.text = title
+        p.alignment = PP_ALIGN.CENTER
+        p.font.size = Pt(44)
+        p.font.bold = True
+        p.font.color.rgb = theme['title']
+        # Subtitle
+        if subtitle:
+            tb2 = slide.shapes.add_textbox(Inches(0.6), Inches(4.2), Inches(9), Inches(1.0))
+            p2 = tb2.text_frame.paragraphs[0]
+            p2.text = subtitle
+            p2.alignment = PP_ALIGN.CENTER
+            p2.font.size = Pt(28)
+            p2.font.color.rgb = theme['subtitle']
+    else:
+        slide = prs.slides.add_slide(prs.slide_layouts[0])
+        _apply_slide_background(slide, style, prs)
+        slide.shapes.title.text = title
+        if subtitle and len(slide.placeholders) > 1:
+            slide.placeholders[1].text = subtitle
+
     return slide
 
 
-def add_section_slide(prs, section_name):
+def add_section_slide(prs, section_name, style=None):
     """
-    Add a section title slide to the presentation.
-    
-    Args:
-        prs: Presentation object
-        section_name (str): Section title text
-    
-    Returns:
-        Slide object
+    Add a section title slide. If slide_style has a background it is applied.
+    When a background is set, uses blank layout for full colour control.
     """
-    section_slide_layout = prs.slide_layouts[1]
-    section_slide = prs.slides.add_slide(section_slide_layout)
-    section_title = section_slide.shapes.title
-    section_title.text = section_name
-    
-    # Style section title
-    section_title.text_frame.paragraphs[0].font.size = Pt(44)
-    section_title.text_frame.paragraphs[0].font.color.rgb = RGBColor(0, 51, 102)
-    
-    return section_slide
+    style = style or {}
+    theme = _resolve_theme(style)
+    has_background = bool(style.get('background_image') or style.get('background_color'))
+
+    if has_background:
+        slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
+        _apply_slide_background(slide, style, prs)
+        tb = slide.shapes.add_textbox(Inches(0.6), Inches(3.0), Inches(9), Inches(1.5))
+        p = tb.text_frame.paragraphs[0]
+        p.text = section_name
+        p.alignment = PP_ALIGN.CENTER
+        p.font.size = Pt(44)
+        p.font.bold = True
+        p.font.color.rgb = theme['section']
+        if theme['font_name']:
+            p.font.name = theme['font_name']
+    else:
+        slide = prs.slides.add_slide(prs.slide_layouts[1])
+        section_title = slide.shapes.title
+        section_title.text = section_name
+        section_title.text_frame.paragraphs[0].font.size = Pt(44)
+        section_title.text_frame.paragraphs[0].font.color.rgb = theme['section']
+
+    return slide
 
 
 def _parse_color(color_value):
@@ -124,26 +146,59 @@ def _parse_color(color_value):
     return NAMED_COLORS['orange']
 
 
-def _normalise_highlights(highlights):
+def _resolve_theme(style: dict) -> dict:
     """
-    Normalise a mixed list of string/object highlight entries into dicts.
+    Resolve all display colors from a slide_style dict with smart defaults.
 
-    String  -> {text, color=orange, bold=True, italic=False, underline=False}
-    Object  -> {text, color, bold, italic, underline, annotation} with defaults applied
+    When background_image or background_color is set, text auto-defaults to
+    white (dark-background mode). Any individual key in slide_style overrides
+    the auto-default.
+
+    JSON keys supported (all optional):
+        text_color, reference_color, title_color, subtitle_color,
+        section_title_color, highlight_color, annotation_color,
+        reference_position, alignment
     """
-    BUBBLES = {1: '❶', 2: '❷', 3: '❸', 4: '❹', 5: '❺',
-                6: '❻', 7: '❼', 8: '❽', 9: '❾'}
+    style = style or {}
+    has_dark_bg = bool(style.get('background_image') or style.get('background_color'))
+    raw_text = style.get('text_color', '').lower().strip()
+    if raw_text:
+        dark_mode = raw_text in ('white', '#ffffff', 'ffffff')
+    else:
+        dark_mode = has_dark_bg  # auto: dark bg → white text
+
+    def _rc(key, light, dark):
+        raw = style.get(key, '')
+        return _parse_color(raw) if raw else (_parse_color(dark) if dark_mode else _parse_color(light))
+
+    return {
+        'dark_mode':        dark_mode,
+        'body':             _rc('text_color',          '#1A1A2E', '#FFFFFF'),
+        'reference':        _rc('reference_color',     '#404040', '#CCCCCC'),
+        'title':            _rc('title_color',         '#1A1A2E', '#FFFFFF'),
+        'subtitle':         _rc('subtitle_color',      '#505050', '#AAAAAA'),
+        'section':          _rc('section_title_color', '#003366', '#FFFFFF'),
+        'highlight':        _rc('highlight_color',     '#FF8C00', '#FFD700'),
+        'annotation':       _rc('annotation_color',    '#1E50C8', '#1E50C8'),
+        'ref_position':     style.get('reference_position', 'bottom'),
+        'global_alignment': style.get('alignment', ''),
+        'font_name':        style.get('font_name', None),
+    }
+
+
+def _normalise_highlights(highlights, highlight_rgb=None):
+    """
+    Normalise highlights list. highlight_rgb overrides the default orange.
+    """
+    default_hl = highlight_rgb or RGBColor(255, 140, 0)
+    BUBBLES = {1: '\u2776', 2: '\u2777', 3: '\u2778', 4: '\u2779', 5: '\u277a',
+                6: '\u277b', 7: '\u277c', 8: '\u277d', 9: '\u277e'}
     result = []
     for h in highlights:
         if isinstance(h, str):
-            result.append({
-                'text': h,
-                'color': RGBColor(255, 140, 0),
-                'bold': True,
-                'italic': False,
-                'underline': False,
-                'annotation': None,
-            })
+            result.append({'text': h, 'color': default_hl,
+                           'bold': True, 'italic': False,
+                           'underline': False, 'annotation': None})
         elif isinstance(h, dict) and h.get('text'):
             ann = h.get('annotation', None)
             result.append({
@@ -151,26 +206,33 @@ def _normalise_highlights(highlights):
                 'color': _parse_color(h.get('color', 'orange')),
                 'bold': h.get('bold', True),
                 'italic': h.get('italic', False),
-                # auto-underline when annotation is set, unless explicitly set
                 'underline': h.get('underline', True if ann else False),
                 'annotation': BUBBLES.get(ann) if ann else None,
             })
     return result
 
 
-def _apply_highlights(paragraph, text, highlights, large_text=None, body_rgb=None):
+def _apply_highlights(paragraph, text, highlights, large_text=None,
+                      body_rgb=None, highlight_rgb=None, annotation_rgb=None,
+                      font_name=None):
     """
-    Apply per-phrase rich text formatting to a paragraph.
-
-    Args:
-        body_rgb (RGBColor): Color for non-highlighted runs (default dark charcoal)
+    Apply per-phrase rich text formatting.
+    body_rgb, highlight_rgb, annotation_rgb, font_name all come from _resolve_theme.
     """
     import re
+    _body = body_rgb or RGBColor(26, 26, 46)
+    _ann  = annotation_rgb or RGBColor(30, 80, 200)
+
+    def _sf(run, size_pt):
+        """Set font size and optional font name on a run."""
+        run.font.size = Pt(size_pt)
+        if font_name:
+            run.font.name = font_name
 
     matches = []
 
     if highlights:
-        for fmt in _normalise_highlights(highlights):
+        for fmt in _normalise_highlights(highlights, highlight_rgb=highlight_rgb):
             pattern = re.escape(fmt['text'])
             for match in re.finditer(pattern, text, re.IGNORECASE):
                 matches.append((match.start(), match.end(), match.group(), 'highlight', fmt))
@@ -192,8 +254,10 @@ def _apply_highlights(paragraph, text, highlights, large_text=None, body_rgb=Non
 
     if not filtered:
         paragraph.text = text
-        paragraph.font.size = Pt(32)
+        _sf(paragraph, 32)
         paragraph.font.color.rgb = _body
+        if font_name:
+            paragraph.font.name = font_name
         return
 
     current_pos = 0
@@ -209,7 +273,7 @@ def _apply_highlights(paragraph, text, highlights, large_text=None, body_rgb=Non
             else:
                 run = paragraph.add_run()
                 run.text = text[current_pos:start]
-            run.font.size = Pt(32)
+            _sf(run, 32)
             run.font.color.rgb = _body
             run.font.bold = False
             run.font.italic = False
@@ -225,24 +289,22 @@ def _apply_highlights(paragraph, text, highlights, large_text=None, body_rgb=Non
             run.text = matched_text
 
         if fmt_type == 'highlight':
-            run.font.size = Pt(32)
+            _sf(run, 32)
             run.font.color.rgb = fmt['color']
             run.font.bold = fmt['bold']
             run.font.italic = fmt['italic']
             run.font.underline = fmt['underline']
-            # Append filled-circle superscript annotation
             if fmt.get('annotation'):
                 ann_run = paragraph.add_run()
                 ann_run.text = fmt['annotation']
-                ann_run.font.size = Pt(46)
+                _sf(ann_run, 46)
                 ann_run.font.bold = False
-                ann_run.font.color.rgb = RGBColor(30, 80, 200)
-                # XML superscript: raise 30% above baseline
+                ann_run.font.color.rgb = _ann
                 rPr = ann_run._r.get_or_add_rPr()
                 rPr.set('baseline', '30000')
         elif fmt_type == 'large':
-            run.font.size = Pt(fmt)
-            run.font.color.rgb = RGBColor(26, 26, 46)
+            _sf(run, fmt)
+            run.font.color.rgb = _body
 
         current_pos = end
 
@@ -250,8 +312,8 @@ def _apply_highlights(paragraph, text, highlights, large_text=None, body_rgb=Non
     if current_pos < len(text):
         run = paragraph.add_run()
         run.text = text[current_pos:]
-        run.font.size = Pt(32)
-        run.font.color.rgb = RGBColor(26, 26, 46)
+        _sf(run, 32)
+        run.font.color.rgb = _body
         run.font.bold = False
         run.font.italic = False
         run.font.underline = False
@@ -268,17 +330,13 @@ def _resolve_alignment(align_str):
 def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
                    alignment='left', style=None):
     """
-    Add a bullet or numbered list slide.
-
-    Args:
-        style (dict): Optional slide_style dict (background_image, text_color, etc.)
+    Add a bullet/numbered list slide. Default alignment is left.
+    All colors and font resolved via slide_style.
     """
     style = style or {}
+    theme = _resolve_theme(style)
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(slide, style, prs)
-
-    raw_text_color = style.get('text_color', '')
-    body_rgb = RGBColor(255, 255, 255) if raw_text_color.lower() in ('white', '#ffffff', 'ffffff') else RGBColor(26, 26, 46)
 
     tb = slide.shapes.add_textbox(Inches(0.6), Inches(1.2), Inches(9), Inches(5.0))
     tf = tb.text_frame
@@ -291,9 +349,10 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
         p.text = prefix + item
         p.alignment = align
         p.font.size = Pt(font_size)
-        p.font.color.rgb = body_rgb
-        from pptx.util import Pt as PtUtil
-        p.space_after = PtUtil(10)
+        p.font.color.rgb = theme['body']
+        if theme['font_name']:
+            p.font.name = theme['font_name']
+        p.space_after = Pt(10)
 
     if reference:
         ref_tb = slide.shapes.add_textbox(Inches(0.6), Inches(6.3), Inches(9), Inches(0.6))
@@ -301,8 +360,10 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
         ref_p.text = reference
         ref_p.alignment = PP_ALIGN.CENTER
         ref_p.font.size = Pt(22)
-        ref_p.font.color.rgb = RGBColor(200, 200, 200) if raw_text_color.lower() in ('white', '#ffffff', 'ffffff') else RGBColor(64, 64, 64)
+        ref_p.font.color.rgb = theme['reference']
         ref_p.font.italic = True
+        if theme['font_name']:
+            ref_p.font.name = theme['font_name']
 
     return slide
 
@@ -310,75 +371,65 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
 def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                     large_text=None, alignment='center', font_size=32, style=None):
     """
-    Add a verse slide to the presentation.
-
-    Args:
-        style (dict): Optional slide_style dict with keys:
-            background_color (str): Hex e.g. '#1A1A2E'
-            background_image (str): Path to image file
-            text_color (str): 'white' / hex (default dark charcoal)
-            reference_position (str): 'top' or 'bottom' (default 'bottom')
+    Add a verse slide. All colors and font resolved via slide_style.
+    Supported slide_style keys: background_image, background_color,
+    text_color, reference_color, highlight_color, annotation_color,
+    title_color, section_title_color, font_name,
+    reference_position ('top'/'bottom'), alignment.
     """
     style = style or {}
+    theme = _resolve_theme(style)
     verse_slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(verse_slide, style, prs)
     align = _resolve_alignment(alignment)
+    ref_position = theme['ref_position']
+    fn = theme['font_name']
 
-    # Resolve colors from style
-    raw_text_color = style.get('text_color', '')
-    if raw_text_color.lower() in ('white', '#ffffff', 'ffffff'):
-        body_rgb = RGBColor(255, 255, 255)
-    else:
-        body_rgb = RGBColor(26, 26, 46)
-
-    ref_position = style.get('reference_position', 'bottom')
+    def _set_ref(tb_shape, text, align_const, size, bold=False, italic=False):
+        rp = tb_shape.text_frame.paragraphs[0]
+        rp.text = text
+        rp.alignment = align_const
+        rp.font.size = Pt(size)
+        rp.font.bold = bold
+        rp.font.italic = italic
+        rp.font.color.rgb = theme['reference']
+        if fn:
+            rp.font.name = fn
 
     if ref_position == 'top' and reference:
-        # Reference at top (bold, larger, white or styled)
-        reference_text = reference
-        if part_num is not None:
-            reference_text += f' (Part {part_num})'
+        ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
         ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(0.3), Inches(9), Inches(0.7))
-        ref_p = ref_tb.text_frame.paragraphs[0]
-        ref_p.text = reference_text
-        ref_p.alignment = PP_ALIGN.LEFT
-        ref_p.font.size = Pt(28)
-        ref_p.font.bold = True
-        ref_p.font.color.rgb = body_rgb
-        verse_top = Inches(1.2)
-        verse_height = Inches(4.5)
+        _set_ref(ref_tb, ref_text, PP_ALIGN.LEFT, 28, bold=True)
+        # Override body color for top reference (use body not reference)
+        ref_tb.text_frame.paragraphs[0].font.color.rgb = theme['body']
+        verse_top, verse_height = Inches(1.2), Inches(4.5)
     else:
-        verse_top = Inches(1.5)
-        verse_height = Inches(3.8)
+        verse_top, verse_height = Inches(1.5), Inches(3.8)
 
-    # Verse text box
     textbox = verse_slide.shapes.add_textbox(Inches(0.6), verse_top, Inches(9), verse_height)
     tf = textbox.text_frame
     tf.word_wrap = True
     tf.vertical_anchor = MSO_ANCHOR.TOP
-
     p = tf.paragraphs[0]
     p.alignment = align
 
     if (highlights and len(highlights) > 0) or (large_text and len(large_text) > 0):
-        _apply_highlights(p, verse_text, highlights, large_text, body_rgb=body_rgb)
+        _apply_highlights(p, verse_text, highlights, large_text,
+                          body_rgb=theme['body'],
+                          highlight_rgb=theme['highlight'],
+                          annotation_rgb=theme['annotation'],
+                          font_name=fn)
     else:
         p.text = verse_text
         p.font.size = Pt(font_size)
-        p.font.color.rgb = body_rgb
+        p.font.color.rgb = theme['body']
+        if fn:
+            p.font.name = fn
 
-    # Reference at bottom
-    if ref_position != 'top':
-        reference_text = reference
-        if part_num is not None:
-            reference_text += f' (Part {part_num})'
+    if ref_position != 'top' and reference:
+        ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
         ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(6.0), Inches(9), Inches(0.7))
-        ref_p = ref_tb.text_frame.paragraphs[0]
-        ref_p.text = reference_text
-        ref_p.alignment = PP_ALIGN.CENTER
-        ref_p.font.size = Pt(22)
-        ref_p.font.color.rgb = RGBColor(200, 200, 200) if raw_text_color.lower() in ('white', '#ffffff', 'ffffff') else RGBColor(64, 64, 64)
-        ref_p.font.italic = True
+        _set_ref(ref_tb, ref_text, PP_ALIGN.CENTER, 22, italic=True)
 
     return verse_slide
 
@@ -432,13 +483,13 @@ def create_presentation(data, output_file=None, custom_title=None,
         title = data.get("presentation_title", "Bible Verses Collection")
         subtitle = data.get("presentation_subtitle", "Selected Scriptures")
     
-    add_title_slide(prs, title, subtitle)
+    add_title_slide(prs, title, subtitle, style=slide_style)
     
     # Add slides for each verse with section slides
     for section_data in verses_data:
         # Add section title slide if section name exists (skip if custom title is provided)
         if section_data.get("section") and not custom_title:
-            add_section_slide(prs, section_data["section"])
+            add_section_slide(prs, section_data["section"], style=slide_style)
 
         # Add verse slides if there are any verses
         if section_data.get("verses") and len(section_data["verses"]) > 0:
@@ -447,7 +498,8 @@ def create_presentation(data, output_file=None, custom_title=None,
                 highlights = verse.get('highlights', None)
                 large_text = verse.get('large_text', None)
                 list_type  = verse.get('list_type', None)
-                alignment  = verse.get('alignment', slide_style.get('alignment', 'center'))
+                list_alignment = verse.get('alignment', slide_style.get('alignment', 'left'))
+                verse_alignment = verse.get('alignment', slide_style.get('alignment', 'center'))
                 font_size  = verse.get('font_size', 32)
 
                 if list_type in ('bullet', 'numbered'):
@@ -455,7 +507,7 @@ def create_presentation(data, output_file=None, custom_title=None,
                     add_list_slide(prs, items, verse['reference'],
                                    list_type=list_type,
                                    font_size=font_size,
-                                   alignment=alignment,
+                                   alignment=list_alignment,
                                    style=slide_style)
                 else:
                     verse_parts = split_long_text(verse['text'])
@@ -463,7 +515,7 @@ def create_presentation(data, output_file=None, custom_title=None,
                         part_num = i + 1 if len(verse_parts) > 1 else None
                         add_verse_slide(prs, part, verse['reference'], part_num,
                                         highlights, large_text,
-                                        alignment=alignment,
+                                        alignment=verse_alignment,
                                         font_size=font_size,
                                         style=slide_style)
     

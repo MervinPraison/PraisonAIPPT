@@ -260,9 +260,9 @@
         }
     ],
     "slide_style": {
-        "background_image": "assets/background_dark.png",
-        "text_color": "white",
+        "alignment": "left",
         "reference_position": "top",
-        "alignment": "left"
+        "highlight_color": "#1565C0",
+        "annotation_color": "#1E50C8"
     }
 }
