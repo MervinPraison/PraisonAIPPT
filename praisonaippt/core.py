@@ -91,8 +91,10 @@ def _normalise_highlights(highlights):
     Normalise a mixed list of string/object highlight entries into dicts.
 
     String  -> {text, color=orange, bold=True, italic=False, underline=False}
-    Object  -> {text, color, bold, italic, underline} with defaults applied
+    Object  -> {text, color, bold, italic, underline, annotation} with defaults applied
     """
+    BUBBLES = {1: '❶', 2: '❷', 3: '❸', 4: '❹', 5: '❺',
+                6: '❻', 7: '❼', 8: '❽', 9: '❾'}
     result = []
     for h in highlights:
         if isinstance(h, str):
@@ -102,14 +104,18 @@ def _normalise_highlights(highlights):
                 'bold': True,
                 'italic': False,
                 'underline': False,
+                'annotation': None,
             })
         elif isinstance(h, dict) and h.get('text'):
+            ann = h.get('annotation', None)
             result.append({
                 'text': h['text'],
                 'color': _parse_color(h.get('color', 'orange')),
                 'bold': h.get('bold', True),
                 'italic': h.get('italic', False),
-                'underline': h.get('underline', False),
+                # auto-underline when annotation is set, unless explicitly set
+                'underline': h.get('underline', True if ann else False),
+                'annotation': BUBBLES.get(ann) if ann else None,
             })
     return result
 
@@ -152,7 +158,7 @@ def _apply_highlights(paragraph, text, highlights, large_text=None):
     if not filtered:
         paragraph.text = text
         paragraph.font.size = Pt(32)
-        paragraph.font.color.rgb = RGBColor(0, 0, 0)
+        paragraph.font.color.rgb = RGBColor(26, 26, 46)
         return
 
     current_pos = 0
@@ -169,7 +175,7 @@ def _apply_highlights(paragraph, text, highlights, large_text=None):
                 run = paragraph.add_run()
                 run.text = text[current_pos:start]
             run.font.size = Pt(32)
-            run.font.color.rgb = RGBColor(0, 0, 0)
+            run.font.color.rgb = RGBColor(26, 26, 46)
             run.font.bold = False
             run.font.italic = False
             run.font.underline = False
@@ -189,9 +195,19 @@ def _apply_highlights(paragraph, text, highlights, large_text=None):
             run.font.bold = fmt['bold']
             run.font.italic = fmt['italic']
             run.font.underline = fmt['underline']
+            # Append filled-circle superscript annotation
+            if fmt.get('annotation'):
+                ann_run = paragraph.add_run()
+                ann_run.text = fmt['annotation']
+                ann_run.font.size = Pt(46)
+                ann_run.font.bold = False
+                ann_run.font.color.rgb = RGBColor(30, 80, 200)
+                # XML superscript: raise 30% above baseline
+                rPr = ann_run._r.get_or_add_rPr()
+                rPr.set('baseline', '30000')
         elif fmt_type == 'large':
             run.font.size = Pt(fmt)
-            run.font.color.rgb = RGBColor(0, 0, 0)
+            run.font.color.rgb = RGBColor(26, 26, 46)
 
         current_pos = end
 
@@ -200,16 +216,73 @@ def _apply_highlights(paragraph, text, highlights, large_text=None):
         run = paragraph.add_run()
         run.text = text[current_pos:]
         run.font.size = Pt(32)
-        run.font.color.rgb = RGBColor(0, 0, 0)
+        run.font.color.rgb = RGBColor(26, 26, 46)
         run.font.bold = False
         run.font.italic = False
         run.font.underline = False
 
+def _resolve_alignment(align_str):
+    """Convert alignment string to PP_ALIGN constant."""
+    return {
+        'left':   PP_ALIGN.LEFT,
+        'right':  PP_ALIGN.RIGHT,
+        'center': PP_ALIGN.CENTER,
+    }.get((align_str or 'center').lower(), PP_ALIGN.CENTER)
 
-def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None, large_text=None):
+
+def add_list_slide(prs, items, reference, list_type='bullet', font_size=32, alignment='left'):
+    """
+    Add a bullet or numbered list slide.
+
+    Args:
+        prs: Presentation object
+        items (list[str]): List of text items to display
+        reference (str): Slide reference/caption
+        list_type (str): 'bullet' or 'numbered'
+        font_size (int): Font size in pt (default 32)
+        alignment (str): 'left', 'center', or 'right'
+    """
+    slide = prs.slides.add_slide(prs.slide_layouts[6])  # Blank
+
+    left, top, width, height = Inches(1), Inches(1.5), Inches(8), Inches(4.5)
+    tb = slide.shapes.add_textbox(left, top, width, height)
+    tf = tb.text_frame
+    tf.word_wrap = True
+
+    align = _resolve_alignment(alignment)
+
+    for idx, item in enumerate(items):
+        p = tf.paragraphs[0] if idx == 0 else tf.add_paragraph()
+        if list_type == 'numbered':
+            prefix = f"{idx + 1}. "
+        else:
+            prefix = "\u2022  "  # bullet •
+        p.text = prefix + item
+        p.alignment = align
+        p.font.size = Pt(font_size)
+        p.font.color.rgb = RGBColor(26, 26, 46)
+        # Add spacing between items
+        from pptx.util import Pt as PtUtil
+        p.space_after = PtUtil(8)
+
+    # Reference
+    if reference:
+        ref_tb = slide.shapes.add_textbox(Inches(1), Inches(6.0), Inches(8), Inches(0.6))
+        ref_p = ref_tb.text_frame.paragraphs[0]
+        ref_p.text = reference
+        ref_p.alignment = PP_ALIGN.CENTER
+        ref_p.font.size = Pt(22)
+        ref_p.font.color.rgb = RGBColor(64, 64, 64)
+        ref_p.font.italic = True
+
+    return slide
+
+
+def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
+                    large_text=None, alignment='center', font_size=32):
     """
     Add a verse slide to the presentation.
-    
+
     Args:
         prs: Presentation object
         verse_text (str): The verse text
@@ -217,13 +290,12 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None, 
         part_num (int): Part number if verse is split (optional)
         highlights (list): List of words/phrases to highlight (optional)
         large_text (dict): Dictionary mapping words to custom font sizes (optional)
-    
-    Returns:
-        Slide object
+        alignment (str): Text alignment — 'left', 'center', or 'right' (default 'center')
+        font_size (int): Body text font size in pt (default 32)
     """
     verse_slide_layout = prs.slide_layouts[6]  # Blank layout
     verse_slide = prs.slides.add_slide(verse_slide_layout)
-    
+    align = _resolve_alignment(alignment)
     # Add text box for verse
     left = Inches(1)
     top = Inches(2)
@@ -234,19 +306,17 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None, 
     text_frame = textbox.text_frame
     text_frame.word_wrap = True
     text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
-    
+
     # Add verse text with highlighting
     p = text_frame.paragraphs[0]
-    p.alignment = PP_ALIGN.CENTER
-    
+    p.alignment = align
+
     if (highlights and len(highlights) > 0) or (large_text and len(large_text) > 0):
-        # Apply highlighting and/or large text formatting
         _apply_highlights(p, verse_text, highlights, large_text)
     else:
-        # No formatting, just add plain text
         p.text = verse_text
-        p.font.size = Pt(32)
-        p.font.color.rgb = RGBColor(0, 0, 0)
+        p.font.size = Pt(font_size)
+        p.font.color.rgb = RGBColor(26, 26, 46)
     
     # Add reference
     reference_text = reference
@@ -265,7 +335,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None, 
     ref_p.text = reference_text
     ref_p.alignment = PP_ALIGN.CENTER
     ref_p.font.size = Pt(22)
-    ref_p.font.color.rgb = RGBColor(100, 100, 100)
+    ref_p.font.color.rgb = RGBColor(64, 64, 64)
     ref_p.font.italic = True
     
     return verse_slide
@@ -329,16 +399,29 @@ def create_presentation(data, output_file=None, custom_title=None,
         # Add verse slides if there are any verses
         if section_data.get("verses") and len(section_data["verses"]) > 0:
             for verse in section_data["verses"]:
-                # Split long verses into multiple parts
-                verse_parts = split_long_text(verse["text"])
-                
-                # Get highlights and large_text if specified
-                highlights = verse.get("highlights", None)
-                large_text = verse.get("large_text", None)
-                
-                for i, part in enumerate(verse_parts):
-                    part_num = i + 1 if len(verse_parts) > 1 else None
-                    add_verse_slide(prs, part, verse["reference"], part_num, highlights, large_text)
+                # Get per-verse options
+                highlights = verse.get('highlights', None)
+                large_text = verse.get('large_text', None)
+                list_type  = verse.get('list_type', None)
+                alignment  = verse.get('alignment', 'center')
+                font_size  = verse.get('font_size', 32)
+
+                if list_type in ('bullet', 'numbered'):
+                    # Render as a list slide (items split by newlines)
+                    items = [line.strip() for line in verse['text'].split('\n') if line.strip()]
+                    add_list_slide(prs, items, verse['reference'],
+                                   list_type=list_type,
+                                   font_size=font_size,
+                                   alignment=alignment)
+                else:
+                    # Split long verses into multiple parts
+                    verse_parts = split_long_text(verse['text'])
+                    for i, part in enumerate(verse_parts):
+                        part_num = i + 1 if len(verse_parts) > 1 else None
+                        add_verse_slide(prs, part, verse['reference'], part_num,
+                                        highlights, large_text,
+                                        alignment=alignment,
+                                        font_size=font_size)
     
     # Generate output filename if not provided
     if not output_file:

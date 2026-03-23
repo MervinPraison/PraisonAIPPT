@@ -22,7 +22,21 @@
                     "reference": "Romans 1:16–17 (NKJV)",
                     "text": "For I am not ashamed of the gospel of Christ, for it is the power of God to salvation for everyone who believes, for the Jew first and also for the Greek.",
                     "highlights": [
-                        "the power of God to salvation",
+                        {
+                            "text": "the gospel",
+                            "annotation": 1
+                        },
+                        {
+                            "text": "the power",
+                            "annotation": 2
+                        },
+                        {
+                            "text": "salvation",
+                            "color": "#4A86E8",
+                            "bold": true,
+                            "underline": true,
+                            "annotation": 3
+                        },
                         "for everyone who believes"
                     ]
                 },
@@ -30,7 +44,14 @@
                     "reference": "Romans 1:16–17 (NKJV)",
                     "text": "For in it the righteousness of God is revealed from faith to faith; as it is written, 'The just shall live by faith.'",
                     "highlights": [
-                        "the righteousness of God is revealed from faith to faith",
+                        {"text": "righteousness of God", "annotation": 5},
+                        {
+                            "text": "faith to faith",
+                            "color": "#4A86E8",
+                            "bold": true,
+                            "underline": true,
+                            "annotation": 4
+                        },
                         "The just shall live by faith"
                     ]
                 }
@@ -43,7 +64,6 @@
                     "reference": "Matthew 8:5–10 (NKJV)",
                     "text": "When Jesus heard it, He marveled, and said to those who followed, 'Assuredly, I say to you, I have not found such great faith, not even in Israel!'",
                     "highlights": [
-                        "He marveled",
                         "I have not found such great faith",
                         "not even in Israel"
                     ]
@@ -66,8 +86,8 @@
                     "text": "But He answered her not a word. And His disciples came and urged Him, saying, 'Send her away, for she cries out after us.' But He answered and said, 'I was not sent except to the lost sheep of the house of Israel.' Then she came and worshiped Him, saying, 'Lord, help me!'",
                     "highlights": [
                         "He answered her not a word",
-                        "she came and worshiped Him",
-                        "Lord, help me"
+                        "she cries out after us",
+                        "she came and worshiped Him"
                     ]
                 },
                 {
@@ -99,23 +119,21 @@
             "verses": [
                 {
                     "reference": "",
-                    "text": "Woman with the Issue of Blood\nCenturion\nCanaanite"
+                    "text": "Woman with the Issue of Blood\nCenturion\nCanaanite",
+                    "list_type": "bullet",
+                    "alignment": "center"
                 },
                 {
                     "reference": "Mark 5:27–29 (NKJV)",
                     "text": "When she heard about Jesus, she came behind Him in the crowd and touched His garment. For she said, 'If only I may touch His clothes, I shall be made well.' Immediately the fountain of her blood was dried up, and she felt in her body that she was healed of the affliction.",
                     "highlights": [
-                        "she heard about Jesus",
-                        "touched His garment",
-                        "Immediately the fountain of her blood was dried up"
+                        "she came behind Him in the crowd and touched His garment"
                     ]
                 },
                 {
                     "reference": "Matthew 8:7 (NKJV)",
                     "text": "And Jesus said to him, \"I will come and heal him.\"",
-                    "highlights": [
-                        "I will come and heal him"
-                    ]
+                    "highlights": []
                 },
                 {
                     "reference": "Matthew 15:22 (NKJV)",
@@ -132,14 +150,14 @@
             "verses": [
                 {
                     "reference": "",
-                    "text": "God's Power Is Greater Than My Sin\nEven Crumbs Are Enough\nOne Word Is Enough\nEven if I touch the helm of the garment"
+                    "text": "God's Power Is Greater Than My Sin\nEven Crumbs Are Enough\nOne Word Is Enough\nEven if I touch the helm of the garment",
+                    "list_type": "bullet",
+                    "alignment": "center"
                 },
                 {
                     "reference": "Romans 5:20–21 (NKJV)",
                     "text": "Moreover the law entered that the offense might abound.",
-                    "highlights": [
-                        "the offense might abound"
-                    ]
+                    "highlights": []
                 },
                 {
                     "reference": "Romans 5:20–21 (NKJV)",
@@ -164,7 +182,9 @@
             "verses": [
                 {
                     "reference": "",
-                    "text": "They Knew His Heart Is Fatherly\nFatherly Heart Wants to Heal\nFatherly Heart Responds Immediately\nFatherly Heart Wants His Children to Take Authority\nFatherly Heart Wants His Children to Claim Their Blessing"
+                    "text": "They Knew His Heart Is Fatherly\nFatherly Heart Wants to Heal\nFatherly Heart Responds Immediately\nFatherly Heart Wants His Children to Take Authority\nFatherly Heart Wants His Children to Claim Their Blessing",
+                    "list_type": "bullet",
+                    "alignment": "center"
                 },
                 {
                     "reference": "Matthew 7:11 (NKJV)",
@@ -181,7 +201,9 @@
             "verses": [
                 {
                     "reference": "",
-                    "text": "They heard about Jesus\nRighteousness of God Revealed\nLaw is not of faith — Gal 3:12\nKnow the Author"
+                    "text": "They heard about Jesus\nRighteousness of God Revealed\nLaw is not of faith — Gal 3:12\nKnow the Author",
+                    "list_type": "bullet",
+                    "alignment": "center"
                 },
                 {
                     "reference": "Mark 5:27 (NKJV)",
@@ -211,7 +233,12 @@
                     "reference": "Romans 1:16–17 (NKJV)",
                     "text": "For I am not ashamed of the gospel of Christ, for it is the power of God to salvation for everyone who believes, for the Jew first and also for the Greek.",
                     "highlights": [
-                        "the power of God to salvation",
+                        {
+                            "text": "salvation",
+                            "color": "#4A86E8",
+                            "bold": true,
+                            "underline": true
+                        },
                         "for everyone who believes"
                     ]
                 },
@@ -219,7 +246,14 @@
                     "reference": "Romans 1:16–17 (NKJV)",
                     "text": "For in it the righteousness of God is revealed from faith to faith; as it is written, 'The just shall live by faith.'",
                     "highlights": [
-                        "the righteousness of God is revealed from faith to faith",
+                        "the righteousness of God is revealed from",
+                        {
+                            "text": "faith to faith",
+                            "color": "#4A86E8",
+                            "bold": true,
+                            "underline": true,
+                            "annotation": 4
+                        },
                         "The just shall live by faith"
                     ]
                 }

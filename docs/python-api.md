@@ -341,22 +341,71 @@ data = {
 ### Verse Object Properties
 
 #### Required Properties
-- `reference` (str): Bible reference (e.g., "John 3:16 (KJV)")
-- `text` (str): Verse text content
+- `reference` (str): Bible reference (e.g., `"John 3:16 (KJV)"`) — shown at slide bottom
+- `text` (str): Verse text content. Use `\n` to separate items for list slides.
 
 #### Optional Properties
-- `highlights` (list): Words/phrases to highlight in orange/bold
-- `large_text` (dict): Custom font sizes for specific words
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `highlights` | list | `[]` | Per-phrase formatting — strings or objects (see below) |
+| `large_text` | dict | `{}` | `{"phrase": font_size_pt}` — enlarge specific words |
+| `list_type` | string | `null` | `"bullet"` or `"numbered"` — renders `\n`-separated lines as a list |
+| `alignment` | string | `"center"` | Text alignment: `"left"`, `"center"`, `"right"` |
+| `font_size` | integer | `32` | Body text size in pt |
+
+#### Highlight Formats
+
+**String** (simple) — bold + orange:
+```python
+"highlights": ["God so loved", "only Son"]
+```
+
+**Object** (rich) — full per-phrase control:
+```python
+"highlights": [
+    "simple phrase",                              # bold + orange (default)
+    {
+        "text": "faith to faith",
+        "color": "#4A86E8",    # named or hex color
+        "bold": True,
+        "italic": False,
+        "underline": True,
+        "annotation": 2        # renders ❷ superscript bubble after phrase
+    }
+]
+```
+
+Named colors: `orange` (default), `yellow`, `red`, `green`, `blue`, `white`, `cyan`, `purple`
 
 #### Example Verse Object
 ```python
 verse = {
-    "reference": "John 3:16 (KJV)",
-    "text": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
-    "highlights": ["God", "loved", "everlasting life"],
-    "large_text": {"everlasting life": 200}
+    "reference": "Romans 1:16–17 (NKJV)",
+    "text": "For I am not ashamed of the gospel of Christ, for it is the power of God to salvation.",
+    "highlights": [
+        { "text": "the gospel",  "annotation": 1 },
+        { "text": "the power",   "annotation": 2 },
+        { "text": "salvation",   "color": "#4A86E8", "underline": True, "annotation": 3 },
+        "for everyone who believes"
+    ],
+    "alignment": "center",
+    "font_size": 32
 }
 ```
+
+#### Bullet List Verse
+```python
+verse = {
+    "reference": "",
+    "text": "Woman with the Issue of Blood\nCenturion\nCanaanite",
+    "list_type": "bullet",
+    "alignment": "center"
+}
+```
+
+> 📖 See the [Rich Text Formatting Guide]({{ '/formatting' | relative_url }}) for the full feature reference.
+
 
 ## 🎯 Complete Examples
 

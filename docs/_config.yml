@@ -24,6 +24,8 @@ nav:
     url: "/pdf-conversion"
   - title: "Examples"
     url: "/examples"
+  - title: "Formatting"
+    url: "/formatting"
   - title: "Troubleshooting"
     url: "/troubleshooting"
 
