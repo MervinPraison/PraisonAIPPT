@@ -528,7 +528,27 @@ def create_presentation(data, output_file=None, custom_title=None,
     
     # Create presentation
     prs = Presentation()
-    
+
+    # Apply slide size if specified in JSON
+    # Supported: "widescreen"/"16:9", "standard"/"4:3", or {"width": W, "height": H} in inches
+    slide_size = data.get("slide_size")
+    if slide_size:
+        from pptx.util import Inches as _Inches
+        PRESETS = {
+            "widescreen": (13.33, 7.5),
+            "16:9":       (13.33, 7.5),
+            "standard":   (10.0,  7.5),
+            "4:3":        (10.0,  7.5),
+            "16:10":      (12.8,  8.0),
+        }
+        if isinstance(slide_size, str) and slide_size.lower() in PRESETS:
+            w, h = PRESETS[slide_size.lower()]
+            prs.slide_width  = _Inches(w)
+            prs.slide_height = _Inches(h)
+        elif isinstance(slide_size, dict):
+            if "width"  in slide_size: prs.slide_width  = _Inches(slide_size["width"])
+            if "height" in slide_size: prs.slide_height = _Inches(slide_size["height"])
+
     # Get verses data from JSON
     verses_data = data.get("sections", [])
     # Presentation-level slide style (background, text color, alignment, etc.)
