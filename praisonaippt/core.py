@@ -266,11 +266,12 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
     _body = body_rgb or RGBColor(26, 26, 46)
 
     if not filtered:
-        paragraph.text = text
-        _sf(paragraph, 32)
-        paragraph.font.color.rgb = _body
+        run = paragraph.add_run()
+        run.text = text
+        _sf(run, 32)
+        run.font.color.rgb = _body
         if font_name:
-            paragraph.font.name = font_name
+            run.font.name = font_name
         return
 
     current_pos = 0
@@ -279,13 +280,8 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
     for start, end, matched_text, fmt_type, fmt in filtered:
         # Plain text before this match
         if start > current_pos:
-            if first_run:
-                paragraph.text = text[current_pos:start]
-                run = paragraph.runs[0]
-                first_run = False
-            else:
-                run = paragraph.add_run()
-                run.text = text[current_pos:start]
+            run = paragraph.add_run()
+            run.text = text[current_pos:start]
             _sf(run, 32)
             run.font.color.rgb = _body
             run.font.bold = False
