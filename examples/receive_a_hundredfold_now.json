@@ -1,10 +1,36 @@
 {
-    "presentation_title": "He became poor so we can become rich",
-    "presentation_subtitle": "",
+    "presentation_title": "receive a hundredfold now",
+    "presentation_subtitle": "Mark 10:30 (NKJV)",
     "sections": [
         {
-            "section": "Why We Should Be Rich",
-            "verses": []
+            "section": "Why We should expect 100 Fold in this world",
+            "verses": [
+                {
+                    "reference": "Ephesians 2:8-9 (NKJV)",
+                    "text": "For by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not by works, so that no one may boast.",
+                    "highlights": [
+                        "by grace you have been saved through faith",
+                        "gift of God"
+                    ]
+                },
+                {
+                    "reference": "Mark 10:30 (NKJV)",
+                    "text": "But he shall receive a hundredfold now in this time, houses, and brethren, and sisters, and mothers, and children, and lands, with persecutions; and in the world to come eternal life.",
+                    "highlights": [
+                        "a hundredfold now in this time",
+                        "eternal life"
+                    ]
+                },
+                {
+                    "reference": "John 10:9 (NKJV)",
+                    "text": "I am the gate; whoever enters through me will be saved. They will come in and go out, and find pasture.",
+                    "highlights": [
+                        "I am the gate",
+                        "will be saved",
+                        "find pasture"
+                    ]
+                }
+            ]
         },
         {
             "section": "1. Jesus Became Poor So We Might Become Rich",
@@ -84,7 +110,7 @@
             ]
         },
         {
-            "section": "4. Prosperity as a Sign That Brings Belief",
+            "section": "4. Shows the Lord is with you",
             "verses": [
                 {
                     "reference": "Genesis 26:28 (NKJV)",
