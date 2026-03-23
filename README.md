@@ -441,6 +441,7 @@ praisonaippt --config-show            # Alternative syntax
 
 # Convert Existing
 praisonaippt convert-pdf input.pptx   # Convert PPTX to PDF
+praisonaippt convert-json input.pptx  # Extract PPTX content to JSON
 ```
 
 ---
