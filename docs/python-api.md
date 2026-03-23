@@ -645,4 +645,81 @@ else:
 
 ---
 
+## 📐 Slide Size (Widescreen)
+
+Set the presentation dimensions at the top level of the data dict:
+
+```python
+data = {
+    "presentation_title": "Great Faith",
+    "slide_size": "widescreen",   # or "16:9", "standard", "4:3", "16:10"
+    "slide_style": { ... },
+    "sections": [ ... ]
+}
+```
+
+| Value | Dimensions |
+|---|---|
+| `"widescreen"` / `"16:9"` | 13.33" × 7.5" |
+| `"standard"` / `"4:3"` | 10" × 7.5" (default) |
+| `"16:10"` | 12.8" × 8.0" |
+| `{"width": W, "height": H}` | Custom inches |
+
+---
+
+## 🔢 Verse Number Superscripts
+
+Start each line of a verse's `text` field with its verse number and a space to render small superscript numbers:
+
+```python
+{
+    "reference": "Mark 5:27-29 (NKJV)",
+    "text": (
+        "27 When she heard about Jesus, she came behind Him in the crowd and touched His garment.\n"
+        "28 For she said, 'If only I may touch His clothes, I shall be made well.'\n"
+        "29 Immediately the fountain of her blood was dried up, and she felt in her body that she was healed."
+    )
+}
+```
+
+Numbers render as ~52% body-size superscripts with 30% raised baseline. Works with `highlights` too — verse numbers appear before any highlighted text.
+
+---
+
+## 🎨 Package-Level Defaults
+
+`_resolve_theme()` now uses opinionated defaults. Any `slide_style` key overrides them:
+
+| Key | Default |
+|---|---|
+| `font_name` | `"Palatino"` |
+| `alignment` | `"left"` |
+| `reference_position` | `"top"` |
+| `highlight_color` (dark bg) | `#FFD700` yellow |
+| `highlight_color` (light) | `#FF8C00` orange |
+
+---
+
+## 📤 PDF + Google Drive Upload
+
+```python
+from praisonaippt import create_presentation
+
+# Generate PPTX; CLI handles PDF + upload via --convert-pdf flag
+result = create_presentation(data, output_file="my.pptx")
+```
+
+Via CLI (recommended — handles GDrive fallback + auto-upload):
+```bash
+# Generates PPTX + PDF, uploads both to YYYY/MM folder on Google Drive
+praisonaippt -i verses.json -o my.pptx --convert-pdf
+
+# Convert existing PPTX
+praisonaippt convert-pdf my.pptx --upload-gdrive
+```
+
+The CLI falls back automatically to Google Drive API for PDF conversion when LibreOffice is not available.
+
+---
+
 **Need help?** [Open an issue on GitHub](https://github.com/MervinPraison/PraisonAIPPT/issues)

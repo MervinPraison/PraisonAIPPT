@@ -259,7 +259,7 @@ Add a `"slide_style"` key at the **top level** of your JSON to control the appea
 
 ### slide_style Fields
 
-| Field | Default (no bg) | Auto-dark default | Description |
+| Field | Default | Auto-dark default | Description |
 |---|---|---|---|
 | `background_image` | — | — | Path to a background image file |
 | `background_color` | — | — | Hex background color e.g. `"#1A1A2E"` |
@@ -268,30 +268,27 @@ Add a `"slide_style"` key at the **top level** of your JSON to control the appea
 | `title_color` | theme default | `#FFFFFF` white | Title slide title |
 | `subtitle_color` | theme default | `#AAAAAA` | Title slide subtitle |
 | `section_title_color` | `#003366` dark blue | `#FFFFFF` white | Section heading slides |
-| `highlight_color` | `#FF8C00` orange | `#FF8C00` orange | Default color for simple string highlights |
+| `highlight_color` | `#FF8C00` orange | `#FFD700` yellow | Default color for simple string highlights |
 | `annotation_color` | `#1E50C8` blue | `#1E50C8` blue | Numbered bubble annotations (❶❷❸…) |
-| `font_name` | (system default) | (system default) | Font family for all text, e.g. `"Spectral"` |
-| `alignment` | `"center"` (verses), `"left"` (lists) | same | Default text alignment |
-| `reference_position` | `"bottom"` | `"bottom"` | `"top"` or `"bottom"` for verse reference |
+| `font_name` | **`Palatino`** | **`Palatino`** | Font family for all text |
+| `alignment` | **`"left"`** | **`"left"`** | Default text alignment (`"left"`, `"center"`, `"right"`) |
+| `reference_position` | **`"top"`** | **`"top"`** | `"top"` or `"bottom"` for verse reference line |
 
 !!! note
-    **Font names**: any font installed on your system works (including Google Fonts after installation). The font name is stored in the PPTX file — PowerPoint will use it automatically.
+    **Package defaults**: `font_name`, `alignment`, and `reference_position` now have opinionated defaults (Palatino / left / top). Override any of them in `slide_style` as needed.
 
 !!! tip
-    **Zero regression**: if you omit `slide_style` entirely, all slides use default styling (dark text, white background). `slide_style` only activates when present.
+    **Zero regression**: if you omit `slide_style` entirely, all slides use the above defaults automatically.
 
 ### Dark Background — Quick Start
 
 ```json
 "slide_style": {
-    "background_image": "assets/background_dark.png",
+    "background_image": "assets/background_alt.jpg",
     "text_color": "white",
-    "reference_position": "top",
-    "font_name": "Spectral"
+    "font_name": "Palatino"
 }
 ```
-
-This will auto-set all text (body, reference, title, section) to white/light variants automatically.
 
 ### Custom Colors Only (No Background)
 
@@ -299,9 +296,83 @@ This will auto-set all text (body, reference, title, section) to white/light var
 "slide_style": {
     "highlight_color": "#FFD700",
     "annotation_color": "#E53935",
-    "font_name": "Lato"
+    "font_name": "Georgia"
 }
 ```
+
+---
+
+## Verse Number Superscripts
+
+Display individual verse numbers as small superscripts before each verse line by starting each line with its verse number followed by a space.
+
+```json
+{
+    "reference": "Titus 2:11-13 (NKJV)",
+    "text": "11 For the grace of God that brings salvation has appeared to all men,\n12 teaching us that, denying ungodliness and worldly lusts, we should live soberly,\n13 looking for the blessed hope and glorious appearing of our great God and Savior Jesus Christ,"
+}
+```
+
+The numbers render as small superscript characters (~52% of body size, raised baseline) before each line of text.
+
+**Rules:**
+- Each line in the `\n`-separated text must start with `1–3 digits + space` to trigger numbering
+- Lines without a leading number are rendered as plain paragraphs (no superscript)
+- Works alongside `highlights` — verse numbers appear before highlighted text without conflict
+- Single-verse entries also support a number prefix: `"20 And they went out and preached…"`
+
+---
+
+## Slide Size (Widescreen)
+
+Add a top-level `"slide_size"` key to change the presentation dimensions.
+
+```json
+{
+    "presentation_title": "Great Faith",
+    "slide_size": "widescreen",
+    "slide_style": { ... },
+    "sections": [ ... ]
+}
+```
+
+### Presets
+
+| Value | Dimensions | Use case |
+|---|---|---|
+| `"widescreen"` / `"16:9"` | 13.33" × 7.5" | Modern projectors / screens |
+| `"standard"` / `"4:3"` | 10" × 7.5" | Classic slides (package default) |
+| `"16:10"` | 12.8" × 8.0" | MacBook / older widescreen |
+| `{"width": W, "height": H}` | Custom | Any size in inches |
+
+```json
+"slide_size": { "width": 13.33, "height": 7.5 }
+```
+
+!!! note
+    Omitting `slide_size` keeps the standard 4:3 default — no change to existing presentations.
+
+---
+
+## PDF Generation & Google Drive Upload
+
+Generate a PDF alongside the PPTX and auto-upload both to Google Drive in a single command:
+
+```bash
+praisonaippt -i verses.json -o my_presentation.pptx --convert-pdf
+```
+
+- Creates `my_presentation.pptx` and `my_presentation.pdf`
+- Automatically uploads **both** to the same Google Drive date folder (`YYYY/MM`)
+- Falls back to Google Drive API for PDF conversion if LibreOffice is not installed
+
+### Convert an Existing PPTX to PDF
+
+```bash
+praisonaippt convert-pdf my_presentation.pptx --upload-gdrive
+```
+
+Same GDrive fallback and auto-upload as the main flag.
 
 ---
 
