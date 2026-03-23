@@ -58,66 +58,108 @@ def add_section_slide(prs, section_name):
     return section_slide
 
 
+def _parse_color(color_value):
+    """Parse a color value (named string or hex) into RGBColor."""
+    NAMED_COLORS = {
+        'orange': RGBColor(255, 140, 0),
+        'yellow': RGBColor(255, 215, 0),
+        'red':    RGBColor(220, 50,  50),
+        'green':  RGBColor(50,  180, 50),
+        'blue':   RGBColor(30,  100, 220),
+        'white':  RGBColor(255, 255, 255),
+        'cyan':   RGBColor(0,   200, 200),
+        'purple': RGBColor(150, 50,  200),
+    }
+    if not color_value:
+        return NAMED_COLORS['orange']
+    if isinstance(color_value, str):
+        if color_value.lower() in NAMED_COLORS:
+            return NAMED_COLORS[color_value.lower()]
+        # Hex string e.g. "#FF8C00" or "FF8C00"
+        lower = color_value.strip('#')
+        if len(lower) == 6:
+            try:
+                r, g, b = int(lower[0:2], 16), int(lower[2:4], 16), int(lower[4:6], 16)
+                return RGBColor(r, g, b)
+            except ValueError:
+                pass
+    return NAMED_COLORS['orange']
+
+
+def _normalise_highlights(highlights):
+    """
+    Normalise a mixed list of string/object highlight entries into dicts.
+
+    String  -> {text, color=orange, bold=True, italic=False, underline=False}
+    Object  -> {text, color, bold, italic, underline} with defaults applied
+    """
+    result = []
+    for h in highlights:
+        if isinstance(h, str):
+            result.append({
+                'text': h,
+                'color': RGBColor(255, 140, 0),
+                'bold': True,
+                'italic': False,
+                'underline': False,
+            })
+        elif isinstance(h, dict) and h.get('text'):
+            result.append({
+                'text': h['text'],
+                'color': _parse_color(h.get('color', 'orange')),
+                'bold': h.get('bold', True),
+                'italic': h.get('italic', False),
+                'underline': h.get('underline', False),
+            })
+    return result
+
+
 def _apply_highlights(paragraph, text, highlights, large_text=None):
     """
-    Apply highlighting and/or large text formatting to specific words or phrases in a paragraph.
-    
+    Apply per-phrase rich text formatting to a paragraph.
+
     Args:
         paragraph: Paragraph object from text frame
         text (str): The full text to display
-        highlights (list): List of words/phrases to highlight (bold + orange)
-        large_text (dict): Dictionary mapping words/phrases to font sizes, e.g. {"word": 200}
-    
-    Returns:
-        None (modifies paragraph in place)
+        highlights (list): Mixed list of strings or dicts:
+            - string  -> bold + orange (original behaviour)
+            - dict    -> {text, color?, bold?, italic?, underline?}
+        large_text (dict): {phrase: font_size_pt} for large text overrides
     """
-    # Create a case-insensitive search pattern for each highlight and large_text
     import re
-    
-    # Build a list of (start, end, matched_text, format_type, font_size) tuples for all matches
+
     matches = []
-    
-    # Add highlights
+
     if highlights:
-        for highlight in highlights:
-            # Escape special regex characters in the highlight text
-            pattern = re.escape(highlight)
-            # Find all occurrences (case-insensitive)
+        for fmt in _normalise_highlights(highlights):
+            pattern = re.escape(fmt['text'])
             for match in re.finditer(pattern, text, re.IGNORECASE):
-                matches.append((match.start(), match.end(), match.group(), 'highlight', None))
-    
-    # Add large_text entries
+                matches.append((match.start(), match.end(), match.group(), 'highlight', fmt))
+
     if large_text:
         for word, font_size in large_text.items():
             pattern = re.escape(word)
             for match in re.finditer(pattern, text, re.IGNORECASE):
                 matches.append((match.start(), match.end(), match.group(), 'large', font_size))
-    
-    # Sort matches by start position
+
     matches.sort(key=lambda x: x[0])
-    
-    # Remove overlapping matches (keep first occurrence)
-    filtered_matches = []
-    last_end = -1
-    for start, end, matched_text, format_type, font_size in matches:
-        if start >= last_end:
-            filtered_matches.append((start, end, matched_text, format_type, font_size))
-            last_end = end
-    
-    # Build the paragraph with highlighted sections
-    if not filtered_matches:
-        # No matches found, just add plain text
+    filtered, last_end = [], -1
+    for m in matches:
+        if m[0] >= last_end:
+            filtered.append(m)
+            last_end = m[1]
+
+    if not filtered:
         paragraph.text = text
         paragraph.font.size = Pt(32)
         paragraph.font.color.rgb = RGBColor(0, 0, 0)
         return
-    
-    # Add text segments with appropriate formatting
+
     current_pos = 0
     first_run = True
-    
-    for start, end, matched_text, format_type, font_size in filtered_matches:
-        # Add text before the formatted text
+
+    for start, end, matched_text, fmt_type, fmt in filtered:
+        # Plain text before this match
         if start > current_pos:
             if first_run:
                 paragraph.text = text[current_pos:start]
@@ -128,8 +170,11 @@ def _apply_highlights(paragraph, text, highlights, large_text=None):
                 run.text = text[current_pos:start]
             run.font.size = Pt(32)
             run.font.color.rgb = RGBColor(0, 0, 0)
-        
-        # Add the formatted text
+            run.font.bold = False
+            run.font.italic = False
+            run.font.underline = False
+
+        # Formatted run
         if first_run:
             paragraph.text = matched_text
             run = paragraph.runs[0]
@@ -137,26 +182,28 @@ def _apply_highlights(paragraph, text, highlights, large_text=None):
         else:
             run = paragraph.add_run()
             run.text = matched_text
-        
-        # Apply formatting based on type
-        if format_type == 'highlight':
-            # Apply highlight formatting (bold + orange color)
+
+        if fmt_type == 'highlight':
             run.font.size = Pt(32)
-            run.font.bold = True
-            run.font.color.rgb = RGBColor(255, 140, 0)  # Orange color for highlights
-        elif format_type == 'large':
-            # Apply large text formatting (custom font size, keep black color)
-            run.font.size = Pt(font_size)
-            run.font.color.rgb = RGBColor(0, 0, 0)  # Keep black color
-        
+            run.font.color.rgb = fmt['color']
+            run.font.bold = fmt['bold']
+            run.font.italic = fmt['italic']
+            run.font.underline = fmt['underline']
+        elif fmt_type == 'large':
+            run.font.size = Pt(fmt)
+            run.font.color.rgb = RGBColor(0, 0, 0)
+
         current_pos = end
-    
-    # Add any remaining text after the last highlight
+
+    # Remaining plain text
     if current_pos < len(text):
         run = paragraph.add_run()
         run.text = text[current_pos:]
         run.font.size = Pt(32)
         run.font.color.rgb = RGBColor(0, 0, 0)
+        run.font.bold = False
+        run.font.italic = False
+        run.font.underline = False
 
 
 def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None, large_text=None):
