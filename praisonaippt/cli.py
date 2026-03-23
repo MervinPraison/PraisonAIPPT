@@ -629,44 +629,36 @@ def handle_setup_credentials():
     return 0
 
 
-def handle_gdrive_upload(output_file, args, config):
-    """Handle Google Drive upload if requested"""
-    # Check if upload is requested (CLI arg or config)
+def handle_gdrive_upload(output_file, args, config, pdf_path=None):
+    """Handle Google Drive upload if requested — uploads PPTX and optionally PDF."""
     should_upload = args.upload_gdrive or config.should_auto_upload_gdrive()
-    
+
     if not should_upload:
         return
-    
+
     try:
         from .gdrive_uploader import upload_to_gdrive, is_gdrive_available
-        
-        # Check if dependencies are available
+
         if not is_gdrive_available():
             print("\nWarning: Google Drive dependencies not installed.")
             print("To enable Google Drive upload, install with:")
             print("  pip install praisonaippt[gdrive]")
             return
-        
-        # Get credentials from CLI args or config
+
         credentials_path = args.gdrive_credentials or config.get_gdrive_credentials()
-        
+
         if not credentials_path:
             print("\nError: Google Drive credentials not configured")
-            print("Options:")
-            print("  1. Use --gdrive-credentials option")
-            print("  2. Run: praisonaippt --config-init")
-            print("  3. Edit config: ~/.praisonaippt/config.yaml")
             return
-        
-        # Get folder settings from CLI args or config
-        folder_id = args.gdrive_folder_id or config.get_gdrive_folder_id()
-        folder_name = args.gdrive_folder_name or config.get_gdrive_folder_name()
-        
-        # Get date folder settings from CLI args or config
+
+        folder_id   = args.gdrive_folder_id   or config.get_gdrive_folder_id()
+        folder_name = args.gdrive_folder_name  or config.get_gdrive_folder_name()
         use_date_folders = args.gdrive_date_folders or config.use_date_folders()
         date_format = config.get_date_format()
-        
+
         print("\nUploading to Google Drive...")
+
+        # --- Upload PPTX ---
         result = upload_to_gdrive(
             output_file,
             credentials_path=credentials_path,
@@ -675,16 +667,76 @@ def handle_gdrive_upload(output_file, args, config):
             use_date_folders=use_date_folders,
             date_format=date_format
         )
-        
         print("✓ Successfully uploaded to Google Drive")
         print(f"  File ID: {result['id']}")
         print(f"  File Name: {result['name']}")
         if 'webViewLink' in result:
             print(f"  View Link: {result['webViewLink']}")
-        
+
+        # --- Upload PDF if provided ---
+        if pdf_path and Path(pdf_path).exists():
+            pdf_result = upload_to_gdrive(
+                pdf_path,
+                credentials_path=credentials_path,
+                folder_id=folder_id,
+                folder_name=folder_name,
+                use_date_folders=use_date_folders,
+                date_format=date_format
+            )
+            print("✓ PDF uploaded to Google Drive")
+            print(f"  File Name: {pdf_result['name']}")
+            if 'webViewLink' in pdf_result:
+                print(f"  PDF Link: {pdf_result['webViewLink']}")
+
     except Exception as e:
         print(f"\nWarning: Google Drive upload failed: {e}")
         print("Presentation was created successfully at:", output_file)
+
+
+def _convert_pdf_via_gdrive(pptx_path: str, pdf_path: str) -> str:
+    """
+    Fallback PDF conversion using Google Drive API:
+    Upload PPTX as native Google Slides, export as PDF, delete temp file.
+    """
+    from .gdrive_uploader import GDriveUploader
+    import io
+    from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+
+    uploader = GDriveUploader()
+    service  = uploader._get_service()
+
+    # Upload as native Slides
+    metadata = {
+        'name': '_pptx_to_pdf_tmp',
+        'mimeType': 'application/vnd.google-apps.presentation'
+    }
+    media = MediaFileUpload(
+        pptx_path,
+        mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    )
+    slides_file = service.files().create(
+        body=metadata, media_body=media, fields='id').execute()
+    slides_id = slides_file['id']
+
+    try:
+        # Export as PDF
+        request = service.files().export_media(
+            fileId=slides_id, mimeType='application/pdf')
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while not done:
+            _, done = downloader.next_chunk()
+        with open(pdf_path, 'wb') as f:
+            f.write(fh.getvalue())
+    finally:
+        # Always delete temp Slides file
+        try:
+            service.files().delete(fileId=slides_id).execute()
+        except Exception:
+            pass
+
+    return pdf_path
 
 
 def main():
@@ -776,35 +828,43 @@ def main():
     if not output_file:
         return 1
     
+    pdf_path = None
+
     # Convert to PDF if requested
     if args.convert_pdf:
         try:
-            # Parse PDF options
             pdf_options = parse_pdf_options(args.pdf_options)
-            
-            # Determine PDF output path
+
             if args.pdf_output:
                 pdf_path = args.pdf_output
             else:
                 pdf_path = str(Path(output_file).with_suffix('.pdf'))
-            
+
             print("Converting to PDF...")
-            result = convert_pptx_to_pdf(
-                output_file,
-                pdf_path,
-                backend=args.pdf_backend,
-                options=pdf_options
-            )
-            
-            print(f"✓ PDF created: {result}")
-            
+            try:
+                result = convert_pptx_to_pdf(
+                    output_file, pdf_path,
+                    backend=args.pdf_backend,
+                    options=pdf_options
+                )
+                print(f"✓ PDF created: {result}")
+            except Exception as primary_err:
+                # Fallback: try Google Drive API conversion
+                print(f"  Local conversion unavailable ({primary_err}), trying via Google Drive...")
+                try:
+                    result = _convert_pdf_via_gdrive(output_file, pdf_path)
+                    print(f"✓ PDF created via Google Drive: {result}")
+                except Exception as gdrive_err:
+                    print(f"Warning: PDF conversion failed: {gdrive_err}")
+                    pdf_path = None  # mark as failed so we don't try to upload
+
         except Exception as e:
             print(f"Warning: PDF conversion failed: {e}")
-            print("Presentation was created successfully at:", output_file)
-    
-    # Upload to Google Drive if requested
-    handle_gdrive_upload(output_file, args, config)
-    
+            pdf_path = None
+
+    # Upload PPTX (and PDF if generated) to Google Drive
+    handle_gdrive_upload(output_file, args, config, pdf_path=pdf_path)
+
     return 0
 
 

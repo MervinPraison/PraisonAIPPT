@@ -525,7 +525,7 @@ def create_presentation(data, output_file=None, custom_title=None,
                 else:
                     verse_parts = split_long_text(verse['text'])
                     for i, part in enumerate(verse_parts):
-                        part_num = i + 1 if len(verse_parts) > 1 else None
+                        part_num = None  # never show (Part N) on split slides
                         add_verse_slide(prs, part, verse['reference'], part_num,
                                         highlights, large_text,
                                         alignment=verse_alignment,
