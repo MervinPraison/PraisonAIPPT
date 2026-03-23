@@ -260,7 +260,7 @@
         }
     ],
     "slide_style": {
-        "background_image": "assets/background_dark.png",
+        "background_image": "assets/background_alt.jpg",
         "text_color": "white",
         "reference_position": "top",
         "alignment": "left",
