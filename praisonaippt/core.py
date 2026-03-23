@@ -275,7 +275,6 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
         return
 
     current_pos = 0
-    first_run = True
 
     for start, end, matched_text, fmt_type, fmt in filtered:
         # Plain text before this match
@@ -288,14 +287,9 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
             run.font.italic = False
             run.font.underline = False
 
-        # Formatted run
-        if first_run:
-            paragraph.text = matched_text
-            run = paragraph.runs[0]
-            first_run = False
-        else:
-            run = paragraph.add_run()
-            run.text = matched_text
+        # Formatted run — always add_run() to preserve any pre-existing runs
+        run = paragraph.add_run()
+        run.text = matched_text
 
         if fmt_type == 'highlight':
             _sf(run, 32)
