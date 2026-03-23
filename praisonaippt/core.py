@@ -100,33 +100,26 @@ def add_title_slide(prs, title, subtitle="", style=None):
 
 def add_section_slide(prs, section_name, style=None):
     """
-    Add a section title slide. If slide_style has a background it is applied.
-    When a background is set, uses blank layout for full colour control.
+    Add a section title slide — centered, same layout for all themes.
+    Background image/color applied when present in slide_style.
     """
     style = style or {}
     theme = _resolve_theme(style)
-    has_background = bool(style.get('background_image') or style.get('background_color'))
 
-    if has_background:
-        slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
-        _apply_slide_background(slide, style, prs)
-        tb = slide.shapes.add_textbox(Inches(0.6), Inches(3.0), Inches(9), Inches(1.5))
-        p = tb.text_frame.paragraphs[0]
-        p.text = section_name
-        p.alignment = PP_ALIGN.CENTER
-        p.font.size = Pt(44)
-        p.font.bold = True
-        p.font.color.rgb = theme['section']
-        if theme['font_name']:
-            p.font.name = theme['font_name']
-    else:
-        slide = prs.slides.add_slide(prs.slide_layouts[1])
-        section_title = slide.shapes.title
-        section_title.text = section_name
-        section_title.text_frame.paragraphs[0].font.size = Pt(44)
-        section_title.text_frame.paragraphs[0].font.color.rgb = theme['section']
-        if theme['font_name']:
-            section_title.text_frame.paragraphs[0].font.name = theme['font_name']
+    slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank for full control
+    _apply_slide_background(slide, style, prs)
+
+    tb = slide.shapes.add_textbox(Inches(0.6), Inches(3.0), Inches(9), Inches(1.5))
+    tf = tb.text_frame
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.text = section_name
+    p.alignment = PP_ALIGN.CENTER
+    p.font.size = Pt(44)
+    p.font.bold = True
+    p.font.color.rgb = theme['section']
+    if theme['font_name']:
+        p.font.name = theme['font_name']
 
     return slide
 
