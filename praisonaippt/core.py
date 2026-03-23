@@ -381,6 +381,52 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
     return slide
 
 
+def _parse_verse_lines(text):
+    """
+    Parse verse text into [(verse_num_or_None, line_text), ...] pairs.
+    Detects lines (or inline segments) starting with 1–3 digit verse numbers.
+    e.g. '11 For the grace...\n12 Teaching us...' → [('11','For the grace...'),('12','Teaching us...')]
+    e.g. '1 Therefore, holy brethren...' → [('1', 'Therefore, holy brethren...')]
+    Returns [(None, full_text)] if no verse numbers detected.
+    """
+    import re
+    VERSE_NUM_RE = re.compile(r'^(\d{1,3})\s+(.*)', re.DOTALL)
+
+    # Split on newlines first
+    raw_lines = [l.strip() for l in text.split('\n') if l.strip()]
+    result = []
+    for line in raw_lines:
+        m = VERSE_NUM_RE.match(line)
+        if m:
+            result.append((m.group(1), m.group(2)))
+        else:
+            # Try inline verse numbers within a single paragraph
+            # e.g. '11 For the grace 12 teaching'
+            parts = re.split(r'(?<![\w])(?=(\d{1,3})\s+)', line)
+            # Simpler: just append as plain text
+            result.append((None, line))
+
+    # If no verse numbers found at all, return original
+    if not any(num for num, _ in result):
+        return [(None, text)]
+    return result
+
+
+def _add_superscript_num_run(paragraph, num_str, font_size, body_rgb, font_name):
+    """Add a small superscript verse-number run to a paragraph."""
+    from pptx.oxml.ns import qn
+    run = paragraph.add_run()
+    run.text = num_str + '\u2009'  # narrow space after number
+    run.font.size = Pt(int(font_size * 0.52))
+    run.font.color.rgb = body_rgb
+    run.font.bold = False
+    if font_name:
+        run.font.name = font_name
+    # Set superscript baseline (30 000 = 30% above normal)
+    rPr = run._r.get_or_add_rPr()
+    rPr.set('baseline', '30000')
+
+
 def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                     large_text=None, alignment='center', font_size=32, style=None):
     """
@@ -426,18 +472,35 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
     p = tf.paragraphs[0]
     p.alignment = align
 
-    if (highlights and len(highlights) > 0) or (large_text and len(large_text) > 0):
-        _apply_highlights(p, verse_text, highlights, large_text,
-                          body_rgb=theme['body'],
-                          highlight_rgb=theme['highlight'],
-                          annotation_rgb=theme['annotation'],
-                          font_name=fn)
-    else:
-        p.text = verse_text
-        p.font.size = Pt(font_size)
-        p.font.color.rgb = theme['body']
-        if fn:
-            p.font.name = fn
+    verse_lines = _parse_verse_lines(verse_text)
+    has_verse_nums = any(num for num, _ in verse_lines)
+
+    first_para = True
+    for v_num, v_text in verse_lines:
+        if first_para:
+            p = tf.paragraphs[0]
+            first_para = False
+        else:
+            p = tf.add_paragraph()
+        p.alignment = align
+
+        if (highlights and len(highlights) > 0) or (large_text and len(large_text) > 0):
+            if has_verse_nums and v_num:
+                _add_superscript_num_run(p, v_num, font_size, theme['body'], fn)
+            _apply_highlights(p, v_text, highlights, large_text,
+                              body_rgb=theme['body'],
+                              highlight_rgb=theme['highlight'],
+                              annotation_rgb=theme['annotation'],
+                              font_name=fn)
+        else:
+            if has_verse_nums and v_num:
+                _add_superscript_num_run(p, v_num, font_size, theme['body'], fn)
+            run = p.add_run()
+            run.text = v_text
+            run.font.size = Pt(font_size)
+            run.font.color.rgb = theme['body']
+            if fn:
+                run.font.name = fn
 
     if ref_position != 'top' and reference:
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
