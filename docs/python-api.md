@@ -111,7 +111,52 @@ result = create_presentation(
 )
 ```
 
-### load_verses_from_file()
+**With Theming (Dark Background + Font)**
+```python
+data = {
+    "presentation_title": "Great Faith",
+    "presentation_subtitle": "Selected Scriptures",
+    "slide_style": {
+        "background_image": "assets/background_alt.jpg",
+        "text_color": "#FFFFFF",
+        "reference_color": "#CCCCCC",
+        "title_color": "#FFFFFF",
+        "subtitle_color": "#AAAAAA",
+        "section_title_color": "#FFFFFF",
+        "highlight_color": "#FFD700",
+        "annotation_color": "#1E50C8",
+        "font_name": "Palatino",
+        "alignment": "left",
+        "reference_position": "top"
+    },
+    "sections": [...]
+}
+result = create_presentation(data, output_file="themed.pptx")
+```
+
+#### slide_style Reference
+
+| Key | Type | Default (light) | Auto-dark default | Description |
+|---|---|---|---|---|
+| `background_image` | string | — | — | Path to background image |
+| `background_color` | string | — | — | Hex background e.g. `"#1A1A2E"` |
+| `text_color` | string | `#1A1A2E` | `#FFFFFF` | Body/verse text color |
+| `reference_color` | string | `#404040` | `#CCCCCC` | Verse reference line |
+| `title_color` | string | theme default | `#FFFFFF` | Title slide title |
+| `subtitle_color` | string | theme default | `#AAAAAA` | Title slide subtitle |
+| `section_title_color` | string | `#003366` | `#FFFFFF` | Section heading slides |
+| `highlight_color` | string | `#FF8C00` orange | `#FFD700` yellow | Default simple-string highlight |
+| `annotation_color` | string | `#1E50C8` blue | `#1E50C8` blue | Numbered bubble ❶❷❸ color |
+| `font_name` | string | system default | system default | Font for all text (e.g. `"Palatino"`, `"Georgia"`) |
+| `alignment` | string | `"left"` (lists), `"center"` (verses) | same | Default text alignment |
+| `reference_position` | string | `"bottom"` | `"bottom"` | `"top"` or `"bottom"` |
+
+!!! note
+    When `background_image` or `background_color` is set, all text colors automatically default to white/light variants. Individual color keys override these auto-defaults.
+
+!!! tip
+    **Zero regression**: omitting `slide_style` entirely preserves the original dark-text-on-white default behaviour.
+
 
 Load verses data from JSON or YAML file.
 
