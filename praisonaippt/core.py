@@ -69,6 +69,8 @@ def add_title_slide(prs, title, subtitle="", style=None):
         p.font.size = Pt(44)
         p.font.bold = True
         p.font.color.rgb = theme['title']
+        if theme['font_name']:
+            p.font.name = theme['font_name']
         # Subtitle
         if subtitle:
             tb2 = slide.shapes.add_textbox(Inches(0.6), Inches(4.2), Inches(9), Inches(1.0))
@@ -77,12 +79,21 @@ def add_title_slide(prs, title, subtitle="", style=None):
             p2.alignment = PP_ALIGN.CENTER
             p2.font.size = Pt(28)
             p2.font.color.rgb = theme['subtitle']
+            if theme['font_name']:
+                p2.font.name = theme['font_name']
     else:
+        theme = _resolve_theme(style)
         slide = prs.slides.add_slide(prs.slide_layouts[0])
         _apply_slide_background(slide, style, prs)
-        slide.shapes.title.text = title
+        title_shape = slide.shapes.title
+        title_shape.text = title
+        if theme['font_name']:
+            title_shape.text_frame.paragraphs[0].font.name = theme['font_name']
         if subtitle and len(slide.placeholders) > 1:
-            slide.placeholders[1].text = subtitle
+            sub = slide.placeholders[1]
+            sub.text = subtitle
+            if theme['font_name']:
+                sub.text_frame.paragraphs[0].font.name = theme['font_name']
 
     return slide
 
@@ -114,6 +125,8 @@ def add_section_slide(prs, section_name, style=None):
         section_title.text = section_name
         section_title.text_frame.paragraphs[0].font.size = Pt(44)
         section_title.text_frame.paragraphs[0].font.color.rgb = theme['section']
+        if theme['font_name']:
+            section_title.text_frame.paragraphs[0].font.name = theme['font_name']
 
     return slide
 

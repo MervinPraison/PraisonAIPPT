@@ -74,6 +74,19 @@
             ]
         },
         {
+            "section": "",
+            "verses": [
+                {
+                    "reference": "Matthew 8:13 (NKJV)",
+                    "text": "Then Jesus said to the centurion, 'Go your way; and as you have believed, so let it be done for you.' And his servant was healed that same hour.",
+                    "highlights": [
+                        "as you have believed, so let it be done for you",
+                        "his servant was healed that same hour"
+                    ]
+                }
+            ]
+        },
+        {
             "section": "2. Canaanite Woman",
             "verses": [
                 {
@@ -100,19 +113,6 @@
                         "even the little dogs eat the crumbs",
                         "great is your faith",
                         "her daughter was healed from that very hour"
-                    ]
-                }
-            ]
-        },
-        {
-            "section": "",
-            "verses": [
-                {
-                    "reference": "Matthew 8:13 (NKJV)",
-                    "text": "Then Jesus said to the centurion, 'Go your way; and as you have believed, so let it be done for you.' And his servant was healed that same hour.",
-                    "highlights": [
-                        "as you have believed, so let it be done for you",
-                        "his servant was healed that same hour"
                     ]
                 }
             ]
@@ -263,6 +263,7 @@
         "background_image": "assets/background_dark.png",
         "text_color": "white",
         "reference_position": "top",
-        "alignment": "left"
+        "alignment": "left",
+        "font_name": "Palatino"
     }
 }
