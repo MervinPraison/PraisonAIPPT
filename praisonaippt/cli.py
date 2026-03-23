@@ -162,41 +162,50 @@ def parse_pdf_options(options_str: str) -> PDFOptions:
 
 
 def handle_convert_pdf_command(args):
-    """Handle standalone convert-pdf command"""
+    """Handle standalone convert-pdf command (full parity with --convert-pdf flag)."""
     if not args.input_file:
         print("Error: Input file required for convert-pdf command")
         return 1
-    
+
     if not Path(args.input_file).exists():
         print(f"Error: Input file not found: {args.input_file}")
         return 1
-    
+
     if not args.input_file.lower().endswith(('.pptx', '.ppt')):
         print("Error: Input file must be a PowerPoint presentation")
         return 1
-    
+
     try:
-        # Parse PDF options
         pdf_options = parse_pdf_options(args.pdf_options)
-        
-        # Determine output path
+
         if args.pdf_output:
             pdf_path = args.pdf_output
         else:
             pdf_path = str(Path(args.input_file).with_suffix('.pdf'))
-        
-        # Convert to PDF
+
         print(f"Converting {args.input_file} to PDF...")
-        result = convert_pptx_to_pdf(
-            args.input_file,
-            pdf_path,
-            backend=args.pdf_backend,
-            options=pdf_options
-        )
-        
-        print(f"✓ Successfully converted to: {result}")
+        pdf_result = None
+        try:
+            pdf_result = convert_pptx_to_pdf(
+                args.input_file, pdf_path,
+                backend=args.pdf_backend, options=pdf_options)
+            print(f"✓ Successfully converted to: {pdf_result}")
+        except Exception as primary_err:
+            print(f"  Local conversion unavailable ({primary_err}), trying via Google Drive...")
+            try:
+                pdf_result = _convert_pdf_via_gdrive(args.input_file, pdf_path)
+                print(f"✓ PDF created via Google Drive: {pdf_result}")
+            except Exception as gdrive_err:
+                print(f"Error: PDF conversion failed: {gdrive_err}")
+                return 1
+
+        # Upload PDF to Google Drive if requested
+        config = load_config()
+        if pdf_result and (args.upload_gdrive or config.should_auto_upload_gdrive()):
+            handle_gdrive_upload(args.input_file, args, config, pdf_path=pdf_result)
+
         return 0
-        
+
     except Exception as e:
         print(f"Error: {e}")
         return 1
