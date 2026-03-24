@@ -364,6 +364,33 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
     return slide
 
 
+def add_image_slide(prs, image_path, style=None, caption=None):
+    """
+    Add a slide containing an embedded image (e.g. a diagram extracted from a source PPTX).
+    The background is applied from slide_style. The image is placed centred with small margins.
+    """
+    import os
+    style = style or {}
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+
+    if not os.path.exists(image_path):
+        return slide  # image file missing — produce blank slide
+
+    slide_w = prs.slide_width
+    slide_h = prs.slide_height
+    margin = Inches(0.2)
+    img = slide.shapes.add_picture(
+        image_path,
+        left=margin,
+        top=margin,
+        width=slide_w - margin * 2,
+        height=slide_h - margin * 2,
+    )
+    return slide
+
+
+
 def _parse_verse_lines(text):
     """
     Parse verse text into [(verse_num_or_None, line_text), ...] pairs.
@@ -589,7 +616,10 @@ def create_presentation(data, output_file=None, custom_title=None,
                 verse_alignment = verse.get('alignment', slide_style.get('alignment', 'left'))
                 font_size  = verse.get('font_size', 32)
 
-                if list_type in ('bullet', 'numbered'):
+                if verse.get('slide_type') == 'image' and verse.get('image_path'):
+                    # Image slide (diagram extracted from source PPTX)
+                    add_image_slide(prs, verse['image_path'], style=slide_style)
+                elif list_type in ('bullet', 'numbered'):
                     items = [line.strip() for line in verse['text'].split('\n') if line.strip()]
                     add_list_slide(prs, items, verse['reference'],
                                    list_type=list_type,

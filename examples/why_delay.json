@@ -46,6 +46,12 @@
                     "text": "\"And if ye be Christ's, then are ye Abraham's seed, and heirs according to the promise.\""
                 },
                 {
+                    "reference": "",
+                    "text": "100% My Power\n75% My Power | 25% His Power\n50% My Power | 50% His Power\n100% His Power",
+                    "list_type": "bullet",
+                    "highlights": []
+                },
+                {
                     "reference": "Romans 5:19 (KJV)",
                     "text": "\"For as by one man's disobedience many were made sinners, so by the obedience of one shall many be made righteous.\""
                 },
@@ -59,7 +65,14 @@
                 },
                 {
                     "reference": "",
-                    "text": "אַבְרָם"
+                    "text": "אַבְרָהָם ← אַבְרָם  (Abram → Abraham)\nשָׂרָה ← שָׂרַי  (Sarai → Sarah)",
+                    "list_type": "bullet"
+                },
+                {
+                    "reference": "",
+                    "text": "אַבְרָהָם ← אַבְרָם  (Abram → Abraham)\nשָׂרָה ← שָׂרַי  (Sarai → Sarah)",
+                    "list_type": "bullet",
+                    "highlights": []
                 }
             ]
         }

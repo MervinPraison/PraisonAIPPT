@@ -96,6 +96,57 @@ def _get_text_boxes(slide) -> List:
     return sorted(boxes, key=lambda s: s.top)
 
 
+def _is_picture_shape(shape) -> bool:
+    """Return True if shape is an embedded picture (MSO_SHAPE_TYPE.PICTURE = 13)."""
+    try:
+        return shape.shape_type == 13
+    except Exception:
+        return False
+
+
+def _save_slide_image(shape, output_dir: str, slide_num: int) -> Optional[str]:
+    """
+    Save the image bytes from a picture shape to disk.
+    Returns the saved file path or None on error.
+    """
+    import mimetypes
+    try:
+        img = shape.image
+        ext = img.ext or 'png'
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+        filename = f"slide_{slide_num:02d}.{ext}"
+        out_path = str(Path(output_dir) / filename)
+        with open(out_path, 'wb') as f:
+            f.write(img.blob)
+        return out_path
+    except Exception as e:
+        return None
+
+
+def _is_image_only_slide(slide, prs) -> bool:
+    """
+    Return True if slide is primarily a full-bleed image slide
+    (one large picture shape covering most of the slide area, minimal text).
+    """
+    slide_w = prs.slide_width
+    slide_h = prs.slide_height
+    slide_area = slide_w * slide_h
+
+    pic_shapes = [s for s in slide.shapes if _is_picture_shape(s)]
+    text_shapes = [s for s in slide.shapes
+                   if s.has_text_frame and s.text_frame.text.strip()]
+
+    if not pic_shapes:
+        return False
+    # Check if any picture covers >30% of slide (major image)
+    for pic in pic_shapes:
+        pic_area = pic.width * pic.height
+        if pic_area / slide_area > 0.30:
+            return True
+    return False
+
+
+
 def _classify_slide(slide, index: int) -> str:
     """
     Returns one of: 'title', 'section', 'verse', 'list'
@@ -651,8 +702,10 @@ class PPTXToJSONConverter:
         if not os.path.exists(pptx_path):
             raise FileNotFoundError(f"File not found: {pptx_path}")
         self._path = pptx_path
+        self._stem = Path(pptx_path).stem
 
-    def convert(self) -> dict:
+
+    def convert(self, images_dir: Optional[str] = None) -> dict:
         """
         Extract and return a praisonaippt-compatible dict from the PPTX.
 
@@ -720,6 +773,24 @@ class PPTXToJSONConverter:
                 if current_section is None:
                     current_section = {'section': '', 'verses': []}
 
+                # ── Image slide detection ─────────────────────────────────────
+                if _is_image_only_slide(slide, prs):
+                    # Extract the dominant picture and store as image_slide entry
+                    _img_dir = images_dir or f"assets/extracted_images/{self._stem}"
+                    _saved = None
+                    for _shape in slide.shapes:
+                        if _is_picture_shape(_shape):
+                            _saved = _save_slide_image(_shape, _img_dir, idx)
+                            break
+                    if _saved:
+                        current_section['verses'].append({
+                            'reference': '',
+                            'text': '',
+                            'slide_type': 'image',
+                            'image_path': _saved,
+                        })
+                    continue  # don't call _extract_verse_from_slide
+
                 try:
                     verse = _extract_verse_from_slide(
                         slide, prs, body_color_rgb, highlight_color_hex)
@@ -761,6 +832,7 @@ def pptx_to_json(
     pptx_path: str,
     output_path: Optional[str] = None,
     pretty: bool = True,
+    images_dir: Optional[str] = None,
 ) -> dict:
     """
     Extract a praisonaippt-compatible JSON dict from a PPTX file.
@@ -800,7 +872,7 @@ def pptx_to_json(
         - All other features are extracted losslessly or with best-effort.
     """
     converter = PPTXToJSONConverter(pptx_path)
-    data = converter.convert()
+    data = converter.convert(images_dir=images_dir)
     if output_path:
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, 'w', encoding='utf-8') as f:
