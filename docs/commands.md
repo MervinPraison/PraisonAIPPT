@@ -126,9 +126,9 @@ praisonaippt -i verses.yaml --convert-pdf \
 
 ## 🔄 PPTX → JSON Extraction Command
 
-Extract slide content from a `.pptx` file back into the praisonaippt JSON schema.
+Convert slide content from a `.pptx` file back into the praisonaippt JSON schema, or convert a `.yaml` verse file back into `.json`.
 
-### Basic Extraction
+### Basic Extraction (PPTX → JSON)
 ```bash
 # Auto-named output (<input>.json)
 praisonaippt convert-json presentation.pptx
@@ -138,6 +138,12 @@ praisonaippt convert-json presentation.pptx --json-output extracted.json
 
 # Compact JSON (no indentation)
 praisonaippt convert-json presentation.pptx --json-output data.json --no-pretty
+```
+
+### Basic Conversion (YAML → JSON)
+```bash
+# Converts verses.yaml into verses.json
+praisonaippt convert-json verses.yaml
 ```
 
 ### Convert-JSON Command Options
@@ -162,6 +168,30 @@ done
 
 > 📖 Full reference: [PPTX to JSON Guide]({{ '/pptx-to-json' | relative_url }})
 
+## 🔄 JSON → YAML Conversion Command
+
+Convert legacy `.json` verse files to the new `.yaml` default format natively.
+
+### Basic Conversion
+```bash
+# Converts verses.json into verses.yaml
+praisonaippt convert-yaml verses.json
+```
+
+### Convert-YAML Command Options
+```
+Convert-YAML Command:
+  positional arguments:
+    input_file              Input file to convert (.json)
+```
+
+### Batch Conversion
+```bash
+# Convert all JSON source files in the current directory to YAML
+for file in *.json; do
+  praisonaippt convert-yaml "$file"
+done
+```
 ## ⚙️ Command Options Reference
 
 ### Global Options

@@ -128,8 +128,8 @@ Examples:
     parser.add_argument(
         'command',
         nargs='?',
-        choices=['convert-pdf', 'convert-json', 'config', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
-        help='Command to execute (e.g., convert-pdf, convert-json, config, setup-oauth)'
+        choices=['convert-pdf', 'convert-json', 'convert-yaml', 'config', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
+        help='Command to execute (e.g., convert-pdf, convert-json, convert-yaml, config, setup-oauth)'
     )
     
     parser.add_argument(
@@ -197,12 +197,38 @@ def handle_convert_json_command(args):
         print("Usage: praisonaippt convert-json <input.pptx> [--json-output output.json] [--output-format yaml]")
         return 1
 
-    if not Path(args.input_file).exists():
+    input_path = Path(args.input_file)
+
+    if not input_path.exists():
         print(f"Error: Input file not found: {args.input_file}")
         return 1
 
-    if not args.input_file.lower().endswith(('.pptx', '.ppt')):
-        print("Error: Input file must be a PowerPoint file (.pptx or .ppt)")
+    suffix = input_path.suffix.lower()
+
+    if suffix in ['.yaml', '.yml']:
+        try:
+            import yaml
+            with open(input_path, 'r', encoding='utf-8') as yf:
+                data = yaml.safe_load(yf)
+                
+            # Determine output path
+            if hasattr(args, 'json_output') and args.json_output:
+                output_path = args.json_output
+            else:
+                output_path = input_path.with_suffix('.json')
+                
+            pretty = getattr(args, 'pretty', True)
+            with open(output_path, 'w', encoding='utf-8') as jf:
+                json.dump(data, jf, indent=2 if pretty else None, ensure_ascii=False)
+                
+            print(f"✓ Converted '{input_path.name}' to '{Path(output_path).name}'")
+            return 0
+        except Exception as e:
+            print(f"Error converting YAML to JSON: {e}")
+            return 1
+
+    if suffix not in ['.pptx', '.ppt']:
+        print("Error: Input file must be a PowerPoint file (.pptx/.ppt) or a YAML file (.yaml/.yml)")
         return 1
 
     try:
@@ -230,6 +256,43 @@ def handle_convert_json_command(args):
         return 1
     except Exception as e:
         print(f"Error during JSON extraction: {e}")
+        return 1
+
+
+def handle_convert_yaml_command(args):
+    """Handle convert-yaml command: convert verses.json to verses.yaml."""
+    if not args.input_file:
+        print("Error: Input file required for convert-yaml command")
+        print("Usage: praisonaippt convert-yaml <input.json>")
+        return 1
+
+    input_path = Path(args.input_file)
+    if not input_path.exists():
+        print(f"Error: Input file not found: {args.input_file}")
+        return 1
+
+    if input_path.suffix.lower() != '.json':
+        print("Error: Input file must be a JSON file (.json)")
+        return 1
+
+    try:
+        import yaml
+        with open(input_path, 'r', encoding='utf-8') as jf:
+            data = json.load(jf)
+            
+        output_path = input_path.with_suffix('.yaml')
+        
+        with open(output_path, 'w', encoding='utf-8') as yf:
+            yaml.dump(data, yf, allow_unicode=True, sort_keys=False, default_flow_style=False)
+            
+        print(f"✓ Converted '{input_path.name}' to '{output_path.name}'")
+        return 0
+
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        return 1
+    except Exception as e:
+        print(f"Error during YAML conversion: {e}")
         return 1
 
 
@@ -872,6 +935,10 @@ def main():
     # Handle convert-json command
     if args.command == 'convert-json':
         return handle_convert_json_command(args)
+    
+    # Handle convert-yaml command
+    if args.command == 'convert-yaml':
+        return handle_convert_yaml_command(args)
     
     # List examples if requested
     if args.list_examples:
