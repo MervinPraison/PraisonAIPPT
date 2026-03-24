@@ -256,26 +256,7 @@ sections: [...]
 
 ### slide_style Fields
 
-| Field | Default | Auto-dark default | Description |
-|---|---|---|---|
-| `background_image` | — | — | Path to a background image file |
-| `background_color` | — | — | Hex background color e.g. `"#1A1A2E"` |
-| `text_color` | `#1A1A2E` dark | `#FFFFFF` white | Body / verse text |
-| `reference_color` | `#404040` gray | `#CCCCCC` light gray | Verse reference line |
-| `title_color` | theme default | `#FFFFFF` white | Title slide title |
-| `subtitle_color` | theme default | `#AAAAAA` | Title slide subtitle |
-| `section_title_color` | `#003366` dark blue | `#FFFFFF` white | Section heading slides |
-| `highlight_color` | `#FF8C00` orange | `#FFD700` yellow | Default color for simple string highlights |
-| `annotation_color` | `#1E50C8` blue | `#1E50C8` blue | Numbered bubble annotations (❶❷❸…) |
-| `font_name` | **`Palatino`** | **`Palatino`** | Font family for all text |
-| `alignment` | **`"left"`** | **`"left"`** | Default text alignment (`"left"`, `"center"`, `"right"`) |
-| `reference_position` | **`"top"`** | **`"top"`** | `"top"` or `"bottom"` for verse reference line |
-
-!!! note
-    **Package defaults**: `font_name`, `alignment`, and `reference_position` now have opinionated defaults (Palatino / left / top). Override any of them in `slide_style` as needed.
-
-!!! tip
-    **Zero regression**: if you omit `slide_style` entirely, all slides use the above defaults automatically.
+--8<-- "docs/snippets/slide_style_table.md"
 
 ### Dark Background — Quick Start
 
