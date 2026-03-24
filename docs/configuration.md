@@ -100,7 +100,7 @@ gdrive:
 
 ```bash
 # This command overrides the config
-praisonaippt -i verses.json --upload-gdrive --gdrive-folder-name "Sunday Service"
+praisonaippt -i verses.yaml --upload-gdrive --gdrive-folder-name "Sunday Service"
 ```
 
 Result: Uploads to "Sunday Service" folder, not "Bible Presentations"
@@ -147,7 +147,7 @@ defaults:
 
 With this config, just run:
 ```bash
-praisonaippt -i verses.json
+praisonaippt -i verses.yaml
 ```
 
 It will automatically:

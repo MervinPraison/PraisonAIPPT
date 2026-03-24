@@ -65,7 +65,7 @@ def create_presentation(
 from praisonaippt import create_presentation, load_verses_from_file
 
 # Load verses from file
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 
 # Create presentation
 output_file = create_presentation(data)
@@ -177,7 +177,7 @@ def load_verses_from_file(file_path):
 from praisonaippt import load_verses_from_file
 
 # Load JSON file
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 
 # Load YAML file
 data = load_verses_from_file("verses.yaml")
@@ -239,13 +239,17 @@ def pptx_to_json(
     pptx_path: str,
     output_path: Optional[str] = None,
     pretty: bool = True,
+    images_dir: Optional[str] = None,
+    output_format: str = 'json',
 ) -> dict:
 ```
 
 #### Parameters
 - `pptx_path` (str): Path to `.pptx` or `.ppt` file
-- `output_path` (str, optional): If set, writes JSON to this file
+- `output_path` (str, optional): If set, writes output to this file
 - `pretty` (bool, optional): Indent JSON output (default: True)
+- `images_dir` (str, optional): Optional directory to save extracted images
+- `output_format` (str, optional): Output format ('json' or 'yaml', default: 'json')
 
 #### Returns
 - `dict`: conforms to the praisonaippt JSON schema
@@ -515,7 +519,7 @@ verse = {
 from praisonaippt import create_presentation, load_verses_from_file
 
 # Load data from file
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 
 # Create presentation
 output_file = create_presentation(
@@ -532,7 +536,7 @@ print(f"Presentation created: {output_file}")
 from praisonaippt import create_presentation, load_verses_from_file, PDFOptions
 
 # Load data
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 
 # Configure PDF options
 pdf_options = PDFOptions(
@@ -645,7 +649,7 @@ from praisonaippt import create_presentation, load_verses_from_file
 
 try:
     # Load file with error handling
-    data = load_verses_from_file("verses.json")
+    data = load_verses_from_file("verses.yaml")
     if not data:
         print("Failed to load verses file")
         return
@@ -769,7 +773,7 @@ result = create_presentation(data, output_file="my.pptx")
 Via CLI (recommended — handles GDrive fallback + auto-upload):
 ```bash
 # Generates PPTX + PDF, uploads both to YYYY/MM folder on Google Drive
-praisonaippt -i verses.json -o my.pptx --convert-pdf
+praisonaippt -i verses.yaml -o my.pptx --convert-pdf
 
 # Convert existing PPTX
 praisonaippt convert-pdf my.pptx --upload-gdrive

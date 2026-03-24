@@ -116,7 +116,7 @@ PDF conversion with Aspose also uses optional dependencies:
 pip install praisonaippt
 
 # Aspose is loaded only when using --convert-pdf with --pdf-backend aspose
-praisonaippt -i verses.json --convert-pdf --pdf-backend aspose
+praisonaippt -i verses.yaml --convert-pdf --pdf-backend aspose
 ```
 
 ## API Reference

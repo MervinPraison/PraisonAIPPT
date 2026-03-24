@@ -50,10 +50,10 @@ sudo apt-get install python3 python3-pip
 
 ### File Issues
 
-#### Issue: "verses.json not found"
+#### Issue: "verses.yaml not found"
 ```bash
-# Create sample verses.json
-cat > verses.json << EOF
+# Create sample verses.yaml
+cat > verses.yaml << EOF
 {
   "presentation_title": "Sample Presentation",
   "sections": [
@@ -71,10 +71,10 @@ cat > verses.json << EOF
 EOF
 ```
 
-#### Issue: "Invalid JSON format"
+#### Issue: "Invalid YAML or JSON format"
 ```bash
 # Validate JSON
-python -m json.tool verses.json
+python -m json.tool verses.yaml
 
 # Or use online validator
 # https://jsonlint.com/

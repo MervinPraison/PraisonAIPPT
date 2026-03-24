@@ -18,32 +18,27 @@ The `highlights` field accepts a **mixed list** of strings and/or objects.
 
 A plain string highlights the phrase in **bold orange** — the default style.
 
-```json
-{
-    "reference": "John 3:16 (NKJV)",
-    "text": "For God so loved the world that he gave his only Son.",
-    "highlights": ["God so loved", "only Son"]
-}
+```yaml
+reference: John 3:16 (NKJV)
+text: For God so loved the world that he gave his only Son.
+highlights:
+- God so loved
+- only Son
 ```
 
 ### Object (Rich) Highlights
 
 Pass an object to control color, bold, italic, underline, and annotation independently.
 
-```json
-{
-    "reference": "Romans 1:17 (NKJV)",
-    "text": "For in it the righteousness of God is revealed from faith to faith.",
-    "highlights": [
-        "the righteousness of God is revealed from",
-        {
-            "text": "faith to faith",
-            "color": "#4A86E8",
-            "bold": true,
-            "underline": true
-        }
-    ]
-}
+```yaml
+reference: Romans 1:17 (NKJV)
+text: For in it the righteousness of God is revealed from faith to faith.
+highlights:
+- the righteousness of God is revealed from
+- text: faith to faith
+  color: '#4A86E8'
+  bold: true
+  underline: true
 ```
 
 #### Object Highlight Fields
@@ -78,20 +73,26 @@ Pass an object to control color, bold, italic, underline, and annotation indepen
 
 Any 6-digit hex string works, with or without `#`:
 
-```json
-{ "text": "faith", "color": "#4A86E8" }
-{ "text": "hope",  "color": "FF8C00"  }
+```yaml
+- text: faith
+  color: '#4A86E8'
+- text: hope
+  color: 'FF8C00'
 ```
 
 ### Multi-Color Example
 
-```json
-"highlights": [
-    { "text": "the gospel",   "annotation": 1 },
-    { "text": "the power",    "annotation": 2 },
-    { "text": "salvation",    "color": "#4A86E8", "underline": true, "annotation": 3 },
-    "for everyone who believes"
-]
+```yaml
+highlights:
+- text: the gospel
+  annotation: 1
+- text: the power
+  annotation: 2
+- text: salvation
+  color: '#4A86E8'
+  underline: true
+  annotation: 3
+- for everyone who believes
 ```
 
 ---
@@ -100,16 +101,19 @@ Any 6-digit hex string works, with or without `#`:
 
 Add `"annotation": N` (1–9) to any object highlight to render a **filled circle bubble** (❶❷❸…) as a superscript immediately after the phrase.
 
-```json
-{
-    "reference": "Romans 1:16–17 (NKJV)",
-    "text": "For I am not ashamed of the gospel of Christ, for it is the power of God to salvation...",
-    "highlights": [
-        { "text": "the gospel",  "annotation": 1 },
-        { "text": "the power",   "annotation": 2 },
-        { "text": "salvation",   "color": "#4A86E8", "underline": true, "annotation": 3 }
-    ]
-}
+```yaml
+reference: Romans 1:16–17 (NKJV)
+text: For I am not ashamed of the gospel of Christ, for it is the power of God to
+  salvation...
+highlights:
+- text: the gospel
+  annotation: 1
+- text: the power
+  annotation: 2
+- text: salvation
+  color: '#4A86E8'
+  underline: true
+  annotation: 3
 ```
 
 Renders as: **the gospel**❶ … **the power**❷ … **salvation**❸
@@ -126,12 +130,14 @@ Items are split by newline characters (`\n`).
 
 ### Bullet List
 
-```json
-{
-    "reference": "",
-    "text": "Woman with the Issue of Blood\nCenturion\nCanaanite",
-    "list_type": "bullet"
-}
+```yaml
+reference: ''
+text: 'Woman with the Issue of Blood
+
+  Centurion
+
+  Canaanite'
+list_type: bullet
 ```
 
 Renders as:
@@ -143,12 +149,14 @@ Renders as:
 
 ### Numbered List
 
-```json
-{
-    "reference": "",
-    "text": "They heard about Jesus\nThey knew the power of God\nThey knew the heart of God",
-    "list_type": "numbered"
-}
+```yaml
+reference: ''
+text: 'They heard about Jesus
+
+  They knew the power of God
+
+  They knew the heart of God'
+list_type: numbered
 ```
 
 Renders as:
@@ -170,12 +178,10 @@ Control per-verse text alignment with `"alignment"`:
 | `"left"` | Default for list slides |
 | `"right"` | Right-align |
 
-```json
-{
-    "reference": "Mark 16:20 (NKJV)",
-    "text": "And they went out and preached everywhere...",
-    "alignment": "left"
-}
+```yaml
+reference: Mark 16:20 (NKJV)
+text: And they went out and preached everywhere...
+alignment: left
 ```
 
 ---
@@ -184,12 +190,10 @@ Control per-verse text alignment with `"alignment"`:
 
 Override the default 32pt body text with `"font_size"`:
 
-```json
-{
-    "reference": "John 3:16 (NKJV)",
-    "text": "For God so loved the world...",
-    "font_size": 28
-}
+```yaml
+reference: John 3:16 (NKJV)
+text: For God so loved the world...
+font_size: 28
 ```
 
 Useful for longer verses that overflow a single slide, or for emphasis slides with large text.
@@ -198,26 +202,22 @@ Useful for longer verses that overflow a single slide, or for emphasis slides wi
 
 ## Complete Verse Object Reference
 
-```json
-{
-    "reference": "Romans 1:16–17 (NKJV)",
-    "text": "For I am not ashamed of the gospel...",
-    "highlights": [
-        "simple phrase (orange + bold)",
-        {
-            "text": "rich phrase",
-            "color": "yellow",
-            "bold": true,
-            "italic": false,
-            "underline": true,
-            "annotation": 1
-        }
-    ],
-    "large_text": { "gospel": 48 },
-    "list_type": "bullet",
-    "alignment": "center",
-    "font_size": 32
-}
+```yaml
+reference: Romans 1:16–17 (NKJV)
+text: For I am not ashamed of the gospel...
+highlights:
+- simple phrase (orange + bold)
+- text: rich phrase
+  color: yellow
+  bold: true
+  italic: false
+  underline: true
+  annotation: 1
+large_text:
+  gospel: 48
+list_type: bullet
+alignment: center
+font_size: 32
 ```
 
 | Field | Type | Default | Description |
@@ -236,25 +236,22 @@ Useful for longer verses that overflow a single slide, or for emphasis slides wi
 
 Add a `"slide_style"` key at the **top level** of your JSON to control the appearance of every slide. All fields are optional. When a background is set, text colors automatically default to white.
 
-```json
-{
-    "presentation_title": "Great Faith",
-    "slide_style": {
-        "background_image": "assets/background_dark.png",
-        "background_color": "#1A1A2E",
-        "text_color": "#FFFFFF",
-        "reference_color": "#CCCCCC",
-        "title_color": "#FFFFFF",
-        "subtitle_color": "#AAAAAA",
-        "section_title_color": "#FFFFFF",
-        "highlight_color": "#FF8C00",
-        "annotation_color": "#1E50C8",
-        "font_name": "Spectral",
-        "alignment": "left",
-        "reference_position": "top"
-    },
-    "sections": [...]
-}
+```yaml
+presentation_title: Great Faith
+slide_style:
+  background_image: assets/background_dark.png
+  background_color: '#1A1A2E'
+  text_color: '#FFFFFF'
+  reference_color: '#CCCCCC'
+  title_color: '#FFFFFF'
+  subtitle_color: '#AAAAAA'
+  section_title_color: '#FFFFFF'
+  highlight_color: '#FF8C00'
+  annotation_color: '#1E50C8'
+  font_name: Spectral
+  alignment: left
+  reference_position: top
+sections: [...]
 ```
 
 ### slide_style Fields
@@ -282,22 +279,20 @@ Add a `"slide_style"` key at the **top level** of your JSON to control the appea
 
 ### Dark Background — Quick Start
 
-```json
-"slide_style": {
-    "background_image": "assets/background_alt.jpg",
-    "text_color": "white",
-    "font_name": "Palatino"
-}
+```yaml
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  font_name: Palatino
 ```
 
 ### Custom Colors Only (No Background)
 
-```json
-"slide_style": {
-    "highlight_color": "#FFD700",
-    "annotation_color": "#E53935",
-    "font_name": "Georgia"
-}
+```yaml
+slide_style:
+  highlight_color: '#FFD700'
+  annotation_color: '#E53935'
+  font_name: Georgia
 ```
 
 ---
@@ -306,11 +301,14 @@ Add a `"slide_style"` key at the **top level** of your JSON to control the appea
 
 Display individual verse numbers as small superscripts before each verse line by starting each line with its verse number followed by a space.
 
-```json
-{
-    "reference": "Titus 2:11-13 (NKJV)",
-    "text": "11 For the grace of God that brings salvation has appeared to all men,\n12 teaching us that, denying ungodliness and worldly lusts, we should live soberly,\n13 looking for the blessed hope and glorious appearing of our great God and Savior Jesus Christ,"
-}
+```yaml
+reference: Titus 2:11-13 (NKJV)
+text: '11 For the grace of God that brings salvation has appeared to all men,
+
+  12 teaching us that, denying ungodliness and worldly lusts, we should live soberly,
+
+  13 looking for the blessed hope and glorious appearing of our great God and Savior
+  Jesus Christ,'
 ```
 
 The numbers render as small superscript characters (~52% of body size, raised baseline) before each line of text.
@@ -327,13 +325,11 @@ The numbers render as small superscript characters (~52% of body size, raised ba
 
 Add a top-level `"slide_size"` key to change the presentation dimensions.
 
-```json
-{
-    "presentation_title": "Great Faith",
-    "slide_size": "widescreen",
-    "slide_style": { ... },
-    "sections": [ ... ]
-}
+```yaml
+presentation_title: Great Faith
+slide_size: widescreen
+slide_style: { ... }
+sections: [ ... ]
 ```
 
 ### Presets
@@ -345,8 +341,10 @@ Add a top-level `"slide_size"` key to change the presentation dimensions.
 | `"16:10"` | 12.8" × 8.0" | MacBook / older widescreen |
 | `{"width": W, "height": H}` | Custom | Any size in inches |
 
-```json
-"slide_size": { "width": 13.33, "height": 7.5 }
+```yaml
+slide_size:
+  width: 13.33
+  height: 7.5
 ```
 
 !!! note
@@ -359,7 +357,7 @@ Add a top-level `"slide_size"` key to change the presentation dimensions.
 Generate a PDF alongside the PPTX and auto-upload both to Google Drive in a single command:
 
 ```bash
-praisonaippt -i verses.json -o my_presentation.pptx --convert-pdf
+praisonaippt -i verses.yaml -o my_presentation.pptx --convert-pdf
 ```
 
 - Creates `my_presentation.pptx` and `my_presentation.pdf`

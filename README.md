@@ -78,7 +78,7 @@ pip install praisonaippt
 praisonaippt --use-example verses
 
 # Or create from your own JSON file
-praisonaippt -i my_verses.json
+praisonaippt -i my_verses.yaml
 ```
 
 ### 3. Explore More Options
@@ -88,13 +88,13 @@ praisonaippt -i my_verses.json
 praisonaippt --list-examples
 
 # Create with custom title
-praisonaippt -i verses.json -t "Sunday Service"
+praisonaippt -i verses.yaml -t "Sunday Service"
 
 # Convert to PDF
-praisonaippt -i verses.json --convert-pdf
+praisonaippt -i verses.yaml --convert-pdf
 
 # Upload to Google Drive (requires setup)
-praisonaippt -i verses.json --upload-gdrive --gdrive-credentials creds.json
+praisonaippt -i verses.yaml --upload-gdrive --gdrive-credentials creds.json
 ```
 
 ---
@@ -235,7 +235,7 @@ Once configured, commands become simpler:
 
 #### Without Configuration
 ```bash
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   --upload-gdrive \
   --gdrive-credentials ~/gdrive-credentials.json \
   --gdrive-folder-name "Bible Presentations"
@@ -244,7 +244,7 @@ praisonaippt -i verses.json \
 #### With Configuration
 ```bash
 # Just this! Config handles the rest
-praisonaippt -i verses.json --upload-gdrive
+praisonaippt -i verses.yaml --upload-gdrive
 ```
 
 ### Configuration Priority
@@ -259,7 +259,7 @@ Settings are applied in this order (later overrides earlier):
 ```bash
 # Config has: "folder_name": "Bible Presentations"
 # This command overrides it:
-praisonaippt -i verses.json --upload-gdrive --gdrive-folder-name "Sunday Service"
+praisonaippt -i verses.yaml --upload-gdrive --gdrive-folder-name "Sunday Service"
 ```
 
 ### Configuration Commands
@@ -317,7 +317,7 @@ from praisonaippt.gdrive_uploader import upload_to_gdrive
 config = load_config()
 
 # Create presentation
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 output = create_presentation(data)
 
 # Upload using config credentials
@@ -402,7 +402,7 @@ defaults:
 
 With this config, just run:
 ```bash
-praisonaippt -i verses.json
+praisonaippt -i verses.yaml
 # Automatically creates PPTX, converts to PDF, and uploads to Google Drive!
 ```
 
@@ -426,14 +426,14 @@ praisonaippt setup-credentials        # Setup service account
 praisonaippt secure-credentials       # Secure credential files
 
 # Create Presentations
-praisonaippt -i verses.json           # Create from JSON/YAML
+praisonaippt -i verses.yaml           # Create from JSON/YAML
 praisonaippt --use-example verses     # Use built-in example
 praisonaippt --list-examples          # List available examples
 
 # With Features
-praisonaippt -i verses.json --convert-pdf              # Create + PDF
-praisonaippt -i verses.json --upload-gdrive            # Create + Upload
-praisonaippt -i verses.json --convert-pdf --upload-gdrive  # All features
+praisonaippt -i verses.yaml --convert-pdf              # Create + PDF
+praisonaippt -i verses.yaml --upload-gdrive            # Create + Upload
+praisonaippt -i verses.yaml --convert-pdf --upload-gdrive  # All features
 
 # Configuration
 praisonaippt config show              # Show current config
@@ -472,26 +472,21 @@ sections:
 
 #### JSON Format
 
-Traditional JSON format is also supported:
+Traditional YAML or JSON format is also supported:
 
-```json
-{
-  "presentation_title": "Your Presentation Title",
-  "presentation_subtitle": "Your Subtitle",
-  "sections": [
-    {
-      "section": "Section Name",
-      "verses": [
-        {
-          "reference": "Book Chapter:Verse (Version)",
-          "text": "The actual verse text here.",
-          "highlights": ["word1", "phrase to highlight"],
-          "large_text": {"special_word": 200}
-        }
-      ]
-    }
-  ]
-}
+```yaml
+presentation_title: Your Presentation Title
+presentation_subtitle: Your Subtitle
+sections:
+- section: Section Name
+  verses:
+  - reference: Book Chapter:Verse (Version)
+    text: The actual verse text here.
+    highlights:
+    - word1
+    - phrase to highlight
+    large_text:
+      special_word: 200
 ```
 
 #### Quick Start Template
@@ -503,9 +498,9 @@ nano my_verses.yaml
 praisonaippt -i my_verses.yaml
 
 # For JSON
-cp examples/template.json my_verses.json
-nano my_verses.json
-praisonaippt -i my_verses.json
+cp examples/template.json my_verses.yaml
+nano my_verses.yaml
+praisonaippt -i my_verses.yaml
 ```
 
 ### CLI Usage
@@ -532,18 +527,18 @@ praisonaippt secure-credentials
 #### Basic Commands
 
 ```bash
-# Use default verses.json
+# Use default verses.yaml
 praisonaippt
 
 # Specify input file
-praisonaippt -i my_verses.json
+praisonaippt -i my_verses.yaml
 praisonaippt -i my_verses.yaml
 
 # Specify output file
-praisonaippt -i verses.json -o my_presentation.pptx
+praisonaippt -i verses.yaml -o my_presentation.pptx
 
 # Use custom title
-praisonaippt -i verses.json -t "My Custom Title"
+praisonaippt -i verses.yaml -t "My Custom Title"
 
 # Use built-in examples
 praisonaippt --use-example tamil_verses
@@ -556,16 +551,16 @@ praisonaippt --list-examples
 
 ```bash
 # Create and convert to PDF in one step
-praisonaippt -i verses.json --convert-pdf
+praisonaippt -i verses.yaml --convert-pdf
 
 # Convert existing PPTX to PDF
 praisonaippt convert-pdf presentation.pptx
 
 # With specific backend
-praisonaippt -i verses.json --convert-pdf --pdf-backend aspose
+praisonaippt -i verses.yaml --convert-pdf --pdf-backend aspose
 
 # With custom options
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","compression":true}'
 ```
 
@@ -573,20 +568,20 @@ praisonaippt -i verses.json --convert-pdf \
 
 ```bash
 # Upload to Google Drive
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   --upload-gdrive \
   --gdrive-credentials credentials.json \
   --gdrive-folder-name "Presentations"
 
 # Upload with date-based folders (e.g., Presentations/2024/12/)
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   --upload-gdrive \
   --gdrive-credentials credentials.json \
   --gdrive-folder-name "Presentations" \
   --gdrive-date-folders
 
 # Complete workflow: Create + PDF + Upload with date folders
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   --convert-pdf \
   --upload-gdrive \
   --gdrive-credentials credentials.json \
@@ -602,7 +597,7 @@ praisonaippt -i verses.json \
 from praisonaippt import create_presentation, load_verses_from_file
 
 # Load verses from file
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 
 # Create presentation
 if data:
@@ -625,7 +620,7 @@ from praisonaippt import (
 )
 
 # Method 1: Create and convert in one step
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 result = create_presentation(
     data,
     output_file="my_presentation.pptx",
@@ -725,11 +720,11 @@ Convert your presentations to PDF with multiple backend options.
 
 ```bash
 # High quality PDF (no compression)
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","compression":false}'
 
 # Password-protected PDF
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"password_protect":true,"password":"secret123"}'
 
 # Export specific slides
@@ -767,7 +762,7 @@ Upload presentations directly to Google Drive with service account authenticatio
 
 3. **Upload:**
    ```bash
-   praisonaippt -i verses.json \
+   praisonaippt -i verses.yaml \
      --upload-gdrive \
      --gdrive-credentials credentials.json \
      --gdrive-folder-name "Presentations"
@@ -788,12 +783,12 @@ Highlight specific words or phrases in your verses.
 
 #### Example
 
-```json
-{
-  "reference": "John 3:16 (NIV)",
-  "text": "For God so loved the world that he gave his one and only Son...",
-  "highlights": ["loved", "eternal life"]
-}
+```yaml
+reference: John 3:16 (NIV)
+text: For God so loved the world that he gave his one and only Son...
+highlights:
+- loved
+- eternal life
 ```
 
 #### Large Text Feature
@@ -883,7 +878,7 @@ Options:
   -h, --help            Show help message
   -v, --version         Show version number
   -i INPUT, --input INPUT
-                        Input JSON/YAML file (default: verses.json)
+                        Input JSON/YAML file (default: verses.yaml)
   -o OUTPUT, --output OUTPUT
                         Output PowerPoint file (auto-generated if not specified)
   -t TITLE, --title TITLE
@@ -1045,15 +1040,15 @@ praisonaippt --use-example verses
 
 ```bash
 # Copy template and customize
-cp examples/template.json my_verses.json
-nano my_verses.json
-praisonaippt -i my_verses.json
+cp examples/template.json my_verses.yaml
+nano my_verses.yaml
+praisonaippt -i my_verses.yaml
 ```
 
 ### Example 3: Custom Title
 
 ```bash
-praisonaippt -i verses.json -t "God's Promises"
+praisonaippt -i verses.yaml -t "God's Promises"
 ```
 
 ### Example 4: Python Script
@@ -1062,7 +1057,7 @@ praisonaippt -i verses.json -t "God's Promises"
 from praisonaippt import create_presentation, load_verses_from_file
 
 # Load and create
-data = load_verses_from_file("my_verses.json")
+data = load_verses_from_file("my_verses.yaml")
 if data:
     create_presentation(data, output_file="output.pptx")
 ```
@@ -1074,7 +1069,7 @@ if data:
 praisonaippt --use-example highlights_example
 
 # Or create your own
-praisonaippt -i my_highlighted_verses.json
+praisonaippt -i my_highlighted_verses.yaml
 ```
 
 ### Example 6: Batch Processing
@@ -1095,7 +1090,7 @@ done
 
 ```bash
 # Create PPTX, convert to PDF, upload to Google Drive
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   -t "Sunday Service - John 3:16" \
   --convert-pdf \
   --pdf-options '{"quality":"high"}' \
@@ -1145,7 +1140,7 @@ The package creates a PowerPoint presentation with:
 
 **Solution:**
 - Verify the JSON file exists
-- Use absolute path if needed: `praisonaippt -i /full/path/to/verses.json`
+- Use absolute path if needed: `praisonaippt -i /full/path/to/verses.yaml`
 
 #### 3. "Invalid JSON" error
 
@@ -1289,17 +1284,17 @@ pip install praisonaippt[gdrive]           # With Google Drive
 pip install praisonaippt[all]              # Everything
 
 # Basic Usage
-praisonaippt                               # Use default verses.json
-praisonaippt -i my_verses.json             # Custom input
+praisonaippt                               # Use default verses.yaml
+praisonaippt -i my_verses.yaml             # Custom input
 praisonaippt -t "My Title"                 # Custom title
 praisonaippt --use-example verses          # Use example
 
 # PDF Conversion
-praisonaippt -i verses.json --convert-pdf  # Create + convert
+praisonaippt -i verses.yaml --convert-pdf  # Create + convert
 praisonaippt convert-pdf file.pptx         # Convert existing
 
 # Google Drive Upload
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   --upload-gdrive \
   --gdrive-credentials creds.json \
   --gdrive-folder-name "Folder"

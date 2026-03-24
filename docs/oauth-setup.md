@@ -144,7 +144,7 @@ The authentication token will be saved to `~/.praisonaippt/token.pickle`
 All future uploads will use the saved token automatically:
 
 ```bash
-praisonaippt -i verses.json --upload-gdrive
+praisonaippt -i verses.yaml --upload-gdrive
 ```
 
 No browser window will open - it just works!
@@ -205,7 +205,7 @@ Make sure you:
 Delete the token and re-authenticate:
 ```bash
 rm ~/.praisonaippt/token.pickle
-praisonaippt -i verses.json --upload-gdrive
+praisonaippt -i verses.yaml --upload-gdrive
 ```
 
 A new browser window will open for re-authentication.

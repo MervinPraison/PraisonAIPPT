@@ -21,14 +21,14 @@ PraisonAI PPT provides a comprehensive command-line interface for creating prese
 
 #### Default Usage
 ```bash
-# Use default verses.json in current directory
+# Use default verses.yaml in current directory
 praisonaippt
 ```
 
 #### Specify Input File
 ```bash
-# JSON format
-praisonaippt -i my_verses.json
+# YAML or JSON format
+praisonaippt -i my_verses.yaml
 
 # YAML format (recommended)
 praisonaippt -i my_verses.yaml
@@ -37,13 +37,13 @@ praisonaippt -i my_verses.yaml
 #### Specify Output File
 ```bash
 # Custom output filename
-praisonaippt -i verses.json -o my_presentation.pptx
+praisonaippt -i verses.yaml -o my_presentation.pptx
 ```
 
 #### Use Custom Title
 ```bash
 # Override JSON title
-praisonaippt -i verses.json -t "My Custom Title"
+praisonaippt -i verses.yaml -t "My Custom Title"
 ```
 
 #### Use Built-in Examples
@@ -106,20 +106,20 @@ praisonaippt convert-pdf presentation.pptx \
 #### Basic Integrated Conversion
 ```bash
 # Create presentation and convert to PDF
-praisonaippt -i verses.json --convert-pdf
+praisonaippt -i verses.yaml --convert-pdf
 
 # Custom PDF output filename
-praisonaippt -i verses.json --convert-pdf --pdf-output custom.pdf
+praisonaippt -i verses.yaml --convert-pdf --pdf-output custom.pdf
 ```
 
 #### Advanced Integrated Conversion
 ```bash
 # With custom PDF options
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","include_hidden_slides":true}'
 
 # With backend selection
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-backend aspose \
   --pdf-options '{"quality":"high","compression":false}'
 ```
@@ -170,7 +170,7 @@ Options:
   -h, --help            Show help message
   -v, --version         Show version number
   -i INPUT, --input INPUT
-                        Input JSON/YAML file (default: verses.json)
+                        Input JSON/YAML file (default: verses.yaml)
   -o OUTPUT, --output OUTPUT
                         Output PowerPoint file (auto-generated if not specified)
   -t TITLE, --title TITLE
@@ -254,18 +254,18 @@ done
 ### Custom Quality Settings
 ```bash
 # High quality PDF (no compression)
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","compression":false}'
 
 # Low quality PDF (smaller file size)
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"low","compression":true}'
 ```
 
 ### Password Protected PDF
 ```bash
 # Create password-protected PDF
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"password_protect":true,"password":"secret123"}'
 ```
 
@@ -302,17 +302,17 @@ praisonaippt
 praisonaippt -t "Sunday Service"
 
 # From specific file
-praisonaippt -i easter_verses.json
+praisonaippt -i easter_verses.yaml
 ```
 
 ### Professional PDF Export
 ```bash
 # High quality PDF for printing
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","compression":false}'
 
 # PDF for web (smaller file)
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"medium","compression":true}'
 ```
 
@@ -323,7 +323,7 @@ find . -name "*.json" -exec praisonaippt -i {} --convert-pdf \;
 
 # Create presentations for multiple services
 for service in morning evening; do
-  praisonaippt -i "${service}_verses.json" -o "${service}_service.pptx"
+  praisonaippt -i "${service}_verses.yaml" -o "${service}_service.pptx"
 done
 ```
 
@@ -365,10 +365,10 @@ python -c "from praisonaippt import PDFConverter; print(PDFConverter().get_avail
 ### File Path Issues
 ```bash
 # Use absolute paths
-praisonaippt -i /full/path/to/verses.json -o /full/path/to/output.pptx
+praisonaippt -i /full/path/to/verses.yaml -o /full/path/to/output.pptx
 
 # Handle spaces in filenames
-praisonaippt -i "my verses.json" -o "my presentation.pptx"
+praisonaippt -i "my verses.yaml" -o "my presentation.pptx"
 ```
 
 ## 📚 Related Documentation

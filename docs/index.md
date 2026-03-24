@@ -6,7 +6,7 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 
 # PraisonAI PPT
 
-**Create beautiful PowerPoint presentations from Bible verses in JSON format with integrated PDF conversion capabilities.**
+**Create beautiful PowerPoint presentations from Bible verses in YAML or JSON format with integrated PDF conversion capabilities.**
 
 [![PyPI version](https://badge.fury.io/py/praisonaippt.svg)](https://pypi.org/project/praisonaippt/)
 [![Python Version](https://img.shields.io/badge/python-3.7%2B-blue.svg)](https://www.python.org/downloads/)
@@ -44,11 +44,11 @@ pip install praisonaippt[pdf-all]
 ### Basic Usage
 
 ```bash
-# Create presentation from default verses.json
+# Create presentation from default verses.yaml
 praisonaippt
 
 # Create presentation and convert to PDF
-praisonaippt -i verses.json --convert-pdf
+praisonaippt -i verses.yaml --convert-pdf
 
 # Convert existing PPTX to PDF
 praisonaippt convert-pdf presentation.pptx
@@ -60,7 +60,7 @@ praisonaippt convert-pdf presentation.pptx
 from praisonaippt import create_presentation, convert_pptx_to_pdf
 
 # Load verses and create presentation
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 result = create_presentation(data, convert_to_pdf=True)
 
 print(f"PPTX: {result['pptx']}")
@@ -75,10 +75,10 @@ print(f"PDF: {result['pdf']}")
 praisonaippt
 
 # Specify input file
-praisonaippt -i my_verses.json
+praisonaippt -i my_verses.yaml
 
 # Custom title and output
-praisonaippt -i verses.json -o output.pptx -t "My Title"
+praisonaippt -i verses.yaml -o output.pptx -t "My Title"
 
 # Use built-in examples
 praisonaippt --use-example tamil_verses
@@ -90,34 +90,29 @@ praisonaippt --use-example tamil_verses
 praisonaippt convert-pdf presentation.pptx
 
 # Create PPTX and convert to PDF
-praisonaippt -i verses.json --convert-pdf
+praisonaippt -i verses.yaml --convert-pdf
 
 # Advanced PDF options
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","compression":true}'
 ```
 
 ## 📄 File Format
 
 ### JSON Format
-```json
-{
-  "presentation_title": "Your Presentation Title",
-  "presentation_subtitle": "Your Subtitle",
-  "sections": [
-    {
-      "section": "Section Name",
-      "verses": [
-        {
-          "reference": "Book Chapter:Verse (Version)",
-          "text": "The actual verse text here.",
-          "highlights": ["word1", "phrase to highlight"],
-          "large_text": {"special_word": 200}
-        }
-      ]
-    }
-  ]
-}
+```yaml
+presentation_title: Your Presentation Title
+presentation_subtitle: Your Subtitle
+sections:
+- section: Section Name
+  verses:
+  - reference: Book Chapter:Verse (Version)
+    text: The actual verse text here.
+    highlights:
+    - word1
+    - phrase to highlight
+    large_text:
+      special_word: 200
 ```
 
 ### YAML Format (Recommended)

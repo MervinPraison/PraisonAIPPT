@@ -67,13 +67,13 @@ If you want to upload to a specific folder:
 Upload to Google Drive root:
 
 ```bash
-praisonaippt -i verses.json --upload-gdrive --gdrive-credentials credentials.json
+praisonaippt -i verses.yaml --upload-gdrive --gdrive-credentials credentials.json
 ```
 
 ### Upload to Specific Folder by ID
 
 ```bash
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   --upload-gdrive \
   --gdrive-credentials credentials.json \
   --gdrive-folder-id "1a2b3c4d5e6f7g8h9i0j"
@@ -84,7 +84,7 @@ praisonaippt -i verses.json \
 The tool will search for the folder and create it if it doesn't exist:
 
 ```bash
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   --upload-gdrive \
   --gdrive-credentials credentials.json \
   --gdrive-folder-name "Presentations"
@@ -95,7 +95,7 @@ praisonaippt -i verses.json \
 Generate presentation, convert to PDF, and upload to Google Drive:
 
 ```bash
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   --convert-pdf \
   --upload-gdrive \
   --gdrive-credentials credentials.json \
@@ -236,7 +236,7 @@ pip install praisonaippt[gdrive]
 
 ```bash
 export GDRIVE_CREDENTIALS="/path/to/credentials.json"
-praisonaippt -i verses.json --upload-gdrive --gdrive-credentials "$GDRIVE_CREDENTIALS"
+praisonaippt -i verses.yaml --upload-gdrive --gdrive-credentials "$GDRIVE_CREDENTIALS"
 ```
 
 ## Examples
@@ -248,7 +248,7 @@ praisonaippt -i verses.json --upload-gdrive --gdrive-credentials "$GDRIVE_CREDEN
 # 2. Convert to PDF
 # 3. Upload to Google Drive folder "Bible Study"
 
-praisonaippt -i verses.json \
+praisonaippt -i verses.yaml \
   -t "Sunday Service - John 3:16" \
   --convert-pdf \
   --upload-gdrive \

@@ -73,6 +73,7 @@ praisonaippt convert-json <input_file> [options]
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--json-output PATH` | `<input>.json` | Output JSON file path |
+| `--output-format FORMAT` | `"json"` | Output format (`"json"` or `"yaml"`) |
 | `--pretty` | `True` | Write indented, human-readable JSON |
 | `--no-pretty` | — | Write compact single-line JSON |
 
@@ -113,6 +114,8 @@ def pptx_to_json(
     pptx_path: str,
     output_path: Optional[str] = None,
     pretty: bool = True,
+    images_dir: Optional[str] = None,
+    output_format: str = 'json',
 ) -> dict:
 ```
 
@@ -121,8 +124,10 @@ def pptx_to_json(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `pptx_path` | `str` | *(required)* | Path to `.pptx` or `.ppt` file |
-| `output_path` | `str` or `None` | `None` | If set, writes JSON to this path |
+| `output_path` | `str` or `None` | `None` | If set, writes output to this path |
 | `pretty` | `bool` | `True` | Indent output JSON (set `False` for compact) |
+| `images_dir` | `str` or `None` | `None` | Optional directory to save extracted images |
+| `output_format` | `str` | `"json"` | Output format (`"json"` or `"yaml"`) |
 
 #### Returns
 
@@ -177,61 +182,51 @@ data = converter.convert()
 
 The output dict mirrors the praisonaippt input schema exactly, plus two metadata fields:
 
-```json
-{
-  "_source": "extracted",
-  "_extraction_warnings": [
-    "background_image: file path not recoverable from PPTX binary"
-  ],
-  "presentation_title": "Great Faith",
-  "presentation_subtitle": "Mark 10:30 (NKJV)",
-  "slide_size": "widescreen",
-  "slide_style": {
-    "text_color": "white",
-    "reference_position": "top",
-    "alignment": "left",
-    "font_name": "Palatino",
-    "highlight_color": "#FF8C00",
-    "annotation_color": "#1E50C8"
-  },
-  "sections": [
-    {
-      "section": "1. Centurion",
-      "verses": [
-        {
-          "reference": "Matthew 8:5-10 (NKJV)",
-          "text": "10 When Jesus heard it, He marveled...",
-          "highlights": ["I have not found such great faith"]
-        }
-      ]
-    },
-    {
-      "section": "To Be Victorious",
-      "verses": []
-    },
-    {
-      "section": "1. They Didn't Wait for God",
-      "verses": [
-        {
-          "reference": "",
-          "text": "Woman with the Issue of Blood\nCenturion\nCanaanite",
-          "list_type": "bullet"
-        }
-      ]
-    },
-    {
-      "section": "1. Tithe",
-      "verses": [
-        {
-          "reference": "",
-          "text": "מַעֲשֵׂר (maʿăśēr) – tithe\n\nעָשַׁר (ʿāšar) – to be rich",
-          "highlights": ["מַעֲשֵׂר", "עָשַׁר"],
-          "large_text": { "מַעֲשֵׂר": 80, "עָשַׁר": 80 }
-        }
-      ]
-    }
-  ]
-}
+```yaml
+_source: extracted
+_extraction_warnings:
+- 'background_image: file path not recoverable from PPTX binary'
+presentation_title: Great Faith
+presentation_subtitle: Mark 10:30 (NKJV)
+slide_size: widescreen
+slide_style:
+  text_color: white
+  reference_position: top
+  alignment: left
+  font_name: Palatino
+  highlight_color: '#FF8C00'
+  annotation_color: '#1E50C8'
+sections:
+- section: 1. Centurion
+  verses:
+  - reference: Matthew 8:5-10 (NKJV)
+    text: 10 When Jesus heard it, He marveled...
+    highlights:
+    - I have not found such great faith
+- section: To Be Victorious
+  verses: []
+- section: 1. They Didn't Wait for God
+  verses:
+  - reference: ''
+    text: 'Woman with the Issue of Blood
+
+      Centurion
+
+      Canaanite'
+    list_type: bullet
+- section: 1. Tithe
+  verses:
+  - reference: ''
+    text: 'מַעֲשֵׂר (maʿăśēr) – tithe
+
+
+      עָשַׁר (ʿāšar) – to be rich'
+    highlights:
+    - מַעֲשֵׂר
+    - עָשַׁר
+    large_text:
+      מַעֲשֵׂר: 80
+      עָשַׁר: 80
 ```
 
 ### Metadata Fields

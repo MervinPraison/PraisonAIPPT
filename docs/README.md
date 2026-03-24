@@ -35,7 +35,7 @@ Welcome to the PraisonAI PPT documentation directory!
 ### Text Highlighting
 The text highlighting feature allows you to emphasize specific words or phrases in your presentations. See the [complete guide](HIGHLIGHTS_FEATURE.md) for:
 - Usage examples
-- JSON format
+- YAML or JSON format
 - Best practices
 - Troubleshooting
 

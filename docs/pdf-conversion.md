@@ -100,20 +100,20 @@ praisonaippt convert-pdf presentation.pptx \
 #### Basic Integrated Conversion
 ```bash
 # Create and convert in one step
-praisonaippt -i verses.json --convert-pdf
+praisonaippt -i verses.yaml --convert-pdf
 
 # Custom PDF output
-praisonaippt -i verses.json --convert-pdf --pdf-output custom.pdf
+praisonaippt -i verses.yaml --convert-pdf --pdf-output custom.pdf
 ```
 
 #### Advanced Integrated Conversion
 ```bash
 # With custom options
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","include_hidden_slides":true}'
 
 # With backend selection
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-backend aspose \
   --pdf-options '{"quality":"high","compression":false}'
 ```
@@ -155,7 +155,7 @@ pdf_file = convert_pptx_to_pdf(
 from praisonaippt import create_presentation, load_verses_from_file, PDFOptions
 
 # Load data
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 
 # Configure PDF options
 pdf_options = PDFOptions(
@@ -209,7 +209,7 @@ print(f"PDF: {result['pdf']}")
 ### High Quality Printing
 ```bash
 # CLI
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","compression":false}'
 
 # Python
@@ -220,7 +220,7 @@ result = create_presentation(data, convert_to_pdf=True, pdf_options=options)
 ### Web Distribution
 ```bash
 # CLI
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"medium","compression":true}'
 
 # Python
@@ -231,7 +231,7 @@ result = create_presentation(data, convert_to_pdf=True, pdf_options=options)
 ### Secure Document
 ```bash
 # CLI
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"password_protect":true,"password":"secret123"}'
 
 # Python
@@ -253,7 +253,7 @@ pdf_file = convert_pptx_to_pdf("presentation.pptx", options=options)
 ### Archival Quality
 ```bash
 # CLI
-praisonaippt -i verses.json --convert-pdf \
+praisonaippt -i verses.yaml --convert-pdf \
   --pdf-options '{"quality":"high","compliance":"PDF/A"}'
 
 # Python

@@ -16,24 +16,21 @@ pip install praisonaippt[pdf-all]
 
 ### Step 2: Create Your First Verses File
 
-Create `verses.json`:
-```json
-{
-  "presentation_title": "My First Presentation",
-  "presentation_subtitle": "Created with PraisonAI PPT",
-  "sections": [
-    {
-      "section": "Introduction",
-      "verses": [
-        {
-          "reference": "John 3:16 (KJV)",
-          "text": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
-          "highlights": ["God", "loved", "everlasting life"]
-        }
-      ]
-    }
-  ]
-}
+Create `verses.yaml`:
+```yaml
+presentation_title: "My First Presentation"
+presentation_subtitle: "Created with PraisonAI PPT"
+sections:
+  - section: "Introduction"
+    verses:
+      - reference: "John 3:16 (KJV)"
+        text: >
+          For God so loved the world, that he gave his only begotten Son, 
+          that whosoever believeth in him should not perish, but have everlasting life.
+        highlights: 
+          - "God"
+          - "loved"
+          - "everlasting life"
 ```
 
 ### Step 3: Create Your Presentation
@@ -65,7 +62,7 @@ praisonaippt --use-example tamil_verses --convert-pdf
 from praisonaippt import create_presentation, load_verses_from_file
 
 # Load your verses
-data = load_verses_from_file("verses.json")
+data = load_verses_from_file("verses.yaml")
 
 # Create presentation with PDF
 result = create_presentation(data, convert_to_pdf=True)
