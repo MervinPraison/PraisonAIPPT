@@ -373,20 +373,28 @@ def _parse_verse_lines(text):
     Returns [(None, full_text)] if no verse numbers detected.
     """
     import re
-    VERSE_NUM_RE = re.compile(r'^(\d{1,3})\s+(.*)', re.DOTALL)
+    VERSE_NUM_RE = re.compile(r"^(\d{1,3})\s+(.*)", re.DOTALL)
 
-    # Split on newlines first
-    raw_lines = [l.strip() for l in text.split('\n') if l.strip()]
+    # Books that appear with a numeric prefix (1/2/3 Timothy, etc.)
+    NUMBERED_BOOKS = frozenset([
+        "timothy", "corinthians", "thessalonians", "peter", "john",
+        "chronicles", "samuel", "kings", "esdras", "maccabees",
+    ])
+
+    raw_lines = [l.strip() for l in text.split("\n") if l.strip()]
     result = []
     for line in raw_lines:
         m = VERSE_NUM_RE.match(line)
         if m:
-            result.append((m.group(1), m.group(2)))
+            num_str = m.group(1)
+            remainder = m.group(2)
+            # If 1/2/3 followed by a numbered Bible book name -> plain text
+            first_word = remainder.split()[0].lower().rstrip(",:)") if remainder.split() else ""
+            if int(num_str) in (1, 2, 3) and first_word in NUMBERED_BOOKS:
+                result.append((None, line))
+            else:
+                result.append((num_str, remainder))
         else:
-            # Try inline verse numbers within a single paragraph
-            # e.g. '11 For the grace 12 teaching'
-            parts = re.split(r'(?<![\w])(?=(\d{1,3})\s+)', line)
-            # Simpler: just append as plain text
             result.append((None, line))
 
     # If no verse numbers found at all, return original

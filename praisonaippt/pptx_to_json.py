@@ -103,6 +103,7 @@ def _classify_slide(slide, index: int) -> str:
     Rules:
       - slide 0 is always 'title'
       - single textbox, bold, >36pt, centered → 'section'
+      - single textbox, short text (<60 chars), no Bible reference pattern → 'section'
       - text starts with bullet (•) or numbered prefix → 'list'
       - otherwise → 'verse'
     """
@@ -129,6 +130,13 @@ def _classify_slide(slide, index: int) -> str:
                     size_val = size_pt.pt if size_pt else 0
                     if size_val >= 36 and bold:
                         return 'section'
+
+            # Short, non-Bible-reference single textbox → section header
+            stripped = text.strip()
+            # Only short text (< 60 chars) with no verse pattern qualifies
+            if (len(stripped) < 80 and '\n' not in stripped.strip()
+                    and not re.search(r'\d+[:.\-–]\d+', stripped)):
+                return 'section'
 
     # Bullet / numbered list detection
     full_text = '\n'.join(_tf_text(b.text_frame) for b in boxes)
@@ -396,6 +404,16 @@ def _strip_list_prefix(text: str, list_type: str) -> str:
     return '\n'.join(cleaned)
 
 
+def _is_warm_color(r: int, g: int, b: int) -> bool:
+    """Orange / gold / yellow family."""
+    return r > 180 and b < 130 and r > g * 0.9
+
+
+def _is_cool_color(r: int, g: int, b: int) -> bool:
+    """Blue / cyan family."""
+    return b > 120 and b > r and b > g * 0.8
+
+
 def _detect_highlights_and_large_text(
         tf,
         body_color_rgb: tuple,
@@ -403,16 +421,27 @@ def _detect_highlights_and_large_text(
 ) -> Tuple[list, Optional[dict]]:
     """
     Scan runs in a text frame. Return:
-      - highlights: list of strings (simple) or dicts (with color/bold/underline)
+      - highlights: list of strings (primary color) or {"text","color"} dicts (secondary)
       - large_text: dict of {word: font_size_pt} for oversized runs, or None
 
-    body_color_rgb: (r,g,b) of the normal body text
-    highlight_color_hex: e.g. '#FF8C00' — runs close to this color → simple string
+    Detection strategy (in priority order):
+      1. Large font (>140% of body_size) → large_text dict entry
+      2. Explicitly colored run, different color from body:
+           warm (orange/gold/yellow) → simple string (uses highlight_color)
+           cool (blue)              → {"text": ..., "color": "#1E50C8"} (annotation)
+           other non-reference      → simple string
+           reference color #003366  → skipped (it's the ref line color)
+      3. Bold run with SAME color as body → simple string (bold = emphasis in many PPTXs)
     """
+    REFERENCE_RGB = (0x00, 0x33, 0x66)   # dark blue used for ref lines
+    ANNOTATION_COLOR = "#1E50C8"          # our design secondary color
+    NS = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
+
     highlights_out = []
     large_text_out = {}
+    seen_texts = set()
 
-    # Determine body font size from most common run sizes in this tf
+    # Determine body font size
     sizes = []
     for para in tf.paragraphs:
         for run in para.runs:
@@ -420,15 +449,16 @@ def _detect_highlights_and_large_text(
                 sizes.append(run.font.size.pt)
     body_size = _most_common(sizes) or 32
 
-    # Parse highlight_color_hex to RGB triple
-    hl_rgb = None
-    if highlight_color_hex:
-        try:
-            hl_rgb = _parse_hex_to_rgb_triple(highlight_color_hex)
-        except Exception:
-            pass
+    br, bg_, bb = body_color_rgb
 
-    seen_texts = set()
+    # Determine if body text is predominantly bold
+    # (if so, bold alone shouldn't trigger highlight)
+    bold_flags = []
+    for para in tf.paragraphs:
+        for run in para.runs:
+            if run.text.strip():
+                bold_flags.append(bool(run.font.bold))
+    all_bold = len(bold_flags) > 0 and all(bold_flags)
 
     for para in tf.paragraphs:
         for run in para.runs:
@@ -450,52 +480,85 @@ def _detect_highlights_and_large_text(
             if run.font.size:
                 sz = run.font.size.pt
                 if sz > body_size * 1.4 and txt.strip() not in seen_texts:
-                    large_text_out[txt.strip()] = int(sz)
+                    large_text_out[txt.strip()] = min(int(sz), 80)
                     seen_texts.add(txt.strip())
                     continue
 
-            # Color-based highlight detection
+            word = txt.strip()
+            if not word or word in seen_texts:
+                continue
+
+            # ── 2. <a:highlight> XML element (background fill highlight) ──────
+            # Used in modern PowerPoint for text highlighter pen (yellow, green, etc.)
+            try:
+                rPr = run._r.find(NS + 'rPr')
+                if rPr is not None:
+                    hl_elem = rPr.find(NS + 'highlight')
+                    if hl_elem is not None:
+                        seen_texts.add(word)
+                        highlights_out.append(word)
+                        continue
+            except Exception:
+                pass
+
+            # ── 3. Color-based highlight detection ───────────────────────────
+            detected = False
             try:
                 color = run.font.color.rgb
                 cr, cg, cb = int(color.r), int(color.g), int(color.b)
-                br, bg_, bb = body_color_rgb
                 dist_from_body = ((cr-br)**2 + (cg-bg_)**2 + (cb-bb)**2) ** 0.5
 
+                # Skip if same as body color
                 if dist_from_body < 30:
-                    continue  # same as body color → not a highlight
-
-                word = txt.strip()
-                if not word or word in seen_texts:
-                    continue
-                seen_texts.add(word)
-
-                # Decide: simple string or rich object?
-                is_bold = bool(run.font.bold)
-                is_underline = bool(run.font.underline)
-                color_hex = f"#{cr:02X}{cg:02X}{cb:02X}"
-
-                # If run color is close to the slide_style highlight_color → emit simple string
-                if hl_rgb:
-                    hr, hg, hb = hl_rgb
-                    dist_from_hl = ((cr-hr)**2 + (cg-hg)**2 + (cb-hb)**2) ** 0.5
-                    if dist_from_hl < 50:
+                    # Fall through to bold check below
+                    pass
+                # Skip reference line color
+                elif (abs(cr - REFERENCE_RGB[0]) < 20 and
+                      abs(cg - REFERENCE_RGB[1]) < 20 and
+                      abs(cb - REFERENCE_RGB[2]) < 20):
+                    continue  # reference-colored text, not a highlight
+                else:
+                    # Color is distinct — map to our design palette
+                    seen_texts.add(word)
+                    if _is_cool_color(cr, cg, cb):
+                        # Secondary (cool) color → annotation color object
+                        highlights_out.append({"text": word, "color": ANNOTATION_COLOR})
+                    else:
+                        # Warm or other → primary highlight (simple string)
                         highlights_out.append(word)
-                        continue
-
-                # Otherwise emit a rich object
-                hl_obj: Dict[str, Any] = {'text': word}
-                if color_hex:
-                    hl_obj['color'] = color_hex
-                if is_bold:
-                    hl_obj['bold'] = True
-                if is_underline:
-                    hl_obj['underline'] = True
-                highlights_out.append(hl_obj)
+                    detected = True
 
             except Exception:
-                continue
+                pass  # No explicit color set (theme color) → fall through to bold check
+
+            # ── Bold-as-highlight fallback ─────────────────────────────────
+            if not detected and not all_bold and bool(run.font.bold):
+                seen_texts.add(word)
+                highlights_out.append(word)
+
+    # ── Isolated inner-run detection (same-color/bold) ─────────────────────
+    # Runs in the middle of a 3+ run paragraph with same formatting = highlight artifact
+    for para in tf.paragraphs:
+        text_runs = [r for r in para.runs if r.text.strip()]
+        if len(text_runs) < 3:
+            continue
+        # Check all runs have same bold+color
+        def run_key(r):
+            try: rgb = str(r.font.color.rgb)
+            except: rgb = ''
+            return (bool(r.font.bold), rgb)
+        first_key = run_key(text_runs[0])
+        if not all(run_key(r) == first_key for r in text_runs):
+            continue  # mixed formatting → handled by color/bold detection above
+        # Inner runs (not first, not last) are highlight candidates
+        for inner_run in text_runs[1:-1]:
+            word = inner_run.text.strip()
+            if word and word not in seen_texts and len(word) > 2:
+                seen_texts.add(word)
+                highlights_out.append(word)
 
     return highlights_out, (large_text_out if large_text_out else None)
+
 
 
 def _extract_verse_from_slide(
@@ -516,6 +579,7 @@ def _extract_verse_from_slide(
     slide_height = prs.slide_height
 
     # Identify reference box vs body box
+    # Reference box: height < 22% of slide AND positioned near top or bottom
     ref_box = None
     body_boxes = []
     for box in boxes:
@@ -524,8 +588,7 @@ def _extract_verse_from_slide(
             continue
         top_ratio = box.top / slide_height
         height_ratio = box.height / slide_height
-        # Small box near top or bottom is likely the reference
-        if height_ratio < 0.15 and (top_ratio < 0.20 or top_ratio > 0.75):
+        if height_ratio < 0.22 and (top_ratio < 0.25 or top_ratio > 0.72):
             if ref_box is None:
                 ref_box = box
             else:
