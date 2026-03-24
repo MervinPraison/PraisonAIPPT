@@ -113,8 +113,11 @@ def list_examples():
     """
     List all available example files.
     
+    Returns YAML files preferentially when both YAML and JSON exist for the same stem.
+    Deduplicates by stem to avoid listing the same example twice.
+    
     Returns:
-        list: List of example filenames
+        list: List of example filenames (preferring .yaml over .json)
     """
     package_dir = Path(__file__).parent.parent
     examples_dir = package_dir / 'examples'
@@ -122,5 +125,22 @@ def list_examples():
     if not examples_dir.exists():
         return []
     
-    examples = [f.name for f in examples_dir.glob('*.json')]
-    return sorted(examples)
+    # Collect all files by stem, tracking available extensions
+    stems = {}
+    for ext in ['.yaml', '.yml', '.json']:
+        for f in examples_dir.glob(f'*{ext}'):
+            if f.stem not in stems:
+                stems[f.stem] = []
+            stems[f.stem].append(ext)
+    
+    # Build result list, preferring YAML over JSON
+    result = []
+    for stem, exts in stems.items():
+        if '.yaml' in exts:
+            result.append(f"{stem}.yaml")
+        elif '.yml' in exts:
+            result.append(f"{stem}.yml")
+        else:
+            result.append(f"{stem}.json")
+    
+    return sorted(result)

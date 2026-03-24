@@ -833,21 +833,24 @@ def pptx_to_json(
     output_path: Optional[str] = None,
     pretty: bool = True,
     images_dir: Optional[str] = None,
+    output_format: str = 'json',
 ) -> dict:
     """
-    Extract a praisonaippt-compatible JSON dict from a PPTX file.
+    Extract a praisonaippt-compatible dict from a PPTX file.
 
     This is the inverse of create_presentation(): given a PPTX file
-    (ideally produced by this package), it reconstructs the JSON schema
+    (ideally produced by this package), it reconstructs the schema
     dict that could regenerate the presentation.
 
     Args:
         pptx_path: Path to the .pptx or .ppt file to read
-        output_path: If provided, write the JSON to this file path
-        pretty: If True (default), emit indented JSON (indent=2)
+        output_path: If provided, write the output to this file path
+        pretty: If True (default), emit indented output (indent=2 for JSON)
+        images_dir: Optional directory to save extracted images
+        output_format: Output format - 'json' (default) or 'yaml'
 
     Returns:
-        dict conforming to the praisonaippt JSON schema
+        dict conforming to the praisonaippt schema
 
     Raises:
         FileNotFoundError: If pptx_path does not exist
@@ -858,8 +861,11 @@ def pptx_to_json(
         from praisonaippt import pptx_to_json
         data = pptx_to_json("presentation.pptx")
 
-        # Save to file
+        # Save to JSON file
         pptx_to_json("presentation.pptx", output_path="output.json")
+
+        # Save to YAML file
+        pptx_to_json("presentation.pptx", output_path="output.yaml", output_format="yaml")
 
         # Feed directly back into create_presentation for a round-trip test
         from praisonaippt import create_presentation, pptx_to_json
@@ -876,7 +882,13 @@ def pptx_to_json(
     if output_path:
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2 if pretty else None,
-                      ensure_ascii=False)
-        print(f"✓ JSON saved to: {output_path}")
+            if output_format.lower() == 'yaml':
+                import yaml
+                yaml.dump(data, f, allow_unicode=True, sort_keys=False,
+                          default_flow_style=False)
+                print(f"✓ YAML saved to: {output_path}")
+            else:
+                json.dump(data, f, indent=2 if pretty else None,
+                          ensure_ascii=False)
+                print(f"✓ JSON saved to: {output_path}")
     return data

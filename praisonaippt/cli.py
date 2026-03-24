@@ -22,7 +22,7 @@ def parse_arguments():
         argparse.Namespace: Parsed arguments
     """
     parser = argparse.ArgumentParser(
-        description="Create PowerPoint presentations from Bible verses in JSON format",
+        description="Create PowerPoint presentations from Bible verses in JSON or YAML format",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -37,8 +37,8 @@ Examples:
     
     parser.add_argument(
         '-i', '--input',
-        default='verses.json',
-        help='Input JSON file with verses (default: verses.json)'
+        default='verses.yaml',
+        help='Input JSON or YAML file with verses (default: verses.yaml, falls back to verses.json)'
     )
     
     parser.add_argument(
@@ -157,6 +157,13 @@ Examples:
         action='store_false',
         help='Output compact JSON for convert-json'
     )
+
+    parser.add_argument(
+        '--output-format',
+        choices=['json', 'yaml'],
+        default='json',
+        help='Output format for convert-json command (default: json)'
+    )
     
     parser.add_argument(
         '-v', '--version',
@@ -182,12 +189,12 @@ def parse_pdf_options(options_str: str) -> PDFOptions:
 
 
 def handle_convert_json_command(args):
-    """Handle convert-json command: extract JSON dict from a PPTX file."""
+    """Handle convert-json command: extract JSON/YAML dict from a PPTX file."""
     from .pptx_to_json import pptx_to_json
 
     if not args.input_file:
         print("Error: Input file required for convert-json command")
-        print("Usage: praisonaippt convert-json <input.pptx> [--json-output output.json]")
+        print("Usage: praisonaippt convert-json <input.pptx> [--json-output output.json] [--output-format yaml]")
         return 1
 
     if not Path(args.input_file).exists():
@@ -199,16 +206,20 @@ def handle_convert_json_command(args):
         return 1
 
     try:
-        # Determine output path
+        # Determine output format
+        output_format = getattr(args, 'output_format', 'json') or 'json'
+        
+        # Determine output path with correct extension
         if hasattr(args, 'json_output') and args.json_output:
             output_path = args.json_output
         else:
-            output_path = str(Path(args.input_file).with_suffix('.json'))
+            ext = '.yaml' if output_format == 'yaml' else '.json'
+            output_path = str(Path(args.input_file).with_suffix(ext))
 
         pretty = getattr(args, 'pretty', True)
 
-        print(f"Extracting JSON from {args.input_file}...")
-        pptx_to_json(args.input_file, output_path=output_path, pretty=pretty)
+        print(f"Extracting {output_format.upper()} from {args.input_file}...")
+        pptx_to_json(args.input_file, output_path=output_path, pretty=pretty, output_format=output_format)
         return 0
 
     except FileNotFoundError as e:
@@ -883,7 +894,13 @@ def main():
             return 1
         print(f"Using example: {args.use_example}")
     else:
+        # Resolve default input: try verses.yaml first, then verses.yml, then verses.json
         input_file = args.input
+        if input_file == 'verses.yaml' and not Path(input_file).exists():
+            for fallback in ['verses.yml', 'verses.json']:
+                if Path(fallback).exists():
+                    input_file = fallback
+                    break
     
     # Load verses data
     print(f"Loading verses from: {input_file}")

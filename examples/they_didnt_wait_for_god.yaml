@@ -1,0 +1,220 @@
+presentation_title: Great Faith
+presentation_subtitle: ''
+sections:
+- section: ''
+  verses:
+  - reference: Mark 16:20 (NKJV)
+    text: And they went out and preached everywhere, the Lord working with them and
+      confirming the word through the accompanying signs. Amen.
+    highlights:
+    - preached
+    - signs
+- section: ''
+  verses:
+  - reference: Romans 1:16–17 (NKJV)
+    text: 16 For I am not ashamed of the gospel of Christ, for it is the power of
+      God to salvation for everyone who believes, for the Jew first and also for the
+      Greek.
+    highlights:
+    - text: the gospel
+      annotation: 1
+    - text: the power
+      annotation: 2
+    - text: salvation
+      color: '#4A86E8'
+      bold: true
+      underline: true
+      annotation: 3
+    - for everyone who believes
+  - reference: Romans 1:16–17 (NKJV)
+    text: 17 For in it the righteousness of God is revealed from faith to faith; as
+      it is written, 'The just shall live by faith.'
+    highlights:
+    - text: righteousness of God
+      annotation: 5
+    - text: faith to faith
+      color: '#4A86E8'
+      bold: true
+      underline: true
+      annotation: 4
+    - The just shall live by faith
+- section: 1. Centurion
+  verses:
+  - reference: Matthew 8:5–10 (NKJV)
+    text: 10 When Jesus heard it, He marveled, and said to those who followed, 'Assuredly,
+      I say to you, I have not found such great faith, not even in Israel!'
+    highlights:
+    - I have not found such great faith
+    - not even in Israel
+- section: ''
+  verses:
+  - reference: Matthew 8:13 (NKJV)
+    text: Then Jesus said to the centurion, 'Go your way; and as you have believed,
+      so let it be done for you.' And his servant was healed that same hour.
+    highlights:
+    - as you have believed, so let it be done for you
+    - his servant was healed that same hour
+- section: 2. Canaanite Woman
+  verses:
+  - reference: Matthew 15:22–28 (NKJV)
+    text: 22 And behold, a woman of Canaan came from that region and cried out to
+      Him, saying, "Have mercy on me, O Lord, Son of David! My daughter is severely
+      demon-possessed."
+    highlights:
+    - came from that region and cried out to Him
+    - Have mercy on me, O Lord, Son of David
+  - reference: Matthew 15:22–28 (NKJV)
+    text: '23 But He answered her not a word. And His disciples came and urged Him,
+      saying, ''Send her away, for she cries out after us.''
+
+      24 But He answered and said, ''I was not sent except to the lost sheep of the
+      house of Israel.''
+
+      25 Then she came and worshiped Him, saying, ''Lord, help me!'''
+    highlights:
+    - He answered her not a word
+    - she cries out after us
+    - she came and worshiped Him
+  - reference: Matthew 15:22–28 (NKJV)
+    text: '26 But He answered and said, ''It is not good to take the children''s bread
+      and throw it to the little dogs.''
+
+      27 And she said, ''Yes, Lord, yet even the little dogs eat the crumbs which
+      fall from their masters'' table.''
+
+      28 Then Jesus answered and said to her, ''O woman, great is your faith! Let
+      it be to you as you desire.'' And her daughter was healed from that very hour.'
+    highlights:
+    - even the little dogs eat the crumbs
+    - great is your faith
+    - her daughter was healed from that very hour
+- section: 1. They Didn't Wait for God
+  verses:
+  - reference: ''
+    text: 'Woman with the Issue of Blood
+
+      Centurion
+
+      Canaanite'
+    list_type: bullet
+  - reference: Mark 5:27–29 (NKJV)
+    text: '27 When she heard about Jesus, she came behind Him in the crowd and touched
+      His garment.
+
+      28 For she said, ''If only I may touch His clothes, I shall be made well.''
+
+      29 Immediately the fountain of her blood was dried up, and she felt in her body
+      that she was healed of the affliction.'
+    highlights:
+    - she came behind Him in the crowd and touched His garment
+  - reference: Matthew 8:7 (NKJV)
+    text: And Jesus said to him, "I will come and heal him."
+    highlights: []
+  - reference: Matthew 15:22 (NKJV)
+    text: And behold, a woman of Canaan came from that region and cried out to Him,
+      saying, 'Have mercy on me, O Lord, Son of David! My daughter is severely demon-possessed.'
+    highlights:
+    - came from that region and cried out to Him
+    - Have mercy on me, O Lord, Son of David
+- section: 2. Knew the Power of God
+  verses:
+  - reference: ''
+    text: 'God''s Power Is Greater Than My Sin
+
+      Even Crumbs Are Enough
+
+      One Word Is Enough
+
+      Even if I touch the helm of the garment'
+    list_type: bullet
+  - reference: Romans 5:20–21 (NKJV)
+    text: 20 Moreover the law entered that the offense might abound.
+    highlights: []
+  - reference: Romans 5:20–21 (NKJV)
+    text: 21 But where sin abounded, grace abounded much more, so that as sin reigned
+      in death, even so grace might reign through righteousness to eternal life through
+      Jesus Christ our Lord.
+    highlights:
+    - where sin abounded, grace abounded much more
+    - grace might reign through righteousness to eternal life
+  - reference: Matthew 8:8 (NKJV)
+    text: The centurion answered and said, 'Lord, I am not worthy that You should
+      come under my roof. But only speak a word, and my servant will be healed.'
+    highlights:
+    - only speak a word
+    - my servant will be healed
+- section: 3. Knew Heart of God
+  verses:
+  - reference: ''
+    text: 'They Knew His Heart Is Fatherly
+
+      Fatherly Heart Wants to Heal
+
+      Fatherly Heart Responds Immediately
+
+      Fatherly Heart Wants His Children to Take Authority
+
+      Fatherly Heart Wants His Children to Claim Their Blessing'
+    list_type: bullet
+  - reference: Matthew 7:11 (NKJV)
+    text: If you then, being evil, know how to give good gifts to your children, how
+      much more will your Father who is in heaven give good things to those who ask
+      Him!
+    highlights:
+    - your Father who is in heaven
+    - give good things to those who ask Him
+- section: 4. They Knew the Gospel
+  verses:
+  - reference: ''
+    text: 'They heard about Jesus
+
+      Righteousness of God Revealed
+
+      Law is not of faith — Gal 3:12
+
+      Know the Author'
+    list_type: bullet
+  - reference: Mark 5:27 (NKJV)
+    text: When she heard about Jesus, she came behind Him in the crowd and touched
+      His garment.
+    highlights:
+    - she heard about Jesus
+    - touched His garment
+  - reference: Luke 7:3 (NKJV)
+    text: So when he heard about Jesus, he sent elders of the Jews to Him, pleading
+      with Him to come and heal his servant.
+    highlights:
+    - he heard about Jesus
+    - pleading with Him to come and heal his servant
+  - reference: Mark 7:25 (NKJV)
+    text: For a woman whose young daughter had an unclean spirit heard about Him,
+      and she came and fell at His feet.
+    highlights:
+    - heard about Him
+    - she came and fell at His feet
+  - reference: Romans 1:16–17 (NKJV)
+    text: For I am not ashamed of the gospel of Christ, for it is the power of God
+      to salvation for everyone who believes, for the Jew first and also for the Greek.
+    highlights:
+    - text: salvation
+      color: '#4A86E8'
+      bold: true
+      underline: true
+    - for everyone who believes
+  - reference: Romans 1:16–17 (NKJV)
+    text: For in it the righteousness of God is revealed from faith to faith; as it
+      is written, 'The just shall live by faith.'
+    highlights:
+    - the righteousness of God is revealed from
+    - text: faith to faith
+      color: '#4A86E8'
+      bold: true
+      underline: true
+      annotation: 4
+    - The just shall live by faith
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  reference_position: top
+  alignment: left
+  font_name: Palatino
