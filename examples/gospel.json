@@ -1,0 +1,67 @@
+{
+  "presentation_title": "Gospel",
+  "sections": [
+    {
+      "section": "Gospel",
+      "verses": [
+        {
+          "reference": "1 Corinthians 9:14 (NKJV)",
+          "text": "Even so the Lord has commanded that those who preach the gospel should live from the gospel.",
+          "highlights": [
+            "should live from the gospel"
+          ]
+        },
+        {
+          "reference": "Galatians 1:8 (NKJV)",
+          "text": "But even if we, or an angel from heaven, preach any other gospel to you than what we have preached to you, let him be accursed."
+        },
+        {
+          "reference": "Galatians 1:9 (NKJV)",
+          "text": "As we have said before, so now I say again, if anyone preaches any other gospel to you than what you have received, let him be accursed."
+        },
+        {
+          "reference": "Mark 10:30 (NKJV)",
+          "text": "who shall not receive a hundredfold now in this time—houses and brothers and sisters and mothers and children and lands, with persecutions—and in the age to come, eternal life.",
+          "highlights": [
+            "hundredfold now"
+          ]
+        },
+        {
+          "reference": "Psalm 133:2 (NKJV)",
+          "text": "It is like the precious oil upon the head, running down on the beard, The beard of Aaron, running down on the edge of his garments."
+        },
+        {
+          "reference": "Matthew 4:23 (NKJV)",
+          "text": "And Jesus went about all Galilee, teaching in their synagogues, preaching the gospel of the kingdom, and healing all kinds of sickness and all kinds of disease among the people."
+        },
+        {
+          "reference": "Matthew 9:35 (NKJV)",
+          "text": "Then Jesus went about all the cities and villages, teaching in their synagogues, preaching the gospel of the kingdom, and healing every sickness and every disease among the people.",
+          "highlights": [
+            "teaching",
+            "preaching",
+            "healing"
+          ]
+        },
+        {
+          "reference": "Luke 24:27 (NKJV)",
+          "text": "And beginning at Moses and all the Prophets, He expounded to them in all the Scriptures the things concerning Himself."
+        },
+        {
+          "reference": "Romans 1:16 (NKJV)",
+          "text": "For I am not ashamed of the gospel of Christ, for it is the power of God to salvation for everyone who believes, for the Jew first and also for the Greek.",
+          "highlights": [
+            "the power"
+          ]
+        }
+      ]
+    }
+  ],
+  "slide_style": {
+    "background_image": "assets/background_alt.jpg",
+    "text_color": "white",
+    "reference_position": "top",
+    "alignment": "left",
+    "font_name": "Palatino"
+  }
+}
