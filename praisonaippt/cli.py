@@ -975,6 +975,9 @@ def main():
     
     if not data:
         return 1
+
+    if data.get('auto_upload_gdrive'):
+        args.upload_gdrive = True
     
     # Create presentation
     output_file = create_presentation(

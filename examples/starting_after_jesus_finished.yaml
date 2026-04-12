@@ -1,0 +1,195 @@
+presentation_title: Starting After Jesus Finished
+presentation_subtitle: Selected Scriptures (NKJV)
+# When true, `praisonaippt -i …` uploads to Google Drive if credentials are configured (same as --upload-gdrive).
+auto_upload_gdrive: true
+slide_style:
+  background_color: '#1A1A2E'
+  alignment: center
+  reference_position: top
+sections:
+- section: Starting After Jesus Finished
+  verses:
+  - reference: ''
+    text: Jesus said, “It is finished”
+    font_size: 34
+  - reference: John 19:30 (NKJV)
+    text: So when Jesus had received the sour wine, He said, “It is finished!” And bowing His head, He gave up His spirit.
+    highlights:
+    - It is finished
+    - gave up His spirit
+  - reference: ''
+    text: People started glorifying after Jesus healed
+    font_size: 34
+  - reference: Matthew 9:8 (NKJV)
+    text: Now when the multitudes saw it, they marveled and glorified God, who had given such power to men.
+    highlights:
+    - glorified God
+    - such power to men
+
+- section: Praying for Victory or Praying from Victory
+  verses:
+  - reference: ''
+    text: Praying from victory
+    font_size: 34
+  - reference: Romans 8:37 (NKJV)
+    text: Yet in all these things we are more than conquerors through Him who loved us.
+    highlights:
+    - more than conquerors
+    - loved us
+  - reference: 1 Corinthians 15:57 (NKJV)
+    text: But thanks be to God, who gives us the victory through our Lord Jesus Christ.
+    highlights:
+    - gives us the victory
+    - our Lord Jesus Christ
+  - reference: Colossians 2:15 (NKJV)
+    text: Having disarmed principalities and powers, He made a public spectacle of them, triumphing over them in it.
+    highlights:
+    - disarmed principalities
+    - triumphing over them
+
+- section: Pleading to Jesus or Inheriting
+  verses:
+  - reference: ''
+    text: Inheriting in Christ
+    font_size: 34
+  - reference: Romans 8:17 (NKJV)
+    text: and if children, then heirs—heirs of God and joint heirs with Christ, if indeed we suffer with Him, that we may also be glorified together.
+    highlights:
+    - heirs of God
+    - joint heirs with Christ
+    - glorified together
+  - reference: Galatians 4:7 (NKJV)
+    text: Therefore you are no longer a slave but a son, and if a son, then an heir of God through Christ.
+    highlights:
+    - no longer a slave
+    - heir of God through Christ
+  - reference: Ephesians 1:11 (NKJV)
+    text: In Him also we have obtained an inheritance, being predestined according to the purpose of Him who works all things according to the counsel of His will.
+    highlights:
+    - obtained an inheritance
+    - counsel of His will
+
+- section: How to Come Out of Testing and Trials
+  verses:
+  - reference: ''
+    text: Jesus revealed by the Father
+    font_size: 34
+  - reference: Matthew 17:4–5 (NKJV)
+    text: >-
+      Then Peter answered and said to Jesus, “Lord, it is good for us to be here; if You wish, let us make here three tabernacles: one for You, one for Moses, and one for Elijah.” While he was still speaking, behold, a bright cloud overshadowed them; and suddenly a voice came out of the cloud, saying, “This is My beloved Son, in whom I am well pleased. Hear Him!”
+    highlights:
+    - beloved Son
+    - Hear Him
+  - reference: ''
+    text: Jesus led into the wilderness
+    font_size: 34
+  - reference: Matthew 4:1 (NKJV)
+    text: Then Jesus was led up by the Spirit into the wilderness to be tempted by the devil.
+    highlights:
+    - led up by the Spirit
+    - tempted by the devil
+  - reference: ''
+    text: If You are the Son of God, command these stones
+    font_size: 34
+  - reference: Matthew 4:3–4 (NKJV)
+    text: Now when the tempter came to Him, he said, “If You are the Son of God, command that these stones become bread.” But He answered and said, “It is written, ‘Man shall not live by bread alone, but by every word that proceeds from the mouth of God.’ ”
+    highlights:
+    - If You are the Son of God
+    - every word that proceeds from the mouth of God
+  - reference: ''
+    text: If You are the Son of God, throw Yourself down
+    font_size: 34
+  - reference: Matthew 4:6–7 (NKJV)
+    text: >-
+      and said to Him, “If You are the Son of God, throw Yourself down. For it is written: ‘He shall give His angels charge over you,’ and, ‘In their hands they shall bear you up, lest you dash your foot against a stone.’ ” Jesus said to him, “It is written again, ‘You shall not tempt the Lord your God.’ ”
+    highlights:
+    - You shall not tempt the Lord your God
+    - His angels charge over you
+  - reference: ''
+    text: All these things I will give You
+    font_size: 34
+  - reference: Matthew 4:8–10 (NKJV)
+    text: Again, the devil took Him up on an exceedingly high mountain, and showed Him all the kingdoms of the world and their glory. And he said to Him, “All these things I will give You if You will fall down and worship me.” Then Jesus said to him, “Away with you, Satan! For it is written, ‘You shall worship the Lord your God, and Him only you shall serve.’ ”
+    highlights:
+    - Away with you, Satan
+    - Him only you shall serve
+  - reference: ''
+    text: The devil left
+    font_size: 34
+  - reference: Matthew 4:11 (NKJV)
+    text: Then the devil left Him, and behold, angels came and ministered to Him.
+    highlights:
+    - devil left Him
+    - ministered to Him
+
+- section: God Won’t Test With Evil
+  verses:
+  - reference: James 1:13 (NKJV)
+    text: Let no one say when he is tempted, “I am tempted by God”; for God cannot be tempted by evil, nor does He Himself tempt anyone.
+    highlights:
+    - God cannot be tempted by evil
+    - tempt anyone
+
+- section: I Became Righteous by His Obedience
+  verses:
+  - reference: Romans 5:19 (NKJV)
+    text: For as by one man’s disobedience many were made sinners, so also by one Man’s obedience many will be made righteous.
+    highlights:
+    - one Man’s obedience
+    - made righteous
+  - reference: 2 Corinthians 5:21 (NKJV)
+    text: For He made Him who knew no sin to be sin for us, that we might become the righteousness of God in Him.
+    highlights:
+    - righteousness of God in Him
+    - knew no sin
+
+- section: I Am Forgiven, So Forgive
+  verses:
+  - reference: Colossians 3:13 (NKJV)
+    text: bearing with one another, and forgiving one another, if anyone has a complaint against another; even as Christ forgave you, so you also must do.
+    highlights:
+    - forgiving one another
+    - Christ forgave you
+  - reference: Ephesians 4:32 (NKJV)
+    text: And be kind to one another, tenderhearted, forgiving one another, even as God in Christ forgave you.
+    highlights:
+    - forgiving one another
+    - God in Christ forgave you
+
+- section: I Am Loved, So Love
+  verses:
+  - reference: John 13:34 (NKJV)
+    text: A new commandment I give to you, that you love one another; as I have loved you, that you also love one another.
+    highlights:
+    - love one another
+    - as I have loved you
+  - reference: 1 John 4:19 (NKJV)
+    text: We love Him because He first loved us.
+    highlights:
+    - He first loved us
+  - reference: Ephesians 5:2 (NKJV)
+    text: And walk in love, as Christ also has loved us and given Himself for us, an offering and a sacrifice to God for a sweet-smelling aroma.
+    highlights:
+    - walk in love
+    - given Himself for us
+
+- section: I Have No Condemnation
+  verses:
+  - reference: John 8:11 (NKJV)
+    text: She said, “No one, Lord.” And Jesus said to her, “Neither do I condemn you; go and sin no more.”
+    highlights:
+    - Neither do I condemn you
+  - reference: Romans 8:1 (NKJV)
+    text: There is therefore now no condemnation to those who are in Christ Jesus, who do not walk according to the flesh, but according to the Spirit.
+    highlights:
+    - no condemnation
+    - in Christ Jesus
+
+- section: Good for Trials Also
+  verses:
+  - reference: James 1:2–4 (NKJV)
+    text: My brethren, count it all joy when you fall into various trials, knowing that the testing of your faith produces patience. But let patience have its perfect work, that you may be perfect and complete, lacking nothing.
+    highlights:
+    - count it all joy
+    - testing of your faith
+    - perfect and complete
