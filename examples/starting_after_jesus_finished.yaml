@@ -9,81 +9,6 @@ slide_style:
   reference_position: top
   font_name: Palatino
 sections:
-- section: Starting After Jesus Finished
-  verses:
-  - reference: ''
-    text: Jesus said, “It is finished”
-    font_size: 34
-  - reference: John 19:30 (NKJV)
-    text: So when Jesus had received the sour wine, He said, “It is finished!” And bowing His head, He gave up His spirit.
-    highlights:
-    - It is finished
-    - gave up His spirit
-  - reference: ''
-    text: People started glorifying after Jesus healed
-    font_size: 34
-  - reference: Matthew 9:8 (NKJV)
-    text: Now when the multitudes saw it, they marveled and glorified God, who had given such power to men.
-    highlights:
-    - glorified God
-    - such power to men
-
-- section: Praying for Victory or Praying from Victory
-  verses:
-  - reference: ''
-    text: Praying from victory
-    font_size: 34
-  - reference: Romans 8:37 (NKJV)
-    text: Yet in all these things we are more than conquerors through Him who loved us.
-    highlights:
-    - more than conquerors
-    - loved us
-  - reference: 1 Corinthians 15:57 (NKJV)
-    text: But thanks be to God, who gives us the victory through our Lord Jesus Christ.
-    highlights:
-    - gives us the victory
-    - our Lord Jesus Christ
-  - reference: Colossians 2:15 (NKJV)
-    text: Having disarmed principalities and powers, He made a public spectacle of them, triumphing over them in it.
-    highlights:
-    - disarmed principalities
-    - triumphing over them
-
-- section: Pleading to Jesus
-  verses:
-  - reference: Hebrews 4:16 (NKJV)
-    text: Let us therefore come boldly to the throne of grace, that we may obtain mercy and find grace to help in time of need.
-    highlights:
-    - throne of grace
-    - grace to help in time of need
-  - reference: John 14:13–14 (NKJV)
-    text: And whatever you ask in My name, that I will do, that the Father may be glorified in the Son. If you ask anything in My name, I will do it.
-    highlights:
-    - ask in My name
-    - glorified in the Son
-
-- section: Inheriting
-  verses:
-  - reference: ''
-    text: Inheriting in Christ
-    font_size: 34
-  - reference: Romans 8:17 (NKJV)
-    text: and if children, then heirs—heirs of God and joint heirs with Christ, if indeed we suffer with Him, that we may also be glorified together.
-    highlights:
-    - heirs of God
-    - joint heirs with Christ
-    - glorified together
-  - reference: Galatians 4:7 (NKJV)
-    text: Therefore you are no longer a slave but a son, and if a son, then an heir of God through Christ.
-    highlights:
-    - no longer a slave
-    - heir of God through Christ
-  - reference: Ephesians 1:11 (NKJV)
-    text: In Him also we have obtained an inheritance, being predestined according to the purpose of Him who works all things according to the counsel of His will.
-    highlights:
-    - obtained an inheritance
-    - counsel of His will
-
 - section: How to Come Out of Testing and Trials
   verses:
   - reference: ''
@@ -238,3 +163,79 @@ sections:
     highlights:
     - My grace is sufficient for you
     - power of Christ may rest upon me
+
+- section: Starting After Jesus Finished
+  verses:
+  - reference: ''
+    text: Jesus said, “It is finished”
+    font_size: 34
+  - reference: John 19:30 (NKJV)
+    text: So when Jesus had received the sour wine, He said, “It is finished!” And bowing His head, He gave up His spirit.
+    highlights:
+    - It is finished
+    - gave up His spirit
+  - reference: ''
+    text: People started glorifying after Jesus healed
+    font_size: 34
+  - reference: Matthew 9:8 (NKJV)
+    text: Now when the multitudes saw it, they marveled and glorified God, who had given such power to men.
+    highlights:
+    - glorified God
+    - such power to men
+
+- section: Praying for Victory or Praying from Victory
+  verses:
+  - reference: ''
+    text: Praying from victory
+    font_size: 34
+  - reference: Romans 8:37 (NKJV)
+    text: Yet in all these things we are more than conquerors through Him who loved us.
+    highlights:
+    - more than conquerors
+    - loved us
+  - reference: 1 Corinthians 15:57 (NKJV)
+    text: But thanks be to God, who gives us the victory through our Lord Jesus Christ.
+    highlights:
+    - gives us the victory
+    - our Lord Jesus Christ
+  - reference: Colossians 2:15 (NKJV)
+    text: Having disarmed principalities and powers, He made a public spectacle of them, triumphing over them in it.
+    highlights:
+    - disarmed principalities
+    - triumphing over them
+
+- section: Pleading to Jesus
+  verses:
+  - reference: Hebrews 4:16 (NKJV)
+    text: Let us therefore come boldly to the throne of grace, that we may obtain mercy and find grace to help in time of need.
+    highlights:
+    - throne of grace
+    - grace to help in time of need
+  - reference: John 14:13–14 (NKJV)
+    text: And whatever you ask in My name, that I will do, that the Father may be glorified in the Son. If you ask anything in My name, I will do it.
+    highlights:
+    - ask in My name
+    - glorified in the Son
+
+- section: Inheriting
+  verses:
+  - reference: ''
+    text: Inheriting in Christ
+    font_size: 34
+  - reference: Romans 8:17 (NKJV)
+    text: and if children, then heirs—heirs of God and joint heirs with Christ, if indeed we suffer with Him, that we may also be glorified together.
+    highlights:
+    - heirs of God
+    - joint heirs with Christ
+    - glorified together
+  - reference: Galatians 4:7 (NKJV)
+    text: Therefore you are no longer a slave but a son, and if a son, then an heir of God through Christ.
+    highlights:
+    - no longer a slave
+    - heir of God through Christ
+  - reference: Ephesians 1:11 (NKJV)
+    text: In Him also we have obtained an inheritance, being predestined according to the purpose of Him who works all things according to the counsel of His will.
+    highlights:
+    - obtained an inheritance
+    - counsel of His will
+
