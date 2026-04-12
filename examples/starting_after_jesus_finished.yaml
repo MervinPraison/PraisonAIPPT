@@ -3,9 +3,9 @@ presentation_subtitle: Selected Scriptures (NKJV) · v2
 # When true, `praisonaippt -i …` uploads to Google Drive if credentials are configured (same as --upload-gdrive).
 auto_upload_gdrive: true
 slide_style:
-  background_image: examples/assets/background_alt.jpg
+  background_image: assets/background_alt.jpg
   text_color: white
-  alignment: center
+  alignment: left
   reference_position: top
   font_name: Palatino
 sections:
