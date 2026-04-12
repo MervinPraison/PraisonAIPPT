@@ -9,6 +9,27 @@ slide_style:
   reference_position: top
   font_name: Palatino
 sections:
+- section: Romans 1
+  verses:
+  - reference: 'Romans 1:17'
+    text: >-
+      For in the gospel the righteousness of God is revealed—a righteousness that is by faith from first to last, just as it is written: “The righteous will live by faith.”
+    highlights:
+    - righteousness of God is revealed
+    - righteous will live by faith
+  - reference: 'Romans 1:21–23'
+    text: >-
+      For although they knew God, they neither glorified him as God nor gave thanks to him, but their thinking became futile and their foolish hearts were darkened. Although they claimed to be wise, they became fools and exchanged the glory of the immortal God for images made to look like a mortal human being and birds and animals and reptiles.
+    highlights:
+    - thinking became futile
+    - became fools
+  - reference: 'Romans 1:29'
+    text: >-
+      They have become filled with every kind of wickedness, evil, greed and depravity. They are full of envy, murder, strife, deceit and malice. They are gossips,
+    highlights:
+    - every kind of wickedness
+    - full of envy
+
 - section: How to Come Out of Testing and Trials
   verses:
   - reference: ''
