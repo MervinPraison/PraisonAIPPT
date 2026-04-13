@@ -1,4 +1,4 @@
-presentation_title: How Jesus Come Out of Testing and Trials
+presentation_title: How to Come Out of Testing and Trials
 presentation_subtitle: Starting After Jesus Finished
 # Auto-rebuild on save: python scripts/watch_and_rebuild_ppt.py examples/how_to_come_out_of_testing_and_trials.yaml examples/how_to_come_out_of_testing_and_trials.pptx
 # When true, `praisonaippt -i …` uploads to Google Drive if credentials are configured (same as --upload-gdrive).
@@ -105,7 +105,6 @@ sections:
     text: Now when the tempter came to Him, he said, “If You are the Son of God, command that these stones become bread.” But He answered and said, “It is written, ‘Man shall not live by bread alone, but by every word that proceeds from the mouth of God.’ ”
     highlights:
     - If You are the Son of God
-    - every word that proceeds from the mouth of God
   - reference: ''
     text: If You are the Son of God, throw Yourself down
     font_size: 34
@@ -113,8 +112,7 @@ sections:
     text: >-
       and said to Him, “If You are the Son of God, throw Yourself down. For it is written: ‘He shall give His angels charge over you,’ and, ‘In their hands they shall bear you up, lest you dash your foot against a stone.’ ” Jesus said to him, “It is written again, ‘You shall not tempt the Lord your God.’ ”
     highlights:
-    - You shall not tempt the Lord your God
-    - His angels charge over you
+    - If You are the Son of God
   - reference: ''
     text: All these things I will give You
     font_size: 34
@@ -163,7 +161,10 @@ sections:
     font_size: 28
   - reference: Proverbs 22:3 (NIV)
     text: The prudent see danger and take refuge, but the simple keep going and pay the penalty.
-  - reference: 1 Kings 5:3–4 (NIV)
+    highlights:
+    - prudent
+    - take refuge
+  - reference: 1 Kings 5:3–4 (NIV) - Solomon Talking
     text: >-
       “You know that because of the wars waged against my father David from all sides, he could not build a temple for the Name of the Lord his God until the Lord put his enemies under his feet. 4 But now the Lord my God has given me rest on every side, and there is no adversary or disaster.”
     highlights:
