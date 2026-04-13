@@ -1,5 +1,5 @@
 presentation_title: How to Come Out of Testing and Trials
-presentation_subtitle: Summary
+presentation_subtitle: Starting After Jesus Finished
 # Auto-rebuild on save: python scripts/watch_and_rebuild_ppt.py examples/how_to_come_out_of_testing_and_trials.yaml examples/how_to_come_out_of_testing_and_trials.pptx
 # When true, `praisonaippt -i …` uploads to Google Drive if credentials are configured (same as --upload-gdrive).
 auto_upload_gdrive: true
