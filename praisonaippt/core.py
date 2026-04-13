@@ -98,10 +98,13 @@ def add_title_slide(prs, title, subtitle="", style=None):
     return slide
 
 
-def add_section_slide(prs, section_name, style=None):
+def add_section_slide(prs, section_name, style=None, section_subtitle=None):
     """
-    Add a section title slide — centered, same layout for all themes.
+    Add a section title slide — centred, same layout for all themes.
     Background image/color applied when present in slide_style.
+
+    Optional ``section_subtitle`` (str): second line below the title, smaller type
+    (e.g. ``Section 1``). Set from YAML as ``section_subtitle`` next to ``section``.
     """
     style = style or {}
     theme = _resolve_theme(style)
@@ -110,8 +113,12 @@ def add_section_slide(prs, section_name, style=None):
     _apply_slide_background(slide, style, prs)
 
     name = section_name or ''
+    sub = (section_subtitle or '').strip()
     line_count = name.count('\n') + 1 if name else 1
     tb_h = Inches(1.5) if line_count <= 1 else Inches(min(1.2 + line_count * 0.55, 4.5))
+    if sub:
+        # Extra height for gap under title + subtitle paragraph
+        tb_h += Inches(0.85)
 
     # Centre the title block vertically and horizontally on the slide
     margin = Inches(0.6)
@@ -130,6 +137,24 @@ def add_section_slide(prs, section_name, style=None):
     p.font.color.rgb = theme['section']
     if theme['font_name']:
         p.font.name = theme['font_name']
+
+    if sub:
+        p.space_after = Pt(20)
+        sr, sg, sb = list(theme['section'])
+        dim = 0.76
+        sub_rgb = RGBColor(
+            max(0, min(255, int(sr * dim))),
+            max(0, min(255, int(sg * dim))),
+            max(0, min(255, int(sb * dim))),
+        )
+        sp = tf.add_paragraph()
+        sp.text = sub
+        sp.alignment = PP_ALIGN.CENTER
+        sp.font.size = Pt(24)
+        sp.font.bold = False
+        sp.font.color.rgb = sub_rgb
+        if theme['font_name']:
+            sp.font.name = theme['font_name']
 
     return slide
 
@@ -706,7 +731,10 @@ def create_presentation(data, output_file=None, custom_title=None,
     for section_data in verses_data:
         # Add section title slide if section name exists (skip if custom title is provided)
         if section_data.get("section") and not custom_title:
-            add_section_slide(prs, section_data["section"], style=slide_style)
+            add_section_slide(
+                prs, section_data["section"], style=slide_style,
+                section_subtitle=section_data.get("section_subtitle"),
+            )
 
         # Add verse slides if there are any verses
         if section_data.get("verses") and len(section_data["verses"]) > 0:

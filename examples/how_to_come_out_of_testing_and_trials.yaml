@@ -68,6 +68,7 @@ sections:
     - full of envy
 
 - section: How Jesus Come Out of Testing and Trials
+  section_subtitle: Section 1
   verses:
   - reference: Identity
     reference_font_size: 44
@@ -130,6 +131,7 @@ sections:
     - ministered to Him
 
 - section: Testing and Trials
+  section_subtitle: Section 2
 
 - section: ''
   verses:
@@ -177,6 +179,7 @@ sections:
     - a greater than Solomon is here
 
 - section: Know Your Identity
+  section_subtitle: Section 3
 
 - section: 1) I am Righteous
   verses:
@@ -238,6 +241,7 @@ sections:
     - Neither do I condemn you
 
 - section: For those who have already fallen into trials
+  section_subtitle: Section 4
   verses:
   - reference: 1 Corinthians 10:13 (NKJV)
     text: No temptation has overtaken you except such as is common to man; but God is faithful, who will not allow you to be tempted beyond what you are able, but with the temptation will also make the way of escape, that you may be able to bear it.
