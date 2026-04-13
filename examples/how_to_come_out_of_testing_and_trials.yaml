@@ -1,5 +1,5 @@
 presentation_title: How to Come Out of Testing and Trials
-presentation_subtitle: Starting After Jesus Finished
+presentation_subtitle: Summary
 # Auto-rebuild on save: python scripts/watch_and_rebuild_ppt.py examples/how_to_come_out_of_testing_and_trials.yaml examples/how_to_come_out_of_testing_and_trials.pptx
 # When true, `praisonaippt -i …` uploads to Google Drive if credentials are configured (same as --upload-gdrive).
 auto_upload_gdrive: true
@@ -277,18 +277,14 @@ sections:
     - My grace is sufficient for you
     - power of Christ may rest upon me
 
-- section: Starting After Jesus Finished
+- section: Summary
   verses:
-  - reference: ''
-    text: Jesus said, “It is finished”
-    font_size: 34
   - reference: John 19:30 (NKJV)
     text: So when Jesus had received the sour wine, He said, “It is finished!” And bowing His head, He gave up His spirit.
     highlights:
     - It is finished
-    - gave up His spirit
   - reference: ''
-    text: People started glorifying after Jesus healed
+    text: People started glorifying 🍎 after Jesus healed 🌳🫜
     font_size: 34
   - reference: Matthew 9:8 (NKJV)
     text: Now when the multitudes saw it, they marveled and glorified God, who had given such power to men.
