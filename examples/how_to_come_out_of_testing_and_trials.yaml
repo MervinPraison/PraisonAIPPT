@@ -1,4 +1,4 @@
-presentation_title: How to Come Out of Testing and Trials
+presentation_title: How Jesus Come Out of Testing and Trials
 presentation_subtitle: Starting After Jesus Finished
 # Auto-rebuild on save: python scripts/watch_and_rebuild_ppt.py examples/how_to_come_out_of_testing_and_trials.yaml examples/how_to_come_out_of_testing_and_trials.pptx
 # When true, `praisonaippt -i …` uploads to Google Drive if credentials are configured (same as --upload-gdrive).
@@ -16,68 +16,81 @@ sections:
   verses:
   - reference: ''
     text: |-
-      📜 Old Covenant — work first, then outcome
+      📜 OLD COVENANT — “Pay first… maybe get paid back later.”
 
-      Work → Work → Work → Result
+      Work → Work → Work → Result (?)
 
-      Result driven work
-    font_size: 32
+      🏃 You climb first; the blessing hangs at the finish line.
+      📋 Vibe: “Did I do enough?” — result-chasing work.
+    font_size: 30
   - reference: ''
     text: |-
-      ✨ New Covenant — outcome first, then obedience
+      ✨ NEW COVENANT — begin on “finished,” not “try harder.”
 
       Result → Work → Work → Work
 
-      Work Driven result
-    font_size: 32
+      ✅ Righteous in Him first — obedience is joy, not repayment.
+      🌿 Same hands; new heart: loved, so you move.
+    font_size: 30
+  - reference: ''
+    split_max_length: 400
+    text: |-
+      📜 OLD COVENANT → Focus on the 🍎 fruit first
+      (“Polish what people can see — behaviour, reputation, scoreboard.”)
+
+      ✨ NEW COVENANT → Focus on the 🌳🫜 root first
+      (Who you are in Christ, hidden with God — Col. 3:3 — then life leaks out.)
+    font_size: 27
 - section: |-
     Identity
     Change of Priority
     Change of Focus
     Change of Order
   verses:
-  - reference: 'Romans 1:17'
+  - reference: '🌳🫜 Romans 1:17'
     text: >-
       For in the gospel the righteousness of God is revealed—a righteousness that is by faith from first to last, just as it is written: “The righteous will live by faith.”
     highlights:
     - righteousness of God is revealed
     - righteous will live by faith
-  - reference: 'Romans 1:21'
+  - reference: '🌳🫜 Romans 1:21'
     text: >-
       because, although they knew God, they did not glorify Him as God, nor were thankful, but became futile in their thoughts, and their foolish hearts were darkened.
     highlights:
     - did not glorify Him as God
     - nor were thankful
     - foolish hearts were darkened
-  - reference: 'Romans 1:29'
+  - reference: '🍎 Romans 1:29'
     text: >-
       They have become filled with every kind of wickedness, evil, greed and depravity. They are full of envy, murder, strife, deceit and malice. They are gossips,
     highlights:
     - every kind of wickedness
     - full of envy
 
-- section: How to Come Out of Testing and Trials
+- section: How Jesus Come Out of Testing and Trials
   verses:
   - reference: Identity
     reference_font_size: 44
     text: |-
+      🆔 ⸻
+
       Jesus didn't prove to the devil that He is the Son of God by His works.
 
-      because He knows who He already is, the Son of God
+      ✨ because He knows who He already is, the Son of God
     highlights:
     - by His works
     font_size: 28
   - reference: True Faith
     reference_font_size: 44
     text: |-
-      Don't fight for Victory, fight from Victory
+      🏆 Don't fight for Victory, fight from Victory
 
-      Don't fight for healing, fight from health
+      💚 Don't fight for healing, fight from health
 
-      Don't plead to God, inherit what your Father has already given to you
+      👑 Don't plead to God, inherit what your Father has already given to you
     font_size: 28
   - reference: ''
-    text: Jesus revealed by the Father
+    text: 🌳🫜 Jesus revealed by the Father
     font_size: 34
   - reference: Matthew 17:4–5 (NKJV)
     text: >-
@@ -110,13 +123,15 @@ sections:
     highlights:
     - All these things I will give You
   - reference: ''
-    text: The devil left
+    text: 🍎 The devil left
     font_size: 34
   - reference: Matthew 4:11 (NKJV)
     text: Then the devil left Him, and behold, angels came and ministered to Him.
     highlights:
     - devil left Him
     - ministered to Him
+
+- section: Testing and Trials
 
 - section: ''
   verses:
@@ -164,6 +179,10 @@ sections:
 
 - section: 1) I am Righteous
   verses:
+  - reference: Romans 5:17 (NKJV)
+    text: For if by the one man’s offense death reigned through the one, much more those who receive abundance of grace and of the gift of righteousness will reign in life through the One, Jesus Christ.
+    highlights:
+    - gift of righteousness
   - reference: Romans 5:19 (NKJV)
     text: For as by one man’s disobedience many were made sinners, so also by one Man’s obedience many will be made righteous.
     highlights:
@@ -174,6 +193,11 @@ sections:
     highlights:
     - righteousness of God in Him
     - knew no sin
+  - reference: Romans 2:4 (NKJV)
+    text: Or do you despise the riches of His goodness, forbearance, and longsuffering, not knowing that the goodness of God leads you to repentance?
+    highlights:
+    - goodness of God
+    - leads you to repentance
 
 - section: 2) I Am Forgiven
   verses:
@@ -187,11 +211,6 @@ sections:
     highlights:
     - forgiving one another
     - God in Christ forgave you
-  - reference: Romans 2:4 (NKJV)
-    text: Or do you despise the riches of His goodness, forbearance, and longsuffering, not knowing that the goodness of God leads you to repentance?
-    highlights:
-    - goodness of God
-    - leads you to repentance
 
 - section: 3) I Am Loved
   verses:
@@ -216,11 +235,6 @@ sections:
     text: She said, “No one, Lord.” And Jesus said to her, “Neither do I condemn you; go and sin no more.”
     highlights:
     - Neither do I condemn you
-  - reference: Romans 8:1 (NKJV)
-    text: There is therefore now no condemnation to those who are in Christ Jesus, who do not walk according to the flesh, but according to the Spirit.
-    highlights:
-    - no condemnation
-    - in Christ Jesus
 
 - section: For those who have already fallen into trials
   verses:
@@ -319,4 +333,20 @@ sections:
     highlights:
     - obtained an inheritance
     - counsel of His will
+
+- section: ''
+  verses:
+  - reference: ''
+    split_max_length: 500
+    text: |-
+      🌱 Water the root — do not water the fruit.
+
+      💧 Water your identity in Christ: righteous, forgiven, loved, no condemnation.
+
+      📖 The word of God is the water — Ephesians 5:26.
+
+      🎧 Hear more messages about your identity in Christ.
+
+      ✨ Fruit will automatically follow.
+    font_size: 24
 

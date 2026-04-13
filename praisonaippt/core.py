@@ -521,7 +521,9 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
             ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
             ref_pt = int(reference_font_size) if reference_font_size is not None else 24
             ref_h_in = 0.72 if extra_ref else 0.85
-            ref_y_in = 1.52
+            # Gap below leading-title textbox before reference (title box ends 0.35 + 1.15)
+            title_ref_gap_in = 0.2
+            ref_y_in = 0.35 + 1.15 + title_ref_gap_in
             ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(ref_y_in), Inches(9), Inches(ref_h_in))
             _set_ref(ref_tb, ref_text, PP_ALIGN.LEFT, ref_pt, bold=True, italic=False)
             ref_tb.text_frame.paragraphs[0].font.color.rgb = theme['body']
@@ -728,7 +730,8 @@ def create_presentation(data, output_file=None, custom_title=None,
                                    alignment=list_alignment,
                                    style=slide_style)
                 else:
-                    verse_parts = split_long_text(verse['text'])
+                    _max_len = int(verse.get('split_max_length') or 200)
+                    verse_parts = split_long_text(verse['text'], max_length=max(_max_len, 50))
                     for i, part in enumerate(verse_parts):
                         part_num = None  # never show (Part N) on split slides
                         add_verse_slide(
