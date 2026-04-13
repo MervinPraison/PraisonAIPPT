@@ -1,5 +1,6 @@
-presentation_title: Starting After Jesus Finished
-presentation_subtitle: Selected Scriptures (NKJV) · v2
+presentation_title: How to Come Out of Testing and Trials
+presentation_subtitle: Starting After Jesus Finished
+# Auto-rebuild on save: python scripts/watch_and_rebuild_ppt.py examples/how_to_come_out_of_testing_and_trials.yaml examples/how_to_come_out_of_testing_and_trials.pptx
 # When true, `praisonaippt -i …` uploads to Google Drive if credentials are configured (same as --upload-gdrive).
 auto_upload_gdrive: true
 slide_style:
@@ -9,7 +10,31 @@ slide_style:
   reference_position: top
   font_name: Palatino
 sections:
-- section: Romans 1
+- section: |-
+    📜 Old Covenant
+    ✨ New Covenant
+  verses:
+  - reference: ''
+    text: |-
+      📜 Old Covenant — work first, then outcome
+
+      Work → Work → Work → Result
+
+      Result driven work
+    font_size: 32
+  - reference: ''
+    text: |-
+      ✨ New Covenant — outcome first, then obedience
+
+      Result → Work → Work → Work
+
+      Work Driven result
+    font_size: 32
+- section: |-
+    Identity
+    Change of Priority
+    Change of Focus
+    Change of Order
   verses:
   - reference: 'Romans 1:17'
     text: >-
@@ -21,7 +46,7 @@ sections:
     text: >-
       For although they knew God, they neither glorified him as God nor gave thanks to him, but their thinking became futile and their foolish hearts were darkened. Although they claimed to be wise, they became fools and exchanged the glory of the immortal God for images made to look like a mortal human being and birds and animals and reptiles.
     highlights:
-    - thinking became futile
+    - although they knew God, they neither glorified him as God nor gave thanks to him
     - became fools
   - reference: 'Romans 1:29'
     text: >-
@@ -32,6 +57,24 @@ sections:
 
 - section: How to Come Out of Testing and Trials
   verses:
+  - reference: Identity
+    reference_font_size: 44
+    text: |-
+      Jesus didn't prove to the devil that He is the Son of God by His works.
+
+      because He knows who He already is, the Son of God
+    highlights:
+    - by His works
+    font_size: 28
+  - reference: True Faith
+    reference_font_size: 44
+    text: |-
+      Don't fight for Victory, fight from Victory
+
+      Don't fight for healing, fight from health
+
+      Don't plead to God, inherit what your Father has already given to you
+    font_size: 28
   - reference: ''
     text: Jesus revealed by the Father
     font_size: 34
@@ -41,14 +84,6 @@ sections:
     highlights:
     - beloved Son
     - Hear Him
-  - reference: ''
-    text: Jesus led into the wilderness
-    font_size: 34
-  - reference: Matthew 4:1 (NKJV)
-    text: Then Jesus was led up by the Spirit into the wilderness to be tempted by the devil.
-    highlights:
-    - led up by the Spirit
-    - tempted by the devil
   - reference: ''
     text: If You are the Son of God, command these stones
     font_size: 34
@@ -72,8 +107,7 @@ sections:
   - reference: Matthew 4:8–10 (NKJV)
     text: Again, the devil took Him up on an exceedingly high mountain, and showed Him all the kingdoms of the world and their glory. And he said to Him, “All these things I will give You if You will fall down and worship me.” Then Jesus said to him, “Away with you, Satan! For it is written, ‘You shall worship the Lord your God, and Him only you shall serve.’ ”
     highlights:
-    - Away with you, Satan
-    - Him only you shall serve
+    - All these things I will give You
   - reference: ''
     text: The devil left
     font_size: 34
@@ -82,26 +116,6 @@ sections:
     highlights:
     - devil left Him
     - ministered to Him
-  - reference: 1 Corinthians 10:13 (NKJV)
-    text: No temptation has overtaken you except such as is common to man; but God is faithful, who will not allow you to be tempted beyond what you are able, but with the temptation will also make the way of escape, that you may be able to bear it.
-    highlights:
-    - God is faithful
-    - way of escape
-  - reference: Hebrews 2:18 (NKJV)
-    text: For in that He Himself has suffered, being tempted, He is able to aid those who are tempted.
-    highlights:
-    - able to aid
-    - tempted
-  - reference: Hebrews 4:15 (NKJV)
-    text: For we do not have a High Priest who cannot sympathize with our weaknesses, but was in all points tempted as we are, yet without sin.
-    highlights:
-    - sympathize with our weaknesses
-    - yet without sin
-  - reference: 2 Timothy 4:18 (NKJV)
-    text: And the Lord will deliver me from every evil work and preserve me for His heavenly kingdom. To Him be glory forever and ever. Amen.
-    highlights:
-    - deliver me from every evil work
-    - His heavenly kingdom
 
 - section: God Won’t Test With Evil
   verses:
@@ -166,14 +180,31 @@ sections:
     - no condemnation
     - in Christ Jesus
 
-- section: Good for Trials Also
+- section: For those who have already fallen into trials
   verses:
+  - reference: 1 Corinthians 10:13 (NKJV)
+    text: No temptation has overtaken you except such as is common to man; but God is faithful, who will not allow you to be tempted beyond what you are able, but with the temptation will also make the way of escape, that you may be able to bear it.
+    highlights:
+    - God is faithful
+    - way of escape
+  - reference: Hebrews 2:18 (NKJV)
+    text: For in that He Himself has suffered, being tempted, He is able to aid those who are tempted.
+    highlights:
+    - able to aid
+    - tempted
+  - reference: Hebrews 4:15 (NKJV)
+    text: For we do not have a High Priest who cannot sympathize with our weaknesses, but was in all points tempted as we are, yet without sin.
+    highlights:
+    - sympathize with our weaknesses
+    - yet without sin
+  - reference: 2 Timothy 4:18 (NKJV)
+    text: And the Lord will deliver me from every evil work and preserve me for His heavenly kingdom. To Him be glory forever and ever. Amen.
+    highlights:
+    - every
   - reference: James 1:2–4 (NKJV)
     text: My brethren, count it all joy when you fall into various trials, knowing that the testing of your faith produces patience. But let patience have its perfect work, that you may be perfect and complete, lacking nothing.
     highlights:
-    - count it all joy
-    - testing of your faith
-    - perfect and complete
+    - lacking nothing
   - reference: Romans 8:37 (NKJV)
     text: Yet in all these things we are more than conquerors through Him who loved us.
     highlights:
@@ -224,19 +255,6 @@ sections:
     highlights:
     - disarmed principalities
     - triumphing over them
-
-- section: Pleading to Jesus
-  verses:
-  - reference: Hebrews 4:16 (NKJV)
-    text: Let us therefore come boldly to the throne of grace, that we may obtain mercy and find grace to help in time of need.
-    highlights:
-    - throne of grace
-    - grace to help in time of need
-  - reference: John 14:13–14 (NKJV)
-    text: And whatever you ask in My name, that I will do, that the Father may be glorified in the Son. If you ask anything in My name, I will do it.
-    highlights:
-    - ask in My name
-    - glorified in the Son
 
 - section: Inheriting
   verses:

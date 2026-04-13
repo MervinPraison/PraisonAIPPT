@@ -1,0 +1,15 @@
+---
+description: After editing the How to Come Out of Testing and Trials deck YAML, rebuild and save the PPTX.
+globs: examples/how_to_come_out_of_testing_and_trials.yaml
+alwaysApply: false
+---
+
+# Rebuild presentation after YAML changes
+
+Whenever `examples/how_to_come_out_of_testing_and_trials.yaml` is modified, **always** run a full rebuild from the repository root and write the output file:
+
+```bash
+python -m praisonaippt.cli -i examples/how_to_come_out_of_testing_and_trials.yaml -o examples/how_to_come_out_of_testing_and_trials.pptx
+```
+
+Do this in the same turn as the edit (or immediately after), so `examples/how_to_come_out_of_testing_and_trials.pptx` stays in sync and Google Drive upload runs if `auto_upload_gdrive` is enabled in the YAML.

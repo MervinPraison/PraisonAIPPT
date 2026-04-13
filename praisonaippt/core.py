@@ -109,7 +109,17 @@ def add_section_slide(prs, section_name, style=None):
     slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank for full control
     _apply_slide_background(slide, style, prs)
 
-    tb = slide.shapes.add_textbox(Inches(0.6), Inches(3.0), Inches(9), Inches(1.5))
+    name = section_name or ''
+    line_count = name.count('\n') + 1 if name else 1
+    tb_h = Inches(1.5) if line_count <= 1 else Inches(min(1.2 + line_count * 0.55, 4.5))
+
+    # Centre the title block vertically and horizontally on the slide
+    margin = Inches(0.6)
+    tb_w = prs.slide_width - 2 * margin
+    left = (prs.slide_width - tb_w) / 2
+    top = (prs.slide_height - tb_h) / 2
+
+    tb = slide.shapes.add_textbox(left, top, tb_w, tb_h)
     tf = tb.text_frame
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
     p = tf.paragraphs[0]
@@ -446,7 +456,8 @@ def _add_superscript_num_run(paragraph, num_str, font_size, body_rgb, font_name)
 
 
 def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
-                    large_text=None, alignment='left', font_size=32, style=None):
+                    large_text=None, alignment='left', font_size=32, style=None,
+                    reference_font_size=None):
     """
     Add a verse slide. All colors and font resolved via slide_style.
     Supported slide_style keys: background_image, background_color,
@@ -475,11 +486,16 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
 
     if ref_position == 'top' and reference:
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
-        ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(0.3), Inches(9), Inches(0.7))
-        _set_ref(ref_tb, ref_text, PP_ALIGN.LEFT, 28, bold=True)
+        ref_pt = int(reference_font_size) if reference_font_size is not None else 28
+        ref_h_in = 0.95 if ref_pt >= 36 else 0.7
+        ref_h = Inches(ref_h_in)
+        ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(0.3), Inches(9), ref_h)
+        _set_ref(ref_tb, ref_text, PP_ALIGN.LEFT, ref_pt, bold=True)
         # Override body color for top reference (use body not reference)
         ref_tb.text_frame.paragraphs[0].font.color.rgb = theme['body']
-        verse_top, verse_height = Inches(1.2), Inches(4.5)
+        # Place body text below the reference box (avoid overlap when ref is large)
+        verse_top = Inches(0.3 + ref_h_in + 0.15)
+        verse_height = Inches(4.5)
     else:
         verse_top, verse_height = Inches(1.5), Inches(3.8)
 
@@ -630,11 +646,14 @@ def create_presentation(data, output_file=None, custom_title=None,
                     verse_parts = split_long_text(verse['text'])
                     for i, part in enumerate(verse_parts):
                         part_num = None  # never show (Part N) on split slides
-                        add_verse_slide(prs, part, verse['reference'], part_num,
-                                        highlights, large_text,
-                                        alignment=verse_alignment,
-                                        font_size=font_size,
-                                        style=slide_style)
+                        add_verse_slide(
+                            prs, part, verse['reference'], part_num,
+                            highlights, large_text,
+                            alignment=verse_alignment,
+                            font_size=font_size,
+                            style=slide_style,
+                            reference_font_size=verse.get('reference_font_size'),
+                        )
     
     # Generate output filename if not provided
     if not output_file:
