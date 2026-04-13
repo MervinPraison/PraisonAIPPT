@@ -1,18 +1,86 @@
 {
   "presentation_title": "Your Presentation Title Here",
   "presentation_subtitle": "Your Subtitle Here",
+  "auto_upload_gdrive": false,
+  "slide_size": "widescreen",
+  "slide_style": {
+    "background_image": null,
+    "background_color": null,
+    "text_color": null,
+    "reference_color": null,
+    "title_color": null,
+    "subtitle_color": null,
+    "section_title_color": null,
+    "highlight_color": null,
+    "annotation_color": null,
+    "reference_position": "top",
+    "alignment": "left",
+    "font_name": null
+  },
   "sections": [
     {
       "section": "Section 1 Name",
       "verses": [
         {
-          "reference": "Book Chapter:Verse (Version)",
-          "text": "Your verse text goes here.",
-          "highlights": ["word1", "phrase to highlight"]
+          "reference": "John 3:16 (NKJV)",
+          "text": "For God so loved the world that He gave His only begotten Son, that whoever believes in Him should not perish but have everlasting life.",
+          "font_size": 32,
+          "alignment": "center",
+          "highlights": [
+            "God so loved",
+            "everlasting life"
+          ],
+          "large_text": {
+            "everlasting life": 40
+          }
         },
         {
-          "reference": "Book Chapter:Verse (Version)",
-          "text": "Another verse text goes here."
+          "reference": "Romans 1:16 (NKJV)",
+          "text": "For I am not ashamed of the gospel of Christ, for it is the power of God to salvation for everyone who believes.",
+          "highlights": [
+            { "text": "the gospel", "annotation": 1 },
+            { "text": "the power", "annotation": 2 },
+            {
+              "text": "salvation",
+              "color": "#4A86E8",
+              "bold": true,
+              "italic": false,
+              "underline": true,
+              "annotation": 3
+            }
+          ]
+        },
+        {
+          "reference": "Your Title Here",
+          "reference_font_size": 44,
+          "text": "",
+          "font_size": 28
+        },
+        {
+          "reference": "Matthew 12:42 (NKJV)",
+          "leading_title": "Jesus, Greater than Solomon inside you",
+          "text": "The queen of the South will rise up in the judgment with this generation and condemn it, for she came from the ends of the earth to hear the wisdom of Solomon; and indeed a greater than Solomon is here.",
+          "highlights": ["a greater than Solomon is here"]
+        },
+        {
+          "reference": "List example (bullet)",
+          "text": "First item\nSecond item\nThird item",
+          "list_type": "bullet",
+          "alignment": "left",
+          "font_size": 28
+        },
+        {
+          "reference": "List example (numbered)",
+          "text": "Alpha\nBeta\nGamma",
+          "list_type": "numbered",
+          "alignment": "left",
+          "font_size": 28
+        },
+        {
+          "slide_type": "image",
+          "image_path": "examples/assets/background_alt.jpg",
+          "reference": "Optional caption under image",
+          "text": ""
         }
       ]
     },
@@ -20,8 +88,8 @@
       "section": "Section 2 Name",
       "verses": [
         {
-          "reference": "Book Chapter:Verse (Version)",
-          "text": "More verse text goes here."
+          "reference": "Psalm 23:1 (NKJV)",
+          "text": "The Lord is my shepherd; I shall not want."
         }
       ]
     }

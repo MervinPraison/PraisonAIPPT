@@ -1,16 +1,109 @@
+# =============================================================================
+# PraisonAI PPT — full verses template (YAML). Copy and edit; remove unused keys.
+# =============================================================================
+
+# --- Presentation (top level) -------------------------------------------------
 presentation_title: Your Presentation Title Here
 presentation_subtitle: Your Subtitle Here
+
+# Optional: when true, CLI uploads PPTX to Google Drive if credentials are set.
+auto_upload_gdrive: false
+
+# Optional slide dimensions: widescreen | 16:9 | standard | 4:3 | 16:10
+# Or custom: { width: 13.33, height: 7.5 }  (inches)
+slide_size: widescreen
+
+# --- slide_style (optional; applies to title, section, verse, list, image slides)
+slide_style:
+  # One of: background_image (path) OR background_color (hex). Image wins if both set.
+  # background_image: examples/assets/background_alt.jpg
+  # background_color: '#1A1A2E'
+
+  # Colours (hex #RRGGBB or named: orange, yellow, red, green, blue, white, cyan, purple)
+  # text_color: white
+  # reference_color: '#CCCCCC'
+  # title_color: '#FFFFFF'
+  # subtitle_color: '#AAAAAA'
+  # section_title_color: '#FFFFFF'
+  # highlight_color: '#FFD700'
+  # annotation_color: '#1E50C8'
+
+  # reference_position: top   # Bible ref line at top of verse slides (default)
+  # reference_position: bottom
+
+  # alignment: left | center | right   # default for verse/list body
+  alignment: left
+
+  # font_name: Palatino
+
+# --- sections ----------------------------------------------------------------
 sections:
-- section: Section 1 Name
-  verses:
-  - reference: Book Chapter:Verse (Version)
-    text: Your verse text goes here.
-    highlights:
-    - word1
-    - phrase to highlight
-  - reference: Book Chapter:Verse (Version)
-    text: Another verse text goes here.
-- section: Section 2 Name
-  verses:
-  - reference: Book Chapter:Verse (Version)
-    text: More verse text goes here.
+  - section: Section 1 Name
+    verses:
+      # --- Standard verse (reference + text) --------------------------------
+      - reference: John 3:16 (NKJV)
+        text: For God so loved the world that He gave His only begotten Son, that whoever believes in Him should not perish but have everlasting life.
+        font_size: 32
+        alignment: center
+        highlights:
+          - God so loved
+          - everlasting life
+        # large_text: { everlasting life: 40 }
+
+      # --- Rich highlight object (optional fields: text, color, bold, italic, underline, annotation 1–9)
+      - reference: Romans 1:16 (NKJV)
+        text: For I am not ashamed of the gospel of Christ, for it is the power of God to salvation for everyone who believes.
+        highlights:
+          - text: the gospel
+            annotation: 1
+          - text: the power
+            annotation: 2
+          - text: salvation
+            color: '#4A86E8'
+            underline: true
+            annotation: 3
+
+      # --- Title-style verse (large reference line, empty body) --------------
+      - reference: Your Title Here
+        reference_font_size: 44
+        text: ''
+        font_size: 28
+
+      # --- leading_title: top headline; reference + verse body lower on slide
+      - reference: Matthew 12:42 (NKJV)
+        leading_title: Jesus, Greater than Solomon inside you
+        text: The queen of the South will rise up in the judgment with this generation and condemn it, for she came from the ends of the earth to hear the wisdom of Solomon; and indeed a greater than Solomon is here.
+        highlights:
+          - a greater than Solomon is here
+
+      # --- Bullet / numbered list (text lines separated by \n) ---------------
+      - reference: List example (bullet)
+        text: |-
+          First item
+          Second item
+          Third item
+        list_type: bullet
+        alignment: left
+        font_size: 28
+
+      - reference: List example (numbered)
+        text: |-
+          Alpha
+          Beta
+          Gamma
+        list_type: numbered
+        alignment: left
+        font_size: 28
+
+      # --- Image slide (diagram / photo) ------------------------------------
+      # - slide_type: image
+      #   image_path: examples/assets/background_alt.jpg
+      #   reference: Optional caption under image
+      #   text: ''
+
+  - section: |-
+      Multi-line
+      Section Title
+    verses:
+      - reference: Psalm 23:1 (NKJV)
+        text: The Lord is my shepherd; I shall not want.

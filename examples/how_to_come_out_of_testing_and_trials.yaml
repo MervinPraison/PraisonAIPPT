@@ -42,12 +42,13 @@ sections:
     highlights:
     - righteousness of God is revealed
     - righteous will live by faith
-  - reference: 'Romans 1:21–23'
+  - reference: 'Romans 1:21'
     text: >-
-      For although they knew God, they neither glorified him as God nor gave thanks to him, but their thinking became futile and their foolish hearts were darkened. Although they claimed to be wise, they became fools and exchanged the glory of the immortal God for images made to look like a mortal human being and birds and animals and reptiles.
+      because, although they knew God, they did not glorify Him as God, nor were thankful, but became futile in their thoughts, and their foolish hearts were darkened.
     highlights:
-    - although they knew God, they neither glorified him as God nor gave thanks to him
-    - became fools
+    - did not glorify Him as God
+    - nor were thankful
+    - foolish hearts were darkened
   - reference: 'Romans 1:29'
     text: >-
       They have become filled with every kind of wickedness, evil, greed and depravity. They are full of envy, murder, strife, deceit and malice. They are gossips,
@@ -117,15 +118,51 @@ sections:
     - devil left Him
     - ministered to Him
 
-- section: God Won’t Test With Evil
+- section: ''
   verses:
+  - reference: 'a) God Won’t Test With Evil'
+    reference_font_size: 44
+    text: ''
+    font_size: 28
   - reference: James 1:13 (NKJV)
     text: Let no one say when he is tempted, “I am tempted by God”; for God cannot be tempted by evil, nor does He Himself tempt anyone.
     highlights:
     - God cannot be tempted by evil
     - tempt anyone
+  - reference: Matthew 7:11 (NKJV)
+    text: If you then, being evil, know how to give good gifts to your children, how much more will your Father who is in heaven give good things to those who ask Him!
+    highlights:
+    - how much more
+    - give good things
+  - reference: 'b) Testing and Trials are optional'
+    reference_font_size: 44
+    text: ''
+    font_size: 28
+  - reference: Matthew 6:13 (NKJV)
+    text: And do not lead us into temptation, But deliver us from the evil one. For Yours is the kingdom and the power and the glory forever. Amen.
+    highlights:
+    - do not lead us into temptation
+  - reference: 'c) Be wise to skip Trials and Troubles'
+    reference_font_size: 44
+    text: ''
+    font_size: 28
+  - reference: Proverbs 22:3 (NIV)
+    text: The prudent see danger and take refuge, but the simple keep going and pay the penalty.
+  - reference: 1 Kings 5:3–4 (NIV)
+    text: >-
+      “You know that because of the wars waged against my father David from all sides, he could not build a temple for the Name of the Lord his God until the Lord put his enemies under his feet. 4 But now the Lord my God has given me rest on every side, and there is no adversary or disaster.”
+    highlights:
+    - rest on every side
+    - no adversary or disaster
+  - reference: Matthew 12:42 (NKJV)
+    leading_title: Jesus, Greater than Solomon inside you
+    text: The queen of the South will rise up in the judgment with this generation and condemn it, for she came from the ends of the earth to hear the wisdom of Solomon; and indeed a greater than Solomon is here.
+    highlights:
+    - a greater than Solomon is here
 
-- section: I Became Righteous by His Obedience
+- section: Know Your Identity
+
+- section: 1) I am Righteous
   verses:
   - reference: Romans 5:19 (NKJV)
     text: For as by one man’s disobedience many were made sinners, so also by one Man’s obedience many will be made righteous.
@@ -138,7 +175,7 @@ sections:
     - righteousness of God in Him
     - knew no sin
 
-- section: I Am Forgiven, So Forgive
+- section: 2) I Am Forgiven
   verses:
   - reference: Colossians 3:13 (NKJV)
     text: bearing with one another, and forgiving one another, if anyone has a complaint against another; even as Christ forgave you, so you also must do.
@@ -150,8 +187,13 @@ sections:
     highlights:
     - forgiving one another
     - God in Christ forgave you
+  - reference: Romans 2:4 (NKJV)
+    text: Or do you despise the riches of His goodness, forbearance, and longsuffering, not knowing that the goodness of God leads you to repentance?
+    highlights:
+    - goodness of God
+    - leads you to repentance
 
-- section: I Am Loved, So Love
+- section: 3) I Am Loved
   verses:
   - reference: John 13:34 (NKJV)
     text: A new commandment I give to you, that you love one another; as I have loved you, that you also love one another.
@@ -168,7 +210,7 @@ sections:
     - walk in love
     - given Himself for us
 
-- section: I Have No Condemnation
+- section: 4) I Have No Condemnation
   verses:
   - reference: John 8:11 (NKJV)
     text: She said, “No one, Lord.” And Jesus said to her, “Neither do I condemn you; go and sin no more.”

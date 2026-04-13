@@ -177,7 +177,7 @@ def _resolve_theme(style: dict) -> dict:
     """
     style = style or {}
     has_dark_bg = bool(style.get('background_image') or style.get('background_color'))
-    raw_text = style.get('text_color', '').lower().strip()
+    raw_text = str(style.get('text_color') or '').lower().strip()
     if raw_text:
         dark_mode = raw_text in ('white', '#ffffff', 'ffffff')
     else:
@@ -198,7 +198,7 @@ def _resolve_theme(style: dict) -> dict:
         'annotation':       _rc('annotation_color',    '#1E50C8', '#1E50C8'),
         'ref_position':     style.get('reference_position', 'top'),
         'global_alignment': style.get('alignment', 'left'),
-        'font_name':        style.get('font_name', 'Palatino'),
+        'font_name':        style.get('font_name') or 'Palatino',
     }
 
 
@@ -230,14 +230,16 @@ def _normalise_highlights(highlights, highlight_rgb=None):
 
 def _apply_highlights(paragraph, text, highlights, large_text=None,
                       body_rgb=None, highlight_rgb=None, annotation_rgb=None,
-                      font_name=None):
+                      font_name=None, base_font_size=32):
     """
     Apply per-phrase rich text formatting.
     body_rgb, highlight_rgb, annotation_rgb, font_name all come from _resolve_theme.
+    base_font_size: point size for normal body and highlight runs (``large_text`` overrides per match).
     """
     import re
     _body = body_rgb or RGBColor(26, 26, 46)
     _ann  = annotation_rgb or RGBColor(30, 80, 200)
+    _base = int(base_font_size) if base_font_size else 32
 
     def _sf(run, size_pt):
         """Set font size and optional font name on a run."""
@@ -271,7 +273,7 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
     if not filtered:
         run = paragraph.add_run()
         run.text = text
-        _sf(run, 32)
+        _sf(run, _base)
         run.font.color.rgb = _body
         if font_name:
             run.font.name = font_name
@@ -284,7 +286,7 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
         if start > current_pos:
             run = paragraph.add_run()
             run.text = text[current_pos:start]
-            _sf(run, 32)
+            _sf(run, _base)
             run.font.color.rgb = _body
             run.font.bold = False
             run.font.italic = False
@@ -295,7 +297,7 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
         run.text = matched_text
 
         if fmt_type == 'highlight':
-            _sf(run, 32)
+            _sf(run, _base)
             run.font.color.rgb = fmt['color']
             run.font.bold = fmt['bold']
             run.font.italic = fmt['italic']
@@ -318,7 +320,7 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
     if current_pos < len(text):
         run = paragraph.add_run()
         run.text = text[current_pos:]
-        _sf(run, 32)
+        _sf(run, _base)
         run.font.color.rgb = _body
         run.font.bold = False
         run.font.italic = False
@@ -457,13 +459,22 @@ def _add_superscript_num_run(paragraph, num_str, font_size, body_rgb, font_name)
 
 def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                     large_text=None, alignment='left', font_size=32, style=None,
-                    reference_font_size=None):
+                    reference_font_size=None, leading_title=None,
+                    text_below_reference=None, text_below_reference_highlights=None,
+                    text_below_reference_large_text=None):
     """
     Add a verse slide. All colors and font resolved via slide_style.
     Supported slide_style keys: background_image, background_color,
     text_color, reference_color, highlight_color, annotation_color,
     title_color, section_title_color, font_name,
     reference_position ('top'/'bottom'), alignment.
+
+    Optional verse YAML key ``leading_title`` (str): large line at the top of the
+    slide; the reference is drawn directly under that title, then the verse body
+    beneath the reference. Optional ``text_below_reference`` adds a further block
+    below the verse body (e.g. a second passage on the same slide).
+    Optional ``text_below_reference_highlights`` / ``text_below_reference_large_text``:
+    same shape as ``highlights`` / ``large_text`` for that block.
     """
     style = style or {}
     theme = _resolve_theme(style)
@@ -472,6 +483,8 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
     align = _resolve_alignment(alignment)
     ref_position = theme['ref_position']
     fn = theme['font_name']
+    leading = (leading_title or '').strip()
+    extra_ref = (text_below_reference or '').strip()
 
     def _set_ref(tb_shape, text, align_const, size, bold=False, italic=False):
         rp = tb_shape.text_frame.paragraphs[0]
@@ -484,7 +497,52 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
         if fn:
             rp.font.name = fn
 
-    if ref_position == 'top' and reference:
+    slide_h_in = prs.slide_height.inches
+    bottom_margin_in = 0.15
+    # Inches from top of slide to top of main verse body (used for text_below_reference placement)
+    leading_verse_top_in = None
+    leading_verse_h_in = None
+
+    if leading:
+        # Title at top; reference under title; verse body under reference
+        lt_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(0.35), Inches(9), Inches(1.15))
+        lt_tf = lt_tb.text_frame
+        lt_tf.word_wrap = True
+        lt_tf.vertical_anchor = MSO_ANCHOR.TOP
+        lt_p = lt_tf.paragraphs[0]
+        lt_p.text = leading
+        lt_p.alignment = align
+        lt_p.font.size = Pt(38)
+        lt_p.font.bold = True
+        lt_p.font.color.rgb = theme['body']
+        if fn:
+            lt_p.font.name = fn
+        if reference:
+            ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
+            ref_pt = int(reference_font_size) if reference_font_size is not None else 24
+            ref_h_in = 0.72 if extra_ref else 0.85
+            ref_y_in = 1.52
+            ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(ref_y_in), Inches(9), Inches(ref_h_in))
+            _set_ref(ref_tb, ref_text, PP_ALIGN.LEFT, ref_pt, bold=True, italic=False)
+            ref_tb.text_frame.paragraphs[0].font.color.rgb = theme['body']
+            if fn:
+                ref_tb.text_frame.paragraphs[0].font.name = fn
+            vtop = ref_y_in + ref_h_in + 0.1
+            if extra_ref:
+                extra_reserve_in = 1.32
+                vh = slide_h_in - vtop - extra_reserve_in - bottom_margin_in
+            else:
+                vh = slide_h_in - vtop - bottom_margin_in
+            leading_verse_top_in = vtop
+            leading_verse_h_in = max(vh, 2.0)
+            verse_top = Inches(vtop)
+            verse_height = Inches(leading_verse_h_in)
+        else:
+            leading_verse_top_in = 1.65
+            leading_verse_h_in = 3.25 if extra_ref else 3.85
+            verse_top = Inches(leading_verse_top_in)
+            verse_height = Inches(leading_verse_h_in)
+    elif ref_position == 'top' and reference:
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
         ref_pt = int(reference_font_size) if reference_font_size is not None else 28
         ref_h_in = 0.95 if ref_pt >= 36 else 0.7
@@ -525,7 +583,8 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                               body_rgb=theme['body'],
                               highlight_rgb=theme['highlight'],
                               annotation_rgb=theme['annotation'],
-                              font_name=fn)
+                              font_name=fn,
+                              base_font_size=int(font_size))
         else:
             if has_verse_nums and v_num:
                 _add_superscript_num_run(p, v_num, font_size, theme['body'], fn)
@@ -536,7 +595,33 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
             if fn:
                 run.font.name = fn
 
-    if ref_position != 'top' and reference:
+    if leading and extra_ref and leading_verse_top_in is not None and leading_verse_h_in is not None:
+        below_top = leading_verse_top_in + leading_verse_h_in + 0.06
+        below_fs = max(int(font_size) - 2, 22)
+        ex_h_in = max(slide_h_in - below_top - bottom_margin_in, 0.5)
+        ex_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(below_top), Inches(9), Inches(ex_h_in))
+        ex_tf = ex_tb.text_frame
+        ex_tf.word_wrap = True
+        ex_tf.vertical_anchor = MSO_ANCHOR.TOP
+        ex_p = ex_tf.paragraphs[0]
+        ex_p.alignment = align
+        hl2 = text_below_reference_highlights
+        lt2 = text_below_reference_large_text
+        if (hl2 and len(hl2) > 0) or (lt2 and len(lt2) > 0):
+            _apply_highlights(ex_p, extra_ref, hl2, lt2,
+                              body_rgb=theme['body'],
+                              highlight_rgb=theme['highlight'],
+                              annotation_rgb=theme['annotation'],
+                              font_name=fn,
+                              base_font_size=below_fs)
+        else:
+            ex_run = ex_p.add_run()
+            ex_run.text = extra_ref
+            ex_run.font.size = Pt(below_fs)
+            ex_run.font.color.rgb = theme['body']
+            if fn:
+                ex_run.font.name = fn
+    elif ref_position != 'top' and reference:
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
         ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(6.0), Inches(9), Inches(0.7))
         _set_ref(ref_tb, ref_text, PP_ALIGN.CENTER, 22, italic=True)
@@ -653,6 +738,12 @@ def create_presentation(data, output_file=None, custom_title=None,
                             font_size=font_size,
                             style=slide_style,
                             reference_font_size=verse.get('reference_font_size'),
+                            leading_title=(verse.get('leading_title') if i == 0 else None),
+                            text_below_reference=(verse.get('text_below_reference') if i == 0 else None),
+                            text_below_reference_highlights=(
+                                verse.get('text_below_reference_highlights') if i == 0 else None),
+                            text_below_reference_large_text=(
+                                verse.get('text_below_reference_large_text') if i == 0 else None),
                         )
     
     # Generate output filename if not provided
