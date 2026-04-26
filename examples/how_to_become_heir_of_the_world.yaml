@@ -68,8 +68,6 @@ sections:
     - estranged from Christ
     - justified by law
     - fallen from grace
-- section: 2. Fallen from Grace
-  verses:
   - reference: Colossians 2:14 (NKJV)
     split_max_length: 400
     text: >-
@@ -78,6 +76,8 @@ sections:
     - wiped out the handwriting of requirements
     - taken it out of the way
     - nailed it to the cross
+- section: 2. Fallen from Grace
+  verses:
   - reference: Romans 5:17 (NKJV)
     split_max_length: 400
     text: >-
