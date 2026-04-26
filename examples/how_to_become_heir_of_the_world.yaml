@@ -39,6 +39,14 @@ sections:
     text: 'who "will render to each one according to his deeds":'
     highlights:
     - according to his deeds
+  - reference: Romans 2:8 (NKJV)
+    split_max_length: 400
+    text: >-
+      but to those who are self-seeking and do not obey the truth, but obey unrighteousness—indignation and wrath,
+    highlights:
+    - self-seeking
+    - do not obey the truth
+    - wrath
   - reference: Psalm 103:10 (NKJV)
     text: He has not dealt with us according to our sins, Nor punished us according to our iniquities.
     highlights:
@@ -52,14 +60,6 @@ sections:
       Nor will He keep His anger forever.
     highlights:
     - Nor will He keep His anger forever
-  - reference: Romans 2:8 (NKJV)
-    split_max_length: 400
-    text: >-
-      but to those who are self-seeking and do not obey the truth, but obey unrighteousness—indignation and wrath,
-    highlights:
-    - self-seeking
-    - do not obey the truth
-    - wrath
   - reference: Galatians 5:4 (NKJV)
     text: You have become estranged from Christ, you who attempt to be justified by law; you have fallen from grace.
     highlights:
