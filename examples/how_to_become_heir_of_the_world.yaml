@@ -68,6 +68,8 @@ sections:
     - estranged from Christ
     - justified by law
     - fallen from grace
+- section: 2. Fallen from Grace
+  verses:
   - reference: Colossians 2:14 (NKJV)
     split_max_length: 400
     text: >-
