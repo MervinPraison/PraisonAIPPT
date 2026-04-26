@@ -86,6 +86,8 @@ sections:
     - abundance of grace
     - gift of righteousness
     - reign in life
+- section: 3. Cursed
+  verses:
   - reference: Galatians 3:10 (NKJV)
     split_max_length: 500
     text: >-
