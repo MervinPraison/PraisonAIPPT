@@ -1,5 +1,6 @@
 # New King James Version (NKJV) throughout — see references on each slide.
 presentation_title: How to become heir of the world?
+presentation_subtitle: ''
 auto_upload_gdrive: true
 slide_style:
   background_image: assets/background_alt.jpg
@@ -10,6 +11,12 @@ slide_style:
 sections:
 - section: ''
   verses:
+  - reference: Romans 4:13 (NKJV)
+    text: For the promise that he would be the heir of the world was not to Abraham or to his seed through the law, but through the righteousness of faith.
+    highlights:
+    - heir of the world
+    - not
+    - through the law
   - reference: Romans 3:28 (NKJV)
     text: Therefore we conclude that a man is justified by faith apart from the deeds of the law.
     highlights:
@@ -24,12 +31,6 @@ sections:
     text: But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;
     highlights:
     - apart from the law
-  - reference: Romans 4:13 (NKJV)
-    text: For the promise that he would be the heir of the world was not to Abraham or to his seed through the law, but through the righteousness of faith.
-    highlights:
-    - heir of the world
-    - not
-    - through the law
   - reference: Romans 2:13 (NKJV)
     text: (for not the hearers of the law are just in the sight of God, but the doers of the law will be justified;
     highlights:
