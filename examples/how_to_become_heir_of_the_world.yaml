@@ -60,7 +60,9 @@ sections:
       Nor will He keep His anger forever.
     highlights:
     - Nor will He keep His anger forever
-  - reference: Galatians 5:4 (NKJV)
+- section: 1. Separated from Christ
+  verses:
+  - reference: Galatians 5:4
     text: You have become estranged from Christ, you who attempt to be justified by law; you have fallen from grace.
     highlights:
     - estranged from Christ
