@@ -1,0 +1,187 @@
+# New King James Version (NKJV) throughout — see references on each slide.
+presentation_title: Freedom from all your troubles
+presentation_subtitle: ''
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+
+sections:
+- section: ''
+  verses:
+  - reference: Romans 3:21 (NKJV)
+    text: But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;
+    highlights:
+    - righteousness of God
+    - witnessed by the Law and the Prophets
+    - text: apart from the law
+      color: green
+
+  - reference: Matthew 17:5 (NKJV)
+    split_max_length: 500
+    text: >-
+      While he was still speaking, behold, a bright cloud overshadowed them; and suddenly a voice came out of the cloud, saying,
+      “This is My beloved Son, in whom I am well pleased. Hear Him!”
+    highlights:
+    - While he was still speaking
+    - Hear Him
+
+  - reference: Acts 10:44 (NKJV)
+    text: While Peter was still speaking these words, the Holy Spirit fell upon all those who heard the word.
+    highlights:
+    - While Peter was still speaking
+    - the Holy Spirit fell
+
+  - reference: 2 Corinthians 3:17 (NIV)
+    text: Now the Lord is the Spirit, and where the Spirit of the Lord is, there is freedom.
+    highlights:
+    - freedom
+
+  - reference: Psalm 34:19 (NIV)
+    text: |-
+      The righteous person may have many troubles,
+      but the Lord delivers him from them all;
+    highlights:
+    - may,
+    - all
+
+  - reference: Romans 4:13 (NKJV)
+    text: For the promise that he would be the heir of the world was not to Abraham or to his seed through the law, but through the righteousness of faith.
+    highlights:
+    - heir of the world
+    - not
+    - through the law
+
+  - reference: Romans 3:28 (NKJV)
+    text: Therefore we conclude that a man is justified by faith apart from the deeds of the law.
+    highlights:
+    - justified
+    - apart from the deeds
+
+  - reference: Galatians 2:16 (NKJV)
+    split_max_length: 500
+    text: >-
+      knowing that a man is not justified by the works of the law but by faith in Jesus Christ, even we have believed in Christ Jesus,
+      that we might be justified by faith in Christ and not by the works of the law; for by the works of the law no flesh shall be justified.
+    highlights:
+    - not justified by the works of the law
+
+  - reference: Romans 2:13 (NKJV)
+    text: (for not the hearers of the law are just in the sight of God, but the doers of the law will be justified;
+    highlights:
+    - doers of the law will be justified
+
+  - reference: Romans 2:6 (NKJV)
+    text: 'who "will render to each one according to his deeds":'
+    highlights:
+    - according to his deeds
+
+  - reference: Romans 2:8 (NKJV)
+    split_max_length: 400
+    text: >-
+      but to those who are self-seeking and do not obey the truth, but obey unrighteousness—indignation and wrath,
+    highlights:
+    - wrath
+
+  - reference: Psalm 103:10 (NKJV)
+    text: He has not dealt with us according to our sins, Nor punished us according to our iniquities.
+    highlights:
+    - not dealt with us according to our sins
+    - Nor punished us according to our iniquities
+
+  - reference: Psalm 103:8–9 (NKJV)
+    text: |-
+      The Lord is merciful and gracious,
+      Slow to anger, and abounding in mercy.
+      He will not always strive with us,
+      Nor will He keep His anger forever.
+    highlights:
+    - Nor will He keep His anger forever
+
+- section: 1. Separated from Christ
+  verses:
+  - reference: Galatians 5:4 (NKJV)
+    text: You have become estranged from Christ, you who attempt to be justified by law; you have fallen from grace.
+    highlights:
+    - estranged from Christ
+    - justified by law
+    - fallen from grace
+
+  - reference: Colossians 2:14 (NKJV)
+    split_max_length: 400
+    text: >-
+      having wiped out the handwriting of requirements that was against us, which was contrary to us.
+      And He has taken it out of the way, having nailed it to the cross.
+    highlights:
+    - wiped out the handwriting of requirements
+    - taken it out of the way
+    - nailed it to the cross
+
+- section: 2. Fallen from Grace
+  verses:
+  - reference: Romans 5:17 (NKJV)
+    split_max_length: 400
+    text: >-
+      For if by the one man's offense death reigned through the one, much more those who receive abundance of grace
+      and of the gift of righteousness will reign in life through the One, Jesus Christ.
+    highlights:
+    - abundance of grace
+    - gift of righteousness
+    - reign in life
+
+- section: 3. Cursed
+  verses:
+  - reference: Galatians 3:10 (NKJV)
+    split_max_length: 500
+    text: >-
+      For as many as are of the works of the law are under the curse; for it is written,
+      "Cursed is everyone who does not continue in all things which are written in the book of the law, to do them."
+    highlights:
+    - works of the law are under the curse
+    - Cursed is everyone
+
+  - reference: Matthew 11:13 (NKJV)
+    text: For all the prophets and the law prophesied until John.
+    highlights:
+    - all the prophets and the law prophesied
+    - until John
+
+  - reference: Luke 9:54 (NKJV)
+    text: And when His disciples James and John saw this, they said, "Lord, do You want us to command fire to come down from heaven and consume them, just as Elijah did?"
+    highlights:
+    - command fire to come down from heaven
+    - just as Elijah did
+
+  - reference: Matthew 17:25–26 (NKJV)
+    split_max_length: 500
+    text: >-
+      He said, "Yes." And when he had come into the house, Jesus anticipated him, saying,
+      "What do you think, Simon? From whom do the kings of the earth take customs or taxes,
+      from their sons or from strangers?"
+
+      Peter said to Him, "From strangers." Jesus said to him, "Then the sons are free."
+    highlights:
+    - From strangers
+    - sons are free
+
+  - reference: Romans 2:15 (NKJV)
+    split_max_length: 400
+    text: >-
+      who show the work of the law written in their hearts, their conscience also bearing witness,
+      and between themselves their thoughts accusing or else excusing them)
+    highlights:
+    - law written in their hearts
+    - conscience also bearing witness
+
+  - reference: Romans 2:29 (NKJV)
+    split_max_length: 400
+    text: >-
+      but he is a Jew who is one inwardly; and circumcision is that of the heart, in the Spirit,
+      not in the letter; whose praise is not from men but from God.
+    highlights:
+    - one inwardly
+    - circumcision is that of the heart
+    - not in the letter          
