@@ -225,6 +225,13 @@ sections:
     highlights:
     - He expounded to them in all the Scriptures the things concerning Himself
 
+  - reference: 1 Corinthians 11:23 (NKJV)
+    text: >-
+      For I received from the Lord that which I also delivered to you: that the
+      Lord Jesus on the same night in which He was betrayed took bread;
+    highlights:
+    - Lord Jesus on the same night in which He was betrayed
+
   - reference: Matthew 11:13 (NKJV)
     text: For all the prophets and the law prophesied until John.
     highlights:
