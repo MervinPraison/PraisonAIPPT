@@ -33,6 +33,14 @@ sections:
     - may,
     - all
 
+  - reference: Romans 3:21 (NKJV)
+    text: But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;
+    highlights:
+    - righteousness of God
+    - witnessed by the Law and the Prophets
+    - text: apart from the law
+      color: green
+
   - reference: Matthew 17:5 (NKJV)
     split_max_length: 500
     text: >-
@@ -49,38 +57,6 @@ sections:
     - the Holy Spirit
     - text: fell
       color: green
-
-  - reference: Romans 2:13 (NKJV)
-    text: (for not the hearers of the law are just in the sight of God, but the doers of the law will be justified;
-    highlights:
-    - doers of the law will be justified
-
-  - reference: Romans 2:6 (NKJV)
-    text: 'who "will render to each one according to his deeds":'
-    highlights:
-    - according to his deeds
-
-  - reference: Romans 2:8 (NKJV)
-    split_max_length: 400
-    text: >-
-      but to those who are self-seeking and do not obey the truth, but obey unrighteousness—indignation and wrath,
-    highlights:
-    - wrath
-
-  - reference: Psalm 103:10 (NKJV)
-    text: He has not dealt with us according to our sins, Nor punished us according to our iniquities.
-    highlights:
-    - not dealt with us according to our sins
-    - Nor punished us according to our iniquities
-
-  - reference: Psalm 103:8–9 (NKJV)
-    text: |-
-      The Lord is merciful and gracious,
-      Slow to anger, and abounding in mercy.
-      He will not always strive with us,
-      Nor will He keep His anger forever.
-    highlights:
-    - Nor will He keep His anger forever
 
 - section: 1. Separated from Christ
   verses:
@@ -123,6 +99,60 @@ sections:
     highlights:
     - works of the law are under the curse
     - Cursed is everyone
+
+- section: 4. Ministry of Death
+  verses:
+  - reference: 2 Corinthians 3:7 (NKJV)
+    split_max_length: 500
+    text: >-
+      But if the ministry of death, written and engraved on stones, was glorious,
+      so that the children of Israel could not look steadily at the face of Moses because of the glory of his countenance, which glory was passing away,
+    highlights:
+    - ministry of death
+
+- section: What Moses and Elijah speaking in the mount of Transfiguration
+  verses:
+  - reference: Luke 9:30–31 (NKJV)
+    split_max_length: 500
+    text: >-
+      And behold, two men talked with Him, who were Moses and Elijah,
+      who appeared in glory and spoke of His decease which He was about to accomplish at Jerusalem.
+    highlights:
+    - Moses and Elijah
+
+- section: ''
+  verses:
+  - reference: Romans 2:13 (NKJV)
+    text: (for not the hearers of the law are just in the sight of God, but the doers of the law will be justified;
+    highlights:
+    - doers of the law will be justified
+
+  - reference: Romans 2:6 (NKJV)
+    text: 'who "will render to each one according to his deeds":'
+    highlights:
+    - according to his deeds
+
+  - reference: Romans 2:8 (NKJV)
+    split_max_length: 400
+    text: >-
+      but to those who are self-seeking and do not obey the truth, but obey unrighteousness—indignation and wrath,
+    highlights:
+    - wrath
+
+  - reference: Psalm 103:10 (NKJV)
+    text: He has not dealt with us according to our sins, Nor punished us according to our iniquities.
+    highlights:
+    - not dealt with us according to our sins
+    - Nor punished us according to our iniquities
+
+  - reference: Psalm 103:8–9 (NKJV)
+    text: |-
+      The Lord is merciful and gracious,
+      Slow to anger, and abounding in mercy.
+      He will not always strive with us,
+      Nor will He keep His anger forever.
+    highlights:
+    - Nor will He keep His anger forever
 
   - reference: Matthew 11:13 (NKJV)
     text: For all the prophets and the law prophesied until John.
