@@ -17,11 +17,14 @@ sections:
     highlights:
     - text: righteousness of God
       annotation: 1
-    - text: witnessed by the Law and the Prophets
+      underline: false
+    - text: Witnessed by the Law and the Prophets
       annotation: 2
+      underline: false
     - text: apart from the law
       color: green
       annotation: 3
+      underline: false
 
   - reference: 2 Corinthians 3:17 (NIV)
     text: Now the Lord is the Spirit, and where the Spirit of the Lord is, there is freedom.
@@ -41,11 +44,14 @@ sections:
     highlights:
     - text: righteousness of God
       annotation: 1
-    - text: witnessed by the Law and the Prophets
+      underline: false
+    - text: Witnessed by the Law and the Prophets
       annotation: 2
+      underline: false
     - text: apart from the law
       color: green
       annotation: 3
+      underline: false
 
   - reference: Matthew 17:5 (NKJV)
     split_max_length: 500
@@ -63,6 +69,14 @@ sections:
     - the Holy Spirit
     - text: fell
       color: green
+
+  - reference: Romans 5:19 (NKJV)
+    split_max_length: 450
+    text: >-
+      For as by one man's disobedience many were made sinners, so also by one Man's obedience many will be made righteous.
+    highlights:
+    - one Man's obedience
+    - made righteous
 
 - section: 1. Separated from Christ
   verses:
@@ -110,7 +124,7 @@ sections:
     - works of the law are under the curse
     - Cursed is everyone
 
-- section: 4. Ministry of Death
+- section: 4. Ministers Death
   verses:
   - reference: 2 Corinthians 3:7 (NKJV)
     split_max_length: 500
@@ -120,7 +134,21 @@ sections:
     highlights:
     - ministry of death
 
-- section: witnessed by the Law and the Prophets
+  - reference: Romans 3:21 (NKJV)
+    text: But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;
+    highlights:
+    - text: righteousness of God
+      annotation: 1
+      underline: false
+    - text: Witnessed by the Law and the Prophets
+      annotation: 2
+      underline: false
+    - text: apart from the law
+      color: green
+      annotation: 3
+      underline: false
+
+- section: Witnessed by the Law and the Prophets
   verses:
   - reference: Luke 9:30–31 (NKJV)
     split_max_length: 500
@@ -129,6 +157,11 @@ sections:
       who appeared in glory and spoke of His decease which He was about to accomplish at Jerusalem.
     highlights:
     - Moses and Elijah
+    - text: decease
+      color: green
+
+- section: 'Can I mix Both His Righteousness   and the Law(Self Righteousness)?'
+  verses: []
 
 - section: ''
   verses:
