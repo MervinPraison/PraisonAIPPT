@@ -15,10 +15,13 @@ sections:
   - reference: Romans 3:21 (NKJV)
     text: But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;
     highlights:
-    - righteousness of God
-    - witnessed by the Law and the Prophets
+    - text: righteousness of God
+      annotation: 1
+    - text: witnessed by the Law and the Prophets
+      annotation: 2
     - text: apart from the law
       color: green
+      annotation: 3
 
   - reference: 2 Corinthians 3:17 (NIV)
     text: Now the Lord is the Spirit, and where the Spirit of the Lord is, there is freedom.
@@ -36,10 +39,13 @@ sections:
   - reference: Romans 3:21 (NKJV)
     text: But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;
     highlights:
-    - righteousness of God
-    - witnessed by the Law and the Prophets
+    - text: righteousness of God
+      annotation: 1
+    - text: witnessed by the Law and the Prophets
+      annotation: 2
     - text: apart from the law
       color: green
+      annotation: 3
 
   - reference: Matthew 17:5 (NKJV)
     split_max_length: 500
@@ -60,12 +66,11 @@ sections:
 
 - section: 1. Separated from Christ
   verses:
-  - reference: Galatians 5:4 (NKJV)
-    text: You have become estranged from Christ, you who attempt to be justified by law; you have fallen from grace.
+  - reference: Galatians 5:4
+    text: You are separated from Christ, you who are trying to be justified by law; you have fallen from grace.
     highlights:
-    - estranged from Christ
-    - justified by law
-    - fallen from grace
+    - separated from Christ
+    - trying to be justified by law
 
   - reference: Colossians 2:14 (NKJV)
     split_max_length: 400
@@ -89,6 +94,11 @@ sections:
     - gift of righteousness
     - reign in life
 
+  - reference: Galatians 5:4
+    text: You are separated from Christ, you who are trying to be justified by law; you have fallen from grace.
+    highlights:
+    - fallen from grace
+
 - section: 3. Cursed
   verses:
   - reference: Galatians 3:10 (NKJV)
@@ -110,7 +120,7 @@ sections:
     highlights:
     - ministry of death
 
-- section: What Moses and Elijah speaking in the mount of Transfiguration
+- section: witnessed by the Law and the Prophets
   verses:
   - reference: Luke 9:30–31 (NKJV)
     split_max_length: 500
