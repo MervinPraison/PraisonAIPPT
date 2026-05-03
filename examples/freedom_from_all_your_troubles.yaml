@@ -150,6 +150,27 @@ sections:
       annotation: 3
       underline: false
 
+  - reference: Romans 4:13 (NKJV)
+    text: For the promise that he would be the heir of the world was not to Abraham or to his seed through the law, but through the righteousness of faith.
+    highlights:
+    - heir of the world
+    - not
+    - through the law
+
+  - reference: Romans 3:28 (NKJV)
+    text: Therefore we conclude that a man is justified by faith apart from the deeds of the law.
+    highlights:
+    - justified
+    - apart from the deeds
+
+  - reference: Galatians 2:16 (NKJV)
+    split_max_length: 500
+    text: >-
+      knowing that a man is not justified by the works of the law but by faith in Jesus Christ, even we have believed in Christ Jesus,
+      that we might be justified by faith in Christ and not by the works of the law; for by the works of the law no flesh shall be justified.
+    highlights:
+    - not justified by the works of the law
+
 - section: 'Can I mix Both His Righteousness   and the Law(Self Righteousness)?'
   verses: []
 
@@ -242,23 +263,3 @@ sections:
     - circumcision is that of the heart
     - not in the letter
 
-  - reference: Romans 4:13 (NKJV)
-    text: For the promise that he would be the heir of the world was not to Abraham or to his seed through the law, but through the righteousness of faith.
-    highlights:
-    - heir of the world
-    - not
-    - through the law
-
-  - reference: Romans 3:28 (NKJV)
-    text: Therefore we conclude that a man is justified by faith apart from the deeds of the law.
-    highlights:
-    - justified
-    - apart from the deeds
-
-  - reference: Galatians 2:16 (NKJV)
-    split_max_length: 500
-    text: >-
-      knowing that a man is not justified by the works of the law but by faith in Jesus Christ, even we have believed in Christ Jesus,
-      that we might be justified by faith in Christ and not by the works of the law; for by the works of the law no flesh shall be justified.
-    highlights:
-    - not justified by the works of the law
