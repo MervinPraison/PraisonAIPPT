@@ -4,6 +4,7 @@ Command-line interface for PraisonAI PPT - PowerPoint Bible Verses Generator.
 """
 
 import argparse
+import logging
 import sys
 import json
 from pathlib import Path
@@ -12,6 +13,21 @@ from .loader import load_verses_from_file, get_example_path, list_examples
 from .core import create_presentation
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
 from .config import load_config, init_config
+
+
+def _configure_logging(verbose: bool, quiet: bool) -> None:
+    """Configure root logger level based on CLI flags. Default: WARNING."""
+    if verbose:
+        level = logging.DEBUG
+    elif quiet:
+        level = logging.ERROR
+    else:
+        level = logging.WARNING
+    logging.basicConfig(
+        level=level,
+        format="%(levelname)s %(name)s: %(message)s",
+        force=True,
+    )
 
 
 def parse_arguments():
@@ -170,7 +186,17 @@ Examples:
         action='version',
         version=f'%(prog)s {__version__}'
     )
-    
+    parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='Enable DEBUG-level logging.'
+    )
+    parser.add_argument(
+        '--quiet', '-q',
+        action='store_true',
+        help='Suppress all but ERROR-level logging.'
+    )
+
     return parser.parse_args()
 
 
@@ -838,49 +864,9 @@ def handle_gdrive_upload(output_file, args, config, pdf_path=None):
 
 
 def _convert_pdf_via_gdrive(pptx_path: str, pdf_path: str) -> str:
-    """
-    Fallback PDF conversion using Google Drive API:
-    Upload PPTX as native Google Slides, export as PDF, delete temp file.
-    """
-    from .gdrive_uploader import GDriveUploader
-    import io
-    from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
-
-    uploader = GDriveUploader()
-    service  = uploader._get_service()
-
-    # Upload as native Slides
-    metadata = {
-        'name': '_pptx_to_pdf_tmp',
-        'mimeType': 'application/vnd.google-apps.presentation'
-    }
-    media = MediaFileUpload(
-        pptx_path,
-        mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation'
-    )
-    slides_file = service.files().create(
-        body=metadata, media_body=media, fields='id').execute()
-    slides_id = slides_file['id']
-
-    try:
-        # Export as PDF
-        request = service.files().export_media(
-            fileId=slides_id, mimeType='application/pdf')
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while not done:
-            _, done = downloader.next_chunk()
-        with open(pdf_path, 'wb') as f:
-            f.write(fh.getvalue())
-    finally:
-        # Always delete temp Slides file
-        try:
-            service.files().delete(fileId=slides_id).execute()
-        except Exception:
-            pass
-
-    return pdf_path
+    """Backward-compat shim. The real implementation lives in pdf_converter."""
+    from .pdf_converter import convert_pptx_to_pdf_via_gdrive
+    return convert_pptx_to_pdf_via_gdrive(pptx_path, pdf_path)
 
 
 def main():
@@ -888,7 +874,8 @@ def main():
     Main entry point for the CLI.
     """
     args = parse_arguments()
-    
+    _configure_logging(getattr(args, 'verbose', False), getattr(args, 'quiet', False))
+
     # Handle config commands
     if args.config_init:
         init_config(interactive=True)

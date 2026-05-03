@@ -31,6 +31,27 @@ dependencies = [
     "PyYAML>=6.0",
 ]
 
+[project.optional-dependencies]
+pdf-aspose = ["aspose.slides>=24.0.0"]
+pdf-all = ["aspose.slides>=24.0.0", "psutil>=5.9.0", "tqdm>=4.64.0"]
+gdrive = [
+    "google-auth>=2.16.0",
+    "google-auth-oauthlib>=1.0.0",
+    "google-api-python-client>=2.80.0",
+]
+all = [
+    "aspose.slides>=24.0.0",
+    "psutil>=5.9.0",
+    "tqdm>=4.64.0",
+    "google-auth>=2.16.0",
+    "google-auth-oauthlib>=1.0.0",
+    "google-api-python-client>=2.80.0",
+]
+dev = [
+    "pytest>=7",
+    "build",
+]
+
 [project.urls]
 Homepage = "https://github.com/MervinPraison/PraisonAIPPT"
 "Bug Reports" = "https://github.com/MervinPraison/PraisonAIPPT/issues"
@@ -40,7 +61,7 @@ Homepage = "https://github.com/MervinPraison/PraisonAIPPT"
 praisonaippt = "praisonaippt.cli:main"
 
 [tool.setuptools]
-packages = ["praisonaippt"]
+packages = ["praisonaippt", "examples"]
 
 [tool.setuptools.package-data]
-"*" = ["examples/*.json", "examples/*.yaml", "examples/*.yml"]
+examples = ["*.json", "*.yaml", "*.yml"]

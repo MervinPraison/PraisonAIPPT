@@ -313,6 +313,84 @@ def convert_pptx_to_pdf(pptx_path: str, pdf_path: Optional[str] = None,
     return converter.convert_to_pdf(pptx_path, pdf_path, options)
 
 
+def convert_pptx_to_pdf_via_gdrive(pptx_path: str, pdf_path: str) -> str:
+    """Fallback PDF conversion using Google Drive API.
+
+    Uploads ``pptx_path`` as a native Google Slides file, exports it as PDF
+    to ``pdf_path``, then deletes the temporary Slides file.
+
+    Requires the ``gdrive`` extra:
+
+        pip install praisonaippt[gdrive]
+    """
+    # Imports kept local so this module stays importable without the gdrive extra.
+    import io
+    from .gdrive_uploader import GDriveUploader
+    from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+
+    uploader = GDriveUploader()
+    service = uploader._get_service()
+
+    metadata = {
+        'name': '_pptx_to_pdf_tmp',
+        'mimeType': 'application/vnd.google-apps.presentation',
+    }
+    media = MediaFileUpload(
+        pptx_path,
+        mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    )
+    slides_file = service.files().create(
+        body=metadata, media_body=media, fields='id').execute()
+    slides_id = slides_file['id']
+
+    try:
+        request = service.files().export_media(
+            fileId=slides_id, mimeType='application/pdf')
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while not done:
+            _, done = downloader.next_chunk()
+        with open(pdf_path, 'wb') as f:
+            f.write(fh.getvalue())
+    finally:
+        try:
+            service.files().delete(fileId=slides_id).execute()
+        except Exception:
+            pass
+
+    return pdf_path
+
+
+def convert_pptx_to_pdf_with_fallback(
+    pptx_path: str,
+    pdf_path: Optional[str] = None,
+    backend: str = 'auto',
+    options: Optional[PDFOptions] = None,
+) -> str:
+    """Try local backends first; on failure fall back to Google Drive export.
+
+    Returns the resulting PDF path. Raises the original exception only if both
+    the local conversion and the GDrive fallback fail.
+    """
+    try:
+        return convert_pptx_to_pdf(pptx_path, pdf_path, backend=backend, options=options)
+    except Exception as primary_err:
+        if pdf_path is None:
+            from pathlib import Path as _P
+            pdf_path = str(_P(pptx_path).with_suffix('.pdf'))
+        logger.warning(
+            "Local PDF conversion unavailable (%s); falling back to Google Drive",
+            primary_err,
+        )
+        try:
+            return convert_pptx_to_pdf_via_gdrive(pptx_path, pdf_path)
+        except Exception as gdrive_err:
+            raise RuntimeError(
+                f"PDF conversion failed (local: {primary_err}; gdrive: {gdrive_err})"
+            ) from gdrive_err
+
+
 # Example usage and testing
 if __name__ == "__main__":
     # Simple test

@@ -1,0 +1,66 @@
+name: tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    name: pytest (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run pytest
+        run: pytest tests/ -q
+
+  build:
+    name: build sdist + wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip build
+      - run: python -m build
+      - name: Verify wheel ships examples
+        run: |
+          python -c "
+          import zipfile, glob, sys
+          whl = glob.glob('dist/*.whl')[0]
+          names = zipfile.ZipFile(whl).namelist()
+          ex = [n for n in names if n.startswith('examples/') and n.endswith(('.json', '.yaml', '.yml'))]
+          assert len(ex) > 10, f'Expected >10 example files, got {len(ex)}'
+          print(f'OK: {len(ex)} example files in wheel')
+          "
+      - name: Verify metadata declares extras
+        run: |
+          python -m pip install dist/*.whl
+          python -c "
+          from importlib.metadata import metadata
+          extras = sorted(v for k, v in metadata('praisonaippt').items() if k == 'Provides-Extra')
+          required = {'gdrive', 'pdf-aspose', 'pdf-all', 'all'}
+          missing = required - set(extras)
+          assert not missing, f'Missing extras: {missing}'
+          print('OK: extras', extras)
+          "

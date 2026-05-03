@@ -6,6 +6,9 @@ import json
 import yaml
 from pathlib import Path
 
+from .exceptions import SchemaError
+from .schema import validate_verses
+
 
 def load_verses_from_file(filepath):
     """
@@ -38,17 +41,15 @@ def load_verses_from_file(filepath):
                     # Fall back to JSON
                     data = json.loads(content)
         
-        # Basic validation
-        if not isinstance(data, dict):
-            print("Error: File must contain an object/dictionary")
+        # Validate (warns on unknown keys; raises SchemaError on hard issues)
+        try:
+            data = validate_verses(data)
+        except SchemaError as e:
+            print(f"Error: Invalid schema in '{filepath}': {e}")
             return None
-        
-        if "sections" not in data:
-            print("Warning: No 'sections' key found in file")
-            data["sections"] = []
-        
+
         return data
-    
+
     except FileNotFoundError:
         print(f"Error: File '{filepath}' not found.")
         return None
@@ -63,20 +64,17 @@ def load_verses_from_file(filepath):
 def load_verses_from_dict(data):
     """
     Load verses data from a dictionary (for programmatic use).
-    
+
+    Raises:
+        SchemaError: If ``data`` does not match the verses schema.
+
     Args:
         data (dict): Verses data dictionary
-    
+
     Returns:
         dict: Validated verses data dictionary
     """
-    if not isinstance(data, dict):
-        raise ValueError("Data must be a dictionary")
-    
-    if "sections" not in data:
-        data["sections"] = []
-    
-    return data
+    return validate_verses(data)
 
 
 def get_example_path(example_name):

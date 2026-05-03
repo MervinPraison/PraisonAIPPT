@@ -136,23 +136,29 @@ class Config:
     def get_gdrive_credentials(self) -> Optional[str]:
         """
         Get Google Drive credentials path from config.
-        
+
+        Environment variable ``PRAISONAIPPT_GDRIVE_CREDENTIALS`` overrides
+        the value stored in the config file when set.
+
         Returns:
             Credentials path or None
         """
-        creds_path = self.get('gdrive', 'credentials_path')
+        creds_path = os.environ.get('PRAISONAIPPT_GDRIVE_CREDENTIALS') \
+            or self.get('gdrive', 'credentials_path')
         if creds_path:
             # Expand ~ to home directory
             return os.path.expanduser(creds_path)
         return None
-    
+
     def get_gdrive_folder_id(self) -> Optional[str]:
-        """Get Google Drive folder ID from config"""
-        return self.get('gdrive', 'folder_id')
-    
+        """Get Google Drive folder ID from config (env: PRAISONAIPPT_GDRIVE_FOLDER_ID)."""
+        return os.environ.get('PRAISONAIPPT_GDRIVE_FOLDER_ID') \
+            or self.get('gdrive', 'folder_id')
+
     def get_gdrive_folder_name(self) -> Optional[str]:
-        """Get Google Drive folder name from config"""
-        return self.get('gdrive', 'folder_name')
+        """Get Google Drive folder name from config (env: PRAISONAIPPT_GDRIVE_FOLDER_NAME)."""
+        return os.environ.get('PRAISONAIPPT_GDRIVE_FOLDER_NAME') \
+            or self.get('gdrive', 'folder_name')
     
     def use_date_folders(self) -> bool:
         """Check if date-based folders should be used"""
