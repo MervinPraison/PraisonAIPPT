@@ -150,6 +150,9 @@ sections:
       annotation: 3
       underline: false
 
+- section: 'Can I mix Both His Righteousness   and the Law(Self Righteousness)?'
+  verses: []
+
 - section: Witnessed by the Law and the Prophets
   verses:
   - reference: Luke 9:30–31 (NKJV)
@@ -161,9 +164,6 @@ sections:
     - Moses and Elijah
     - text: decease
       color: green
-
-- section: 'Can I mix Both His Righteousness   and the Law(Self Righteousness)?'
-  verses: []
 
 - section: ''
   verses:
