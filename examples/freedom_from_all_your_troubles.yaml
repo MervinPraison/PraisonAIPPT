@@ -295,6 +295,8 @@ sections:
     - From strangers
     - sons are free
 
+- section: What is written in your hearts?
+  verses:
   - reference: Romans 2:15 (NKJV)
     leading_title: law written in heart - old covenant
     split_max_length: 400
