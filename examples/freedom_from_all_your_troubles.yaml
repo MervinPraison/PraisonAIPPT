@@ -230,6 +230,10 @@ sections:
     - text: Himself
       color: green
 
+  - text: >-
+      Peter was mixing the messages from Moses, Elijah and Jesus, thats why the Heavenly Father was against him
+    reference: ''
+
   - reference: 1 Corinthians 11:23 (NKJV)
     text: >-
       For I received from the Lord that which I also delivered to you: that the
