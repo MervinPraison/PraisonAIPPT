@@ -202,6 +202,18 @@ sections:
   - reference: Matthew 9:16 (NKJV)
     text: No one puts a piece of unshrunk cloth on an old garment; for the patch pulls away from the garment, and the tear is made worse.
 
+  - reference: Romans 7:3-4 (NKJV)
+    text: >-
+      So then if, while her husband lives, she marries another man, she will be
+      called an adulteress; but if her husband dies, she is free from that law,
+      so that she is no adulteress, though she has married another man.
+
+      Therefore, my brethren, you also have become dead to the law through the
+      body of Christ, that you may be married to another—to Him who was raised
+      from the dead, that we should bear fruit to God.
+    highlights:
+    - dead to the law
+
 - section: Witnessed by the Law and the Prophets
   verses:
   - reference: Luke 9:30–31 (NKJV)
@@ -262,18 +274,6 @@ sections:
       color: yellow
     - text: Himself
       color: green
-
-  - reference: Romans 7:3-4 (NKJV)
-    text: >-
-      So then if, while her husband lives, she marries another man, she will be
-      called an adulteress; but if her husband dies, she is free from that law,
-      so that she is no adulteress, though she has married another man.
-
-      Therefore, my brethren, you also have become dead to the law through the
-      body of Christ, that you may be married to another—to Him who was raised
-      from the dead, that we should bear fruit to God.
-    highlights:
-    - dead to the law
 
 - section: Disciples Failed Again
   verses:
