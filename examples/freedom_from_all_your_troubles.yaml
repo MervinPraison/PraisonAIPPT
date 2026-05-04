@@ -293,6 +293,7 @@ sections:
     - just as Elijah did
 
   - reference: Matthew 17:25–26 (NKJV)
+    leading_title: Moses Message
     split_max_length: 500
     text: >-
       He said, "Yes." And when he had come into the house, Jesus anticipated him, saying,
