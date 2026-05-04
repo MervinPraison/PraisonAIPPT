@@ -36,7 +36,8 @@ sections:
       The righteous person may have many troubles,
       but the Lord delivers him from them all;
     highlights:
-    - may,
+    - text: may
+      color: green
     - all
 
   - reference: Romans 3:21 (NKJV)
