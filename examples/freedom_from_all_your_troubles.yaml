@@ -316,3 +316,16 @@ sections:
     - circumcision is that of the heart
     - not in the letter
 
+- section: While Peter was still speaking
+  verses:
+  - reference: Acts 10:43,44 (NIV)
+    split_max_length: 500
+    text: >-
+      All the prophets testify about him that everyone who believes in him receives forgiveness of sins through his name.
+
+      While Peter was still speaking these words, the Holy Spirit came on all who heard the message.
+    highlights:
+    - forgiveness of sins
+    - text: testify
+      color: green
+
