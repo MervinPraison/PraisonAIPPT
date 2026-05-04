@@ -125,6 +125,15 @@ sections:
     - works of the law are under the curse
     - Cursed is everyone
 
+  - reference: Galatians 1:8,9 (NKJV)
+    split_max_length: 500
+    text: >-
+      But even if we, or an angel from heaven, preach any other gospel to you than
+      what we have preached to you, let him be accursed.
+
+      As we have said before, so now I say again, if anyone preaches any other
+      gospel to you than what you have received, let him be accursed.
+
 - section: 4. Ministers Death
   verses:
   - reference: 2 Corinthians 3:7 (NKJV)
