@@ -144,6 +144,12 @@ sections:
     highlights:
     - ministry of death
 
+  - reference: 2 Corinthians 3:6 (NKJV)
+    text: >-
+      who also made us sufficient as ministers of the new covenant, not of the letter but of the Spirit; for the law kills, but the Spirit gives life.
+    highlights:
+    - law kills
+
 - section: Apart from the law
   verses:
   - reference: Romans 3:21 (NKJV)
