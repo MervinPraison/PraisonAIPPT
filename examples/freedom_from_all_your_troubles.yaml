@@ -224,6 +224,7 @@ sections:
     - wrath
 
   - reference: Psalm 103:10 (NKJV)
+    leading_title: Message of Jesus
     text: He has not dealt with us according to our sins, Nor punished us according to our iniquities.
     highlights:
     - not dealt with us according to our sins
