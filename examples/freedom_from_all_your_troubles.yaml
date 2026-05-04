@@ -286,6 +286,7 @@ sections:
 - section: Disciples Failed Again
   verses:
   - reference: Luke 9:54 (NKJV)
+    leading_title: Elijah Message
     text: And when His disciples James and John saw this, they said, "Lord, do You want us to command fire to come down from heaven and consume them, just as Elijah did?"
     highlights:
     - command fire to come down from heaven
