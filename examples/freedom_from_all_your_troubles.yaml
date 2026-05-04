@@ -272,12 +272,6 @@ sections:
 
 - section: ''
   verses:
-  - reference: Matthew 11:13 (NKJV)
-    text: For all the prophets and the law prophesied until John.
-    highlights:
-    - all the prophets and the law prophesied
-    - until John
-
   - reference: Luke 9:54 (NKJV)
     text: And when His disciples James and John saw this, they said, "Lord, do You want us to command fire to come down from heaven and consume them, just as Elijah did?"
     highlights:
