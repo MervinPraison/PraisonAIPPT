@@ -188,7 +188,16 @@ sections:
     - not justified by the works of the law
 
 - section: 'Can I mix Both His Righteousness   and the Law(Self Righteousness)?'
-  verses: []
+  verses:
+  - text: >-
+      Peter was mixing the messages from Moses, Elijah and Jesus, thats why the Heavenly Father was against him
+    reference: ''
+
+  - reference: ''
+    text: |-
+      Nither be hot nor be cold ...
+      Do not pore old wine in the new wine skin
+      do not stitch old cloth with the new cloth
 
 - section: Witnessed by the Law and the Prophets
   verses:
@@ -249,16 +258,6 @@ sections:
       color: yellow
     - text: Himself
       color: green
-
-  - text: >-
-      Peter was mixing the messages from Moses, Elijah and Jesus, thats why the Heavenly Father was against him
-    reference: ''
-
-  - reference: ''
-    text: |-
-      Nither be hot nor be cold ...
-      Do not pore old wine in the new wine skin
-      do not stitch old cloth with the new cloth
 
   - reference: Romans 7:3-4 (NKJV)
     text: >-
