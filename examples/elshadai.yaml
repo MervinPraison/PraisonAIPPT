@@ -37,7 +37,7 @@ sections:
     - gives life to the dead
     - calls those things which do not exist
 
-- section: Righteousness apart from works
+- section: 1. Righteousness apart from the law
   verses:
   - reference: Romans 4:5
     split_max_length: 500
@@ -58,7 +58,7 @@ sections:
     - not to Abraham or to his seed through the law
     - righteousness of faith
 
-- section: Sins are forgiven
+- section: 2. Sins are forgiven
   verses:
   - reference: Romans 4:7 (NKJV)
     text: Blessed are those whose lawless deeds are forgiven, And whose sins are covered;
@@ -66,7 +66,7 @@ sections:
     - lawless deeds are forgiven
     - sins are covered
 
-- section: Shall not impute sin
+- section: 3. Shall not impute sin
   verses:
   - reference: Romans 4:8 (NKJV)
     text: Blessed is the man to whom the LORD shall not impute sin.
@@ -92,7 +92,7 @@ sections:
     highlights:
     - sin is not imputed
 
-- section: The gospel heard but not mixed with faith
+- section: 4. Knowing the Gospel
   verses:
   - reference: Hebrews 4:2
     split_max_length: 500
