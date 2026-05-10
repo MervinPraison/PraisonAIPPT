@@ -85,6 +85,13 @@ sections:
     - for us also
     - if we believe
 
+  - reference: Romans 5:13 (KJV)
+    text: >-
+      For until the law sin was in the world: but sin is not imputed when there
+      is no law.
+    highlights:
+    - sin is not imputed
+
 - section: The gospel heard but not mixed with faith
   verses:
   - reference: Hebrews 4:2
