@@ -73,6 +73,18 @@ sections:
     highlights:
     - shall not impute sin
 
+  - reference: Romans 4:22-24 (KJV)
+    split_max_length: 500
+    text: >-
+      And therefore it was imputed to him for righteousness. Now it was not
+      written for his sake alone, that it was imputed to him; But for us also,
+      to whom it shall be imputed, if we believe on him that raised up Jesus
+      our Lord from the dead;
+    highlights:
+    - imputed to him for righteousness
+    - for us also
+    - if we believe
+
 - section: The gospel heard but not mixed with faith
   verses:
   - reference: Hebrews 4:2
