@@ -50,34 +50,6 @@ sections:
     - believeth
     - counted for righteousness
 
-  - reference: Galatians 3:8 (KJV)
-    split_max_length: 500
-    text: >-
-      And the scripture, foreseeing that God would justify the heathen through
-      faith, preached before the gospel unto Abraham, saying, In thee shall all
-      nations be blessed.
-    highlights:
-    - justify the heathen through faith
-    - preached before the gospel unto Abraham
-
-  - reference: John 8:56 (KJV)
-    text: 'Your father Abraham rejoiced to see my day: and he saw it, and was glad.'
-    highlights:
-    - Abraham rejoiced
-    - saw my day
-
-  - reference: Genesis 15:5-6 (KJV)
-    split_max_length: 500
-    text: >-
-      And he brought him forth abroad, and said, Look now toward heaven, and tell
-      the stars, if thou be able to number them: and he said unto him, So shall
-      thy seed be. And he believed in the LORD; and he counted it to him for
-      righteousness.
-    highlights:
-    - So shall thy seed be
-    - believed in the LORD
-    - counted it to him for righteousness
-
   - reference: Romans 4:13 (NKJV)
     split_max_length: 500
     text: >-
@@ -131,3 +103,31 @@ sections:
     highlights:
     - entering into his rest
     - come short of it
+
+  - reference: Galatians 3:8 (KJV)
+    split_max_length: 500
+    text: >-
+      And the scripture, foreseeing that God would justify the heathen through
+      faith, preached before the gospel unto Abraham, saying, In thee shall all
+      nations be blessed.
+    highlights:
+    - justify the heathen through faith
+    - preached before the gospel unto Abraham
+
+  - reference: John 8:56 (KJV)
+    text: 'Your father Abraham rejoiced to see my day: and he saw it, and was glad.'
+    highlights:
+    - Abraham rejoiced
+    - saw my day
+
+  - reference: Genesis 15:5-6 (KJV)
+    split_max_length: 500
+    text: >-
+      And he brought him forth abroad, and said, Look now toward heaven, and tell
+      the stars, if thou be able to number them: and he said unto him, So shall
+      thy seed be. And he believed in the LORD; and he counted it to him for
+      righteousness.
+    highlights:
+    - So shall thy seed be
+    - believed in the LORD
+    - counted it to him for righteousness
