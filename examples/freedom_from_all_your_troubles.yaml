@@ -40,6 +40,12 @@ sections:
       color: green
     - all
 
+  - reference: Proverbs 12:21 (NIV)
+    text: No harm overtakes the righteous, but the wicked have their fill of trouble.
+    highlights:
+    - No harm
+    - righteous
+
   - reference: Romans 3:21 (NKJV)
     text: But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;
     highlights:
