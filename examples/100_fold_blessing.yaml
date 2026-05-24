@@ -57,14 +57,14 @@ sections:
     - word of God
 
   - reference: Matthew 13:4 (NKJV)
-    leading_title: Wayside - Parable
+    leading_title: Level 1 No Faith
     text: And as he sowed, some seed fell by the wayside; and the birds came and devoured them.
     highlights:
     - fell by the wayside
     - birds came and devoured them
 
   - reference: Matthew 13:19 (NKJV)
-    leading_title: No Root / No Understanding
+    leading_title: Level 1 No Faith
     split_max_length: 500
     text: >-
       When anyone hears the word of the kingdom, and does not understand it,
