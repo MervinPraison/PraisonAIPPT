@@ -9,6 +9,20 @@ slide_style:
   font_name: Palatino
 
 sections:
+- section: ''
+  verses:
+  - reference: Matthew 13:23 (NKJV)
+    leading_title: Level 5 Fruitful Faith
+    split_max_length: 500
+    text: >-
+      But he who received seed on the good ground is he who hears the word and
+      understands it, who indeed bears fruit and produces: some a hundredfold,
+      some sixty, some thirty.
+    highlights:
+    - understands it
+    - bears fruit
+    - a hundredfold
+
 - section: Romans 2 - Message of Law, Prophets vs Jesus
   verses:
   - reference: Romans 2:13 (NKJV)
