@@ -86,7 +86,7 @@ sections:
     - produces patience
 
   - reference: Matthew 13:5-6 (NKJV)
-    leading_title: Level 3 Shallow Faith
+    leading_title: Level 2 Shallow Faith
     split_max_length: 500
     text: >-
       Some fell on stony places, where they did not have much earth; and they
@@ -98,7 +98,7 @@ sections:
     - withered away
 
   - reference: Matthew 13:20-21 (NKJV)
-    leading_title: Level 3 Shallow Faith
+    leading_title: Level 2 Shallow Faith
     split_max_length: 500
     text: >-
       But he who received the seed on stony places, this is he who hears the
@@ -128,14 +128,14 @@ sections:
     - without wavering
 
   - reference: Matthew 13:7 (NKJV)
-    leading_title: Level 4 Distracted Faith
+    leading_title: Level 3 Distracted Faith
     text: And some fell among thorns, and the thorns sprang up and choked them.
     highlights:
     - fell among thorns
     - choked them
 
   - reference: Matthew 13:22 (NKJV)
-    leading_title: Level 4 Distracted Faith
+    leading_title: Level 3 Distracted Faith
     split_max_length: 500
     text: >-
       Now he who received seed among the thorns is he who hears the word, and
