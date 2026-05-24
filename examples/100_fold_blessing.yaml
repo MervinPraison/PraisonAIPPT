@@ -1,0 +1,190 @@
+presentation_title: 100 Fold Blessing
+presentation_subtitle: ''
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+
+sections:
+- section: Romans 2 - Message of Law, Prophets vs Jesus
+  verses:
+  - reference: Romans 2:13 (NKJV)
+    leading_title: Message of Moses
+    text: (for not the hearers of the law are just in the sight of God, but the doers of the law will be justified;
+    highlights:
+    - doers of the law will be justified
+
+  - reference: Romans 2:6 (NKJV)
+    leading_title: Message of Moses
+    text: 'who "will render to each one according to his deeds":'
+    highlights:
+    - according to his deeds
+
+  - reference: Romans 2:8 (NKJV)
+    leading_title: Message of Elijah
+    split_max_length: 400
+    text: >-
+      but to those who are self-seeking and do not obey the truth, but obey
+      unrighteousness-indignation and wrath,
+    highlights:
+    - wrath
+
+  - reference: Psalm 103:10 (NKJV)
+    leading_title: Message of Jesus
+    text: He has not dealt with us according to our sins, Nor punished us according to our iniquities.
+    highlights:
+    - not dealt with us according to our sins
+
+  - reference: Psalm 103:8-9 (NKJV)
+    leading_title: Message of Jesus
+    text: |-
+      The Lord is merciful and gracious, Slow to anger, and abounding in mercy.
+      He will not always strive with us, Nor will He keep His anger forever.
+    highlights:
+    - merciful and gracious
+    - Nor will He keep His anger forever
+
+- section: "Different Levels of Faith - Level 1: Starting Faith"
+  verses:
+  - reference: Romans 10:17 (NKJV)
+    leading_title: Starting Faith
+    text: So then faith comes by hearing, and hearing by the word of God.
+    highlights:
+    - faith comes by hearing
+    - word of God
+
+  - reference: ''
+    leading_title: Mapped against sower
+    text: No Root / No Understanding
+
+  - reference: Matthew 13:4 (NKJV)
+    leading_title: Wayside - Parable
+    text: And as he sowed, some seed fell by the wayside; and the birds came and devoured them.
+    highlights:
+    - fell by the wayside
+    - birds came and devoured them
+
+  - reference: Matthew 13:19 (NKJV)
+    leading_title: Wayside - Explanation
+    split_max_length: 500
+    text: >-
+      When anyone hears the word of the kingdom, and does not understand it,
+      then the wicked one comes and snatches away what was sown in his heart.
+      This is he who received seed by the wayside.
+    highlights:
+    - does not understand it
+    - snatches away what was sown
+
+- section: "Different Levels of Faith - Level 2: Faith Tested"
+  verses:
+  - reference: James 1:3 (NKJV)
+    leading_title: Faith Tested
+    text: knowing that the testing of your faith produces patience.
+    highlights:
+    - testing of your faith
+    - produces patience
+
+  - reference: ''
+    leading_title: Mapped against sower
+    text: Shallow Faith
+
+  - reference: Matthew 13:5-6 (NKJV)
+    leading_title: Stony Places - Parable
+    split_max_length: 500
+    text: >-
+      Some fell on stony places, where they did not have much earth; and they
+      immediately sprang up because they had no depth of earth. But when the sun
+      was up they were scorched, and because they had no root they withered away.
+    highlights:
+    - no depth of earth
+    - had no root
+    - withered away
+
+  - reference: Matthew 13:20-21 (NKJV)
+    leading_title: Stony Places - Explanation
+    split_max_length: 500
+    text: >-
+      But he who received the seed on stony places, this is he who hears the
+      word and immediately receives it with joy; yet he has no root in himself,
+      but endures only for a while. For when tribulation or persecution arises
+      because of the word, immediately he stumbles.
+    highlights:
+    - no root in himself
+    - tribulation or persecution
+    - immediately he stumbles
+
+- section: "Different Levels of Faith - Level 3: Keeping the Faith"
+  verses:
+  - reference: 2 Timothy 4:7 (NKJV)
+    leading_title: Keeping the Faith
+    text: I have fought the good fight, I have finished the race, I have kept the faith.
+    highlights:
+    - fought the good fight
+    - finished the race
+    - kept the faith
+
+  - reference: Hebrews 10:23 (NKJV)
+    leading_title: Keeping the Faith
+    text: Let us hold fast the confession of our hope without wavering, for He who promised is faithful.
+    highlights:
+    - hold fast
+    - without wavering
+
+  - reference: ''
+    leading_title: Mapped against sower
+    text: Distracted Faith
+
+  - reference: Matthew 13:7 (NKJV)
+    leading_title: Among Thorns - Parable
+    text: And some fell among thorns, and the thorns sprang up and choked them.
+    highlights:
+    - fell among thorns
+    - choked them
+
+  - reference: Matthew 13:22 (NKJV)
+    leading_title: Among Thorns - Explanation
+    split_max_length: 500
+    text: >-
+      Now he who received seed among the thorns is he who hears the word, and
+      the cares of this world and the deceitfulness of riches choke the word,
+      and he becomes unfruitful.
+    highlights:
+    - cares of this world
+    - deceitfulness of riches
+    - becomes unfruitful
+
+- section: "Different Levels of Faith - Level 4: Victory in Faith"
+  verses:
+  - reference: 1 John 5:4 (NKJV)
+    leading_title: Victory in Faith
+    text: For whatever is born of God overcomes the world. And this is the victory that has overcome the world-our faith.
+    highlights:
+    - overcomes the world
+    - victory
+    - our faith
+
+  - reference: ''
+    leading_title: Mapped against sower
+    text: Fruitful Faith
+
+  - reference: Matthew 13:8 (NKJV)
+    leading_title: Good Ground - Parable
+    text: 'But others fell on good ground and yielded a crop: some a hundredfold, some sixty, some thirty.'
+    highlights:
+    - good ground
+    - a hundredfold
+
+  - reference: Matthew 13:23 (NKJV)
+    leading_title: Good Ground - Explanation
+    split_max_length: 500
+    text: >-
+      But he who received seed on the good ground is he who hears the word and
+      understands it, who indeed bears fruit and produces: some a hundredfold,
+      some sixty, some thirty.
+    highlights:
+    - understands it
+    - bears fruit
+    - a hundredfold
