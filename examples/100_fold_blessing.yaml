@@ -76,15 +76,6 @@ sections:
     - faith comes by hearing
     - word of God
 
-- section: "Different Levels of Faith - Level 3: Faith Tested"
-  verses:
-  - reference: James 1:3 (NKJV)
-    leading_title: Level 3 Faith Tested
-    text: knowing that the testing of your faith produces patience.
-    highlights:
-    - testing of your faith
-    - produces patience
-
   - reference: Matthew 13:5-6 (NKJV)
     leading_title: Level 2 Shallow Faith
     split_max_length: 500
@@ -110,22 +101,14 @@ sections:
     - tribulation or persecution
     - immediately he stumbles
 
-- section: "Different Levels of Faith - Level 4: Keeping the Faith"
+- section: "Different Levels of Faith - Level 3: Faith Tested"
   verses:
-  - reference: 2 Timothy 4:7 (NKJV)
-    leading_title: Level 4 Keeping the Faith
-    text: I have fought the good fight, I have finished the race, I have kept the faith.
+  - reference: James 1:3 (NKJV)
+    leading_title: Level 3 Faith Tested
+    text: knowing that the testing of your faith produces patience.
     highlights:
-    - fought the good fight
-    - finished the race
-    - kept the faith
-
-  - reference: Hebrews 10:23 (NKJV)
-    leading_title: Level 4 Keeping the Faith
-    text: Let us hold fast the confession of our hope without wavering, for He who promised is faithful.
-    highlights:
-    - hold fast
-    - without wavering
+    - testing of your faith
+    - produces patience
 
   - reference: Matthew 13:7 (NKJV)
     leading_title: Level 3 Distracted Faith
@@ -145,6 +128,23 @@ sections:
     - cares of this world
     - deceitfulness of riches
     - becomes unfruitful
+
+- section: "Different Levels of Faith - Level 4: Keeping the Faith"
+  verses:
+  - reference: 2 Timothy 4:7 (NKJV)
+    leading_title: Level 4 Keeping the Faith
+    text: I have fought the good fight, I have finished the race, I have kept the faith.
+    highlights:
+    - fought the good fight
+    - finished the race
+    - kept the faith
+
+  - reference: Hebrews 10:23 (NKJV)
+    leading_title: Level 4 Keeping the Faith
+    text: Let us hold fast the confession of our hope without wavering, for He who promised is faithful.
+    highlights:
+    - hold fast
+    - without wavering
 
 - section: "Different Levels of Faith - Level 5: Victory in Faith"
   verses:
