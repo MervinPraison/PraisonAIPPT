@@ -60,17 +60,24 @@ sections:
     highlights:
     - wrath
 
-- section: "Different Levels of Faith - Level 1: No Faith"
+- section: "Different Levels of Faith - Level 1: Starting Faith"
   verses:
+  - reference: Romans 10:17 (NKJV)
+    leading_title: Level 1 Starting Faith
+    text: So then faith comes by hearing, and hearing by the word of God.
+    highlights:
+    - faith comes by hearing
+    - word of God
+
   - reference: Matthew 13:4 (NKJV)
-    leading_title: Level 1 No Faith
+    leading_title: Level 1 Starting Faith
     text: And as he sowed, some seed fell by the wayside; and the birds came and devoured them.
     highlights:
     - fell by the wayside
     - birds came and devoured them
 
   - reference: Matthew 13:19 (NKJV)
-    leading_title: Level 1 No Faith
+    leading_title: Level 1 Starting Faith
     split_max_length: 500
     text: >-
       When anyone hears the word of the kingdom, and does not understand it,
@@ -80,14 +87,14 @@ sections:
     - does not understand it
     - snatches away what was sown
 
-- section: "Different Levels of Faith - Level 2: Starting Faith"
+- section: "Different Levels of Faith - Level 2: Faith Tested"
   verses:
-  - reference: Romans 10:17 (NKJV)
-    leading_title: Level 2 Starting Faith
-    text: So then faith comes by hearing, and hearing by the word of God.
+  - reference: James 1:3 (NKJV)
+    leading_title: Level 2 Faith Tested
+    text: knowing that the testing of your faith produces patience.
     highlights:
-    - faith comes by hearing
-    - word of God
+    - testing of your faith
+    - produces patience
 
   - reference: Matthew 13:5-6 (NKJV)
     leading_title: Level 2 Shallow Faith
@@ -114,14 +121,22 @@ sections:
     - tribulation or persecution
     - immediately he stumbles
 
-- section: "Different Levels of Faith - Level 3: Faith Tested"
+- section: "Different Levels of Faith - Level 3: Keeping the Faith"
   verses:
-  - reference: James 1:3 (NKJV)
-    leading_title: Level 3 Faith Tested
-    text: knowing that the testing of your faith produces patience.
+  - reference: 2 Timothy 4:7 (NKJV)
+    leading_title: Level 3 Keeping the Faith
+    text: I have fought the good fight, I have finished the race, I have kept the faith.
     highlights:
-    - testing of your faith
-    - produces patience
+    - fought the good fight
+    - finished the race
+    - kept the faith
+
+  - reference: Hebrews 10:23 (NKJV)
+    leading_title: Level 3 Keeping the Faith
+    text: Let us hold fast the confession of our hope without wavering, for He who promised is faithful.
+    highlights:
+    - hold fast
+    - without wavering
 
   - reference: Matthew 13:7 (NKJV)
     leading_title: Level 3 Distracted Faith
@@ -142,27 +157,10 @@ sections:
     - deceitfulness of riches
     - becomes unfruitful
 
-- section: "Different Levels of Faith - Level 4: Keeping the Faith"
-  verses:
-  - reference: 2 Timothy 4:7 (NKJV)
-    leading_title: Level 4 Keeping the Faith
-    text: I have fought the good fight, I have finished the race, I have kept the faith.
-    highlights:
-    - fought the good fight
-    - finished the race
-    - kept the faith
-
-  - reference: Hebrews 10:23 (NKJV)
-    leading_title: Level 4 Keeping the Faith
-    text: Let us hold fast the confession of our hope without wavering, for He who promised is faithful.
-    highlights:
-    - hold fast
-    - without wavering
-
-- section: "Different Levels of Faith - Level 5: Victory in Faith"
+- section: "Different Levels of Faith - Level 4: Victory in Faith"
   verses:
   - reference: 1 John 5:4 (NKJV)
-    leading_title: Level 5 Victory in Faith
+    leading_title: Level 4 Victory in Faith
     text: For whatever is born of God overcomes the world. And this is the victory that has overcome the world-our faith.
     highlights:
     - overcomes the world
@@ -170,14 +168,14 @@ sections:
     - our faith
 
   - reference: Matthew 13:8 (NKJV)
-    leading_title: Level 5 Fruitful Faith
+    leading_title: Level 4 Fruitful Faith
     text: 'But others fell on good ground and yielded a crop: some a hundredfold, some sixty, some thirty.'
     highlights:
     - good ground
     - a hundredfold
 
   - reference: Matthew 13:23 (NKJV)
-    leading_title: Level 5 Fruitful Faith
+    leading_title: Level 4 Fruitful Faith
     split_max_length: 500
     text: >-
       But he who received seed on the good ground is he who hears the word and
