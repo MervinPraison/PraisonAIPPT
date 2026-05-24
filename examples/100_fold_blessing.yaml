@@ -56,10 +56,6 @@ sections:
     - faith comes by hearing
     - word of God
 
-  - reference: ''
-    leading_title: Mapped against sower
-    text: No Root / No Understanding
-
   - reference: Matthew 13:4 (NKJV)
     leading_title: Wayside - Parable
     text: And as he sowed, some seed fell by the wayside; and the birds came and devoured them.
@@ -68,7 +64,7 @@ sections:
     - birds came and devoured them
 
   - reference: Matthew 13:19 (NKJV)
-    leading_title: Wayside - Explanation
+    leading_title: No Root / No Understanding
     split_max_length: 500
     text: >-
       When anyone hears the word of the kingdom, and does not understand it,
@@ -87,10 +83,6 @@ sections:
     - testing of your faith
     - produces patience
 
-  - reference: ''
-    leading_title: Mapped against sower
-    text: Shallow Faith
-
   - reference: Matthew 13:5-6 (NKJV)
     leading_title: Stony Places - Parable
     split_max_length: 500
@@ -104,7 +96,7 @@ sections:
     - withered away
 
   - reference: Matthew 13:20-21 (NKJV)
-    leading_title: Stony Places - Explanation
+    leading_title: Shallow Faith
     split_max_length: 500
     text: >-
       But he who received the seed on stony places, this is he who hears the
@@ -133,10 +125,6 @@ sections:
     - hold fast
     - without wavering
 
-  - reference: ''
-    leading_title: Mapped against sower
-    text: Distracted Faith
-
   - reference: Matthew 13:7 (NKJV)
     leading_title: Among Thorns - Parable
     text: And some fell among thorns, and the thorns sprang up and choked them.
@@ -145,7 +133,7 @@ sections:
     - choked them
 
   - reference: Matthew 13:22 (NKJV)
-    leading_title: Among Thorns - Explanation
+    leading_title: Distracted Faith
     split_max_length: 500
     text: >-
       Now he who received seed among the thorns is he who hears the word, and
@@ -166,10 +154,6 @@ sections:
     - victory
     - our faith
 
-  - reference: ''
-    leading_title: Mapped against sower
-    text: Fruitful Faith
-
   - reference: Matthew 13:8 (NKJV)
     leading_title: Good Ground - Parable
     text: 'But others fell on good ground and yielded a crop: some a hundredfold, some sixty, some thirty.'
@@ -178,7 +162,7 @@ sections:
     - a hundredfold
 
   - reference: Matthew 13:23 (NKJV)
-    leading_title: Good Ground - Explanation
+    leading_title: Fruitful Faith
     split_max_length: 500
     text: >-
       But he who received seed on the good ground is he who hears the word and
