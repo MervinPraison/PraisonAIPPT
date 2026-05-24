@@ -77,14 +77,14 @@ sections:
 - section: "Different Levels of Faith - Level 2: Faith Tested"
   verses:
   - reference: James 1:3 (NKJV)
-    leading_title: Faith Tested
+    leading_title: Level 2 Faith Tested
     text: knowing that the testing of your faith produces patience.
     highlights:
     - testing of your faith
     - produces patience
 
   - reference: Matthew 13:5-6 (NKJV)
-    leading_title: Stony Places - Parable
+    leading_title: Level 2 Shallow Faith
     split_max_length: 500
     text: >-
       Some fell on stony places, where they did not have much earth; and they
@@ -96,7 +96,7 @@ sections:
     - withered away
 
   - reference: Matthew 13:20-21 (NKJV)
-    leading_title: Shallow Faith
+    leading_title: Level 2 Shallow Faith
     split_max_length: 500
     text: >-
       But he who received the seed on stony places, this is he who hears the
@@ -111,7 +111,7 @@ sections:
 - section: "Different Levels of Faith - Level 3: Keeping the Faith"
   verses:
   - reference: 2 Timothy 4:7 (NKJV)
-    leading_title: Keeping the Faith
+    leading_title: Level 3 Keeping the Faith
     text: I have fought the good fight, I have finished the race, I have kept the faith.
     highlights:
     - fought the good fight
@@ -119,21 +119,21 @@ sections:
     - kept the faith
 
   - reference: Hebrews 10:23 (NKJV)
-    leading_title: Keeping the Faith
+    leading_title: Level 3 Keeping the Faith
     text: Let us hold fast the confession of our hope without wavering, for He who promised is faithful.
     highlights:
     - hold fast
     - without wavering
 
   - reference: Matthew 13:7 (NKJV)
-    leading_title: Among Thorns - Parable
+    leading_title: Level 3 Distracted Faith
     text: And some fell among thorns, and the thorns sprang up and choked them.
     highlights:
     - fell among thorns
     - choked them
 
   - reference: Matthew 13:22 (NKJV)
-    leading_title: Distracted Faith
+    leading_title: Level 3 Distracted Faith
     split_max_length: 500
     text: >-
       Now he who received seed among the thorns is he who hears the word, and
@@ -147,7 +147,7 @@ sections:
 - section: "Different Levels of Faith - Level 4: Victory in Faith"
   verses:
   - reference: 1 John 5:4 (NKJV)
-    leading_title: Victory in Faith
+    leading_title: Level 4 Victory in Faith
     text: For whatever is born of God overcomes the world. And this is the victory that has overcome the world-our faith.
     highlights:
     - overcomes the world
@@ -155,14 +155,14 @@ sections:
     - our faith
 
   - reference: Matthew 13:8 (NKJV)
-    leading_title: Good Ground - Parable
+    leading_title: Level 4 Fruitful Faith
     text: 'But others fell on good ground and yielded a crop: some a hundredfold, some sixty, some thirty.'
     highlights:
     - good ground
     - a hundredfold
 
   - reference: Matthew 13:23 (NKJV)
-    leading_title: Fruitful Faith
+    leading_title: Level 4 Fruitful Faith
     split_max_length: 500
     text: >-
       But he who received seed on the good ground is he who hears the word and
