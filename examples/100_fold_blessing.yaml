@@ -12,7 +12,6 @@ sections:
 - section: ''
   verses:
   - reference: Matthew 13:23 (NKJV)
-    leading_title: Level 5 Fruitful Faith
     split_max_length: 500
     text: >-
       But he who received seed on the good ground is he who hears the word and
