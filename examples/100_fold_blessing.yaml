@@ -24,6 +24,21 @@ sections:
 
 - section: Romans 2 - Message of Law, Prophets vs Jesus
   verses:
+  - reference: Psalm 103:10 (NKJV)
+    leading_title: Message of Jesus
+    text: He has not dealt with us according to our sins, Nor punished us according to our iniquities.
+    highlights:
+    - not dealt with us according to our sins
+
+  - reference: Psalm 103:8-9 (NKJV)
+    leading_title: Message of Jesus
+    text: |-
+      The Lord is merciful and gracious, Slow to anger, and abounding in mercy.
+      He will not always strive with us, Nor will He keep His anger forever.
+    highlights:
+    - merciful and gracious
+    - Nor will He keep His anger forever
+
   - reference: Romans 2:13 (NKJV)
     leading_title: Message of Moses
     text: (for not the hearers of the law are just in the sight of God, but the doers of the law will be justified;
@@ -44,21 +59,6 @@ sections:
       unrighteousness-indignation and wrath,
     highlights:
     - wrath
-
-  - reference: Psalm 103:10 (NKJV)
-    leading_title: Message of Jesus
-    text: He has not dealt with us according to our sins, Nor punished us according to our iniquities.
-    highlights:
-    - not dealt with us according to our sins
-
-  - reference: Psalm 103:8-9 (NKJV)
-    leading_title: Message of Jesus
-    text: |-
-      The Lord is merciful and gracious, Slow to anger, and abounding in mercy.
-      He will not always strive with us, Nor will He keep His anger forever.
-    highlights:
-    - merciful and gracious
-    - Nor will He keep His anger forever
 
 - section: "Different Levels of Faith - Level 1: No Faith"
   verses:
