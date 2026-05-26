@@ -1,66 +1,284 @@
-presentation_title: Why Delay?
+presentation_title: How to prevent delay
 presentation_subtitle: ''
-slide_size: standard
+auto_upload_gdrive: true
 slide_style:
   background_image: assets/background_alt.jpg
+  text_color: white
+  reference_color: '#66B3FF'
+  highlight_color: '#FFD700'
+  alignment: left
+  reference_position: top
+  font_name: Palatino
 sections:
 - section: ''
   verses:
   - reference: Genesis 12:2 (KJV)
     text: '"And I will make of thee a great nation, and I will bless thee, and make
       thy name great; and thou shalt be a blessing."'
-  - reference: 2 Corinthians 5:17 (KJV)
-    text: '"Therefore if any man be in Christ, he is a new creature: old things are
-      passed away; behold, all things are become new."'
-  - reference: Revelation 21:4 (KJV)
-    text: '"And God shall wipe away all tears from their eyes; and there shall be
-      no more death, neither sorrow, nor crying, neither shall there be any more pain:
-      for the former things are passed away."'
+    highlights:
+    - great nation
+    - bless thee
+    - a blessing
+
   - reference: Genesis 17:1 (KJV)
     text: '"And when Abram was ninety years old and nine, the Lord appeared to Abram,
       and said unto him, I am the Almighty God; walk before me, and be thou perfect."'
+    highlights:
+    - ninety years old and nine
+    - I am the Almighty God
+
+- section: Abraham Transformation 1
+  verses:
+  - reference: Romans 4:21 (NKJV)
+    text: and being fully convinced that what He had promised He was also able to perform.
+    highlights:
+    - fully convinced
+    - He had promised
+    - able to perform
+
+  - reference: Romans 4:17 (NKJV)
+    split_max_length: 500
+    text: >-
+      (as it is written, "I have made you a father of many nations") in the
+      presence of Him whom he believed-God, who gives life to the dead and calls
+      those things which do not exist as though they did;
+    highlights:
+    - gives life to the dead
+    - calls those things which do not exist
+
+- section: 1. Knowing the Gospel
+  verses:
+  - reference: Hebrews 4:2
+    split_max_length: 500
+    text: >-
+      For unto us was the gospel preached, as well as unto them: but the word
+      preached did not profit them, not being mixed with faith in them that heard it.
+    highlights:
+    - gospel preached
+    - did not profit them
+    - mixed with faith
+
+  - reference: Hebrews 3:18-19
+    split_max_length: 500
+    text: >-
+      And to whom sware he that they should not enter into his rest, but to them
+      that believed not? So we see that they could not enter in because of unbelief.
+    highlights:
+    - could not enter in
+    - unbelief
+
+  - reference: Hebrews 4:1
+    split_max_length: 500
+    text: >-
+      Let us therefore fear, lest, a promise being left us of entering into his
+      rest, any of you should seem to come short of it.
+    highlights:
+    - entering into his rest
+    - come short of it
+
+  - reference: Galatians 3:8 (KJV)
+    split_max_length: 500
+    text: >-
+      And the scripture, foreseeing that God would justify the heathen through
+      faith, preached before the gospel unto Abraham, saying, In thee shall all
+      nations be blessed.
+    highlights:
+    - justify the heathen through faith
+    - preached before the gospel unto Abraham
+
+  - reference: John 8:56 (KJV)
+    text: 'Your father Abraham rejoiced to see my day: and he saw it, and was glad.'
+    highlights:
+    - Abraham rejoiced
+    - saw my day
+
+  - reference: Genesis 15:5-6 (NKJV)
+    split_max_length: 500
+    text: >-
+      Then He brought him outside and said, "Look now toward heaven, and count
+      the stars if you are able to number them." And He said to him, "So shall
+      your descendants be." And he believed in the LORD, and He accounted it to
+      him for righteousness.
+    highlights:
+    - stars
+    - count
+    - number them
+    - believed
+    - righteousness
+
+  - reference: Genesis 22:17 (NKJV)
+    split_max_length: 500
+    text: >-
+      I will bless you, and I will multiply your descendants as the stars of the
+      heaven and as the sand which is on the seashore; and your descendants shall
+      possess the gate of their enemies.
+    highlights:
+    - stars of the heaven
+    - descendants
+    - multiply
+
+  - reference: Galatians 3:16 (NKJV)
+    split_max_length: 500
+    text: >-
+      Now to Abraham and his Seed were the promises made. He does not say, "And
+      to seeds," as of many, but as of one, "And to your Seed," who is Christ.
+    highlights:
+    - Seed
+    - your Seed
+    - Christ
+
+  - reference: Genesis 22:18 (NKJV)
+    text: >-
+      In your seed all the nations of the earth shall be blessed, because you
+      have obeyed My voice.
+    highlights:
+    - seed
+    - all the nations of the earth shall be blessed
+
+  - reference: Genesis 15:5-6 (KJV)
+    split_max_length: 500
+    text: >-
+      And he brought him forth abroad, and said, Look now toward heaven, and tell
+      the stars, if thou be able to number them: and he said unto him, So shall
+      thy seed be. And he believed in the LORD; and he counted it to him for
+      righteousness.
+    highlights:
+    - So shall thy seed be
+    - believed in the LORD
+    - counted it to him for righteousness
+
+  - reference: Romans 5:13 (KJV)
+    text: >-
+      For until the law sin was in the world: but sin is not imputed when there
+      is no law.
+    highlights:
+    - sin is not imputed
+
+  - slide_type: image
+    image_path: assets/images/gospel_in_the_stars/The-Gospel-in-the-Stars-Bible.png
+    image_fit: cover
+    reference: ''
+    text: ''
+  - slide_type: image
+    image_path: assets/images/gospel_in_the_stars/The-Gospel-in-the-Stars.png
+    image_fit: cover
+    reference: ''
+    text: ''
+
+- section: 2. Righteousness apart from the law
+  verses:
+  - reference: Romans 4:5
+    split_max_length: 500
+    text: >-
+      But to him that worketh not, but believeth on him that justifieth the
+      ungodly, his faith is counted for righteousness.
+    highlights:
+    - worketh not
+    - believeth
+    - counted for righteousness
+
+  - reference: Romans 4:13 (NKJV)
+    split_max_length: 500
+    text: >-
+      For the promise that he would be the heir of the world was not to Abraham
+      or to his seed through the law, but through the righteousness of faith.
+    highlights:
+    - not to Abraham or to his seed through the law
+    - righteousness of faith
+
+- section: 3. Sins are forgiven
+  verses:
+  - reference: Romans 4:7 (NKJV)
+    text: Blessed are those whose lawless deeds are forgiven, And whose sins are covered;
+    highlights:
+    - lawless deeds are forgiven
+    - sins are covered
+
+- section: 4. Shall not impute sin
+  verses:
+  - reference: Romans 4:8 (NKJV)
+    text: Blessed is the man to whom the LORD shall not impute sin.
+    highlights:
+    - shall not impute sin
+
+  - reference: Romans 4:22-24 (KJV)
+    split_max_length: 500
+    text: >-
+      And therefore it was imputed to him for righteousness. Now it was not
+      written for his sake alone, that it was imputed to him; But for us also,
+      to whom it shall be imputed, if we believe on him that raised up Jesus
+      our Lord from the dead;
+    highlights:
+    - imputed to him for righteousness
+    - for us also
+    - if we believe
+
+- section: 1. Hope
+  verses:
   - reference: Genesis 17:5 (KJV)
     text: '"Neither shall thy name any more be called Abram, but thy name shall be
       Abraham; for a father of many nations have I made thee."'
+    highlights:
+    - Abram
+    - Abraham
+    - father of many nations
+
+- section: ''
+  verses:
   - reference: Genesis 17:15 (KJV)
     text: '"And God said unto Abraham, As for Sarai thy wife, thou shalt not call
       her name Sarai, but Sarah shall her name be."'
+    highlights:
+    - Sarai
+    - Sarah
+
+- section: 2. Faith
+  verses:
+  - slide_type: image
+    image_path: assets/images/why_delay/power_vs_his_power.png
+    image_fit: contain
+    reference: 100% His Power — not a mixture
+    text: Green = My Power · Red = His Power
+
+- section: ''
+  verses:
   - reference: Romans 4:13–14 (KJV) (Part 1/2)
     text: '"For the promise, that he should be the heir of the world, was not to Abraham,
       or to his seed, through the law, but through the righteousness of faith."'
+    highlights:
+    - heir of the world
+    - text: through the law
+      color: green
+    - righteousness of faith
+
   - reference: Romans 4:13–14 (KJV) (Part 2/2)
     text: '"For if they which are of the law be heirs, faith is made void, and the
       promise made of none effect:"'
+    highlights:
+    - text: of the law
+      color: green
+    - faith is made void
+    - promise made of none effect
+
   - reference: Galatians 3:29 (KJV)
     text: '"And if ye be Christ''s, then are ye Abraham''s seed, and heirs according
       to the promise."'
-  - reference: ''
-    text: '100% My Power
+    highlights:
+    - Christ's
+    - Abraham's seed
+    - heirs according to the promise
 
-      75% My Power | 25% His Power
-
-      50% My Power | 50% His Power
-
-      100% His Power'
-    list_type: bullet
-    highlights: []
-  - reference: Romans 5:19 (KJV)
-    text: '"For as by one man''s disobedience many were made sinners, so by the obedience
-      of one shall many be made righteous."'
-  - reference: 2 Corinthians 5:21 (KJV)
-    text: '"For he hath made him to be sin for us, who knew no sin; that we might
-      be made the righteousness of God in him."'
-  - reference: Galatians 5:4 (KJV)
-    text: '"Christ is become of no effect unto you, whosoever of you are justified
-      by the law; ye are fallen from grace."'
-  - reference: ''
-    text: 'אַבְרָהָם ← אַבְרָם  (Abram → Abraham)
-
-      שָׂרָה ← שָׂרַי  (Sarai → Sarah)'
-    list_type: bullet
-  - reference: ''
-    text: 'אַבְרָהָם ← אַבְרָם  (Abram → Abraham)
-
-      שָׂרָה ← שָׂרַי  (Sarai → Sarah)'
-    list_type: bullet
-    highlights: []
+- section: ''
+  verses:
+  - slide_type: hebrew_rename
+    hebrew_font_size: 110
+    hebrew_highlight_color: '#9900FF'
+    hebrew_rows:
+    - left: אַבְרָם
+      right: אַבְרָהָם
+      highlight_in_right: הָ
+    - left: שָׂרַי
+      right: שָׂרָה
+      highlight_in_right: ה
+    reference: God renames — new identity ends delay
+    text: ''
