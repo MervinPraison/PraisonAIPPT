@@ -6,7 +6,7 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
-from .utils import split_long_text, sanitize_filename
+from .utils import split_long_text, sanitize_filename, resolve_asset_path
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
 
 
@@ -23,11 +23,12 @@ def _apply_slide_background(slide, style: dict, prs=None):
 
     img_path = style.get('background_image')
     bg_color = style.get('background_color')
+    source_file = style.get('_source_file')
 
     if img_path:
-        import os, pathlib
-        if not os.path.isabs(img_path):
-            img_path = str(pathlib.Path(img_path).resolve())
+        import os
+        resolved = resolve_asset_path(img_path, source_file=source_file)
+        img_path = resolved if resolved else img_path
         if os.path.exists(img_path):
             # Use prs dimensions or fall back to standard 16:9 (13.33 x 7.5 in)
             if prs is not None:
@@ -401,31 +402,210 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
     return slide
 
 
-def add_image_slide(prs, image_path, style=None, caption=None):
+def add_image_slide(prs, image_path, style=None, caption=None, reference=None,
+                    image_fit='contain', source_file=None):
     """
-    Add a slide containing an embedded image (e.g. a diagram extracted from a source PPTX).
-    The background is applied from slide_style. The image is placed centred with small margins.
+    Add a slide with an embedded image and optional caption.
+
+    ``image_fit``: ``contain`` (default, keep aspect ratio), ``cover`` (fill area,
+    keep ratio, may crop), or ``fill`` (stretch to content box).
+    ``reference`` / ``caption`` appear below the image when provided.
     """
     import os
-    style = style or {}
+    style = dict(style or {})
+    if source_file:
+        style['_source_file'] = source_file
+
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(slide, style, prs)
 
-    if not os.path.exists(image_path):
-        return slide  # image file missing — produce blank slide
+    resolved = resolve_asset_path(image_path, source_file=source_file)
+    path = resolved if resolved else image_path
+    if not path or not os.path.exists(path):
+        print(f"Warning: Image not found: {image_path}")
+        return slide
 
+    theme = _resolve_theme(style)
     slide_w = prs.slide_width
     slide_h = prs.slide_height
-    margin = Inches(0.2)
-    img = slide.shapes.add_picture(
-        image_path,
-        left=margin,
-        top=margin,
-        width=slide_w - margin * 2,
-        height=slide_h - margin * 2,
-    )
+    caption_lines = []
+    if reference and str(reference).strip():
+        caption_lines.append(str(reference).strip())
+    if caption and str(caption).strip():
+        caption_lines.append(str(caption).strip())
+    caption_h = Inches(0.9) if caption_lines else Inches(0)
+    fit = (image_fit or 'contain').lower()
+    margin = Inches(0) if not caption_lines and fit in ('cover', 'fill') else Inches(0.35)
+
+    box_top = margin
+    box_h = slide_h - margin * 2 - caption_h
+    box_w = slide_w - margin * 2
+    if fit not in ('contain', 'cover', 'fill'):
+        fit = 'contain'
+
+    if fit == 'fill':
+        slide.shapes.add_picture(path, margin, box_top, width=box_w, height=box_h)
+    else:
+        pic = slide.shapes.add_picture(path, margin, box_top, width=box_w)
+        scale_w = box_w / pic.width
+        scale_h = box_h / pic.height
+        if fit == 'contain':
+            scale = min(scale_w, scale_h)
+        else:  # cover
+            scale = max(scale_w, scale_h)
+        pic.width = int(pic.width * scale)
+        pic.height = int(pic.height * scale)
+        pic.left = margin + (box_w - pic.width) // 2
+        pic.top = box_top + (box_h - pic.height) // 2
+
+    if caption_lines:
+        cap_top = slide_h - margin - caption_h
+        cap_tb = slide.shapes.add_textbox(margin, cap_top, box_w, caption_h)
+        cap_tf = cap_tb.text_frame
+        cap_tf.word_wrap = True
+        for i, line in enumerate(caption_lines):
+            p = cap_tf.paragraphs[0] if i == 0 else cap_tf.add_paragraph()
+            p.text = line
+            p.alignment = PP_ALIGN.CENTER
+            p.font.size = Pt(22 if i == 0 and reference else 18)
+            p.font.bold = bool(i == 0 and reference)
+            p.font.color.rgb = theme['reference'] if i == 0 and reference else theme['body']
+            if theme['font_name']:
+                p.font.name = theme['font_name']
+
     return slide
 
+
+def _hebrew_font_name(style: dict) -> str:
+    """Prefer a Hebrew-capable font when available."""
+    custom = (style or {}).get("hebrew_font_name")
+    if custom:
+        return custom
+    import os
+    for path in (
+        "/System/Library/Fonts/SFHebrew.ttf",
+        "/System/Library/Fonts/Supplemental/Arial Hebrew.ttf",
+        "/Library/Fonts/Arial Hebrew.ttf",
+    ):
+        if os.path.exists(path):
+            return "Arial Hebrew" if "Arial" in path else "SF Hebrew"
+    return (style or {}).get("font_name") or "Palatino"
+
+
+def _fill_hebrew_runs(paragraph, text, highlight_substring, body_rgb, highlight_rgb, font_size_pt, font_name):
+    """Write Hebrew text; colour ``highlight_substring`` in the right-hand name."""
+    hl = highlight_substring or ""
+    if not hl or hl not in text:
+        run = paragraph.add_run()
+        run.text = text
+        run.font.size = Pt(font_size_pt)
+        run.font.color.rgb = body_rgb
+        if font_name:
+            run.font.name = font_name
+        return
+
+    parts = text.split(hl, 1)
+    before, after = parts[0], parts[1] if len(parts) > 1 else ""
+
+    def _add(part, rgb):
+        if not part:
+            return
+        r = paragraph.add_run()
+        r.text = part
+        r.font.size = Pt(font_size_pt)
+        r.font.color.rgb = rgb
+        if font_name:
+            r.font.name = font_name
+
+    _add(before, body_rgb)
+    _add(hl, highlight_rgb)
+    _add(after, body_rgb)
+
+
+def add_hebrew_rename_slide(prs, rows, style=None, font_size=110, reference=None, caption=None,
+                            highlight_color=None):
+    """
+    Slide matching the original Why Delay Hebrew layout: large names left/right,
+    purple highlight on the changed letter in the new name (e.g. הָ in אַבְרָהָם).
+    """
+    from pptx.enum.shapes import MSO_CONNECTOR_TYPE
+
+    style = style or {}
+    theme = _resolve_theme(style)
+    body_rgb = theme["body"]
+    hl_hex = highlight_color or style.get("hebrew_highlight_color") or "#9900FF"
+    hl_rgb = _parse_color(hl_hex) or RGBColor(153, 0, 255)
+    hebrew_pt = int(font_size or style.get("hebrew_font_size") or 110)
+    fn = _hebrew_font_name(style)
+
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+
+    slide_w_in = prs.slide_width.inches
+    sx = slide_w_in / 10.0
+    row_y = [1.15, 4.05]
+    left_x = 0.35 * sx
+    right_x = 5.15 * sx
+    box_w = 4.2 * sx
+    box_h = 1.35
+
+    for i, row in enumerate(rows[:2]):
+        left = (row.get("left") or "").strip()
+        right = (row.get("right") or "").strip()
+        hl = (row.get("highlight_in_right") or "ה").strip()
+        y = Inches(row_y[i] if i < len(row_y) else row_y[-1] + i * 2.9)
+
+        lt = slide.shapes.add_textbox(Inches(left_x), y, Inches(box_w), Inches(box_h))
+        lt_tf = lt.text_frame
+        lt_tf.word_wrap = False
+        lp = lt_tf.paragraphs[0]
+        lp.alignment = PP_ALIGN.CENTER
+        lr = lp.add_run()
+        lr.text = left
+        lr.font.size = Pt(hebrew_pt)
+        lr.font.color.rgb = body_rgb
+        if fn:
+            lr.font.name = fn
+
+        rt = slide.shapes.add_textbox(Inches(right_x), y, Inches(box_w), Inches(box_h))
+        rt_tf = rt.text_frame
+        rt_tf.word_wrap = False
+        rp = rt_tf.paragraphs[0]
+        rp.alignment = PP_ALIGN.CENTER
+        _fill_hebrew_runs(rp, right, hl, body_rgb, hl_rgb, hebrew_pt, fn)
+
+        y_mid = y.inches + box_h * 0.45
+        x1 = left_x + box_w * 0.85
+        x2 = right_x + box_w * 0.05
+        conn = slide.shapes.add_connector(
+            MSO_CONNECTOR_TYPE.STRAIGHT,
+            Inches(x1), Inches(y_mid), Inches(x2), Inches(y_mid),
+        )
+        conn.line.color.rgb = theme["highlight"]
+        conn.line.width = Pt(2.5)
+
+    cap_h = Inches(0.85)
+    if reference or caption:
+        cap_top = prs.slide_height - Inches(0.45) - cap_h
+        cap_tb = slide.shapes.add_textbox(Inches(0.5), cap_top, prs.slide_width - Inches(1.0), cap_h)
+        cap_tf = cap_tb.text_frame
+        cap_tf.word_wrap = True
+        lines = []
+        if reference:
+            lines.append(str(reference).strip())
+        if caption:
+            lines.append(str(caption).strip())
+        for idx, line in enumerate(lines):
+            p = cap_tf.paragraphs[0] if idx == 0 else cap_tf.add_paragraph()
+            p.text = line
+            p.alignment = PP_ALIGN.CENTER
+            p.font.size = Pt(22 if idx == 0 and reference else 18)
+            p.font.bold = bool(idx == 0 and reference)
+            p.font.color.rgb = theme["reference"] if idx == 0 and reference else theme["body"]
+            if theme["font_name"]:
+                p.font.name = theme["font_name"]
+
+    return slide
 
 
 def _parse_verse_lines(text):
@@ -715,7 +895,10 @@ def create_presentation(data, output_file=None, custom_title=None,
     # Get verses data from JSON
     verses_data = data.get("sections", [])
     # Presentation-level slide style (background, text color, alignment, etc.)
-    slide_style = data.get("slide_style", {})
+    slide_style = dict(data.get("slide_style", {}) or {})
+    source_file = data.get("_source_file")
+    if source_file:
+        slide_style["_source_file"] = source_file
 
     # Add title slide
     if custom_title:
@@ -748,8 +931,25 @@ def create_presentation(data, output_file=None, custom_title=None,
                 font_size  = verse.get('font_size', 32)
 
                 if verse.get('slide_type') == 'image' and verse.get('image_path'):
-                    # Image slide (diagram extracted from source PPTX)
-                    add_image_slide(prs, verse['image_path'], style=slide_style)
+                    add_image_slide(
+                        prs,
+                        verse['image_path'],
+                        style=slide_style,
+                        reference=verse.get('reference'),
+                        caption=verse.get('text'),
+                        image_fit=verse.get('image_fit', 'contain'),
+                        source_file=source_file,
+                    )
+                elif verse.get('slide_type') == 'hebrew_rename' and verse.get('hebrew_rows'):
+                    add_hebrew_rename_slide(
+                        prs,
+                        verse['hebrew_rows'],
+                        style=slide_style,
+                        font_size=verse.get('hebrew_font_size'),
+                        reference=verse.get('reference'),
+                        caption=verse.get('text'),
+                        highlight_color=verse.get('hebrew_highlight_color'),
+                    )
                 elif list_type in ('bullet', 'numbered'):
                     items = [line.strip() for line in verse['text'].split('\n') if line.strip()]
                     add_list_slide(prs, items, verse['reference'],

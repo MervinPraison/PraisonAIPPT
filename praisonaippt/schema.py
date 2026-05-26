@@ -26,6 +26,7 @@ _TOP_LEVEL_KEYS = {
     "auto_upload_gdrive",
     # implementation/extension hooks
     "_source",
+    "_source_file",
 }
 
 _SECTION_KEYS = {"section", "section_subtitle", "verses"}
@@ -43,6 +44,11 @@ _VERSE_KEYS = {
     "split_max_length",
     "slide_type",
     "image_path",
+    "image_fit",
+    "hebrew_rows",
+    "hebrew_font_size",
+    "hebrew_highlight_color",
+    "hebrew_font_name",
     "text_below_reference",
     "text_below_reference_highlights",
     "text_below_reference_large_text",
@@ -96,6 +102,28 @@ def validate_verses(data: Any) -> Dict[str, Any]:
                 _VERSE_KEYS,
                 f"sections[{s_idx}].verses[{v_idx}]",
             )
+            if verse.get("slide_type") == "image":
+                if not verse.get("image_path"):
+                    raise SchemaError(
+                        f"sections[{s_idx}].verses[{v_idx}] with slide_type 'image' "
+                        "requires 'image_path'"
+                    )
+                fit = verse.get("image_fit")
+                if fit is not None and fit not in ("contain", "cover", "fill"):
+                    raise SchemaError(
+                        f"sections[{s_idx}].verses[{v_idx}].image_fit must be "
+                        "'contain', 'cover', or 'fill'"
+                    )
+                continue
+
+            if verse.get("slide_type") == "hebrew_rename":
+                if not verse.get("hebrew_rows"):
+                    raise SchemaError(
+                        f"sections[{s_idx}].verses[{v_idx}] with slide_type 'hebrew_rename' "
+                        "requires 'hebrew_rows'"
+                    )
+                continue
+
             # 'reference' or 'text' is required (text can be empty for title-only slides)
             if "reference" not in verse and "text" not in verse:
                 raise SchemaError(

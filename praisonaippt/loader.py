@@ -48,6 +48,7 @@ def load_verses_from_file(filepath):
             print(f"Error: Invalid schema in '{filepath}': {e}")
             return None
 
+        data["_source_file"] = str(file_path.resolve())
         return data
 
     except FileNotFoundError:

@@ -1,0 +1,22 @@
+presentation_title: The Gospel in the Stars
+presentation_subtitle: Abraham, the Gospel, and the Story in the Stars
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+sections:
+- section: ''
+  verses:
+  - slide_type: image
+    image_path: assets/images/gospel_in_the_stars/The-Gospel-in-the-Stars-Bible.png
+    image_fit: contain
+    reference: The Gospel in the Stars (Bible)
+    text: From biblerevelation.org — Christ-centred witness in the heavens, not astrology.
+  - slide_type: image
+    image_path: assets/images/gospel_in_the_stars/The-Gospel-in-the-Stars.png
+    image_fit: contain
+    reference: The Gospel in the Stars (Mazzaroth)
+    text: Virgo to Leo — from the Virgin Birth to the Lion of Judah.

@@ -26,6 +26,7 @@ from .exceptions import (
     SchemaError,
     BackendUnavailableError,
 )
+from .utils import resolve_asset_path
 
 
 def _read_version() -> str:
@@ -70,4 +71,5 @@ __all__ = [
     "LoaderError",
     "SchemaError",
     "BackendUnavailableError",
+    "resolve_asset_path",
 ]

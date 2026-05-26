@@ -147,12 +147,13 @@ sections:
     - believed in the LORD
     - counted it to him for righteousness
 
-  - reference: Romans 5:13 (KJV)
+  - reference: Romans 4:3 (KJV)
     text: >-
-      For until the law sin was in the world: but sin is not imputed when there
-      is no law.
+      For what saith the scripture? Abraham believed God, and it was counted
+      unto him for righteousness.
     highlights:
-    - sin is not imputed
+    - Abraham believed God
+    - counted unto him for righteousness
 
   - slide_type: image
     image_path: assets/images/gospel_in_the_stars/The-Gospel-in-the-Stars-Bible.png
@@ -240,7 +241,20 @@ sections:
     reference: 100% His Power — not a mixture
     text: Green = My Power · Red = His Power
 
-- section: ''
+  - slide_type: hebrew_rename
+    hebrew_font_size: 110
+    hebrew_highlight_color: '#9900FF'
+    hebrew_rows:
+    - left: אַבְרָם
+      right: אַבְרָהָם
+      highlight_in_right: הָ
+    - left: שָׂרַי
+      right: שָׂרָה
+      highlight_in_right: ה
+    reference: God renames — new identity ends delay
+    text: ''
+
+- section: 3. Elshadai
   verses:
   - reference: Romans 4:13–14 (KJV) (Part 1/2)
     text: '"For the promise, that he should be the heir of the world, was not to Abraham,
@@ -267,18 +281,3 @@ sections:
     - Christ's
     - Abraham's seed
     - heirs according to the promise
-
-- section: ''
-  verses:
-  - slide_type: hebrew_rename
-    hebrew_font_size: 110
-    hebrew_highlight_color: '#9900FF'
-    hebrew_rows:
-    - left: אַבְרָם
-      right: אַבְרָהָם
-      highlight_in_right: הָ
-    - left: שָׂרַי
-      right: שָׂרָה
-      highlight_in_right: ה
-    reference: God renames — new identity ends delay
-    text: ''

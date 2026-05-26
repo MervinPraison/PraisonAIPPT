@@ -96,10 +96,12 @@ sections:
         font_size: 28
 
       # --- Image slide (diagram / photo) ------------------------------------
+      # Paths are relative to the YAML file, cwd, or repo root (e.g. assets/...).
       # - slide_type: image
-      #   image_path: examples/assets/background_alt.jpg
-      #   reference: Optional caption under image
-      #   text: ''
+      #   image_path: assets/background_alt.jpg
+      #   image_fit: contain          # contain | cover | fill (default: contain)
+      #   reference: Diagram title    # optional caption line above text
+      #   text: Short caption below the image
 
   - section: |-
       Multi-line

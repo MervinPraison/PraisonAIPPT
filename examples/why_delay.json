@@ -1,9 +1,15 @@
 {
-    "presentation_title": "Why Delay?",
+    "presentation_title": "How to prevent delay",
     "presentation_subtitle": "",
-    "slide_size": "standard",
+    "auto_upload_gdrive": true,
     "slide_style": {
-        "background_image": "assets/background_alt.jpg"
+        "background_image": "assets/background_alt.jpg",
+        "text_color": "white",
+        "reference_color": "#66B3FF",
+        "highlight_color": "#FFD700",
+        "alignment": "left",
+        "reference_position": "top",
+        "font_name": "Palatino"
     },
     "sections": [
         {
@@ -11,68 +17,152 @@
             "verses": [
                 {
                     "reference": "Genesis 12:2 (KJV)",
-                    "text": "\"And I will make of thee a great nation, and I will bless thee, and make thy name great; and thou shalt be a blessing.\""
+                    "text": "\"And I will make of thee a great nation, and I will bless thee, and make thy name great; and thou shalt be a blessing.\"",
+                    "highlights": [
+                        "great nation",
+                        "bless thee",
+                        "a blessing"
+                    ]
                 },
                 {
                     "reference": "2 Corinthians 5:17 (KJV)",
-                    "text": "\"Therefore if any man be in Christ, he is a new creature: old things are passed away; behold, all things are become new.\""
+                    "text": "\"Therefore if any man be in Christ, he is a new creature: old things are passed away; behold, all things are become new.\"",
+                    "highlights": [
+                        "in Christ",
+                        "new creature",
+                        "old things are passed away",
+                        "all things are become new"
+                    ]
                 },
                 {
                     "reference": "Revelation 21:4 (KJV)",
-                    "text": "\"And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away.\""
+                    "text": "\"And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away.\"",
+                    "highlights": [
+                        "no more death",
+                        "passed away"
+                    ]
                 },
                 {
                     "reference": "Genesis 17:1 (KJV)",
-                    "text": "\"And when Abram was ninety years old and nine, the Lord appeared to Abram, and said unto him, I am the Almighty God; walk before me, and be thou perfect.\""
+                    "text": "\"And when Abram was ninety years old and nine, the Lord appeared to Abram, and said unto him, I am the Almighty God; walk before me, and be thou perfect.\"",
+                    "highlights": [
+                        "ninety years old and nine",
+                        "I am the Almighty God",
+                        "be thou perfect"
+                    ]
                 },
                 {
                     "reference": "Genesis 17:5 (KJV)",
-                    "text": "\"Neither shall thy name any more be called Abram, but thy name shall be Abraham; for a father of many nations have I made thee.\""
+                    "text": "\"Neither shall thy name any more be called Abram, but thy name shall be Abraham; for a father of many nations have I made thee.\"",
+                    "highlights": [
+                        "Abram",
+                        "Abraham",
+                        "father of many nations"
+                    ]
                 },
                 {
                     "reference": "Genesis 17:15 (KJV)",
-                    "text": "\"And God said unto Abraham, As for Sarai thy wife, thou shalt not call her name Sarai, but Sarah shall her name be.\""
+                    "text": "\"And God said unto Abraham, As for Sarai thy wife, thou shalt not call her name Sarai, but Sarah shall her name be.\"",
+                    "highlights": [
+                        "Sarai",
+                        "Sarah"
+                    ]
                 },
                 {
                     "reference": "Romans 4:13–14 (KJV) (Part 1/2)",
-                    "text": "\"For the promise, that he should be the heir of the world, was not to Abraham, or to his seed, through the law, but through the righteousness of faith.\""
+                    "text": "\"For the promise, that he should be the heir of the world, was not to Abraham, or to his seed, through the law, but through the righteousness of faith.\"",
+                    "highlights": [
+                        "heir of the world",
+                        {
+                            "text": "through the law",
+                            "color": "green"
+                        },
+                        "righteousness of faith"
+                    ]
                 },
                 {
                     "reference": "Romans 4:13–14 (KJV) (Part 2/2)",
-                    "text": "\"For if they which are of the law be heirs, faith is made void, and the promise made of none effect:\""
+                    "text": "\"For if they which are of the law be heirs, faith is made void, and the promise made of none effect:\"",
+                    "highlights": [
+                        {
+                            "text": "of the law",
+                            "color": "green"
+                        },
+                        "faith is made void",
+                        "promise made of none effect"
+                    ]
                 },
                 {
                     "reference": "Galatians 3:29 (KJV)",
-                    "text": "\"And if ye be Christ's, then are ye Abraham's seed, and heirs according to the promise.\""
+                    "text": "\"And if ye be Christ's, then are ye Abraham's seed, and heirs according to the promise.\"",
+                    "highlights": [
+                        "Christ's",
+                        "Abraham's seed",
+                        "heirs according to the promise"
+                    ]
                 },
                 {
                     "reference": "",
-                    "text": "100% My Power\n75% My Power | 25% His Power\n50% My Power | 50% His Power\n100% His Power",
-                    "list_type": "bullet",
-                    "highlights": []
+                    "text": "100% My Power\n75% My Power | 25% His Power\n50% My Power | 50% His Power\n100% His Power\n50% His Power\n25% His Power",
+                    "highlights": [
+                        {
+                            "text": "My Power",
+                            "color": "green"
+                        },
+                        {
+                            "text": "His Power",
+                            "color": "#FFD700"
+                        }
+                    ]
                 },
                 {
                     "reference": "Romans 5:19 (KJV)",
-                    "text": "\"For as by one man's disobedience many were made sinners, so by the obedience of one shall many be made righteous.\""
+                    "text": "\"For as by one man's disobedience many were made sinners, so by the obedience of one shall many be made righteous.\"",
+                    "highlights": [
+                        "disobedience",
+                        "obedience of one",
+                        "made righteous"
+                    ]
                 },
                 {
                     "reference": "2 Corinthians 5:21 (KJV)",
-                    "text": "\"For he hath made him to be sin for us, who knew no sin; that we might be made the righteousness of God in him.\""
+                    "text": "\"For he hath made him to be sin for us, who knew no sin; that we might be made the righteousness of God in him.\"",
+                    "highlights": [
+                        "righteousness of God in him"
+                    ]
                 },
                 {
                     "reference": "Galatians 5:4 (KJV)",
-                    "text": "\"Christ is become of no effect unto you, whosoever of you are justified by the law; ye are fallen from grace.\""
+                    "text": "\"Christ is become of no effect unto you, whosoever of you are justified by the law; ye are fallen from grace.\"",
+                    "highlights": [
+                        {
+                            "text": "justified by the law",
+                            "color": "green"
+                        },
+                        "fallen from grace"
+                    ]
                 },
                 {
                     "reference": "",
-                    "text": "אַבְרָהָם ← אַבְרָם  (Abram → Abraham)\nשָׂרָה ← שָׂרַי  (Sarai → Sarah)",
-                    "list_type": "bullet"
-                },
-                {
-                    "reference": "",
-                    "text": "אַבְרָהָם ← אַבְרָם  (Abram → Abraham)\nשָׂרָה ← שָׂרַי  (Sarai → Sarah)",
-                    "list_type": "bullet",
-                    "highlights": []
+                    "text": "אַבְרָם → אַבְרָהָם\nשָׂרַי → שָׂרָה",
+                    "highlights": [
+                        {
+                            "text": "אַבְרָם",
+                            "color": "#9900FF"
+                        },
+                        {
+                            "text": "אַבְרָהָם",
+                            "color": "#9900FF"
+                        },
+                        {
+                            "text": "שָׂרַי",
+                            "color": "#9900FF"
+                        },
+                        {
+                            "text": "שָׂרָה",
+                            "color": "#9900FF"
+                        }
+                    ]
                 }
             ]
         }

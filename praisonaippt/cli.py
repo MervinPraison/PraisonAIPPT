@@ -11,6 +11,7 @@ from pathlib import Path
 from . import __version__
 from .loader import load_verses_from_file, get_example_path, list_examples
 from .core import create_presentation
+from .list_slides import print_slide_outline
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
 from .config import load_config, init_config
 
@@ -144,8 +145,8 @@ Examples:
     parser.add_argument(
         'command',
         nargs='?',
-        choices=['convert-pdf', 'convert-json', 'convert-yaml', 'config', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
-        help='Command to execute (e.g., convert-pdf, convert-json, convert-yaml, config, setup-oauth)'
+        choices=['convert-pdf', 'convert-json', 'convert-yaml', 'list-slides', 'config', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
+        help='Command to execute (e.g., list-slides, convert-pdf, convert-json, config, setup-oauth)'
     )
     
     parser.add_argument(
@@ -197,7 +198,22 @@ Examples:
         help='Suppress all but ERROR-level logging.'
     )
 
+    parser.add_argument(
+        '--no-list-slides',
+        action='store_true',
+        help='Do not print slide outline after building a presentation'
+    )
+
     return parser.parse_args()
+
+
+def handle_list_slides_command(args):
+    """Handle list-slides command: print numbered slide outline from a PPTX."""
+    if not args.input_file:
+        print("Error: Input file required for list-slides command")
+        print("Usage: praisonaippt list-slides <file.pptx>")
+        return 1
+    return print_slide_outline(args.input_file)
 
 
 def parse_pdf_options(options_str: str) -> PDFOptions:
@@ -926,6 +942,9 @@ def main():
     # Handle convert-yaml command
     if args.command == 'convert-yaml':
         return handle_convert_yaml_command(args)
+
+    if args.command == 'list-slides':
+        return handle_list_slides_command(args)
     
     # List examples if requested
     if args.list_examples:
@@ -975,7 +994,11 @@ def main():
     
     if not output_file:
         return 1
-    
+
+    if not getattr(args, 'no_list_slides', False):
+        print()
+        print_slide_outline(output_file)
+
     pdf_path = None
 
     # Convert to PDF if requested
