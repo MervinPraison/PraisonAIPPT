@@ -83,7 +83,6 @@ sections:
       faith, preached before the gospel unto Abraham, saying, In thee shall all
       nations be blessed.
     highlights:
-    - justify the heathen through faith
     - preached before the gospel unto Abraham
 
   - reference: John 8:56 (KJV)
@@ -92,30 +91,32 @@ sections:
     - Abraham rejoiced
     - saw my day
 
-  - reference: Genesis 15:5-6 (NKJV)
+  - reference: Genesis 15:5-6 (KJV)
     split_max_length: 500
     text: >-
-      Then He brought him outside and said, "Look now toward heaven, and count
-      the stars if you are able to number them." And He said to him, "So shall
-      your descendants be." And he believed in the LORD, and He accounted it to
-      him for righteousness.
+      And he brought him forth abroad, and said, Look now toward heaven, and tell
+      the stars, if thou be able to number them: and he said unto him, So shall
+      thy seed be. And he believed in the LORD; and he counted it to him for
+      righteousness.
     highlights:
-    - stars
-    - count
     - number them
+    - seed
     - believed
     - righteousness
 
-  - reference: Genesis 22:17 (NKJV)
+  - reference: Genesis 22:17 (KJV)
     split_max_length: 500
     text: >-
-      I will bless you, and I will multiply your descendants as the stars of the
-      heaven and as the sand which is on the seashore; and your descendants shall
-      possess the gate of their enemies.
+      That in blessing I will bless thee, and in multiplying I will multiply thy
+      seed as the stars of the heaven, and as the sand which is upon the sea
+      shore; and thy seed shall possess the gate of his enemies;
     highlights:
     - stars of the heaven
-    - descendants
+    - sand
+    - sea shore
+    - seed
     - multiply
+    - possess the gate
 
   - reference: Galatians 3:16 (NKJV)
     split_max_length: 500
@@ -133,27 +134,14 @@ sections:
       have obeyed My voice.
     highlights:
     - seed
-    - all the nations of the earth shall be blessed
-
-  - reference: Genesis 15:5-6 (KJV)
-    split_max_length: 500
-    text: >-
-      And he brought him forth abroad, and said, Look now toward heaven, and tell
-      the stars, if thou be able to number them: and he said unto him, So shall
-      thy seed be. And he believed in the LORD; and he counted it to him for
-      righteousness.
-    highlights:
-    - So shall thy seed be
-    - believed in the LORD
-    - counted it to him for righteousness
 
   - reference: Romans 4:3 (KJV)
     text: >-
       For what saith the scripture? Abraham believed God, and it was counted
       unto him for righteousness.
     highlights:
-    - Abraham believed God
-    - counted unto him for righteousness
+    - believed
+    - righteousness
 
   - slide_type: image
     image_path: assets/images/gospel_in_the_stars/The-Gospel-in-the-Stars-Bible.png

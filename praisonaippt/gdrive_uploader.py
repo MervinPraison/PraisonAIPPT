@@ -6,9 +6,10 @@ using the Google Drive API v3. Dependencies are loaded lazily only when needed.
 """
 
 import os
+import time
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Tuple
 from .lazy_loader import lazy_import, check_optional_dependency
 
 
@@ -181,35 +182,51 @@ class GDriveUploader:
             self.service = self.build('drive', 'v3', credentials=self.credentials)
         return self.service
     
+    def _escape_query_value(self, value: str) -> str:
+        """Escape a value for use in a Drive API query string."""
+        return value.replace("\\", "\\\\").replace("'", "\\'")
+
+    def _list_drive_items(
+        self,
+        query: str,
+        *,
+        order_by: str = "createdTime",
+        page_size: int = 100,
+    ) -> List[Dict[str, str]]:
+        """List Drive items matching a query, with stable ordering."""
+        service = self._get_service()
+        items: List[Dict[str, str]] = []
+        page_token = None
+        while True:
+            response = service.files().list(
+                q=query,
+                spaces="drive",
+                fields="nextPageToken,files(id,name,createdTime,modifiedTime)",
+                pageSize=page_size,
+                pageToken=page_token,
+                orderBy=order_by,
+            ).execute()
+            items.extend(response.get("files", []))
+            page_token = response.get("nextPageToken")
+            if not page_token:
+                break
+        return items
+
     def find_file_by_name(self, file_name: str, folder_id: Optional[str] = None) -> Optional[str]:
         """
         Find a file by name in a specific folder.
-        
-        Args:
-            file_name: Name of the file to find
-            folder_id: Folder ID to search in (optional)
-        
-        Returns:
-            File ID if found, None otherwise
+
+        When duplicates exist, returns the most recently modified match so
+        overwrite updates the active copy in the canonical folder.
         """
-        service = self._get_service()
-        
-        # Build query
-        query = f"name='{file_name}' and trashed=false"
+        safe_name = self._escape_query_value(file_name)
+        query = f"name='{safe_name}' and trashed=false"
         if folder_id:
             query += f" and '{folder_id}' in parents"
-        
-        # Search for file
-        results = service.files().list(
-            q=query,
-            spaces='drive',
-            fields='files(id, name)',
-            pageSize=1
-        ).execute()
-        
-        files = results.get('files', [])
+
+        files = self._list_drive_items(query, order_by="modifiedTime desc")
         if files:
-            return files[0]['id']
+            return files[0]["id"]
         return None
     
     def update_file(self, file_id: str, file_path: str) -> Dict[str, str]:
@@ -329,65 +346,97 @@ class GDriveUploader:
         }
         return mime_types.get(extension, 'application/octet-stream')
     
+    def _get_folder_ids_by_name(
+        self, folder_name: str, parent_id: Optional[str] = None
+    ) -> List[str]:
+        """Return folder IDs with this name under parent, oldest first."""
+        safe_name = self._escape_query_value(folder_name)
+        query = (
+            f"name='{safe_name}' and mimeType='application/vnd.google-apps.folder' "
+            "and trashed=false"
+        )
+        if parent_id:
+            query += f" and '{parent_id}' in parents"
+
+        folders = self._list_drive_items(query, order_by="createdTime")
+        return [item["id"] for item in folders]
+
     def get_folder_id_by_name(self, folder_name: str, parent_id: Optional[str] = None) -> Optional[str]:
         """
         Get folder ID by folder name.
-        
-        Args:
-            folder_name: Name of the folder to find
-            parent_id: Parent folder ID (optional, searches in root if not provided)
-        
+
+        When duplicate folders exist under the same parent, returns the oldest
+        (canonical) folder so uploads stay consistent.
+        """
+        folder_ids = self._get_folder_ids_by_name(folder_name, parent_id)
+        return folder_ids[0] if folder_ids else None
+
+    def get_or_create_folder(
+        self, folder_name: str, parent_id: Optional[str] = None
+    ) -> Tuple[str, bool]:
+        """
+        Resolve a folder by name, creating it only when missing.
+
+        Re-queries after create to absorb parallel-upload races. If duplicates
+        already exist, always uses the oldest folder.
+        """
+        folder_name = folder_name.strip()
+        if not folder_name:
+            raise ValueError("folder_name must be non-empty")
+
+        existing = self._get_folder_ids_by_name(folder_name, parent_id)
+        if existing:
+            if len(existing) > 1:
+                print(
+                    f"  Note: {len(existing)} folders named '{folder_name}' found; "
+                    "using oldest"
+                )
+            return existing[0], False
+
+        self.create_folder(folder_name, parent_id)
+
+        for delay in (0.15, 0.35, 0.75):
+            time.sleep(delay)
+            existing = self._get_folder_ids_by_name(folder_name, parent_id)
+            if existing:
+                if len(existing) > 1:
+                    print(
+                        f"  Note: {len(existing)} folders named '{folder_name}' found; "
+                        "using oldest"
+                    )
+                return existing[0], True
+
+        raise RuntimeError(f"Failed to resolve folder '{folder_name}' after create")
+
+    def ensure_folder_path(
+        self, folder_path: str, parent_id: Optional[str] = None
+    ) -> Tuple[str, bool]:
+        """
+        Ensure a nested folder path exists (e.g. "2026/06").
+
         Returns:
-            Folder ID if found, None otherwise
+            (final_folder_id, created_any_segment)
         """
-        service = self._get_service()
-        
-        # Build query
-        query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
-        if parent_id:
-            query += f" and '{parent_id}' in parents"
-        
-        # Search for folder
-        results = service.files().list(
-            q=query,
-            spaces='drive',
-            fields='files(id, name)'
-        ).execute()
-        
-        files = results.get('files', [])
-        if files:
-            return files[0]['id']
-        return None
-    
-    def create_folder_path(self, folder_path: str, parent_id: Optional[str] = None) -> str:
-        """
-        Create a nested folder path in Google Drive (e.g., "2024/12/22").
-        
-        Args:
-            folder_path: Folder path with / separators (e.g., "2024/12/22")
-            parent_id: Parent folder ID to start from
-        
-        Returns:
-            ID of the final folder in the path
-        """
-        folders = folder_path.split('/')
+        folders = folder_path.split("/")
         current_parent = parent_id
-        
+        created_any = False
+
         for folder_name in folders:
             folder_name = folder_name.strip()
             if not folder_name:
                 continue
-            
-            # Check if folder exists
-            folder_id = self.get_folder_id_by_name(folder_name, current_parent)
-            
-            if not folder_id:
-                # Create folder
-                folder_id = self.create_folder(folder_name, current_parent)
-            
-            current_parent = folder_id
-        
-        return current_parent
+
+            current_parent, created = self.get_or_create_folder(folder_name, current_parent)
+            created_any = created_any or created
+
+        if current_parent is None:
+            raise RuntimeError(f"Invalid folder path: {folder_path}")
+        return current_parent, created_any
+
+    def create_folder_path(self, folder_path: str, parent_id: Optional[str] = None) -> str:
+        """Create a nested folder path in Google Drive (e.g., "2024/12/22")."""
+        folder_id, _ = self.ensure_folder_path(folder_path, parent_id)
+        return folder_id
     
     def create_folder(self, folder_name: str, parent_id: Optional[str] = None) -> str:
         """
@@ -457,23 +506,24 @@ def upload_to_gdrive(file_path: str,
     # Handle folder_name if provided
     target_folder_id = folder_id
     if folder_name and not folder_id:
-        # Try to find existing folder
-        target_folder_id = uploader.get_folder_id_by_name(folder_name)
-        if not target_folder_id:
-            # Create folder if it doesn't exist
-            print(f"Creating folder: {folder_name}")
-            target_folder_id = uploader.create_folder(folder_name)
-    
+        target_folder_id, created = uploader.get_or_create_folder(folder_name)
+        if created:
+            print(f"Created folder: {folder_name}")
+        else:
+            print(f"Using folder: {folder_name}")
+
     # Handle date-based folders if enabled
     if use_date_folders:
-        # Generate date path based on format
         now = datetime.now()
-        date_path = date_format.replace('YYYY', str(now.year))
-        date_path = date_path.replace('MM', f'{now.month:02d}')
-        date_path = date_path.replace('DD', f'{now.day:02d}')
-        
-        print(f"Creating date-based folder: {date_path}")
-        target_folder_id = uploader.create_folder_path(date_path, target_folder_id)
+        date_path = date_format.replace("YYYY", str(now.year))
+        date_path = date_path.replace("MM", f"{now.month:02d}")
+        date_path = date_path.replace("DD", f"{now.day:02d}")
+
+        target_folder_id, created = uploader.ensure_folder_path(date_path, target_folder_id)
+        if created:
+            print(f"Created date folder: {date_path}")
+        else:
+            print(f"Using date folder: {date_path}")
     
     # Upload file
     return uploader.upload_file(file_path, target_folder_id, file_name, overwrite)
