@@ -35,7 +35,7 @@
       ]
     },
     {
-      "section": "Abraham Transformation 1",
+      "section": "Abraham between the age of 75 and 85",
       "verses": [
         {
           "reference": "Romans 4:21 (NKJV)",
@@ -166,14 +166,14 @@
         {
           "slide_type": "image",
           "image_path": "assets/images/gospel_in_the_stars/The-Gospel-in-the-Stars-Bible.png",
-          "image_fit": "cover",
+          "image_fit": "contain",
           "reference": "",
           "text": ""
         },
         {
           "slide_type": "image",
           "image_path": "assets/images/gospel_in_the_stars/The-Gospel-in-the-Stars.png",
-          "image_fit": "cover",
+          "image_fit": "contain",
           "reference": "",
           "text": ""
         }
@@ -239,6 +239,10 @@
       ]
     },
     {
+      "section": "Abraham at the age of 99",
+      "verses": []
+    },
+    {
       "section": "1. Hope",
       "verses": [
         {
@@ -269,13 +273,6 @@
       "section": "2. Faith",
       "verses": [
         {
-          "slide_type": "image",
-          "image_path": "assets/images/why_delay/power_vs_his_power.png",
-          "image_fit": "contain",
-          "reference": "100% His Power — not a mixture",
-          "text": "Green = My Power · Red = His Power"
-        },
-        {
           "slide_type": "hebrew_rename",
           "hebrew_font_size": 110,
           "hebrew_highlight_color": "#9900FF",
@@ -299,6 +296,13 @@
     {
       "section": "3. Elshadai",
       "verses": [
+        {
+          "slide_type": "image",
+          "image_path": "assets/images/why_delay/power_vs_his_power.png",
+          "image_fit": "contain",
+          "reference": "100% His Power — not a mixture",
+          "text": "Green = My Power · Red = His Power"
+        },
         {
           "reference": "Romans 4:13–14 (KJV) (Part 1/2)",
           "text": "\"For the promise, that he should be the heir of the world, was not to Abraham, or to his seed, through the law, but through the righteousness of faith.\"",

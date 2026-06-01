@@ -150,5 +150,6 @@ Thumbs.db
 *.bak
 *.pptx
 *.pdf
+*.png
 
 assets/extracted_images
