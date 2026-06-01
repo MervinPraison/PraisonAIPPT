@@ -58,7 +58,7 @@ uv run .cursor/skills/gpt-image/scripts/generate.py \
 Then regenerate the deck:
 
 ```bash
-python3 -m praisonaippt.cli -i examples/why_delay.yaml -o examples/why_delay.pptx
+python3 -m praisonaippt.cli -i examples/how_to_prevent_delay.yaml -o examples/how_to_prevent_delay.pptx
 ```
 
 ## generate.py flags
