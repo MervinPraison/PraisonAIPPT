@@ -106,8 +106,8 @@ def _split_boxes(
 
 
 def _pip_box(cx: float, cy: float, cw: float, ch: float, style: dict, kind: str) -> RegionBox:
-    ratio = float(layout_in(style, kind, "pip_width_ratio", 0.18))
-    margin = float(layout_in(style, kind, "pip_margin_in", 0.35))
+    ratio = float(layout_in(style, kind, "pip_width_ratio"))
+    margin = float(layout_in(style, kind, "pip_margin_in"))
     size = cw * ratio
     return RegionBox(cx + cw - size - margin, cy + ch - size - margin, size, size)
 
@@ -136,10 +136,14 @@ def _slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional[RegionBox]
     elif kind == "media_only":
         regions["media"] = full
     elif kind in _SPLIT_KINDS:
-        ratio = float(layout_in(style, kind, "media_width_ratio", 0.5))
-        gap = float(layout_in(style, kind, "gap_in", layout_in(style, kind, "inner_gap_in", 0)))
+        ratio = float(layout_in(style, kind, "media_width_ratio"))
+        gap_raw = layout_in(style, kind, "gap_in")
+        if gap_raw is None:
+            gap_raw = layout_in(style, kind, "inner_gap_in")
+        gap = float(gap_raw or 0)
         rounded = kind.startswith("avatar_media_border")
-        radius = float(layout_in(style, kind, "inner_radius_in", 0.12))
+        radius_raw = layout_in(style, kind, "inner_radius_in") if rounded else 0
+        radius = float(radius_raw or 0.12) if rounded else 0.0
         media, avatar = _split_boxes(cx, cy, cw, ch, ratio, gap)
         regions["media"] = RegionBox(
             media.left_in, media.top_in, media.width_in, media.height_in, rounded, radius

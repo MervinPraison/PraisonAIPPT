@@ -54,12 +54,26 @@ def test_split_geometry_media_left():
     from praisonaippt.avatar_layouts import _slide_regions
 
     prs = Presentation()
-    prs.slide_width = prs.slide_width.__class__(12192000)  # 13.33in default may vary
-    media, avatar = _slide_regions(prs, "avatar_media_1", {})["media"], _slide_regions(
+    m1, a1 = _slide_regions(prs, "avatar_media_1", {})["media"], _slide_regions(
         prs, "avatar_media_1", {}
     )["avatar"]
-    assert media.left_in < avatar.left_in
-    assert abs(media.width_in / (media.width_in + avatar.width_in) - 0.5) < 0.02
+    m2, a2 = _slide_regions(prs, "avatar_media_2", {})["media"], _slide_regions(
+        prs, "avatar_media_2", {}
+    )["avatar"]
+    assert m1.left_in < a1.left_in
+    assert abs(m1.width_in / (m1.width_in + a1.width_in) - 0.5) < 0.02
+    assert abs(m2.width_in / (m2.width_in + a2.width_in) - 0.4) < 0.02
+    assert m1.width_in != m2.width_in
+
+
+def test_border_split_ratios_differ():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _slide_regions
+
+    prs = Presentation()
+    m1 = _slide_regions(prs, "avatar_media_border_1", {})["media"]
+    m2 = _slide_regions(prs, "avatar_media_border_2", {})["media"]
+    assert m1.width_in > m2.width_in
 
 
 def test_avatar_quote_has_no_media_region():
