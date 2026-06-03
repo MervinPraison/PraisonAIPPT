@@ -1,0 +1,5 @@
+name: sermon-dark-center
+description: Centred body text on sermon-dark base
+extends: sermon-dark.yaml
+slide_style:
+  alignment: center

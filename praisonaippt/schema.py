@@ -24,6 +24,8 @@ _TOP_LEVEL_KEYS = {
     "slide_style",
     "slide_size",
     "auto_upload_gdrive",
+    "template",
+    "extends",
     # implementation/extension hooks
     "_source",
     "_source_file",

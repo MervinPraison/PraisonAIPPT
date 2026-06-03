@@ -51,7 +51,9 @@ jobs:
           names = zipfile.ZipFile(whl).namelist()
           ex = [n for n in names if n.startswith('examples/') and n.endswith(('.json', '.yaml', '.yml'))]
           assert len(ex) > 10, f'Expected >10 example files, got {len(ex)}'
-          print(f'OK: {len(ex)} example files in wheel')
+          tpl = [n for n in names if n.startswith('templates/') and n.endswith(('.yaml', '.yml'))]
+          assert len(tpl) >= 4, f'Expected >=4 template files, got {len(tpl)}'
+          print(f'OK: {len(ex)} example files, {len(tpl)} template files in wheel')
           "
       - name: Verify metadata declares extras
         run: |

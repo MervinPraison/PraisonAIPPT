@@ -1,0 +1,11 @@
+name: sermon-dark
+description: House style — white Palatino text on dark background (8 example decks)
+source_example: 100_fold_blessing
+extends: default.yaml
+slide_size: widescreen
+slide_style:
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+  # Defaults when unset: highlight orange, reference grey-on-dark, title white

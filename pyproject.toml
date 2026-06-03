@@ -61,7 +61,8 @@ Homepage = "https://github.com/MervinPraison/PraisonAIPPT"
 praisonaippt = "praisonaippt.cli:main"
 
 [tool.setuptools]
-packages = ["praisonaippt", "examples"]
+packages = ["praisonaippt", "examples", "templates"]
 
 [tool.setuptools.package-data]
 examples = ["*.json", "*.yaml", "*.yml"]
+templates = ["*.yaml", "*.yml", "README.md"]

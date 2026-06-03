@@ -40,7 +40,9 @@ def _apply_slide_background(slide, style: dict, prs=None):
             sp_tree = slide.shapes._spTree
             sp_tree.remove(pic._element)
             sp_tree.insert(2, pic._element)
-    elif bg_color:
+        elif bg_color:
+            img_path = None
+    if not img_path and bg_color:
         fill = slide.background.fill
         fill.solid()
         hex_c = bg_color.lstrip('#')
@@ -62,23 +64,30 @@ def add_title_slide(prs, title, subtitle="", style=None):
         theme = _resolve_theme(style)
         slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
         _apply_slide_background(slide, style, prs)
-        # Title
-        tb = slide.shapes.add_textbox(Inches(0.6), Inches(2.5), Inches(9), Inches(1.5))
+        margin = Inches(_style_layout(style, 'title', 'margin_in', 0.6))
+        width = Inches(_style_layout(style, 'title', 'content_width_in', 9.0))
+        title_top = Inches(_style_layout(style, 'title', 'title_top_in', 2.5))
+        title_h = Inches(_style_layout(style, 'title', 'title_height_in', 1.5))
+        title_pt = _style_typography(style, 'title_size_pt', 44)
+        tb = slide.shapes.add_textbox(margin, title_top, width, title_h)
         p = tb.text_frame.paragraphs[0]
         p.text = title
         p.alignment = PP_ALIGN.CENTER
-        p.font.size = Pt(44)
+        p.font.size = Pt(title_pt)
         p.font.bold = True
         p.font.color.rgb = theme['title']
         if theme['font_name']:
             p.font.name = theme['font_name']
         # Subtitle
         if subtitle:
-            tb2 = slide.shapes.add_textbox(Inches(0.6), Inches(4.2), Inches(9), Inches(1.0))
+            subtitle_top = Inches(_style_layout(style, 'title', 'subtitle_top_in', 4.2))
+            subtitle_h = Inches(_style_layout(style, 'title', 'subtitle_height_in', 1.0))
+            subtitle_pt = _style_typography(style, 'subtitle_size_pt', 28)
+            tb2 = slide.shapes.add_textbox(margin, subtitle_top, width, subtitle_h)
             p2 = tb2.text_frame.paragraphs[0]
             p2.text = subtitle
             p2.alignment = PP_ALIGN.CENTER
-            p2.font.size = Pt(28)
+            p2.font.size = Pt(subtitle_pt)
             p2.font.color.rgb = theme['subtitle']
             if theme['font_name']:
                 p2.font.name = theme['font_name']
@@ -226,6 +235,19 @@ def _resolve_theme(style: dict) -> dict:
         'global_alignment': style.get('alignment', 'left'),
         'font_name':        style.get('font_name') or 'Palatino',
     }
+
+
+def _style_layout(style: dict, slide_type: str, key: str, default):
+    """Optional SDK v2 layout token from slide_style.layouts."""
+    layouts = (style or {}).get('layouts') or {}
+    block = layouts.get(slide_type) or {}
+    return block.get(key, default)
+
+
+def _style_typography(style: dict, key: str, default):
+    """Optional SDK v2 typography token from slide_style.typography."""
+    typography = (style or {}).get('typography') or {}
+    return typography.get(key, default)
 
 
 def _normalise_highlights(highlights, highlight_rgb=None):

@@ -1,0 +1,11 @@
+name: default
+description: Dark background colour with optional image (16 example decks use this fingerprint)
+source_example: love_of_god
+# Style keys this theme sets (override any key inline on your deck):
+#   background_image, background_color, text_color, reference_color,
+#   title_color, subtitle_color, section_title_color, highlight_color,
+#   annotation_color, reference_position (top|bottom), alignment (left|center|right),
+#   font_name, slide_size (widescreen|standard|16:9|4:3)
+slide_style:
+  background_image: assets/background_alt.jpg
+  background_color: '#1A1A2E'

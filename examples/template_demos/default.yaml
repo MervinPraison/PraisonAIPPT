@@ -1,0 +1,85 @@
+template: default
+presentation_title: Template showcase — default
+presentation_subtitle: Dark background colour with optional image (16 example decks
+  use this fingerprint)
+sections:
+- section: This template
+  verses:
+  - reference: 'template: default'
+    leading_title: Dark background colour with optional image (16 example decks use
+      this fingerprint)
+    text: 'background_color: #1A1A2E
+
+      background_image: assets/background_alt.jpg'
+    font_size: 20
+    alignment: left
+- section: Colours & highlights
+  verses:
+  - reference: John 3:16 (NKJV)
+    text: For God so loved the world that he gave his one and only Son, that whoever
+      believes in him shall not perish but have eternal life.
+    highlights:
+    - God so loved
+    - eternal life
+  - reference: Romans 1:16–17 (NKJV)
+    text: For I am not ashamed of the gospel of Christ, for it is the power of God
+      to salvation for everyone who believes.
+    highlights:
+    - text: the gospel
+      annotation: 1
+    - text: the power
+      annotation: 2
+    - text: salvation
+      color: '#4A86E8'
+      underline: true
+      annotation: 3
+- section: Alignment
+  verses:
+  - reference: Left aligned (default)
+    text: The Lord is my shepherd; I shall not want.
+    alignment: left
+    font_size: 28
+  - reference: Centre aligned
+    text: He makes me lie down in green pastures.
+    alignment: center
+    font_size: 28
+  - reference: Right aligned
+    text: He leads me beside still waters.
+    alignment: right
+    font_size: 28
+- section: Layout & lists
+  verses:
+  - reference: Matthew 12:42 (NKJV)
+    leading_title: Jesus, greater than Solomon inside you
+    text: The queen of the South will rise up in the judgment with this generation
+      and condemn it, for she came from the ends of the earth to hear the wisdom of
+      Solomon; and indeed a greater than Solomon is here.
+    highlights:
+    - a greater than Solomon is here
+  - reference: Bullet list example
+    text: 'First point from the theme
+
+      Second point — highlight colour applies
+
+      Third point — annotation colour on notes'
+    list_type: bullet
+    font_size: 26
+  - reference: Numbered list example
+    text: 'Faith comes by hearing
+
+      Hearing by the word of God
+
+      The word is near you'
+    list_type: numbered
+    font_size: 26
+  - reference: Title-style slide
+    reference_font_size: 44
+    text: ''
+    font_size: 28
+- section: 'Multi-line
+
+    section title'
+  verses:
+  - reference: Psalm 23:1 (NKJV)
+    text: The Lord is my shepherd; I shall not want.
+    font_size: 32

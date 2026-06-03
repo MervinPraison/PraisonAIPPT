@@ -11,6 +11,7 @@ from pathlib import Path
 from . import __version__
 from .exceptions import SchemaError
 from .loader import load_verses_from_file, get_example_path, list_examples
+from .template_resolver import list_templates, resolve_template_style
 from .schema import validate_verses
 from .core import create_presentation
 from .list_slides import print_slide_outline
@@ -51,6 +52,9 @@ Examples:
   %(prog)s -t "My Title"                # Use custom title
   %(prog)s --use-example tamil_verses   # Use built-in example
   %(prog)s --list-examples              # List available examples
+  %(prog)s --list-templates             # List style theme templates
+  %(prog)s -i deck.yaml --template sermon-dark
+  %(prog)s template sermon-gold          # Show resolved theme YAML
         """
     )
     
@@ -80,6 +84,18 @@ Examples:
         '--list-examples',
         action='store_true',
         help='List all available example files'
+    )
+
+    parser.add_argument(
+        '--list-templates',
+        action='store_true',
+        help='List all available style theme templates'
+    )
+
+    parser.add_argument(
+        '--template',
+        metavar='NAME',
+        help='Apply a style theme template (e.g. sermon-dark, sermon-gold)'
     )
     
     parser.add_argument(
@@ -147,8 +163,8 @@ Examples:
     parser.add_argument(
         'command',
         nargs='?',
-        choices=['convert-pdf', 'convert-json', 'convert-yaml', 'list-slides', 'config', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
-        help='Command to execute (e.g., list-slides, convert-pdf, convert-json, config, setup-oauth)'
+        choices=['convert-pdf', 'convert-json', 'convert-yaml', 'list-slides', 'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
+        help='Command to execute (e.g., list-slides, convert-pdf, template, config)'
     )
     
     parser.add_argument(
@@ -207,6 +223,22 @@ Examples:
     )
 
     return parser.parse_args()
+
+
+def handle_template_show_command(template_name):
+    """Print fully resolved slide_style for a theme template."""
+    if not template_name:
+        print("Error: Template name required")
+        print("Usage: praisonaippt template <name>")
+        return 1
+    try:
+        resolved = resolve_template_style(template_name)
+    except SchemaError as e:
+        print(f"Error: {e}")
+        return 1
+    import yaml
+    print(yaml.dump(resolved, allow_unicode=True, sort_keys=False, default_flow_style=False))
+    return 0
 
 
 def handle_list_slides_command(args):
@@ -959,6 +991,27 @@ def main():
 
     if args.command == 'list-slides':
         return handle_list_slides_command(args)
+
+    if args.command == 'template':
+        return handle_template_show_command(args.input_file)
+
+    # List templates if requested
+    if args.list_templates:
+        entries = list_templates()
+        if entries:
+            print("Available style templates:")
+            for entry in entries:
+                line = f"  - {entry['name']}"
+                if entry.get('description'):
+                    line += f" — {entry['description']}"
+                if entry.get('extends'):
+                    line += f" (extends {entry['extends']})"
+                print(line)
+            print("\nUse with: praisonaippt -i deck.yaml --template <name>")
+            print("Show resolved style: praisonaippt template <name>")
+        else:
+            print("No templates found.")
+        return 0
     
     # List examples if requested
     if args.list_examples:
@@ -991,7 +1044,7 @@ def main():
     
     # Load verses data
     print(f"Loading verses from: {input_file}")
-    data = load_verses_from_file(input_file)
+    data = load_verses_from_file(input_file, template=getattr(args, 'template', None))
     
     if not data:
         return 1

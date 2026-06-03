@@ -1,0 +1,10 @@
+name: light-minimal
+description: Light deck without background image; blue highlights and annotations
+source_example: they_didnt_wait_for_god_light
+# No background_image or background_color — light mode (dark text, orange highlights unless set)
+slide_style:
+  alignment: left
+  reference_position: top
+  highlight_color: '#1565C0'
+  annotation_color: '#1E50C8'
+  font_name: Palatino

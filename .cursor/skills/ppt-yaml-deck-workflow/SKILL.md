@@ -36,14 +36,32 @@ Progress:
 |-----|---------|
 | `presentation_title` | Opening title slide |
 | `presentation_subtitle` | Optional subtitle on title slide |
-| `slide_style` | Global look (background, colours, font, alignment) for all slide types |
+| `slide_style` | Global look (background, colours, font, alignment) — or use `template: sermon-dark` |
+| `template` | Built-in style theme name (`praisonaippt --list-templates`); replaces inline `slide_style` |
 | `slide_size` | Optional: `widescreen` / `16:9` / `standard` / `4:3` / `16:10`, or `{ width, height }` in inches |
 | `auto_upload_gdrive` | Default **`true`** on example decks; uploads PPTX after build when credentials exist (also honour `~/.praisonaippt` `defaults.auto_upload_gdrive`) |
 | `sections` | List of section blocks (required) |
 
-### Default `slide_style` (match latest example decks)
+### Default style (use a theme template)
 
-When creating or restyling a deck, use the same block as recent files (e.g. `100_fold_blessing.yaml`, `freedom_from_all_your_troubles.yaml`):
+Prefer a built-in theme instead of copying `slide_style` into every deck:
+
+```yaml
+template: sermon-dark
+auto_upload_gdrive: true
+```
+
+Other themes: `default`, `sermon-gold`, `light-minimal` — see `docs/templates.md` or `praisonaippt --list-templates`.
+
+Inline override example:
+
+```yaml
+template: sermon-dark
+slide_style:
+  highlight_color: '#FFD700'
+```
+
+Legacy inline block (equivalent to `template: sermon-dark`):
 
 ```yaml
 auto_upload_gdrive: true

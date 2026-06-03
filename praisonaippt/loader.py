@@ -8,22 +8,24 @@ from pathlib import Path
 
 from .exceptions import SchemaError
 from .schema import validate_verses
+from .template_resolver import apply_template_layers
 
 
-def load_verses_from_file(filepath):
+def load_verses_from_file(filepath, template=None):
     """
     Load verses data from a JSON or YAML file.
-    
+
     Args:
         filepath (str): Path to the JSON or YAML file
-    
+        template (str, optional): Theme template name or path (--template)
+
     Returns:
         dict: Verses data dictionary, or None if error
     """
     try:
         file_path = Path(filepath)
         file_extension = file_path.suffix.lower()
-        
+
         with open(filepath, 'r', encoding='utf-8') as f:
             # Detect file format and load accordingly
             if file_extension in ['.yaml', '.yml']:
@@ -40,7 +42,17 @@ def load_verses_from_file(filepath):
                 except yaml.YAMLError:
                     # Fall back to JSON
                     data = json.loads(content)
-        
+
+        if not isinstance(data, dict):
+            print(f"Error: Invalid format in '{filepath}': top level must be a mapping")
+            return None
+
+        try:
+            data = apply_template_layers(data, deck_path=file_path, cli_template=template)
+        except SchemaError as e:
+            print(f"Error: Template resolution failed for '{filepath}': {e}")
+            return None
+
         # Validate (warns on unknown keys; raises SchemaError on hard issues)
         try:
             data = validate_verses(data)
@@ -81,58 +93,51 @@ def load_verses_from_dict(data):
 def get_example_path(example_name):
     """
     Get the full path to an example file.
-    
+
     Args:
         example_name (str): Name of the example file (with or without extension)
-    
+
     Returns:
         str: Full path to the example file, or None if not found
     """
-    # Get the package directory
     package_dir = Path(__file__).parent.parent
     examples_dir = package_dir / 'examples'
-    
-    # If no extension, try YAML first, then JSON
+
     if not any(example_name.endswith(ext) for ext in ['.json', '.yaml', '.yml']):
-        # Try YAML first
         for ext in ['.yaml', '.yml', '.json']:
             example_path = examples_dir / (example_name + ext)
             if example_path.exists():
                 return str(example_path)
     else:
-        # Extension provided, use as-is
         example_path = examples_dir / example_name
         if example_path.exists():
             return str(example_path)
-    
+
     return None
 
 
 def list_examples():
     """
     List all available example files.
-    
+
     Returns YAML files preferentially when both YAML and JSON exist for the same stem.
-    Deduplicates by stem to avoid listing the same example twice.
-    
+
     Returns:
         list: List of example filenames (preferring .yaml over .json)
     """
     package_dir = Path(__file__).parent.parent
     examples_dir = package_dir / 'examples'
-    
+
     if not examples_dir.exists():
         return []
-    
-    # Collect all files by stem, tracking available extensions
+
     stems = {}
     for ext in ['.yaml', '.yml', '.json']:
         for f in examples_dir.glob(f'*{ext}'):
             if f.stem not in stems:
                 stems[f.stem] = []
             stems[f.stem].append(ext)
-    
-    # Build result list, preferring YAML over JSON
+
     result = []
     for stem, exts in stems.items():
         if '.yaml' in exts:
@@ -141,5 +146,5 @@ def list_examples():
             result.append(f"{stem}.yml")
         else:
             result.append(f"{stem}.json")
-    
+
     return sorted(result)

@@ -13,6 +13,15 @@
 | `alignment` | string | **`"left"`** | **`"left"`** | Default text alignment (`"left"`, `"center"`, `"right"`) |
 | `reference_position` | string | **`"top"`** | **`"top"`** | `"top"` or `"bottom"` for verse reference line |
 
+Optional **layout SDK** keys under `slide_style` (see [templates.md](templates.md)):
+
+| Block | Purpose |
+|-------|---------|
+| `typography.title_size_pt` | Title slide title size (default 44) |
+| `typography.subtitle_size_pt` | Title slide subtitle size (default 28) |
+| `layouts.title.margin_in` | Title slide horizontal margin (default 0.6) |
+| `layouts.title.content_width_in` | Title textbox width (default 9.0) |
+
 !!! note
     **Package defaults**: When `background_image` or `background_color` is set, all text colors automatically default to white/light variants. Individual color keys override these auto-defaults. `font_name`, `alignment`, and `reference_position` have opinionated defaults (Palatino / left / top).
 

@@ -1,0 +1,8 @@
+name: sermon-gold
+description: Gold highlights and blue references on sermon-dark base
+source_example: why_delay
+extends: sermon-dark.yaml
+slide_style:
+  reference_color: '#66B3FF'
+  highlight_color: '#FFD700'
+  # title_color, subtitle_color, section_title_color inherit sermon-dark dark-mode defaults

@@ -8,6 +8,8 @@ description: "Complete guide to rich text formatting, bullet lists, annotations,
 
 PraisonAI PPT supports per-phrase rich text formatting directly in your JSON input — colors, bold, italic, underline, numbered annotations, bullet lists, text alignment, and custom font sizes.
 
+For reusable **style themes** (background, colours, fonts), see [Theme templates](templates.md) — use `template: sermon-dark` instead of repeating `slide_style` in every deck.
+
 ---
 
 ## Highlights

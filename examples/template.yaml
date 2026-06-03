@@ -13,7 +13,12 @@ auto_upload_gdrive: false
 # Or custom: { width: 13.33, height: 7.5 }  (inches)
 slide_size: widescreen
 
+# Style theme — use a built-in template instead of repeating slide_style:
+# template: sermon-dark
+# See: praisonaippt --list-templates  and  docs/templates.md
+
 # --- slide_style (optional; applies to title, section, verse, list, image slides)
+# Or: slide_style: { preset: sermon-dark, overrides: { highlight_color: '#FFD700' } }
 slide_style:
   # One of: background_image (path) OR background_color (hex). Image wins if both set.
   # background_image: examples/assets/background_alt.jpg

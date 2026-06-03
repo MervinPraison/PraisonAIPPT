@@ -1,0 +1,21 @@
+# Template gallery — one demo per built-in theme
+#
+# Generate all YAML + PPTX showcases:
+#   python examples/template_demos/build_demos.py
+#
+# Each deck includes the same feature slides (highlights, annotations, alignment,
+# lists, leading_title) styled with that template's settings.
+#
+# Built-in themes: praisonaippt --list-templates
+
+template: sermon-dark
+presentation_title: Quick template demo
+presentation_subtitle: See examples/template_demos/ for the full gallery
+sections:
+  - section: Demo
+    verses:
+      - reference: John 3:16 (NKJV)
+        text: For God so loved the world that he gave his one and only Son.
+        highlights:
+          - God so loved
+          - one and only Son

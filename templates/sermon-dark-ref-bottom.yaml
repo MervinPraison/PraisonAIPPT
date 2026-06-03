@@ -1,0 +1,5 @@
+name: sermon-dark-ref-bottom
+description: Bible reference line at bottom of verse slides
+extends: sermon-dark.yaml
+slide_style:
+  reference_position: bottom
