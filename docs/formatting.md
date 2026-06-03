@@ -172,12 +172,12 @@ Renders as:
 
 ## Text Alignment
 
-Control per-verse text alignment with `"alignment"`:
+Control per-verse text alignment with `"alignment"`. When omitted, verses inherit `slide_style.alignment` (default **`"left"`**).
 
 | Value | Description |
 |---|---|
-| `"center"` | Default for verse slides |
-| `"left"` | Default for list slides |
+| `"left"` | Default (from `slide_style.alignment`) |
+| `"center"` | Centre-align body text |
 | `"right"` | Right-align |
 
 ```yaml
@@ -229,7 +229,7 @@ font_size: 32
 | `highlights` | list | `[]` | Rich text formatting, see above |
 | `large_text` | object | `{}` | `{"phrase": font_size_pt}` overrides |
 | `list_type` | string | `null` | `"bullet"` or `"numbered"` |
-| `alignment` | string | `"center"` | `"left"`, `"center"`, or `"right"` |
+| `alignment` | string | `"left"` (via `slide_style`) | `"left"`, `"center"`, or `"right"` |
 | `font_size` | integer | `32` | Body text size in pt |
 
 ---

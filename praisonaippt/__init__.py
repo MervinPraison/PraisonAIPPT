@@ -14,6 +14,7 @@ from importlib.metadata import PackageNotFoundError, version as _pkg_version
 from .core import create_presentation
 from .loader import load_verses_from_file, load_verses_from_dict
 from .template_resolver import list_templates, resolve_template_style, get_template_path
+from .slide_renderers import register_renderer, list_renderers
 from .pdf_converter import convert_pptx_to_pdf, PDFOptions, PDFConverter
 from .lazy_loader import lazy_import, check_optional_dependency, LazyImportError
 from .config import load_config, init_config, Config
@@ -58,6 +59,8 @@ __all__ = [
     "list_templates",
     "resolve_template_style",
     "get_template_path",
+    "register_renderer",
+    "list_renderers",
     "convert_pptx_to_pdf",
     "PDFConverter",
     "PDFOptions",

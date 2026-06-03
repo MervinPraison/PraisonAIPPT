@@ -9,3 +9,12 @@ slide_style:
   reference_position: top
   font_name: Palatino
   # Defaults when unset: highlight orange, reference grey-on-dark, title white
+  # Optional layout SDK (uncomment to override geometry / sizes):
+  # typography:
+  #   body_size_pt: 32
+  #   reference_size_pt: 28
+  # layouts:
+  #   verse:
+  #     margin_in: 0.6
+  #   title:
+  #     title_top_in: 2.5

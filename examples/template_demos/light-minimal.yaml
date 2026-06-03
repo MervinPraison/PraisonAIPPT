@@ -1,11 +1,11 @@
 template: light-minimal
-presentation_title: Template showcase — light-minimal
-presentation_subtitle: Light deck without background image; blue highlights and annotations
+presentation_title: light-minimal
+presentation_subtitle: Theme gallery demo
 sections:
-- section: This template
+- section: light-minimal
+  section_subtitle: Light deck without background image; blue highlights and annotations
   verses:
   - reference: 'template: light-minimal'
-    leading_title: Light deck without background image; blue highlights and annotations
     text: 'alignment: left
 
       annotation_color: #1E50C8
@@ -15,7 +15,8 @@ sections:
       highlight_color: #1565C0
 
       reference_position: top'
-    font_size: 20
+    list_type: bullet
+    font_size: 18
     alignment: left
 - section: Colours & highlights
   verses:
@@ -37,6 +38,13 @@ sections:
       color: '#4A86E8'
       underline: true
       annotation: 3
+  - reference: Psalm 119:105 (NKJV)
+    text: Your word is a lamp to my feet and a light to my path.
+    highlights:
+    - lamp to my feet
+    - light to my path
+    large_text:
+      lamp to my feet: 40
 - section: Alignment
   verses:
   - reference: Left aligned (default)
@@ -80,6 +88,72 @@ sections:
     reference_font_size: 44
     text: ''
     font_size: 28
+- section: Dual passage & numbering
+  verses:
+  - reference: Romans 8:28 (NKJV)
+    text: And we know that all things work together for good to those who love God.
+    text_below_reference: To those who are called according to His purpose.
+    text_below_reference_highlights:
+    - called according to His purpose
+    highlights:
+    - all things work together for good
+  - reference: Titus 2:11–13 (NKJV)
+    text: '11 For the grace of God that brings salvation has appeared to all men,
+
+      12 teaching us that, denying ungodliness and worldly lusts, we should live soberly,
+      righteously, and godly in the present age,
+
+      13 looking for the blessed hope and glorious appearing of our great God and
+      Savior Jesus Christ.'
+    font_size: 24
+    highlights:
+    - grace of God
+    - blessed hope
+- section: Long text split
+  verses:
+  - reference: Split slide demo (auto parts)
+    text: This is a deliberately long passage to demonstrate automatic slide splitting
+      when the text exceeds the default character limit. PraisonAI PPT splits overflow
+      text across multiple slides while keeping the same reference and highlights.
+      The theme colours, font, and reference position apply to every part. Add split_max_length
+      on a verse to control when splitting starts. This second paragraph continues
+      on the same logical slide entry until the splitter creates part two. Highlights
+      still match across parts when defined on the verse object.
+    split_max_length: 280
+    highlights:
+    - automatic slide splitting
+    - split_max_length
+- section: Image slides
+  verses:
+  - slide_type: image
+    image_path: assets/showcase-diagram.png
+    image_fit: contain
+    reference: image_fit contain (default)
+    text: Full image visible; letterboxed if needed
+  - slide_type: image
+    image_path: assets/showcase-diagram.png
+    image_fit: cover
+    reference: image_fit cover
+    text: Fills the frame; may crop edges
+  - slide_type: image
+    image_path: assets/showcase-diagram.png
+    image_fit: fill
+    reference: image_fit fill
+    text: Stretched to the content box
+- section: Hebrew rename
+  verses:
+  - slide_type: hebrew_rename
+    hebrew_font_size: 100
+    hebrew_highlight_color: '#9900FF'
+    hebrew_rows:
+    - left: אַבְרָם
+      right: אַבְרָהָם
+      highlight_in_right: הָ
+    - left: שָׂרַי
+      right: שָׂרָה
+      highlight_in_right: ה
+    reference: God renames — new identity
+    text: ''
 - section: 'Multi-line
 
     section title'

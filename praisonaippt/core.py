@@ -8,6 +8,14 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from .utils import split_long_text, sanitize_filename, resolve_asset_path
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
+from .layout_tokens import (
+    layout_in,
+    typography_pt,
+    content_box,
+    content_width_inches,
+    split_max_length_default,
+    title_custom_threshold,
+)
 
 
 def _apply_slide_background(slide, style: dict, prs=None):
@@ -51,48 +59,75 @@ def _apply_slide_background(slide, style: dict, prs=None):
 
 
 
+def _slide_content_width(prs, style, slide_type, default_margin_in=0.6):
+    """Centred content width from slide size and optional layout tokens."""
+    left, width, _, _ = content_box(prs, style, slide_type, default_margin_in)
+    return left, width
+
+
+def _estimate_text_lines(text, width_in, pt_size):
+    """Rough line count for word-wrapped text in a textbox."""
+    chars_per_line = max(14, int(width_in * 72 / max(pt_size, 1) * 0.5))
+    lines = 0
+    for part in (text or '').split('\n'):
+        part = part.strip()
+        if not part:
+            continue
+        lines += max(1, (len(part) + chars_per_line - 1) // chars_per_line)
+    return max(1, lines)
+
+
+def _render_title_textboxes(slide, prs, title, subtitle, style, theme):
+    """Word-wrapped title and subtitle blocks, centred on the slide."""
+    left, width = _slide_content_width(prs, style, 'title')
+    title_top_in = layout_in(style, 'title', 'title_top_in', 2.5)
+    title_pt = typography_pt(style, 'title_size_pt', 44)
+    title_lines = _estimate_text_lines(title, width.inches, title_pt)
+    title_h = Inches(min(0.55 + title_lines * 0.52, 3.2))
+    tb = slide.shapes.add_textbox(left, Inches(title_top_in), width, title_h)
+    tf = tb.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.text = title
+    p.alignment = PP_ALIGN.CENTER
+    p.font.size = Pt(title_pt)
+    p.font.bold = True
+    p.font.color.rgb = theme['title']
+    if theme['font_name']:
+        p.font.name = theme['font_name']
+    if subtitle:
+        subtitle_pt = typography_pt(style, 'subtitle_size_pt', 28)
+        subtitle_lines = _estimate_text_lines(subtitle, width.inches, subtitle_pt)
+        gap = layout_in(style, 'title', 'subtitle_gap_in', 0.25)
+        subtitle_top_in = title_top_in + title_h.inches + gap
+        subtitle_h = Inches(min(0.45 + subtitle_lines * 0.38, 2.5))
+        tb2 = slide.shapes.add_textbox(left, Inches(subtitle_top_in), width, subtitle_h)
+        tf2 = tb2.text_frame
+        tf2.word_wrap = True
+        p2 = tf2.paragraphs[0]
+        p2.text = subtitle
+        p2.alignment = PP_ALIGN.CENTER
+        p2.font.size = Pt(subtitle_pt)
+        p2.font.color.rgb = theme['subtitle']
+        if theme['font_name']:
+            p2.font.name = theme['font_name']
+
+
 def add_title_slide(prs, title, subtitle="", style=None):
     """
-    Add a title slide. When slide_style contains a background, the slide uses
-    a blank layout for full text-color control. Otherwise uses the default
-    template layout (zero regression).
+    Add a title slide. Custom word-wrapped layout when a background is set or
+    the subtitle is long; otherwise uses the default template layout.
     """
     style = style or {}
     has_background = bool(style.get('background_image') or style.get('background_color'))
+    theme = _resolve_theme(style)
+    use_custom = has_background or bool(subtitle and len(subtitle) > title_custom_threshold(style))
 
-    if has_background:
-        theme = _resolve_theme(style)
+    if use_custom:
         slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
         _apply_slide_background(slide, style, prs)
-        margin = Inches(_style_layout(style, 'title', 'margin_in', 0.6))
-        width = Inches(_style_layout(style, 'title', 'content_width_in', 9.0))
-        title_top = Inches(_style_layout(style, 'title', 'title_top_in', 2.5))
-        title_h = Inches(_style_layout(style, 'title', 'title_height_in', 1.5))
-        title_pt = _style_typography(style, 'title_size_pt', 44)
-        tb = slide.shapes.add_textbox(margin, title_top, width, title_h)
-        p = tb.text_frame.paragraphs[0]
-        p.text = title
-        p.alignment = PP_ALIGN.CENTER
-        p.font.size = Pt(title_pt)
-        p.font.bold = True
-        p.font.color.rgb = theme['title']
-        if theme['font_name']:
-            p.font.name = theme['font_name']
-        # Subtitle
-        if subtitle:
-            subtitle_top = Inches(_style_layout(style, 'title', 'subtitle_top_in', 4.2))
-            subtitle_h = Inches(_style_layout(style, 'title', 'subtitle_height_in', 1.0))
-            subtitle_pt = _style_typography(style, 'subtitle_size_pt', 28)
-            tb2 = slide.shapes.add_textbox(margin, subtitle_top, width, subtitle_h)
-            p2 = tb2.text_frame.paragraphs[0]
-            p2.text = subtitle
-            p2.alignment = PP_ALIGN.CENTER
-            p2.font.size = Pt(subtitle_pt)
-            p2.font.color.rgb = theme['subtitle']
-            if theme['font_name']:
-                p2.font.name = theme['font_name']
+        _render_title_textboxes(slide, prs, title, subtitle, style, theme)
     else:
-        theme = _resolve_theme(style)
         slide = prs.slides.add_slide(prs.slide_layouts[0])
         _apply_slide_background(slide, style, prs)
         title_shape = slide.shapes.title
@@ -125,24 +160,25 @@ def add_section_slide(prs, section_name, style=None, section_subtitle=None):
     name = section_name or ''
     sub = (section_subtitle or '').strip()
     line_count = name.count('\n') + 1 if name else 1
-    tb_h = Inches(1.5) if line_count <= 1 else Inches(min(1.2 + line_count * 0.55, 4.5))
+    section_title_pt = typography_pt(style, 'section_title_size_pt', 44)
+    section_sub_pt = typography_pt(style, 'section_subtitle_size_pt', 24)
+    tb_h_in = 1.5 if line_count <= 1 else min(1.2 + line_count * 0.55, 4.5)
+    left, tb_w, tb_w_in, margin_in = content_box(prs, style, 'section')
     if sub:
-        # Extra height for gap under title + subtitle paragraph
-        tb_h += Inches(0.85)
-
-    # Centre the title block vertically and horizontally on the slide
-    margin = Inches(0.6)
-    tb_w = prs.slide_width - 2 * margin
+        sub_lines = _estimate_text_lines(sub, tb_w_in, section_sub_pt)
+        tb_h_in += min(0.45 + sub_lines * 0.38, 2.5)
+    tb_h = Inches(tb_h_in)
     left = (prs.slide_width - tb_w) / 2
     top = (prs.slide_height - tb_h) / 2
 
     tb = slide.shapes.add_textbox(left, top, tb_w, tb_h)
     tf = tb.text_frame
+    tf.word_wrap = True
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
     p = tf.paragraphs[0]
     p.text = section_name
     p.alignment = PP_ALIGN.CENTER
-    p.font.size = Pt(44)
+    p.font.size = Pt(section_title_pt)
     p.font.bold = True
     p.font.color.rgb = theme['section']
     if theme['font_name']:
@@ -151,7 +187,7 @@ def add_section_slide(prs, section_name, style=None, section_subtitle=None):
     if sub:
         p.space_after = Pt(20)
         sr, sg, sb = list(theme['section'])
-        dim = 0.76
+        dim = float(layout_in(style, 'section', 'subtitle_dim_factor', 0.76))
         sub_rgb = RGBColor(
             max(0, min(255, int(sr * dim))),
             max(0, min(255, int(sg * dim))),
@@ -160,7 +196,7 @@ def add_section_slide(prs, section_name, style=None, section_subtitle=None):
         sp = tf.add_paragraph()
         sp.text = sub
         sp.alignment = PP_ALIGN.CENTER
-        sp.font.size = Pt(24)
+        sp.font.size = Pt(section_sub_pt)
         sp.font.bold = False
         sp.font.color.rgb = sub_rgb
         if theme['font_name']:
@@ -237,19 +273,6 @@ def _resolve_theme(style: dict) -> dict:
     }
 
 
-def _style_layout(style: dict, slide_type: str, key: str, default):
-    """Optional SDK v2 layout token from slide_style.layouts."""
-    layouts = (style or {}).get('layouts') or {}
-    block = layouts.get(slide_type) or {}
-    return block.get(key, default)
-
-
-def _style_typography(style: dict, key: str, default):
-    """Optional SDK v2 typography token from slide_style.typography."""
-    typography = (style or {}).get('typography') or {}
-    return typography.get(key, default)
-
-
 def _normalise_highlights(highlights, highlight_rgb=None):
     """
     Normalise highlights list. highlight_rgb overrides the default orange.
@@ -278,7 +301,7 @@ def _normalise_highlights(highlights, highlight_rgb=None):
 
 def _apply_highlights(paragraph, text, highlights, large_text=None,
                       body_rgb=None, highlight_rgb=None, annotation_rgb=None,
-                      font_name=None, base_font_size=32):
+                      font_name=None, base_font_size=32, annotation_size_pt=46):
     """
     Apply per-phrase rich text formatting.
     body_rgb, highlight_rgb, annotation_rgb, font_name all come from _resolve_theme.
@@ -353,7 +376,7 @@ def _apply_highlights(paragraph, text, highlights, large_text=None,
             if fmt.get('annotation'):
                 ann_run = paragraph.add_run()
                 ann_run.text = fmt['annotation']
-                _sf(ann_run, 46)
+                _sf(ann_run, int(annotation_size_pt))
                 ann_run.font.bold = False
                 ann_run.font.color.rgb = _ann
                 rPr = ann_run._r.get_or_add_rPr()
@@ -388,13 +411,45 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
     """
     Add a bullet/numbered list slide. Default alignment is left.
     All colors and font resolved via slide_style.
+    Respects slide_style reference_position (top or bottom).
     """
     style = style or {}
     theme = _resolve_theme(style)
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(slide, style, prs)
 
-    tb = slide.shapes.add_textbox(Inches(0.6), Inches(1.2), Inches(9), Inches(5.0))
+    ref_position = theme['ref_position']
+    margin_in = float(layout_in(style, 'list', 'margin_in', 0.6))
+    slide_h_in = prs.slide_height.inches
+    content_w_in = content_width_inches(prs, style, 'list', margin_in)
+    list_top_in = float(layout_in(style, 'list', 'list_top_in', 0.35))
+    list_bottom_in = slide_h_in - float(layout_in(style, 'list', 'list_bottom_margin_in', 0.4))
+
+    if reference and ref_position == 'top':
+        ref_pt = int(typography_pt(style, 'list_ref_top_pt', 26))
+        ref_lines = _estimate_text_lines(reference, content_w_in, ref_pt)
+        ref_h_in = min(0.35 + ref_lines * 0.36, 1.2)
+        ref_tb = slide.shapes.add_textbox(
+            Inches(margin_in), Inches(list_top_in), Inches(content_w_in), Inches(ref_h_in),
+        )
+        ref_tf = ref_tb.text_frame
+        ref_tf.word_wrap = True
+        ref_p = ref_tf.paragraphs[0]
+        ref_p.text = reference
+        ref_p.alignment = PP_ALIGN.LEFT
+        ref_p.font.size = Pt(ref_pt)
+        ref_p.font.bold = True
+        ref_p.font.color.rgb = theme['reference']
+        if theme['font_name']:
+            ref_p.font.name = theme['font_name']
+        list_top_in += ref_h_in + float(layout_in(style, 'list', 'ref_gap_in', 0.12))
+    elif reference:
+        list_bottom_in = float(layout_in(style, 'list', 'list_bottom_reserve_in', 6.0))
+
+    list_h_in = max(list_bottom_in - list_top_in, 1.2)
+    tb = slide.shapes.add_textbox(
+        Inches(margin_in), Inches(list_top_in), Inches(content_w_in), Inches(list_h_in),
+    )
     tf = tb.text_frame
     tf.word_wrap = True
     align = _resolve_alignment(alignment)
@@ -410,18 +465,52 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
             p.font.name = theme['font_name']
         p.space_after = Pt(10)
 
-    if reference:
-        ref_tb = slide.shapes.add_textbox(Inches(0.6), Inches(6.3), Inches(9), Inches(0.6))
-        ref_p = ref_tb.text_frame.paragraphs[0]
+    if reference and ref_position != 'top':
+        ref_pt = int(typography_pt(style, 'list_ref_bottom_pt', 22))
+        ref_lines = _estimate_text_lines(reference, content_w_in, ref_pt)
+        ref_h_in = min(0.35 + ref_lines * 0.32, 1.0)
+        ref_y_in = slide_h_in - ref_h_in - float(layout_in(style, 'list', 'ref_bottom_offset_in', 0.35))
+        ref_tb = slide.shapes.add_textbox(
+            Inches(margin_in), Inches(ref_y_in), Inches(content_w_in), Inches(ref_h_in),
+        )
+        ref_tf = ref_tb.text_frame
+        ref_tf.word_wrap = True
+        ref_p = ref_tf.paragraphs[0]
         ref_p.text = reference
         ref_p.alignment = PP_ALIGN.CENTER
-        ref_p.font.size = Pt(22)
+        ref_p.font.size = Pt(ref_pt)
         ref_p.font.color.rgb = theme['reference']
         ref_p.font.italic = True
         if theme['font_name']:
             ref_p.font.name = theme['font_name']
 
     return slide
+
+
+def _fit_picture_in_box(pic, box_left, box_top, box_w, box_h, fit):
+    """Scale picture for contain/cover within a content box; crop cover overflow."""
+    scale_w = box_w / pic.width
+    scale_h = box_h / pic.height
+    scale = min(scale_w, scale_h) if fit == 'contain' else max(scale_w, scale_h)
+    pic.width = int(pic.width * scale)
+    pic.height = int(pic.height * scale)
+    pic.left = box_left + (box_w - pic.width) // 2
+    pic.top = box_top + (box_h - pic.height) // 2
+    if fit != 'cover':
+        return
+    crop_l = max(0.0, float(box_left - pic.left) / float(pic.width))
+    crop_r = max(0.0, float(pic.left + pic.width - (box_left + box_w)) / float(pic.width))
+    crop_t = max(0.0, float(box_top - pic.top) / float(pic.height))
+    crop_b = max(0.0, float(pic.top + pic.height - (box_top + box_h)) / float(pic.height))
+    if crop_l or crop_r or crop_t or crop_b:
+        pic.crop_left = crop_l
+        pic.crop_right = crop_r
+        pic.crop_top = crop_t
+        pic.crop_bottom = crop_b
+        pic.left = box_left
+        pic.top = box_top
+        pic.width = box_w
+        pic.height = box_h
 
 
 def add_image_slide(prs, image_path, style=None, caption=None, reference=None,
@@ -455,9 +544,11 @@ def add_image_slide(prs, image_path, style=None, caption=None, reference=None,
         caption_lines.append(str(reference).strip())
     if caption and str(caption).strip():
         caption_lines.append(str(caption).strip())
-    caption_h = Inches(0.9) if caption_lines else Inches(0)
+    caption_h_in = float(layout_in(style, 'image', 'caption_height_in', 0.9))
+    caption_h = Inches(caption_h_in) if caption_lines else Inches(0)
     fit = (image_fit or 'contain').lower()
-    margin = Inches(0) if not caption_lines and fit in ('cover', 'fill') else Inches(0.35)
+    margin_in = float(layout_in(style, 'image', 'margin_in', 0.35))
+    margin = Inches(0) if not caption_lines and fit in ('cover', 'fill') else Inches(margin_in)
 
     box_top = margin
     box_h = slide_h - margin * 2 - caption_h
@@ -469,18 +560,11 @@ def add_image_slide(prs, image_path, style=None, caption=None, reference=None,
         slide.shapes.add_picture(path, margin, box_top, width=box_w, height=box_h)
     else:
         pic = slide.shapes.add_picture(path, margin, box_top, width=box_w)
-        scale_w = box_w / pic.width
-        scale_h = box_h / pic.height
-        if fit == 'contain':
-            scale = min(scale_w, scale_h)
-        else:  # cover
-            scale = max(scale_w, scale_h)
-        pic.width = int(pic.width * scale)
-        pic.height = int(pic.height * scale)
-        pic.left = margin + (box_w - pic.width) // 2
-        pic.top = box_top + (box_h - pic.height) // 2
+        _fit_picture_in_box(pic, margin, box_top, box_w, box_h, fit)
 
     if caption_lines:
+        cap_ref_pt = int(typography_pt(style, 'caption_ref_size_pt', 22))
+        cap_body_pt = int(typography_pt(style, 'caption_body_size_pt', 18))
         cap_top = slide_h - margin - caption_h
         cap_tb = slide.shapes.add_textbox(margin, cap_top, box_w, caption_h)
         cap_tf = cap_tb.text_frame
@@ -489,7 +573,7 @@ def add_image_slide(prs, image_path, style=None, caption=None, reference=None,
             p = cap_tf.paragraphs[0] if i == 0 else cap_tf.add_paragraph()
             p.text = line
             p.alignment = PP_ALIGN.CENTER
-            p.font.size = Pt(22 if i == 0 and reference else 18)
+            p.font.size = Pt(cap_ref_pt if i == 0 and reference else cap_body_pt)
             p.font.bold = bool(i == 0 and reference)
             p.font.color.rgb = theme['reference'] if i == 0 and reference else theme['body']
             if theme['font_name']:
@@ -564,12 +648,15 @@ def add_hebrew_rename_slide(prs, rows, style=None, font_size=110, reference=None
     _apply_slide_background(slide, style, prs)
 
     slide_w_in = prs.slide_width.inches
-    sx = slide_w_in / 10.0
-    row_y = [1.15, 4.05]
-    left_x = 0.35 * sx
-    right_x = 5.15 * sx
-    box_w = 4.2 * sx
-    box_h = 1.35
+    ref_w_in = float(layout_in(style, 'hebrew_rename', 'reference_width_in', 10.0))
+    sx = slide_w_in / ref_w_in
+    row_y = layout_in(style, 'hebrew_rename', 'row_y_in', [1.15, 4.05])
+    if not isinstance(row_y, list):
+        row_y = [1.15, 4.05]
+    left_x = float(layout_in(style, 'hebrew_rename', 'left_x_factor', 0.35)) * sx
+    right_x = float(layout_in(style, 'hebrew_rename', 'right_x_factor', 5.15)) * sx
+    box_w = float(layout_in(style, 'hebrew_rename', 'box_width_factor', 4.2)) * sx
+    box_h = float(layout_in(style, 'hebrew_rename', 'box_height_in', 1.35))
 
     for i, row in enumerate(rows[:2]):
         left = (row.get("left") or "").strip()
@@ -606,12 +693,17 @@ def add_hebrew_rename_slide(prs, rows, style=None, font_size=110, reference=None
         conn.line.color.rgb = theme["highlight"]
         conn.line.width = Pt(2.5)
 
-    cap_h = Inches(0.85)
+    cap_h_in = float(layout_in(style, 'hebrew_rename', 'caption_height_in', 0.85))
+    cap_h = Inches(cap_h_in)
     if reference or caption:
-        cap_top = prs.slide_height - Inches(0.45) - cap_h
-        cap_tb = slide.shapes.add_textbox(Inches(0.5), cap_top, prs.slide_width - Inches(1.0), cap_h)
+        cap_bottom = float(layout_in(style, 'hebrew_rename', 'caption_bottom_in', 0.45))
+        cap_margin = float(layout_in(style, 'hebrew_rename', 'caption_margin_in', 0.5))
+        cap_top = prs.slide_height - Inches(cap_bottom) - cap_h
+        cap_tb = slide.shapes.add_textbox(Inches(cap_margin), cap_top, prs.slide_width - Inches(cap_margin * 2), cap_h)
         cap_tf = cap_tb.text_frame
         cap_tf.word_wrap = True
+        cap_ref_pt = int(typography_pt(style, 'caption_ref_size_pt', 22))
+        cap_body_pt = int(typography_pt(style, 'caption_body_size_pt', 18))
         lines = []
         if reference:
             lines.append(str(reference).strip())
@@ -621,7 +713,7 @@ def add_hebrew_rename_slide(prs, rows, style=None, font_size=110, reference=None
             p = cap_tf.paragraphs[0] if idx == 0 else cap_tf.add_paragraph()
             p.text = line
             p.alignment = PP_ALIGN.CENTER
-            p.font.size = Pt(22 if idx == 0 and reference else 18)
+            p.font.size = Pt(cap_ref_pt if idx == 0 and reference else cap_body_pt)
             p.font.bold = bool(idx == 0 and reference)
             p.font.color.rgb = theme["reference"] if idx == 0 and reference else theme["body"]
             if theme["font_name"]:
@@ -705,6 +797,8 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
     """
     style = style or {}
     theme = _resolve_theme(style)
+    ann_pt = int(typography_pt(style, 'annotation_size_pt', 46))
+    left, content_w, content_w_in, margin_in = content_box(prs, style, 'verse')
     verse_slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(verse_slide, style, prs)
     align = _resolve_alignment(alignment)
@@ -712,6 +806,28 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
     fn = theme['font_name']
     leading = (leading_title or '').strip()
     extra_ref = (text_below_reference or '').strip()
+
+    slide_h_in = prs.slide_height.inches
+    bottom_margin_in = float(layout_in(style, 'verse', 'bottom_margin_in', 0.15))
+    leading_top_in = float(layout_in(style, 'verse', 'leading_title_top_in', 0.35))
+    leading_pt = int(typography_pt(style, 'leading_title_size_pt', 38))
+    ref_top_in = float(layout_in(style, 'verse', 'ref_top_in', 0.3))
+    body_gap_in = float(layout_in(style, 'verse', 'body_gap_in', 0.15))
+    default_body_h_in = float(layout_in(style, 'verse', 'default_body_height_in', 4.5))
+    bottom_ref_top_in = float(layout_in(style, 'verse', 'bottom_ref_top_in', 6.0))
+    bottom_ref_h_in = float(layout_in(style, 'verse', 'bottom_ref_height_in', 0.7))
+    no_ref_top_in = float(layout_in(style, 'verse', 'no_ref_body_top_in', 1.5))
+    no_ref_h_in = float(layout_in(style, 'verse', 'no_ref_body_height_in', 3.8))
+    extra_reserve_in = float(layout_in(style, 'verse', 'extra_ref_reserve_in', 1.32))
+    title_ref_gap_in = float(layout_in(style, 'verse', 'leading_title_ref_gap_in', 0.2))
+    ref_h_default_in = float(layout_in(style, 'verse', 'ref_height_in', 0.7))
+    ref_h_large_in = float(layout_in(style, 'verse', 'ref_height_large_in', 0.95))
+    ref_pt_default = int(typography_pt(style, 'reference_size_pt', 28))
+    ref_pt_small = int(typography_pt(style, 'reference_size_small_pt', 24))
+    ref_pt_bottom = int(typography_pt(style, 'reference_size_bottom_pt', 22))
+
+    leading_verse_top_in = None
+    leading_verse_h_in = None
 
     def _set_ref(tb_shape, text, align_const, size, bold=False, italic=False):
         rp = tb_shape.text_frame.paragraphs[0]
@@ -724,41 +840,38 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
         if fn:
             rp.font.name = fn
 
-    slide_h_in = prs.slide_height.inches
-    bottom_margin_in = 0.15
-    # Inches from top of slide to top of main verse body (used for text_below_reference placement)
-    leading_verse_top_in = None
-    leading_verse_h_in = None
-
     if leading:
-        # Title at top; reference under title; verse body under reference
-        lt_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(0.35), Inches(9), Inches(1.15))
+        leading_lines = max(1, leading.count('\n') + 1)
+        leading_lines = max(leading_lines, _estimate_text_lines(leading, content_w_in, leading_pt))
+        lt_h_in = min(0.45 + leading_lines * 0.42, 2.8)
+        lt_tb = verse_slide.shapes.add_textbox(
+            left, Inches(leading_top_in), content_w, Inches(lt_h_in),
+        )
         lt_tf = lt_tb.text_frame
         lt_tf.word_wrap = True
         lt_tf.vertical_anchor = MSO_ANCHOR.TOP
         lt_p = lt_tf.paragraphs[0]
         lt_p.text = leading
         lt_p.alignment = align
-        lt_p.font.size = Pt(38)
+        lt_p.font.size = Pt(leading_pt)
         lt_p.font.bold = True
         lt_p.font.color.rgb = theme['body']
         if fn:
             lt_p.font.name = fn
-        if reference:
+        if reference and ref_position == 'top':
             ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
-            ref_pt = int(reference_font_size) if reference_font_size is not None else 24
+            ref_pt = int(reference_font_size) if reference_font_size is not None else ref_pt_small
             ref_h_in = 0.72 if extra_ref else 0.85
-            # Gap below leading-title textbox before reference (title box ends 0.35 + 1.15)
-            title_ref_gap_in = 0.2
-            ref_y_in = 0.35 + 1.15 + title_ref_gap_in
-            ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(ref_y_in), Inches(9), Inches(ref_h_in))
+            ref_y_in = leading_top_in + lt_h_in + title_ref_gap_in
+            ref_tb = verse_slide.shapes.add_textbox(
+                left, Inches(ref_y_in), content_w, Inches(ref_h_in),
+            )
             _set_ref(ref_tb, ref_text, PP_ALIGN.LEFT, ref_pt, bold=True, italic=False)
             ref_tb.text_frame.paragraphs[0].font.color.rgb = theme['body']
             if fn:
                 ref_tb.text_frame.paragraphs[0].font.name = fn
             vtop = ref_y_in + ref_h_in + 0.1
             if extra_ref:
-                extra_reserve_in = 1.32
                 vh = slide_h_in - vtop - extra_reserve_in - bottom_margin_in
             else:
                 vh = slide_h_in - vtop - bottom_margin_in
@@ -766,27 +879,36 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
             leading_verse_h_in = max(vh, 2.0)
             verse_top = Inches(vtop)
             verse_height = Inches(leading_verse_h_in)
-        else:
-            leading_verse_top_in = 1.65
-            leading_verse_h_in = 3.25 if extra_ref else 3.85
-            verse_top = Inches(leading_verse_top_in)
+        elif reference and ref_position != 'top':
+            ref_reserve_in = 0.85
+            vtop = leading_top_in + lt_h_in + 0.15
+            vh = slide_h_in - vtop - ref_reserve_in - bottom_margin_in
+            leading_verse_top_in = vtop
+            leading_verse_h_in = max(vh, 1.5)
+            verse_top = Inches(vtop)
             verse_height = Inches(leading_verse_h_in)
+        else:
+            leading_verse_top_in = leading_top_in + lt_h_in + 0.15
+            leading_verse_h_in = (
+                slide_h_in - leading_verse_top_in - bottom_margin_in
+                if not extra_ref else 3.25
+            )
+            verse_top = Inches(leading_verse_top_in)
+            verse_height = Inches(max(leading_verse_h_in, 2.0))
     elif ref_position == 'top' and reference:
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
-        ref_pt = int(reference_font_size) if reference_font_size is not None else 28
-        ref_h_in = 0.95 if ref_pt >= 36 else 0.7
+        ref_pt = int(reference_font_size) if reference_font_size is not None else ref_pt_default
+        ref_h_in = ref_h_large_in if ref_pt >= 36 else ref_h_default_in
         ref_h = Inches(ref_h_in)
-        ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(0.3), Inches(9), ref_h)
+        ref_tb = verse_slide.shapes.add_textbox(left, Inches(ref_top_in), content_w, ref_h)
         _set_ref(ref_tb, ref_text, PP_ALIGN.LEFT, ref_pt, bold=True)
-        # Override body color for top reference (use body not reference)
         ref_tb.text_frame.paragraphs[0].font.color.rgb = theme['body']
-        # Place body text below the reference box (avoid overlap when ref is large)
-        verse_top = Inches(0.3 + ref_h_in + 0.15)
-        verse_height = Inches(4.5)
+        verse_top = Inches(ref_top_in + ref_h_in + body_gap_in)
+        verse_height = Inches(default_body_h_in)
     else:
-        verse_top, verse_height = Inches(1.5), Inches(3.8)
+        verse_top, verse_height = Inches(no_ref_top_in), Inches(no_ref_h_in)
 
-    textbox = verse_slide.shapes.add_textbox(Inches(0.6), verse_top, Inches(9), verse_height)
+    textbox = verse_slide.shapes.add_textbox(left, verse_top, content_w, verse_height)
     tf = textbox.text_frame
     tf.word_wrap = True
     tf.vertical_anchor = MSO_ANCHOR.TOP
@@ -813,7 +935,8 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                               highlight_rgb=theme['highlight'],
                               annotation_rgb=theme['annotation'],
                               font_name=fn,
-                              base_font_size=int(font_size))
+                              base_font_size=int(font_size),
+                              annotation_size_pt=ann_pt)
         else:
             if has_verse_nums and v_num:
                 _add_superscript_num_run(p, v_num, font_size, theme['body'], fn)
@@ -828,7 +951,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
         below_top = leading_verse_top_in + leading_verse_h_in + 0.06
         below_fs = max(int(font_size) - 2, 22)
         ex_h_in = max(slide_h_in - below_top - bottom_margin_in, 0.5)
-        ex_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(below_top), Inches(9), Inches(ex_h_in))
+        ex_tb = verse_slide.shapes.add_textbox(left, Inches(below_top), content_w, Inches(ex_h_in))
         ex_tf = ex_tb.text_frame
         ex_tf.word_wrap = True
         ex_tf.vertical_anchor = MSO_ANCHOR.TOP
@@ -842,7 +965,8 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                               highlight_rgb=theme['highlight'],
                               annotation_rgb=theme['annotation'],
                               font_name=fn,
-                              base_font_size=below_fs)
+                              base_font_size=below_fs,
+                              annotation_size_pt=ann_pt)
         else:
             ex_run = ex_p.add_run()
             ex_run.text = extra_ref
@@ -852,8 +976,10 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                 ex_run.font.name = fn
     elif ref_position != 'top' and reference:
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
-        ref_tb = verse_slide.shapes.add_textbox(Inches(0.6), Inches(6.0), Inches(9), Inches(0.7))
-        _set_ref(ref_tb, ref_text, PP_ALIGN.CENTER, 22, italic=True)
+        ref_tb = verse_slide.shapes.add_textbox(
+            left, Inches(bottom_ref_top_in), content_w, Inches(bottom_ref_h_in),
+        )
+        _set_ref(ref_tb, ref_text, PP_ALIGN.CENTER, ref_pt_bottom, italic=True)
 
     return verse_slide
 
@@ -943,61 +1069,14 @@ def create_presentation(data, output_file=None, custom_title=None,
 
         # Add verse slides if there are any verses
         if section_data.get("verses") and len(section_data["verses"]) > 0:
-            for verse in section_data["verses"]:
-                # Get per-verse options
-                highlights = verse.get('highlights', None)
-                large_text = verse.get('large_text', None)
-                list_type  = verse.get('list_type', None)
-                list_alignment = verse.get('alignment', slide_style.get('alignment', 'left'))
-                verse_alignment = verse.get('alignment', slide_style.get('alignment', 'left'))
-                font_size  = verse.get('font_size', 32)
+            from .slide_renderers import resolve_renderer
 
-                if verse.get('slide_type') == 'image' and verse.get('image_path'):
-                    add_image_slide(
-                        prs,
-                        verse['image_path'],
-                        style=slide_style,
-                        reference=verse.get('reference'),
-                        caption=verse.get('text'),
-                        image_fit=verse.get('image_fit', 'contain'),
-                        source_file=source_file,
-                    )
-                elif verse.get('slide_type') == 'hebrew_rename' and verse.get('hebrew_rows'):
-                    add_hebrew_rename_slide(
-                        prs,
-                        verse['hebrew_rows'],
-                        style=slide_style,
-                        font_size=verse.get('hebrew_font_size'),
-                        reference=verse.get('reference'),
-                        caption=verse.get('text'),
-                        highlight_color=verse.get('hebrew_highlight_color'),
-                    )
-                elif list_type in ('bullet', 'numbered'):
-                    items = [line.strip() for line in verse['text'].split('\n') if line.strip()]
-                    add_list_slide(prs, items, verse['reference'],
-                                   list_type=list_type,
-                                   font_size=font_size,
-                                   alignment=list_alignment,
-                                   style=slide_style)
-                else:
-                    _max_len = int(verse.get('split_max_length') or 200)
-                    verse_parts = split_long_text(verse['text'], max_length=max(_max_len, 50))
-                    for i, part in enumerate(verse_parts):
-                        part_num = None  # never show (Part N) on split slides
-                        add_verse_slide(
-                            prs, part, verse['reference'], part_num,
-                            highlights, large_text,
-                            alignment=verse_alignment,
-                            font_size=font_size,
-                            style=slide_style,
-                            reference_font_size=verse.get('reference_font_size'),
-                            leading_title=(verse.get('leading_title') if i == 0 else None),
-                            text_below_reference=(verse.get('text_below_reference') if i == 0 else None),
-                            text_below_reference_highlights=(
-                                verse.get('text_below_reference_highlights') if i == 0 else None),
-                            text_below_reference_large_text=(
-                                verse.get('text_below_reference_large_text') if i == 0 else None),
-                        )
+            for v_idx, verse in enumerate(section_data["verses"]):
+                if not isinstance(verse, dict):
+                    continue
+                resolve_renderer(verse).render(
+                    prs, verse, slide_style, source_file=source_file,
+                )
     
     # Generate output filename if not provided
     if not output_file:

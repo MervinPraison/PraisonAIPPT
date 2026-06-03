@@ -10,7 +10,7 @@
 
 template: sermon-dark
 presentation_title: Quick template demo
-presentation_subtitle: See examples/template_demos/ for the full gallery
+presentation_subtitle: Full layout gallery in examples/template_demos/
 sections:
   - section: Demo
     verses:

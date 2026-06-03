@@ -115,6 +115,71 @@ slide_style:
 
 Omitted keys use built-in defaults (unchanged decks).
 
+Full token tables: [slide_style_table.md](snippets/slide_style_table.md).
+
+### Example override block
+
+```yaml
+slide_style:
+  split_max_length: 220
+  typography:
+    body_size_pt: 30
+    reference_size_pt: 26
+  layouts:
+    verse:
+      margin_in: 0.75
+    list:
+      list_top_in: 0.5
+    image:
+      margin_in: 0.4
+      caption_height_in: 1.0
+```
+
+Convention: **`layouts.*`** = position and size in inches; **`typography.*`** = font sizes in pt.
+
+## Adding a custom slide type
+
+Register a renderer before building the deck (Python API or your own import hook):
+
+```python
+from praisonaippt import register_renderer, create_presentation, load_verses_from_dict
+
+class QuoteRenderer:
+    kind = "quote"
+
+    def validate(self, verse, path):
+        if not verse.get("text"):
+            from praisonaippt.exceptions import SchemaError
+            raise SchemaError(f"{path} quote slide requires 'text'")
+
+    def render(self, prs, verse, style, *, source_file=None):
+        from praisonaippt.core import add_verse_slide  # or your own builder
+        add_verse_slide(
+            prs, verse["text"], verse.get("reference"), style=style,
+            alignment=verse.get("alignment", style.get("alignment", "left")),
+        )
+
+register_renderer(QuoteRenderer())
+```
+
+Deck YAML:
+
+```yaml
+sections:
+  - section: Quotes
+    verses:
+      - slide_type: quote
+        reference: Spurgeon
+        text: A lie can travel halfway around the world…
+```
+
+Resolution order: explicit `slide_type` (must be registered) → `list_type` (`bullet` / `numbered`) → default `verse`. Unknown `slide_type` raises `SchemaError`.
+
+```python
+from praisonaippt import list_renderers
+list_renderers()  # ['hebrew_rename', 'image', 'list', 'verse', …]
+```
+
 ## Content vs style templates
 
 | Type | Location | CLI |
