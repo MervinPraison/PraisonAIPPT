@@ -320,6 +320,41 @@ Built-in renderers (use `slide_type` on any verse entry):
 | `image` | Picture with caption | `image_path`, `image_fit`, optional `reference`/`text` |
 | `hebrew_rename` | Custom | `hebrew_rows` |
 
+### Avatar layouts (`slide_type`)
+
+Speaking-head **avatar video** in fixed regions; **media** (image or video) in the white area. Omit `avatar_video_path` for an empty grey placeholder.
+
+| `slide_type` | Layout | Key fields |
+|--------------|--------|------------|
+| `avatar_only` | Full-slide avatar | optional `avatar_video_path`, `avatar_poster_path` |
+| `media_only` | Full-slide media | `media_path`, optional `media_fit`, `media_poster_path` |
+| `avatar_media_1` | 50/50 split (media left) | optional paths + `media_fit` |
+| `avatar_media_2` | 40/60 split (media left) | optional paths + `media_fit` |
+| `avatar_media_3` | Full media + PiP avatar | optional paths + `media_fit` |
+| `avatar_name_card` | Full avatar + bottom-left panel | `headline`, optional `subheader`, optional avatar paths |
+| `avatar_headline` | Full avatar + top-left panel | `headline`, optional `subheader`, optional avatar paths |
+| `avatar_quote` | Navy quote + PiP avatar | `text`, optional `reference` (author), optional avatar paths |
+| `avatar_border` | Framed full avatar | optional avatar paths |
+| `media_border` | Framed full media | `media_path` |
+| `avatar_media_border_1` | Framed 60/40 split | optional paths + `media_fit` |
+| `avatar_media_border_2` | Framed 40/60 split | optional paths + `media_fit` |
+| `avatar_media_border_3` | Framed media + PiP | optional paths + `media_fit` |
+
+```yaml
+- slide_type: avatar_media_1
+  avatar_video_path: assets/speaker.mp4
+  avatar_poster_path: assets/speaker.jpg
+  media_path: assets/diagram.png
+  media_fit: contain
+
+- slide_type: avatar_name_card
+  headline: Jeremy Blank
+  subheader: Lead Engineer
+  avatar_video_path: assets/speaker.mp4
+```
+
+Intro and Outro animated layouts are not supported yet.
+
 Presenter notes (any slide kind):
 
 ```yaml

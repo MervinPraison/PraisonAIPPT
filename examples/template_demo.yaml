@@ -1,7 +1,11 @@
 # Template gallery — one demo per built-in theme
 #
-# Generate all YAML + PPTX showcases:
+# Generate all YAML + PPTX showcases (includes all 13 avatar layouts):
 #   python examples/template_demos/build_demos.py
+#
+# Full layout reference (standard + avatar layouts):
+#   praisonaippt -i examples/template.yaml -o examples/template_built.pptx
+#   praisonaippt -i examples/avatar_layouts.yaml -o examples/avatar_layouts_built.pptx
 #
 # Each deck includes the same feature slides (highlights, annotations, alignment,
 # lists, leading_title) styled with that template's settings.

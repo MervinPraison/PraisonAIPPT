@@ -369,8 +369,39 @@ class VerseRenderer:
                 _apply_notes(slide, verse)
 
 
+class AvatarKindRenderer:
+    """Factory renderer for avatar layout slide types."""
+
+    _MEDIA_REQUIRED = frozenset({"media_only", "media_border"})
+    _HEADLINE_REQUIRED = frozenset({"avatar_name_card", "avatar_headline"})
+
+    def __init__(self, kind: str) -> None:
+        self.kind = kind
+
+    def validate(self, verse: dict, path: str) -> None:
+        if self.kind in self._MEDIA_REQUIRED and not verse.get("media_path"):
+            raise SchemaError(f"{path} with slide_type {self.kind!r} requires 'media_path'")
+        if self.kind in self._HEADLINE_REQUIRED and not verse.get("headline"):
+            raise SchemaError(f"{path} with slide_type {self.kind!r} requires 'headline'")
+        if self.kind == "avatar_quote" and not verse.get("text"):
+            raise SchemaError(f"{path} with slide_type 'avatar_quote' requires 'text'")
+        fit = verse.get("media_fit")
+        if fit is not None and fit not in ("contain", "cover", "fill"):
+            raise SchemaError(f"{path}.media_fit must be 'contain', 'cover', or 'fill'")
+
+    def render(self, prs, verse: dict, style: dict, *, source_file: Optional[str] = None) -> None:
+        from .avatar_layouts import render_avatar_slide
+
+        slide = render_avatar_slide(
+            prs, self.kind, verse, style=style, source_file=source_file
+        )
+        _apply_notes(slide, verse)
+
+
 def _register_builtins() -> None:
-    for renderer in (
+    from .avatar_layouts import AVATAR_SLIDE_TYPES
+
+    renderers = [
         ImageRenderer(),
         HebrewRenameRenderer(),
         ListRenderer(),
@@ -382,7 +413,9 @@ def _register_builtins() -> None:
         PictureTextRenderer(),
         TableRenderer(),
         VerseRenderer(),
-    ):
+    ]
+    renderers.extend(AvatarKindRenderer(kind) for kind in AVATAR_SLIDE_TYPES)
+    for renderer in renderers:
         register_renderer(renderer)
 
 

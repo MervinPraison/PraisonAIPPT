@@ -65,6 +65,13 @@ _VERSE_KEYS = {
     "table_rows",
     "rows",
     "header_row",
+    "avatar_video_path",
+    "avatar_poster_path",
+    "media_path",
+    "media_poster_path",
+    "media_fit",
+    "headline",
+    "subheader",
 }
 
 

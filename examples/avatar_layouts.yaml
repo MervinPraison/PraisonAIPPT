@@ -1,0 +1,40 @@
+# All 13 avatar layout slide types (Intro/Outro not included).
+# Optional: avatar_video_path, avatar_poster_path, media_path, media_poster_path
+#
+# Build:
+#   praisonaippt -i examples/avatar_layouts.yaml -o examples/avatar_layouts_built.pptx
+
+presentation_title: Avatar layout gallery
+presentation_subtitle: Speaking-head video + media regions
+slide_size: widescreen
+
+sections:
+  - section: Avatar layouts
+    verses:
+      - slide_type: avatar_only
+      - slide_type: media_only
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_1
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_2
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_3
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_name_card
+        headline: Jeremy Blank
+        subheader: Lead Engineer
+      - slide_type: avatar_headline
+        headline: Headline
+        subheader: Subheader
+      - slide_type: avatar_quote
+        text: Faith comes by hearing, and hearing by the word of God.
+        reference: Romans 10:17
+      - slide_type: avatar_border
+      - slide_type: media_border
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_border_1
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_border_2
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_border_3
+        media_path: assets/background_alt.jpg
