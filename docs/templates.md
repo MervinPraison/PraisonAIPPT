@@ -137,47 +137,51 @@ slide_style:
 
 Convention: **`layouts.*`** = position and size in inches; **`typography.*`** = font sizes in pt.
 
+## Built-in slide types
+
+`list_renderers()` returns all registered kinds, including:
+
+`big_number`, `comparison`, `hebrew_rename`, `image`, `list`, `picture_text`, `quote`, `table`, `title_only`, `two_column`, `verse`.
+
+See [formatting.md](formatting.md#standard-layout-slide-types-slide_type) for YAML examples.
+
 ## Adding a custom slide type
 
-Register a renderer before building the deck (Python API or your own import hook):
+Register a renderer before building the deck when you need a layout **not** in the table above:
 
 ```python
 from praisonaippt import register_renderer, create_presentation, load_verses_from_dict
 
-class QuoteRenderer:
-    kind = "quote"
+class CalloutRenderer:
+    kind = "callout"
 
     def validate(self, verse, path):
         if not verse.get("text"):
             from praisonaippt.exceptions import SchemaError
-            raise SchemaError(f"{path} quote slide requires 'text'")
+            raise SchemaError(f"{path} callout slide requires 'text'")
 
     def render(self, prs, verse, style, *, source_file=None):
-        from praisonaippt.core import add_verse_slide  # or your own builder
-        add_verse_slide(
-            prs, verse["text"], verse.get("reference"), style=style,
-            alignment=verse.get("alignment", style.get("alignment", "left")),
-        )
+        from praisonaippt.core import add_quote_slide
+        add_quote_slide(prs, verse["text"], style=style, reference=verse.get("reference"))
 
-register_renderer(QuoteRenderer())
+register_renderer(CalloutRenderer())
 ```
 
 Deck YAML:
 
 ```yaml
 sections:
-  - section: Quotes
+  - section: Custom
     verses:
-      - slide_type: quote
-        reference: Spurgeon
-        text: A lie can travel halfway around the world…
+      - slide_type: callout
+        text: A boxed callout for your deck.
 ```
 
 Resolution order: explicit `slide_type` (must be registered) → `list_type` (`bullet` / `numbered`) → default `verse`. Unknown `slide_type` raises `SchemaError`.
 
 ```python
 from praisonaippt import list_renderers
-list_renderers()  # ['hebrew_rename', 'image', 'list', 'verse', …]
+list_renderers()
 ```
 
 ## Content vs style templates

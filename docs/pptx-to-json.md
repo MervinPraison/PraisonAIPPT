@@ -252,7 +252,7 @@ All features from the praisonaippt JSON schema are handled:
 | `slide_style.background_color` | ✅ Lossless | Extracted from solid fill |
 | `slide_style.background_image` | ⚠️ Lossy | Image detected but **path not recoverable**; noted in `_extraction_warnings` |
 | `slide_style.text_color` | ✅ Best-effort | Most common run color |
-| `slide_style.reference_position` | ✅ Lossless | Inferred from textbox vertical position |
+| `slide_style.reference_position` | ⚠️ Best-effort | Deck-level `top`/`bottom` inferred; `below` and per-verse overrides not recovered |
 | `slide_style.alignment` | ✅ Best-effort | Most frequent paragraph alignment |
 | `slide_style.font_name` | ✅ Lossless | Most common `run.font.name` |
 | `slide_style.highlight_color` | ✅ Best-effort | Most common non-body run color |
@@ -268,8 +268,8 @@ All features from the praisonaippt JSON schema are handled:
 | `verses[].highlights[].annotation` number | ⚠️ Lossy | Bubble chars (❶❷) **not recoverable**; omitted from output |
 | `verses[].large_text` | ✅ Lossless | Runs with font size ≥ 1.4× body size |
 | `verses[].list_type` | ✅ Lossless | Bullet prefix `•` → `"bullet"`, `N.` → `"numbered"` |
-| `verses[].font_size` | ✅ Lossless | Per-verse body font size |
-| `verses[].alignment` | ✅ Lossless | Paragraph alignment |
+| `verses[].font_size` | ⚠️ Best-effort | Often omitted |
+| `verses[].alignment` | ⚠️ Best-effort | Often omitted |
 | Tamil / Hebrew / Unicode text | ✅ Lossless | Full Unicode support throughout |
 
 ---
@@ -323,6 +323,13 @@ for pptx in pptx_files:
 
 | Limitation | Reason | Workaround |
 |-----------|--------|-----------|
+| `slide_type` layouts (`comparison`, `table`, etc.) | No render-time metadata in PPTX | Re-add `slide_type` and fields manually after extraction |
+| `notes` (speaker notes) | Not read from `notes_slide` | Re-add presenter notes manually |
+| `hebrew_rename`, `leading_title`, `text_below_reference` | Multi-box layouts not classified | Use hand-authored YAML |
+| `image_fit`, image captions | Heuristic image-only detection | Re-add caption text and `image_fit` manually |
+| `reference_position: below` | Mid-slide ref not inferred | Defaults to `bottom` or `top` heuristic |
+| `section_subtitle` | Merged into `section` string | Split manually if needed |
+| Auto-split verse parts | One YAML verse per slide | Merge adjacent slides manually |
 | `background_image` path not in output | Image bytes in ZIP — path metadata stripped by PowerPoint | Manually add the path back to `slide_style.background_image` |
 | `annotation` numbers (❶❷) not recovered | Bubble chars are rendered glyphs with no metadata | Re-add annotation numbers manually if needed |
 | Style heuristics are best-effort | No semantic metadata in PPTX format | Visual inspection recommended for complex slides |

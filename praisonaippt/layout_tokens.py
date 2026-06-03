@@ -56,6 +56,39 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "caption_bottom_in": 0.45,
         "caption_margin_in": 0.5,
     },
+    "title_only": {
+        "margin_in": 0.6,
+    },
+    "two_column": {
+        "margin_in": 0.6,
+        "top_in": 0.9,
+        "column_gap_in": 0.4,
+        "bottom_reserve_in": 0.5,
+    },
+    "comparison": {
+        "margin_in": 0.6,
+        "top_in": 0.75,
+        "heading_height_in": 0.55,
+        "column_gap_in": 0.4,
+        "body_top_gap_in": 0.12,
+        "bottom_reserve_in": 0.5,
+    },
+    "big_number": {
+        "margin_in": 0.6,
+    },
+    "quote": {
+        "margin_in": 0.8,
+        "top_in": 2.0,
+    },
+    "picture_text": {
+        "margin_in": 0.35,
+        "column_gap_in": 0.35,
+        "image_width_ratio": 0.48,
+    },
+    "table": {
+        "margin_in": 0.6,
+        "top_in": 0.75,
+    },
 }
 
 TYPOGRAPHY_DEFAULTS: Dict[str, Any] = {
@@ -75,6 +108,10 @@ TYPOGRAPHY_DEFAULTS: Dict[str, Any] = {
     "list_ref_bottom_pt": 22,
     "caption_ref_size_pt": 22,
     "caption_body_size_pt": 18,
+    "big_number_size_pt": 120,
+    "big_number_label_size_pt": 32,
+    "quote_size_pt": 36,
+    "comparison_heading_size_pt": 28,
 }
 
 

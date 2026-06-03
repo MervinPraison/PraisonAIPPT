@@ -55,6 +55,16 @@ _VERSE_KEYS = {
     "text_below_reference",
     "text_below_reference_highlights",
     "text_below_reference_large_text",
+    "notes",
+    "columns",
+    "left",
+    "right",
+    "number",
+    "label",
+    "image_side",
+    "table_rows",
+    "rows",
+    "header_row",
 }
 
 

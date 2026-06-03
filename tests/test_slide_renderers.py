@@ -14,7 +14,11 @@ from praisonaippt.slide_renderers import (
 
 def test_list_renderers_includes_builtins():
     kinds = set(list_renderers())
-    assert kinds >= {"verse", "list", "image", "hebrew_rename"}
+    assert kinds >= {
+        "verse", "list", "image", "hebrew_rename",
+        "title_only", "two_column", "comparison", "big_number",
+        "quote", "picture_text", "table",
+    }
 
 
 def test_resolve_renderer_defaults_to_verse():

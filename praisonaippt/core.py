@@ -58,11 +58,346 @@ def _apply_slide_background(slide, style: dict, prs=None):
         fill.fore_color.rgb = RGBColor(r, g, b)
 
 
+def _apply_speaker_notes(slide, notes):
+    """Set presenter notes on a slide when ``notes`` is non-empty."""
+    text = (notes or "").strip()
+    if not text:
+        return
+    try:
+        slide.notes_slide.notes_text_frame.text = text
+    except AttributeError:
+        pass
 
-def _slide_content_width(prs, style, slide_type, default_margin_in=0.6):
-    """Centred content width from slide size and optional layout tokens."""
-    left, width, _, _ = content_box(prs, style, slide_type, default_margin_in)
-    return left, width
+
+def _write_body_paragraph(p, text, font_size, theme, style=None, alignment=None,
+                          highlights=None, large_text=None):
+    """Fill a paragraph with plain or highlighted body text."""
+    if alignment is not None and hasattr(alignment, "value"):
+        align = alignment
+    else:
+        align = _resolve_alignment(alignment) if alignment else PP_ALIGN.LEFT
+    p.alignment = align
+    fn = theme.get("font_name")
+    ann_pt = int(typography_pt(style or {}, "annotation_size_pt", 46))
+    if (highlights and len(highlights) > 0) or (large_text and len(large_text) > 0):
+        _apply_highlights(
+            p, text or "", highlights, large_text,
+            body_rgb=theme["body"],
+            highlight_rgb=theme["highlight"],
+            annotation_rgb=theme["annotation"],
+            font_name=fn,
+            base_font_size=int(font_size),
+            annotation_size_pt=ann_pt,
+        )
+    else:
+        run = p.add_run()
+        run.text = text or ""
+        run.font.size = Pt(font_size)
+        run.font.color.rgb = theme["body"]
+        if fn:
+            run.font.name = fn
+
+
+def _two_column_layout(prs, style, kind="two_column"):
+    """Return geometry for side-by-side columns."""
+    left, width, width_in, _ = content_box(prs, style, kind)
+    gap_in = float(layout_in(style, kind, "column_gap_in", 0.4))
+    col_w_in = (width_in - gap_in) / 2.0
+    left_x = left.inches
+    right_x = left.inches + col_w_in + gap_in
+    top_in = float(layout_in(style, kind, "top_in", 0.9))
+    bottom_in = float(layout_in(style, kind, "bottom_reserve_in", 0.5))
+    height_in = prs.slide_height.inches - top_in - bottom_in
+    return left_x, right_x, col_w_in, top_in, height_in, gap_in
+
+
+def add_title_only_slide(prs, title, subtitle=None, style=None, font_size=None):
+    """Title-only slide (PowerPoint Title Only / Google TITLE_ONLY)."""
+    style = style or {}
+    theme = _resolve_theme(style)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+    title_pt = int(font_size or typography_pt(style, "title_size_pt", 44))
+    left, width, width_in, _ = content_box(prs, style, "title_only")
+    title_lines = _estimate_text_lines(title or "", width_in, title_pt)
+    title_h_in = min(0.55 + title_lines * 0.52, 3.2)
+    sub = (subtitle or "").strip()
+    sub_pt = int(typography_pt(style, "subtitle_size_pt", 28))
+    sub_h_in = 0.0
+    if sub:
+        sub_h_in = min(0.45 + _estimate_text_lines(sub, width_in, sub_pt) * 0.38, 2.5)
+    gap_in = float(layout_in(style, "title", "subtitle_gap_in", 0.25)) if sub else 0.0
+    block_h_in = title_h_in + (gap_in + sub_h_in if sub else 0)
+    top_in = (prs.slide_height.inches - block_h_in) / 2.0
+    tb = slide.shapes.add_textbox(left, Inches(top_in), width, Inches(title_h_in))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.text = title or ""
+    p.alignment = PP_ALIGN.CENTER
+    p.font.size = Pt(title_pt)
+    p.font.bold = True
+    p.font.color.rgb = theme["title"]
+    if theme["font_name"]:
+        p.font.name = theme["font_name"]
+    if sub:
+        tb2 = slide.shapes.add_textbox(
+            left, Inches(top_in + title_h_in + gap_in), width, Inches(sub_h_in),
+        )
+        tf2 = tb2.text_frame
+        tf2.word_wrap = True
+        p2 = tf2.paragraphs[0]
+        p2.text = sub
+        p2.alignment = PP_ALIGN.CENTER
+        p2.font.size = Pt(sub_pt)
+        p2.font.color.rgb = theme["subtitle"]
+        if theme["font_name"]:
+            p2.font.name = theme["font_name"]
+    return slide
+
+
+def add_two_column_slide(prs, left_text, right_text, style=None, font_size=28,
+                         alignment="left", left_highlights=None, right_highlights=None):
+    """Two Content layout — side-by-side body columns."""
+    style = style or {}
+    theme = _resolve_theme(style)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+    lx, rx, col_w, top_in, height_in, _ = _two_column_layout(prs, style, "two_column")
+    for x_in, text, hl in (
+        (lx, left_text, left_highlights),
+        (rx, right_text, right_highlights),
+    ):
+        tb = slide.shapes.add_textbox(Inches(x_in), Inches(top_in), Inches(col_w), Inches(height_in))
+        tf = tb.text_frame
+        tf.word_wrap = True
+        tf.vertical_anchor = MSO_ANCHOR.TOP
+        p = tf.paragraphs[0]
+        _write_body_paragraph(p, text, font_size, theme, style=style, alignment=alignment, highlights=hl)
+    return slide
+
+
+def add_comparison_slide(prs, columns, style=None, font_size=28, alignment="left", reference=None):
+    """Comparison layout — heading + body per column."""
+    style = style or {}
+    theme = _resolve_theme(style)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+    lx, rx, col_w, _, height_in, _ = _two_column_layout(prs, style, "comparison")
+    top_in = float(layout_in(style, "comparison", "top_in", 0.75))
+    heading_h_in = float(layout_in(style, "comparison", "heading_height_in", 0.55))
+    body_gap_in = float(layout_in(style, "comparison", "body_top_gap_in", 0.12))
+    heading_pt = int(typography_pt(style, "comparison_heading_size_pt", 28))
+    align = _resolve_alignment(alignment)
+    cols = (columns or [])[:2]
+    while len(cols) < 2:
+        cols.append({})
+    for x_in, col in zip((lx, rx), cols):
+        heading = (col.get("heading") or "").strip()
+        body = (col.get("text") or "").strip()
+        hl = col.get("highlights")
+        if heading:
+            ht = slide.shapes.add_textbox(
+                Inches(x_in), Inches(top_in), Inches(col_w), Inches(heading_h_in),
+            )
+            hp = ht.text_frame.paragraphs[0]
+            hp.text = heading
+            hp.alignment = align
+            hp.font.size = Pt(heading_pt)
+            hp.font.bold = True
+            hp.font.color.rgb = theme["body"]
+            if theme["font_name"]:
+                hp.font.name = theme["font_name"]
+        body_top = top_in + (heading_h_in + body_gap_in if heading else 0)
+        body_h = height_in - (heading_h_in + body_gap_in if heading else 0)
+        bt = slide.shapes.add_textbox(
+            Inches(x_in), Inches(body_top), Inches(col_w), Inches(max(body_h, 1.0)),
+        )
+        tf = bt.text_frame
+        tf.word_wrap = True
+        tf.vertical_anchor = MSO_ANCHOR.TOP
+        _write_body_paragraph(
+            tf.paragraphs[0], body, font_size, theme, style=style,
+            alignment=align, highlights=hl,
+        )
+    if reference and str(reference).strip():
+        ref_pt = int(typography_pt(style, "reference_size_bottom_pt", 22))
+        ref_h_in = 0.7
+        ref_y = prs.slide_height.inches - ref_h_in - 0.35
+        left, width, _, _ = content_box(prs, style, "comparison")
+        rt = slide.shapes.add_textbox(left, Inches(ref_y), width, Inches(ref_h_in))
+        rp = rt.text_frame.paragraphs[0]
+        rp.text = str(reference).strip()
+        rp.alignment = PP_ALIGN.CENTER
+        rp.font.size = Pt(ref_pt)
+        rp.font.italic = True
+        rp.font.color.rgb = theme["reference"]
+        if theme["font_name"]:
+            rp.font.name = theme["font_name"]
+    return slide
+
+
+def add_big_number_slide(prs, number, label, style=None, reference=None):
+    """Big Number layout (Google Slides BIG_NUMBER)."""
+    style = style or {}
+    theme = _resolve_theme(style)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+    num_pt = int(typography_pt(style, "big_number_size_pt", 120))
+    label_pt = int(typography_pt(style, "big_number_label_size_pt", 32))
+    left, width, width_in, _ = content_box(prs, style, "big_number")
+    num_str = str(number or "").strip()
+    label_str = (label or "").strip()
+    ref_str = (reference or "").strip()
+    num_lines = _estimate_text_lines(num_str, width_in, num_pt)
+    num_h_in = min(1.2 + num_lines * 0.85, 3.5)
+    label_h_in = 0.0
+    if label_str:
+        label_h_in = min(0.5 + _estimate_text_lines(label_str, width_in, label_pt) * 0.42, 2.0)
+    ref_h_in = 0.65 if ref_str else 0.0
+    block_h = num_h_in + (0.2 + label_h_in if label_str else 0) + (0.25 + ref_h_in if ref_str else 0)
+    top_in = (prs.slide_height.inches - block_h) / 2.0
+    nt = slide.shapes.add_textbox(left, Inches(top_in), width, Inches(num_h_in))
+    np = nt.text_frame.paragraphs[0]
+    np.text = num_str
+    np.alignment = PP_ALIGN.CENTER
+    np.font.size = Pt(num_pt)
+    np.font.bold = True
+    np.font.color.rgb = theme["title"]
+    if theme["font_name"]:
+        np.font.name = theme["font_name"]
+    y = top_in + num_h_in + 0.2
+    if label_str:
+        lt = slide.shapes.add_textbox(left, Inches(y), width, Inches(label_h_in))
+        lp = lt.text_frame.paragraphs[0]
+        lp.text = label_str
+        lp.alignment = PP_ALIGN.CENTER
+        lp.font.size = Pt(label_pt)
+        lp.font.color.rgb = theme["body"]
+        if theme["font_name"]:
+            lp.font.name = theme["font_name"]
+        y += label_h_in + 0.25
+    if ref_str:
+        rt = slide.shapes.add_textbox(left, Inches(y), width, Inches(ref_h_in))
+        rp = rt.text_frame.paragraphs[0]
+        rp.text = ref_str
+        rp.alignment = PP_ALIGN.CENTER
+        rp.font.size = Pt(int(typography_pt(style, "reference_size_bottom_pt", 22)))
+        rp.font.italic = True
+        rp.font.color.rgb = theme["reference"]
+        if theme["font_name"]:
+            rp.font.name = theme["font_name"]
+    return slide
+
+
+def add_quote_slide(prs, text, style=None, reference=None, font_size=None, alignment="center"):
+    """Centred pull-quote slide."""
+    style = style or {}
+    theme = _resolve_theme(style)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+    quote_pt = int(font_size or typography_pt(style, "quote_size_pt", 36))
+    left, width, width_in, _ = content_box(prs, style, "quote")
+    top_in = float(layout_in(style, "quote", "top_in", 2.0))
+    body_h_in = prs.slide_height.inches - top_in - 1.2
+    align = _resolve_alignment(alignment)
+    tb = slide.shapes.add_textbox(left, Inches(top_in), width, Inches(body_h_in * 0.75))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    _write_body_paragraph(p, text, quote_pt, theme, style=style, alignment=align)
+    ref_str = (reference or "").strip()
+    if ref_str:
+        ref_pt = int(typography_pt(style, "reference_size_pt", 28))
+        ref_y = top_in + body_h_in * 0.78
+        rt = slide.shapes.add_textbox(left, Inches(ref_y), width, Inches(0.7))
+        rp = rt.text_frame.paragraphs[0]
+        rp.text = f"— {ref_str}"
+        rp.alignment = align
+        rp.font.size = Pt(ref_pt)
+        rp.font.italic = True
+        rp.font.color.rgb = theme["reference"]
+        if theme["font_name"]:
+            rp.font.name = theme["font_name"]
+    return slide
+
+
+def add_picture_text_slide(prs, image_path, text, style=None, image_side="left",
+                           image_fit="contain", font_size=28, alignment="left",
+                           source_file=None):
+    """Picture + text side by side (Text and Object layout)."""
+    import os
+    style = dict(style or {})
+    if source_file:
+        style["_source_file"] = source_file
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+    theme = _resolve_theme(style)
+    margin_in = float(layout_in(style, "picture_text", "margin_in", 0.35))
+    gap_in = float(layout_in(style, "picture_text", "column_gap_in", 0.35))
+    ratio = float(layout_in(style, "picture_text", "image_width_ratio", 0.48))
+    margin = Inches(margin_in)
+    slide_w = prs.slide_width
+    slide_h = prs.slide_height
+    content_w = slide_w - margin * 2
+    content_h = slide_h - margin * 2
+    img_w = int(content_w * ratio)
+    txt_w = int(content_w) - img_w - Inches(gap_in)
+    side = (image_side or "left").lower()
+    if side not in ("left", "right"):
+        side = "left"
+    img_left = margin if side == "left" else margin + txt_w + Inches(gap_in)
+    txt_left = margin + img_w + Inches(gap_in) if side == "left" else margin
+    resolved = resolve_asset_path(image_path, source_file=source_file)
+    path = resolved if resolved else image_path
+    fit = (image_fit or "contain").lower()
+    if fit not in ("contain", "cover", "fill"):
+        fit = "contain"
+    if path and os.path.exists(path):
+        if fit == "fill":
+            slide.shapes.add_picture(path, img_left, margin, width=img_w, height=content_h)
+        else:
+            pic = slide.shapes.add_picture(path, img_left, margin, width=img_w)
+            _fit_picture_in_box(pic, img_left, margin, img_w, content_h, fit)
+    else:
+        print(f"Warning: Image not found: {image_path}")
+    align = _resolve_alignment(alignment)
+    tb = slide.shapes.add_textbox(txt_left, margin, txt_w, content_h)
+    tf = tb.text_frame
+    tf.word_wrap = True
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    _write_body_paragraph(tf.paragraphs[0], text, font_size, theme, style=style, alignment=align)
+    return slide
+
+
+def add_table_slide(prs, rows, style=None, font_size=24, header_row=True):
+    """Table layout — plain cell text."""
+    style = style or {}
+    theme = _resolve_theme(style)
+    if not rows:
+        rows = [[" "]]
+    row_count = len(rows)
+    col_count = max(len(r) for r in rows)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+    top_in = float(layout_in(style, "table", "top_in", 0.75))
+    left, width, width_in, margin_in = content_box(prs, style, "table")
+    table_h_in = min(prs.slide_height.inches - top_in - 0.5, 0.45 * row_count + 0.3)
+    table = slide.shapes.add_table(row_count, col_count, left, Inches(top_in), width, Inches(table_h_in)).table
+    for r_idx, row in enumerate(rows):
+        for c_idx in range(col_count):
+            cell = table.cell(r_idx, c_idx)
+            val = row[c_idx] if c_idx < len(row) else ""
+            cell.text = str(val)
+            for para in cell.text_frame.paragraphs:
+                para.font.size = Pt(font_size)
+                para.font.color.rgb = theme["body"]
+                if header_row and r_idx == 0:
+                    para.font.bold = True
+                if theme["font_name"]:
+                    para.font.name = theme["font_name"]
+    return slide
 
 
 def _estimate_text_lines(text, width_in, pt_size):
@@ -92,6 +427,12 @@ def _estimate_verse_body_height_in(verse_text, content_w_in, font_size):
         lines += _estimate_text_lines(v_text, content_w_in, font_size)
     line_h_in = (float(font_size) / 72.0) * 1.45
     return max(0.35, lines * line_h_in + 0.12)
+
+
+def _slide_content_width(prs, style, slide_type, default_margin_in=0.6):
+    """Centred content width from slide size and optional layout tokens."""
+    left, width, _, _ = content_box(prs, style, slide_type, default_margin_in)
+    return left, width
 
 
 def _render_title_textboxes(slide, prs, title, subtitle, style, theme):

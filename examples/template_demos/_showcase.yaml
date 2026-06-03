@@ -138,6 +138,51 @@ sections:
         reference: God renames — new identity
         text: ''
 
+  - section: Standard layouts
+    verses:
+      - slide_type: title_only
+        text: Title Only Slide
+        reference: Optional subtitle beneath the headline
+        notes: Use title_only for transition slides instead of empty verse hacks.
+
+      - slide_type: comparison
+        reference: Law vs grace (illustration)
+        columns:
+          - heading: Before
+            text: The law condemns sin.
+          - heading: After
+            text: Grace brings salvation through faith.
+
+      - slide_type: two_column
+        left: Left column body text for side-by-side content.
+        right: Right column body text — Two Content layout.
+
+      - slide_type: big_number
+        number: '100'
+        label: Fold increase
+        reference: Mark 10:30 (NKJV)
+
+      - slide_type: quote
+        text: Faith comes by hearing, and hearing by the word of God.
+        reference: Romans 10:17 (NKJV)
+
+      - slide_type: table
+        table_rows:
+          - [Fruit, Reference]
+          - [Love, Galatians 5:22]
+          - [Joy, Galatians 5:22]
+          - [Peace, Galatians 5:22]
+
+      - slide_type: picture_text
+        image_path: assets/showcase-diagram.png
+        image_side: left
+        image_fit: contain
+        text: Diagram with explanation — picture and text side by side (Text and Object layout).
+
+      - reference: Speaker notes example
+        text: This verse slide includes presenter notes in the PPTX.
+        notes: Remind the congregation of the historical context before reading aloud.
+
   - section: |-
       Multi-line
       section title

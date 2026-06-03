@@ -33,8 +33,9 @@ slide_style:
   # highlight_color: '#FFD700'
   # annotation_color: '#1E50C8'
 
-  # reference_position: top   # Bible ref line at top of verse slides (default)
-  # reference_position: bottom
+  # reference_position: bottom  # slide foot (default); use below or top to change
+  # reference_position: below   # directly under verse body
+  # reference_position: top     # above verse body
 
   # alignment: left | center | right   # default for verse/list body
   alignment: left
@@ -68,7 +69,12 @@ sections:
             underline: true
             annotation: 3
 
-      # --- Title-style verse (large reference line, empty body) --------------
+      # --- Title-only slide (PowerPoint Title Only layout) -------------------
+      - slide_type: title_only
+        text: Your transition headline
+        reference: Optional subtitle line
+
+      # --- Title-style verse (legacy; prefer slide_type: title_only) ---------
       - reference: Your Title Here
         reference_font_size: 44
         text: ''
@@ -107,6 +113,46 @@ sections:
       #   image_fit: contain          # contain | cover | fill (default: contain)
       #   reference: Diagram title    # optional caption line above text
       #   text: Short caption below the image
+
+  - section: Standard layouts
+    verses:
+      - slide_type: comparison
+        reference: Law vs grace (illustration)
+        columns:
+          - heading: Before
+            text: The law condemns sin.
+          - heading: After
+            text: Grace brings salvation through faith.
+
+      - slide_type: two_column
+        left: Left column body text for side-by-side content.
+        right: Right column body text — Two Content layout.
+
+      - slide_type: big_number
+        number: '100'
+        label: Fold increase
+        reference: Mark 10:30 (NKJV)
+
+      - slide_type: quote
+        text: Faith comes by hearing, and hearing by the word of God.
+        reference: Romans 10:17 (NKJV)
+
+      - slide_type: table
+        table_rows:
+          - [Fruit, Reference]
+          - [Love, Galatians 5:22]
+          - [Joy, Galatians 5:22]
+          - [Peace, Galatians 5:22]
+
+      - slide_type: picture_text
+        image_path: assets/background_alt.jpg
+        image_side: left
+        image_fit: contain
+        text: Diagram with explanation — picture and text side by side.
+
+      - reference: Speaker notes example
+        text: This verse slide includes presenter notes in the exported PPTX.
+        notes: Remind the congregation of the historical context before reading aloud.
 
   - section: |-
       Multi-line

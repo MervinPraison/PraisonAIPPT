@@ -302,6 +302,34 @@ slide_style:
 
 ---
 
+## Standard layout slide types (`slide_type`)
+
+Built-in renderers (use `slide_type` on any verse entry):
+
+| `slide_type` | PowerPoint / Slides equivalent | Key fields |
+|--------------|-------------------------------|------------|
+| *(omit)* | Title and body | `reference`, `text` |
+| `list` | Bullets (via `list_type`) | `list_type`, `text` |
+| `title_only` | Title Only | `text`, optional `reference` (subtitle) |
+| `two_column` | Two Content | `left`/`right` or `columns: [{text}, {text}]` |
+| `comparison` | Comparison | `columns: [{heading, text}, …]` |
+| `big_number` | Big Number | `number`, `label`, optional `reference` |
+| `quote` | Pull quote | `text`, optional `reference` (attribution) |
+| `picture_text` | Text and Object | `image_path`, `text`, `image_side`, `image_fit` |
+| `table` | Table | `table_rows` or `rows` (list of lists) |
+| `image` | Picture with caption | `image_path`, `image_fit`, optional `reference`/`text` |
+| `hebrew_rename` | Custom | `hebrew_rows` |
+
+Presenter notes (any slide kind):
+
+```yaml
+- reference: John 3:16 (NKJV)
+  text: For God so loved the world…
+  notes: Mention Nicodemus visit context before reading.
+```
+
+---
+
 ## Verse Number Superscripts
 
 Display individual verse numbers as small superscripts before each verse line by starting each line with its verse number followed by a space.
