@@ -93,7 +93,6 @@
           "split_max_length": 500,
           "text": "And the scripture, foreseeing that God would justify the heathen through faith, preached before the gospel unto Abraham, saying, In thee shall all nations be blessed.",
           "highlights": [
-            "justify the heathen through faith",
             "preached before the gospel unto Abraham"
           ]
         },
@@ -143,8 +142,7 @@
           "reference": "Genesis 22:18 (NKJV)",
           "text": "In your seed all the nations of the earth shall be blessed, because you have obeyed My voice.",
           "highlights": [
-            "seed",
-            "all the nations of the earth shall be blessed"
+            "seed"
           ]
         },
         {
