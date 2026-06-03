@@ -1,0 +1,171 @@
+{
+    "presentation_title": "Elshadai",
+    "presentation_subtitle": "",
+    "auto_upload_gdrive": true,
+    "slide_style": {
+        "background_image": "assets/background_alt.jpg",
+        "text_color": "white",
+        "alignment": "left",
+        "reference_position": "top",
+        "font_name": "Palatino"
+    },
+    "sections": [
+        {
+            "section": "Fully convinced God is able to perform what He promised",
+            "verses": [
+                {
+                    "reference": "Romans 4:21 (NKJV)",
+                    "text": "and being fully convinced that what He had promised He was also able to perform.",
+                    "highlights": [
+                        "fully convinced",
+                        "He had promised",
+                        "able to perform"
+                    ]
+                },
+                {
+                    "reference": "Genesis 17:1",
+                    "split_max_length": 500,
+                    "text": "And when Abram was ninety years old and nine, the LORD appeared to Abram, and said unto him, I am the Almighty God; walk before me, and be thou perfect.",
+                    "highlights": [
+                        "I am the Almighty God"
+                    ]
+                },
+                {
+                    "reference": "Romans 4:17 (NKJV)",
+                    "split_max_length": 500,
+                    "text": "(as it is written, \"I have made you a father of many nations\") in the presence of Him whom he believed-God, who gives life to the dead and calls those things which do not exist as though they did;",
+                    "highlights": [
+                        "gives life to the dead",
+                        "calls those things which do not exist"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "1. Righteousness apart from the law",
+            "verses": [
+                {
+                    "reference": "Romans 4:5",
+                    "split_max_length": 500,
+                    "text": "But to him that worketh not, but believeth on him that justifieth the ungodly, his faith is counted for righteousness.",
+                    "highlights": [
+                        "worketh not",
+                        "believeth",
+                        "counted for righteousness"
+                    ]
+                },
+                {
+                    "reference": "Romans 4:13 (NKJV)",
+                    "split_max_length": 500,
+                    "text": "For the promise that he would be the heir of the world was not to Abraham or to his seed through the law, but through the righteousness of faith.",
+                    "highlights": [
+                        "not to Abraham or to his seed through the law",
+                        "righteousness of faith"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "2. Sins are forgiven",
+            "verses": [
+                {
+                    "reference": "Romans 4:7 (NKJV)",
+                    "text": "Blessed are those whose lawless deeds are forgiven, And whose sins are covered;",
+                    "highlights": [
+                        "lawless deeds are forgiven",
+                        "sins are covered"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "3. Shall not impute sin",
+            "verses": [
+                {
+                    "reference": "Romans 4:8 (NKJV)",
+                    "text": "Blessed is the man to whom the LORD shall not impute sin.",
+                    "highlights": [
+                        "shall not impute sin"
+                    ]
+                },
+                {
+                    "reference": "Romans 4:22-24 (KJV)",
+                    "split_max_length": 500,
+                    "text": "And therefore it was imputed to him for righteousness. Now it was not written for his sake alone, that it was imputed to him; But for us also, to whom it shall be imputed, if we believe on him that raised up Jesus our Lord from the dead;",
+                    "highlights": [
+                        "imputed to him for righteousness",
+                        "for us also",
+                        "if we believe"
+                    ]
+                },
+                {
+                    "reference": "Romans 5:13 (KJV)",
+                    "text": "For until the law sin was in the world: but sin is not imputed when there is no law.",
+                    "highlights": [
+                        "sin is not imputed"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "4. Knowing the Gospel",
+            "verses": [
+                {
+                    "reference": "Hebrews 4:2",
+                    "split_max_length": 500,
+                    "text": "For unto us was the gospel preached, as well as unto them: but the word preached did not profit them, not being mixed with faith in them that heard it.",
+                    "highlights": [
+                        "gospel preached",
+                        "did not profit them",
+                        "mixed with faith"
+                    ]
+                },
+                {
+                    "reference": "Hebrews 3:18-19",
+                    "split_max_length": 500,
+                    "text": "And to whom sware he that they should not enter into his rest, but to them that believed not? So we see that they could not enter in because of unbelief.",
+                    "highlights": [
+                        "could not enter in",
+                        "unbelief"
+                    ]
+                },
+                {
+                    "reference": "Hebrews 4:1",
+                    "split_max_length": 500,
+                    "text": "Let us therefore fear, lest, a promise being left us of entering into his rest, any of you should seem to come short of it.",
+                    "highlights": [
+                        "entering into his rest",
+                        "come short of it"
+                    ]
+                },
+                {
+                    "reference": "Galatians 3:8 (KJV)",
+                    "split_max_length": 500,
+                    "text": "And the scripture, foreseeing that God would justify the heathen through faith, preached before the gospel unto Abraham, saying, In thee shall all nations be blessed.",
+                    "highlights": [
+                        "justify the heathen through faith",
+                        "preached before the gospel unto Abraham"
+                    ]
+                },
+                {
+                    "reference": "John 8:56 (KJV)",
+                    "text": "Your father Abraham rejoiced to see my day: and he saw it, and was glad.",
+                    "highlights": [
+                        "Abraham rejoiced",
+                        "saw my day"
+                    ]
+                },
+                {
+                    "reference": "Genesis 15:5-6 (KJV)",
+                    "split_max_length": 500,
+                    "text": "And he brought him forth abroad, and said, Look now toward heaven, and tell the stars, if thou be able to number them: and he said unto him, So shall thy seed be. And he believed in the LORD; and he counted it to him for righteousness.",
+                    "highlights": [
+                        "So shall thy seed be",
+                        "believed in the LORD",
+                        "counted it to him for righteousness"
+                    ]
+                }
+            ]
+        }
+    ]
+}

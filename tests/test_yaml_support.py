@@ -59,6 +59,16 @@ def create_temp_yaml(content=None) -> str:
     return tmp
 
 
+def deck_without_metadata(data):
+    """Strip loader/extraction metadata before comparing deck content."""
+    if data is None:
+        return None
+    out = dict(data)
+    for key in ('_source_file', '_source', '_extraction_warnings'):
+        out.pop(key, None)
+    return out
+
+
 # ── tests ──────────────────────────────────────────────────────────────────────
 
 def test_load_verses_from_yaml():
@@ -86,8 +96,8 @@ def test_yaml_json_equivalence():
         f.write(json_content)
     
     try:
-        yaml_data = load_verses_from_file(yaml_file)
-        json_data = load_verses_from_file(json_file)
+        yaml_data = deck_without_metadata(load_verses_from_file(yaml_file))
+        json_data = deck_without_metadata(load_verses_from_file(json_file))
         assert yaml_data == json_data, "YAML and JSON data should be identical"
         print("✓ test_yaml_json_equivalence")
     finally:
@@ -197,6 +207,16 @@ def test_yaml_round_trip():
         # Key fields should match
         assert extracted['presentation_title'] == original['presentation_title'], \
             "Title mismatch in round-trip"
+        assert extracted.get('presentation_subtitle') == original.get('presentation_subtitle')
+        assert len(extracted.get('sections', [])) == len(original['sections']), \
+            "Section count mismatch in round-trip"
+        orig_sections = [s.get('section') for s in original['sections']]
+        extr_sections = [s.get('section') for s in extracted.get('sections', [])]
+        assert extr_sections == orig_sections, "Section titles mismatch in round-trip"
+        orig_verse_count = sum(len(s.get('verses', [])) for s in original['sections'])
+        extr_verse_count = sum(len(s.get('verses', [])) for s in extracted.get('sections', []))
+        assert extr_verse_count >= orig_verse_count, \
+            "Fewer verses after round-trip than in original"
         print("✓ test_yaml_round_trip")
     finally:
         for p in [yaml_file, pptx_file, yaml_out]:

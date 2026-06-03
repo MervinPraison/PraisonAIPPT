@@ -9,7 +9,9 @@ import sys
 import json
 from pathlib import Path
 from . import __version__
+from .exceptions import SchemaError
 from .loader import load_verses_from_file, get_example_path, list_examples
+from .schema import validate_verses
 from .core import create_presentation
 from .list_slides import print_slide_outline
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
@@ -252,7 +254,13 @@ def handle_convert_json_command(args):
             import yaml
             with open(input_path, 'r', encoding='utf-8') as yf:
                 data = yaml.safe_load(yf)
-                
+
+            try:
+                data = validate_verses(data)
+            except SchemaError as e:
+                print(f"Error: Invalid schema in '{input_path}': {e}")
+                return 1
+
             # Determine output path
             if hasattr(args, 'json_output') and args.json_output:
                 output_path = args.json_output
@@ -321,7 +329,13 @@ def handle_convert_yaml_command(args):
         import yaml
         with open(input_path, 'r', encoding='utf-8') as jf:
             data = json.load(jf)
-            
+
+        try:
+            data = validate_verses(data)
+        except SchemaError as e:
+            print(f"Error: Invalid schema in '{input_path}': {e}")
+            return 1
+
         output_path = input_path.with_suffix('.yaml')
         
         with open(output_path, 'w', encoding='utf-8') as yf:

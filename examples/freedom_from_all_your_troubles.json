@@ -1,0 +1,448 @@
+{
+    "presentation_title": "Freedom from ALL your troubles",
+    "presentation_subtitle": "",
+    "auto_upload_gdrive": true,
+    "slide_style": {
+        "background_image": "assets/background_alt.jpg",
+        "text_color": "white",
+        "alignment": "left",
+        "reference_position": "top",
+        "font_name": "Palatino"
+    },
+    "sections": [
+        {
+            "section": "",
+            "verses": [
+                {
+                    "reference": "Romans 3:21 (NKJV)",
+                    "text": "But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;",
+                    "highlights": [
+                        {
+                            "text": "righteousness of God",
+                            "annotation": 1,
+                            "underline": false
+                        },
+                        {
+                            "text": "Witnessed by the Law and the Prophets",
+                            "annotation": 2,
+                            "underline": false
+                        },
+                        {
+                            "text": "apart from the law",
+                            "color": "green",
+                            "annotation": 3,
+                            "underline": false
+                        }
+                    ]
+                },
+                {
+                    "reference": "2 Corinthians 3:17 (NIV)",
+                    "text": "Now the Lord is the Spirit, and where the Spirit of the Lord is, there is freedom.",
+                    "highlights": [
+                        "freedom"
+                    ]
+                },
+                {
+                    "reference": "Psalm 34:19 (NIV)",
+                    "text": "The righteous person may have many troubles,\nbut the Lord delivers him from them all;",
+                    "highlights": [
+                        {
+                            "text": "may",
+                            "color": "green"
+                        },
+                        "all"
+                    ]
+                },
+                {
+                    "reference": "Proverbs 12:21 (NIV)",
+                    "text": "No harm overtakes the righteous, but the wicked have their fill of trouble.",
+                    "highlights": [
+                        "No harm",
+                        "righteous"
+                    ]
+                },
+                {
+                    "reference": "Romans 3:21 (NKJV)",
+                    "text": "But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;",
+                    "highlights": [
+                        {
+                            "text": "righteousness of God",
+                            "annotation": 1,
+                            "underline": false
+                        },
+                        {
+                            "text": "Witnessed by the Law and the Prophets",
+                            "annotation": 2,
+                            "underline": false
+                        },
+                        {
+                            "text": "apart from the law",
+                            "color": "green",
+                            "annotation": 3,
+                            "underline": false
+                        }
+                    ]
+                },
+                {
+                    "reference": "Matthew 17:5 (NKJV)",
+                    "split_max_length": 500,
+                    "text": "While he was still speaking, behold, a bright cloud overshadowed them; and suddenly a voice came out of the cloud, saying, “This is My beloved Son, in whom I am well pleased. Hear Him!”",
+                    "highlights": [
+                        "While he was still speaking",
+                        "Hear Him"
+                    ]
+                },
+                {
+                    "reference": "Acts 10:44 (NKJV)",
+                    "text": "While Peter was still speaking these words, the Holy Spirit fell upon all those who heard the word.",
+                    "highlights": [
+                        "While Peter was still speaking",
+                        "the Holy Spirit",
+                        {
+                            "text": "fell",
+                            "color": "green"
+                        }
+                    ]
+                },
+                {
+                    "reference": "Romans 5:19 (NKJV)",
+                    "split_max_length": 450,
+                    "text": "For as by one man's disobedience many were made sinners, so also by one Man's obedience many will be made righteous.",
+                    "highlights": [
+                        "one Man's obedience",
+                        "made righteous"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "1. Separated from Christ",
+            "verses": [
+                {
+                    "reference": "Galatians 5:4",
+                    "text": "You are separated from Christ, you who are trying to be justified by law; you have fallen from grace.",
+                    "highlights": [
+                        "separated from Christ",
+                        "trying to be justified by law"
+                    ]
+                },
+                {
+                    "reference": "Colossians 2:14 (NKJV)",
+                    "split_max_length": 400,
+                    "text": "having wiped out the handwriting of requirements that was against us, which was contrary to us. And He has taken it out of the way, having nailed it to the cross.",
+                    "highlights": [
+                        "wiped out the handwriting of requirements",
+                        "taken it out of the way",
+                        "nailed it to the cross"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "2. Fallen from Grace",
+            "verses": [
+                {
+                    "reference": "Romans 5:17 (NKJV)",
+                    "split_max_length": 400,
+                    "text": "For if by the one man's offense death reigned through the one, much more those who receive abundance of grace and of the gift of righteousness will reign in life through the One, Jesus Christ.",
+                    "highlights": [
+                        "abundance of grace",
+                        "gift of righteousness",
+                        "reign in life"
+                    ]
+                },
+                {
+                    "reference": "Galatians 5:4",
+                    "text": "You are separated from Christ, you who are trying to be justified by law; you have fallen from grace.",
+                    "highlights": [
+                        "fallen from grace"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "3. Cursed",
+            "verses": [
+                {
+                    "reference": "Galatians 3:10 (NKJV)",
+                    "split_max_length": 500,
+                    "text": "For as many as are of the works of the law are under the curse; for it is written, \"Cursed is everyone who does not continue in all things which are written in the book of the law, to do them.\"",
+                    "highlights": [
+                        "works of the law are under the curse",
+                        "Cursed is everyone"
+                    ]
+                },
+                {
+                    "reference": "Galatians 1:8,9 (NKJV)",
+                    "split_max_length": 500,
+                    "text": "But even if we, or an angel from heaven, preach any other gospel to you than what we have preached to you, let him be accursed.\nAs we have said before, so now I say again, if anyone preaches any other gospel to you than what you have received, let him be accursed."
+                }
+            ]
+        },
+        {
+            "section": "4. Ministers Death",
+            "verses": [
+                {
+                    "reference": "2 Corinthians 3:7 (NKJV)",
+                    "split_max_length": 500,
+                    "text": "But if the ministry of death, written and engraved on stones, was glorious, so that the children of Israel could not look steadily at the face of Moses because of the glory of his countenance, which glory was passing away,",
+                    "highlights": [
+                        "ministry of death"
+                    ]
+                },
+                {
+                    "reference": "2 Corinthians 3:6 (NKJV)",
+                    "text": "who also made us sufficient as ministers of the new covenant, not of the letter but of the Spirit; for the law kills, but the Spirit gives life.",
+                    "highlights": [
+                        "law kills"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "Apart from the law",
+            "verses": [
+                {
+                    "reference": "Romans 3:21 (NKJV)",
+                    "text": "But now the righteousness of God apart from the law is revealed, being witnessed by the Law and the Prophets;",
+                    "highlights": [
+                        {
+                            "text": "righteousness of God",
+                            "annotation": 1,
+                            "underline": false
+                        },
+                        {
+                            "text": "Witnessed by the Law and the Prophets",
+                            "annotation": 2,
+                            "underline": false
+                        },
+                        {
+                            "text": "apart from the law",
+                            "color": "green",
+                            "annotation": 3,
+                            "underline": false
+                        }
+                    ]
+                },
+                {
+                    "reference": "Romans 4:13 (NKJV)",
+                    "text": "For the promise that he would be the heir of the world was not to Abraham or to his seed through the law, but through the righteousness of faith.",
+                    "highlights": [
+                        "heir of the world",
+                        "not",
+                        "through the law"
+                    ]
+                },
+                {
+                    "reference": "Romans 3:28 (NKJV)",
+                    "text": "Therefore we conclude that a man is justified by faith apart from the deeds of the law.",
+                    "highlights": [
+                        "justified",
+                        "apart from the deeds"
+                    ]
+                },
+                {
+                    "reference": "Galatians 2:16 (NKJV)",
+                    "split_max_length": 500,
+                    "text": "knowing that a man is not justified by the works of the law but by faith in Jesus Christ, even we have believed in Christ Jesus, that we might be justified by faith in Christ and not by the works of the law; for by the works of the law no flesh shall be justified.",
+                    "highlights": [
+                        "not justified by the works of the law"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "Can I mix Both His Righteousness   and the Law(Self Righteousness)?",
+            "verses": [
+                {
+                    "text": "Peter was mixing the messages from Moses, Elijah, and Jesus; that's why the Heavenly Father was against him. ⚠️",
+                    "reference": ""
+                },
+                {
+                    "reference": "Revelation 3:15 (NKJV)",
+                    "text": "I know your works, that you are neither cold nor hot. I could wish you were cold or hot.",
+                    "highlights": [
+                        "neither cold nor hot"
+                    ]
+                },
+                {
+                    "reference": "Matthew 9:17 (NKJV)",
+                    "text": "Nor do they put new wine into old wineskins, or else the wineskins break; the wine is spilled, and the wineskins are ruined. But they put new wine into new wineskins, and both are preserved.",
+                    "highlights": [
+                        "new wine into old wineskins",
+                        "new wine into new wineskins"
+                    ]
+                },
+                {
+                    "reference": "Matthew 9:16 (NKJV)",
+                    "text": "No one puts a piece of unshrunk cloth on an old garment; for the patch pulls away from the garment, and the tear is made worse.",
+                    "highlights": [
+                        "unshrunk cloth on an old garment",
+                        "tear is made worse"
+                    ]
+                },
+                {
+                    "reference": "Romans 7:3-4 (NKJV)",
+                    "text": "So then if, while her husband lives, she marries another man, she will be called an adulteress; but if her husband dies, she is free from that law, so that she is no adulteress, though she has married another man.\nTherefore, my brethren, you also have become dead to the law through the body of Christ, that you may be married to another—to Him who was raised from the dead, that we should bear fruit to God.",
+                    "highlights": [
+                        "dead to the law"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "Witnessed by the Law and the Prophets",
+            "verses": [
+                {
+                    "reference": "Luke 9:30–31 (NKJV)",
+                    "split_max_length": 500,
+                    "text": "And behold, two men talked with Him, who were Moses and Elijah, who appeared in glory and spoke of His decease which He was about to accomplish at Jerusalem.",
+                    "highlights": [
+                        "Moses and Elijah",
+                        {
+                            "text": "decease",
+                            "color": "green"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "Romans 2 - Message of Law, Prophets vs Jesus",
+            "verses": [
+                {
+                    "reference": "Romans 2:13 (NKJV)",
+                    "leading_title": "Message of Moses (Spoken to unbelievers)",
+                    "text": "(for not the hearers of the law are just in the sight of God, but the doers of the law will be justified;",
+                    "highlights": [
+                        "doers of the law will be justified"
+                    ]
+                },
+                {
+                    "reference": "Romans 2:6 (NKJV)",
+                    "leading_title": "Message of Moses (Spoken to unbelievers)",
+                    "text": "who \"will render to each one according to his deeds\":",
+                    "highlights": [
+                        "according to his deeds"
+                    ]
+                },
+                {
+                    "reference": "Romans 2:8 (NKJV)",
+                    "leading_title": "Message of Elijah (Spoken to unbelievers)",
+                    "split_max_length": 400,
+                    "text": "but to those who are self-seeking and do not obey the truth, but obey unrighteousness—indignation and wrath,",
+                    "highlights": [
+                        "wrath"
+                    ]
+                },
+                {
+                    "reference": "Psalm 103:10 (NKJV)",
+                    "leading_title": "Message of Jesus",
+                    "text": "He has not dealt with us according to our sins, Nor punished us according to our iniquities.",
+                    "highlights": [
+                        "not dealt with us according to our sins",
+                        "Nor punished us according to our iniquities"
+                    ]
+                },
+                {
+                    "reference": "Psalm 103:8–9 (NKJV)",
+                    "leading_title": "Message of Jesus",
+                    "text": "The Lord is merciful and gracious,\nSlow to anger, and abounding in mercy.\nHe will not always strive with us,\nNor will He keep His anger forever.",
+                    "highlights": [
+                        "Nor will He keep His anger forever"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "So Can’t we learn from Old Testament?",
+            "verses": [
+                {
+                    "reference": "Luke 24:27 (NKJV)",
+                    "text": "And beginning at Moses and all the Prophets, He expounded to them in all the Scriptures the things concerning Himself.",
+                    "highlights": [
+                        {
+                            "text": "Moses and all the Prophets",
+                            "color": "yellow"
+                        },
+                        {
+                            "text": "Himself",
+                            "color": "green"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "Disciples Failed Again",
+            "verses": [
+                {
+                    "reference": "Luke 9:54 (NKJV)",
+                    "leading_title": "Elijah Message",
+                    "text": "And when His disciples James and John saw this, they said, \"Lord, do You want us to command fire to come down from heaven and consume them, just as Elijah did?\"",
+                    "highlights": [
+                        "command fire to come down from heaven",
+                        "just as Elijah did"
+                    ]
+                },
+                {
+                    "reference": "Matthew 17:25–26 (NKJV)",
+                    "leading_title": "Moses Message",
+                    "split_max_length": 500,
+                    "text": "He said, \"Yes.\" And when he had come into the house, Jesus anticipated him, saying, \"What do you think, Simon? From whom do the kings of the earth take customs or taxes, from their sons or from strangers?\"\nPeter said to Him, \"From strangers.\" Jesus said to him, \"Then the sons are free.\"",
+                    "highlights": [
+                        "From strangers",
+                        "sons are free"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "What is written in your hearts?",
+            "verses": [
+                {
+                    "reference": "Romans 2:15 (NKJV)",
+                    "leading_title": "law written in heart - old covenant",
+                    "split_max_length": 400,
+                    "text": "who show the work of the law written in their hearts, their conscience also bearing witness, and between themselves their thoughts accusing or else excusing them)",
+                    "highlights": [
+                        "law written in their hearts",
+                        "conscience also bearing witness"
+                    ]
+                },
+                {
+                    "reference": "Romans 2:29 (NKJV)",
+                    "leading_title": "Spirit written in heart - New Covenant",
+                    "split_max_length": 400,
+                    "text": "but he is a Jew who is one inwardly; and circumcision is that of the heart, in the Spirit, not in the letter; whose praise is not from men but from God.",
+                    "highlights": [
+                        "one inwardly",
+                        "circumcision is that of the heart",
+                        "not in the letter"
+                    ]
+                }
+            ]
+        },
+        {
+            "section": "While Peter was still speaking",
+            "verses": [
+                {
+                    "reference": "Acts 10:43,44 (NIV)",
+                    "split_max_length": 500,
+                    "text": "All the prophets testify about him that everyone who believes in him receives forgiveness of sins through his name.\nWhile Peter was still speaking these words, the Holy Spirit came on all who heard the message.",
+                    "highlights": [
+                        "forgiveness of sins",
+                        {
+                            "text": "prophets",
+                            "color": "yellow"
+                        },
+                        {
+                            "text": "testify",
+                            "color": "green"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
