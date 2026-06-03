@@ -77,6 +77,23 @@ def _estimate_text_lines(text, width_in, pt_size):
     return max(1, lines)
 
 
+def _normalize_ref_position(value: str | None) -> str:
+    """Verse/list reference placement: bottom (slide foot), below (under body), top."""
+    pos = (value or 'bottom').lower().strip()
+    if pos in ('bottom', 'below', 'top'):
+        return pos
+    return 'bottom'
+
+
+def _estimate_verse_body_height_in(verse_text, content_w_in, font_size):
+    """Approximate rendered verse body height in inches."""
+    lines = 0
+    for _, v_text in _parse_verse_lines(verse_text):
+        lines += _estimate_text_lines(v_text, content_w_in, font_size)
+    line_h_in = (float(font_size) / 72.0) * 1.45
+    return max(0.35, lines * line_h_in + 0.12)
+
+
 def _render_title_textboxes(slide, prs, title, subtitle, style, theme):
     """Word-wrapped title and subtitle blocks, centred on the slide."""
     left, width = _slide_content_width(prs, style, 'title')
@@ -267,7 +284,7 @@ def _resolve_theme(style: dict) -> dict:
         'section':          _rc('section_title_color', '#003366', '#FFFFFF'),
         'highlight':        _rc('highlight_color',     '#FF8C00', '#FFD700'),
         'annotation':       _rc('annotation_color',    '#1E50C8', '#1E50C8'),
-        'ref_position':     style.get('reference_position', 'top'),
+        'ref_position':     _normalize_ref_position(style.get('reference_position')),
         'global_alignment': style.get('alignment', 'left'),
         'font_name':        style.get('font_name') or 'Palatino',
     }
@@ -411,7 +428,7 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
     """
     Add a bullet/numbered list slide. Default alignment is left.
     All colors and font resolved via slide_style.
-    Respects slide_style reference_position (top or bottom).
+    Respects slide_style reference_position (top, bottom, or below).
     """
     style = style or {}
     theme = _resolve_theme(style)
@@ -465,7 +482,7 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
             p.font.name = theme['font_name']
         p.space_after = Pt(10)
 
-    if reference and ref_position != 'top':
+    if reference and ref_position in ('bottom', 'below'):
         ref_pt = int(typography_pt(style, 'list_ref_bottom_pt', 22))
         ref_lines = _estimate_text_lines(reference, content_w_in, ref_pt)
         ref_h_in = min(0.35 + ref_lines * 0.32, 1.0)
@@ -780,13 +797,17 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                     large_text=None, alignment='left', font_size=32, style=None,
                     reference_font_size=None, leading_title=None,
                     text_below_reference=None, text_below_reference_highlights=None,
-                    text_below_reference_large_text=None):
+                    text_below_reference_large_text=None, reference_position=None):
     """
     Add a verse slide. All colors and font resolved via slide_style.
     Supported slide_style keys: background_image, background_color,
     text_color, reference_color, highlight_color, annotation_color,
     title_color, section_title_color, font_name,
-    reference_position ('top'/'bottom'), alignment.
+    reference_position ('bottom'/'below'/'top'), alignment.
+
+    ``bottom`` (default): reference anchored at the foot of the slide.
+    ``below``: reference placed directly under the verse body text.
+    ``top``: reference above the verse body.
 
     Optional verse YAML key ``leading_title`` (str): large line at the top of the
     slide; the reference is drawn directly under that title, then the verse body
@@ -802,7 +823,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
     verse_slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(verse_slide, style, prs)
     align = _resolve_alignment(alignment)
-    ref_position = theme['ref_position']
+    ref_position = _normalize_ref_position(reference_position or theme['ref_position'])
     fn = theme['font_name']
     leading = (leading_title or '').strip()
     extra_ref = (text_below_reference or '').strip()
@@ -879,7 +900,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
             leading_verse_h_in = max(vh, 2.0)
             verse_top = Inches(vtop)
             verse_height = Inches(leading_verse_h_in)
-        elif reference and ref_position != 'top':
+        elif reference and ref_position in ('bottom', 'below'):
             ref_reserve_in = 0.85
             vtop = leading_top_in + lt_h_in + 0.15
             vh = slide_h_in - vtop - ref_reserve_in - bottom_margin_in
@@ -974,7 +995,20 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
             ex_run.font.color.rgb = theme['body']
             if fn:
                 ex_run.font.name = fn
-    elif ref_position != 'top' and reference:
+    elif reference and ref_position == 'below':
+        ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
+        body_h_in = _estimate_verse_body_height_in(verse_text, content_w_in, font_size)
+        if leading and leading_verse_top_in is not None:
+            ref_y_in = leading_verse_top_in + body_h_in + body_gap_in
+        else:
+            ref_y_in = verse_top.inches + body_h_in + body_gap_in
+        ref_lines = _estimate_text_lines(ref_text, content_w_in, ref_pt_bottom)
+        ref_h_in = min(0.3 + ref_lines * 0.32, bottom_ref_h_in)
+        ref_tb = verse_slide.shapes.add_textbox(
+            left, Inches(ref_y_in), content_w, Inches(ref_h_in),
+        )
+        _set_ref(ref_tb, ref_text, align, ref_pt_bottom, italic=True)
+    elif reference and ref_position == 'bottom':
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
         ref_tb = verse_slide.shapes.add_textbox(
             left, Inches(bottom_ref_top_in), content_w, Inches(bottom_ref_h_in),

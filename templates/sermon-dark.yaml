@@ -6,7 +6,7 @@ slide_size: widescreen
 slide_style:
   text_color: white
   alignment: left
-  reference_position: top
+  reference_position: bottom
   font_name: Palatino
   # Defaults when unset: highlight orange, reference grey-on-dark, title white
   # Optional layout SDK (uncomment to override geometry / sizes):

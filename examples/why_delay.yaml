@@ -7,7 +7,7 @@ slide_style:
   reference_color: '#66B3FF'
   highlight_color: '#FFD700'
   alignment: left
-  reference_position: top
+  reference_position: bottom
   font_name: Palatino
 sections:
 - section: ''

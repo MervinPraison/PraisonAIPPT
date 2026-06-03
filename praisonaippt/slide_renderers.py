@@ -154,6 +154,7 @@ class VerseRenderer:
                 font_size=font_size,
                 style=style,
                 reference_font_size=verse.get("reference_font_size"),
+                reference_position=verse.get("reference_position"),
                 leading_title=(verse.get("leading_title") if i == 0 else None),
                 text_below_reference=(verse.get("text_below_reference") if i == 0 else None),
                 text_below_reference_highlights=(

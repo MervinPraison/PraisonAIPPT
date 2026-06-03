@@ -252,8 +252,30 @@ slide_style:
   annotation_color: '#1E50C8'
   font_name: Spectral
   alignment: left
-  reference_position: top
+  reference_position: bottom   # slide foot (default); use below or top to change
 sections: [...]
+```
+
+### Reference line placement
+
+| Value | Layout |
+|-------|--------|
+| `bottom` | Reference anchored at the foot of the slide (default) |
+| `below` | Reference placed directly under the verse body text |
+| `top` | Reference above the verse body |
+
+Deck-wide default in `slide_style`, or per verse:
+
+```yaml
+slide_style:
+  reference_position: bottom
+
+sections:
+  - section: Message
+    verses:
+      - reference: John 3:16 (NKJV)
+        text: For God so loved the world…
+        reference_position: below   # optional override for this slide only
 ```
 
 ### slide_style Fields

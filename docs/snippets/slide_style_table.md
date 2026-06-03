@@ -11,7 +11,7 @@
 | `annotation_color` | string | `#1E50C8` blue | `#1E50C8` blue | Numbered bubble annotations (❶❷❸…) |
 | `font_name` | string | **`Palatino`** | **`Palatino`** | Font family for all text |
 | `alignment` | string | **`"left"`** | **`"left"`** | Default text alignment (`"left"`, `"center"`, `"right"`) |
-| `reference_position` | string | **`"top"`** | **`"top"`** | `"top"` or `"bottom"` for verse reference line |
+| `reference_position` | string | **`"bottom"`** | **`"bottom"`** | `"bottom"` (slide foot, default), `"below"` (under verse body), or `"top"` (above verse) |
 | `split_max_length` | integer | **`200`** | **`200`** | Deck-level default max characters before verse text splits |
 
 ### `typography.*` (pt sizes)
@@ -107,7 +107,7 @@ Sizes use `typography.section_title_size_pt` / `section_subtitle_size_pt`.
 See [templates.md](../templates.md) for merge priority, examples, and custom slide types.
 
 !!! note
-    **Package defaults**: When `background_image` or `background_color` is set, all text colors automatically default to white/light variants. Individual color keys override these auto-defaults. `font_name`, `alignment`, and `reference_position` have opinionated defaults (Palatino / left / top).
+    **Package defaults**: When `background_image` or `background_color` is set, all text colors automatically default to white/light variants. Individual color keys override these auto-defaults. `font_name`, `alignment`, and `reference_position` have opinionated defaults (Palatino / left / bottom).
 
 !!! tip
     **Zero regression**: If you omit `slide_style` entirely, all slides retain their standard default parameters automatically.

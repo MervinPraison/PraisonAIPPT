@@ -17,7 +17,7 @@ sections:
 
       font_name: Palatino
 
-      reference_position: top
+      reference_position: bottom
 
       text_color: white'
     list_type: bullet

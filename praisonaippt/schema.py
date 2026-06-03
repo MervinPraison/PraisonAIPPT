@@ -40,6 +40,7 @@ _VERSE_KEYS = {
     "large_text",
     "list_type",
     "alignment",
+    "reference_position",
     "font_size",
     "reference_font_size",
     "leading_title",
