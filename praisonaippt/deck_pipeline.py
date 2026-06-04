@@ -45,6 +45,8 @@ GATE_POST_RENDER = "post_render"
 GATE_AV_SYNC = "av_sync"
 GATE_PIP_CENTRING = "pip_centring"
 GATE_SLIDE_JPEG_GOLDEN = "slide_jpeg_golden"
+GATE_SLIDE_QA = "slide_qa"
+GATE_MP4_FRAMES = "mp4_frames"
 GATE_PLAN_APPROVAL = "plan_approval"
 GATE_RIGHTS = "rights_licensing"
 
@@ -85,6 +87,8 @@ class PipelineReport:
             GATE_AV_SYNC: ("av_sync", "timing_drift"),
             GATE_PIP_CENTRING: ("pip_centring",),
             GATE_SLIDE_JPEG_GOLDEN: ("slide_jpegs",),
+            GATE_SLIDE_QA: ("slide_qa",),
+            GATE_MP4_FRAMES: ("mp4_frames",),
             GATE_POST_RENDER: ("post_render",),
             GATE_UNIFIED_PIPELINE: ("export_mp4", "build_pptx"),
         }
@@ -131,7 +135,7 @@ def iter_verses(data: dict) -> List[dict]:
 
 def expected_deck_duration(data: dict) -> float:
     vex = data.get("video_export") or {}
-    title = float(vex.get("slide_duration_sec") or 3.0)
+    title = 0.0 if data.get("skip_title_slide") else float(vex.get("slide_duration_sec") or 3.0)
     return title + sum(float(v.get("duration_sec") or 0) for v in iter_verses(data))
 
 
@@ -546,6 +550,8 @@ def check_slide_jpegs(
     hash_diffs: List[str] = []
     if golden_dir:
         gold = Path(golden_dir)
+        if not gold.is_absolute():
+            gold = (base / golden_dir).resolve()
         for j in jpgs:
             g = gold / j.name
             if not g.is_file():
@@ -643,6 +649,9 @@ class PipelineOptions:
     calibrate_force: bool = False
     pip_validation_image: Optional[str] = None
     golden_slide_dir: Optional[str] = None
+    export_mp4_frames: bool = False
+    mp4_frames_dir: Optional[str] = None
+    validate_slide_qa: bool = True
     post_render_qc: bool = True
     strict_post_render: bool = False
     transcribe_audio: Optional[str] = None
@@ -670,6 +679,12 @@ class PipelineOptions:
             opts.variant_prefix = str(pipe["variant_prefix"])
         if opts.golden_slide_dir is None and pipe.get("golden_slide_dir"):
             opts.golden_slide_dir = str(pipe["golden_slide_dir"])
+        if not opts.export_mp4_frames and pipe.get("export_mp4_frames"):
+            opts.export_mp4_frames = bool(pipe["export_mp4_frames"])
+        if opts.mp4_frames_dir is None and pipe.get("mp4_frames_dir"):
+            opts.mp4_frames_dir = str(pipe["mp4_frames_dir"])
+        if "validate_slide_qa" in pipe:
+            opts.validate_slide_qa = bool(pipe["validate_slide_qa"])
         if "validate_plan" in pipe:
             opts.validate_plan = bool(pipe["validate_plan"])
         if "validate_rights" in pipe:
@@ -875,8 +890,21 @@ def run_pipeline(opts: PipelineOptions) -> PipelineReport:
                 _write_report(report, opts)
                 return report
     golden = opts.golden_slide_dir or pipe_cfg.get("golden_slide_dir")
+    img_dir: Optional[Path] = None
     if data.get("slide_images_dir"):
+        from .slide_images import resolve_slide_images_dir
+
+        try:
+            img_dir = resolve_slide_images_dir(
+                data, pptx_path=pptx_path if opts.build_pptx else deck_path, source_file=sf,
+            )
+        except Exception:
+            img_dir = Path(sf).parent / str(data["slide_images_dir"])
         report.add(check_slide_jpegs(data, source_file=sf, golden_dir=golden))
+        if opts.validate_slide_qa and img_dir and img_dir.is_dir():
+            from .slide_qa import check_slide_qa_manifest
+
+            report.add(check_slide_qa_manifest(data, source_file=sf, jpeg_dir=img_dir))
         if not report.ok and opts.fail_fast:
             _write_report(report, opts)
             return report
@@ -907,9 +935,36 @@ def run_pipeline(opts: PipelineOptions) -> PipelineReport:
                 if not qc.ok and opts.strict_post_render and opts.fail_fast:
                     _write_report(report, opts)
                     return report
+            if opts.export_mp4_frames or pipe_cfg.get("export_mp4_frames"):
+                from .slide_qa import check_mp4_plan_frames, resolve_mp4_output
+
+                frames_dir = opts.mp4_frames_dir or pipe_cfg.get("mp4_frames_dir")
+                report.add(
+                    check_mp4_plan_frames(
+                        data, result, source_file=sf, frames_dir=frames_dir,
+                    ),
+                )
+                if not report.ok and opts.fail_fast:
+                    _write_report(report, opts)
+                    return report
         except Exception as e:
             report.add(StepResult("export_mp4", False, str(e)))
             if opts.fail_fast:
+                _write_report(report, opts)
+                return report
+
+    elif opts.export_mp4_frames or pipe_cfg.get("export_mp4_frames"):
+        from .slide_qa import check_mp4_plan_frames, resolve_mp4_output
+
+        mp4_candidate = opts.output_mp4 or str(resolve_mp4_output(data, deck_path))
+        if Path(mp4_candidate).is_file():
+            frames_dir = opts.mp4_frames_dir or pipe_cfg.get("mp4_frames_dir")
+            report.add(
+                check_mp4_plan_frames(
+                    data, mp4_candidate, source_file=sf, frames_dir=frames_dir,
+                ),
+            )
+            if not report.ok and opts.fail_fast:
                 _write_report(report, opts)
                 return report
 

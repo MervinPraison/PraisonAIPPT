@@ -1545,16 +1545,17 @@ def create_presentation(data, output_file=None, custom_title=None,
     source_file = data.get("_source_file")
     if source_file:
         slide_style["_source_file"] = source_file
+    if data.get("jpeg_show_pip_preview"):
+        slide_style["_jpeg_show_pip_preview"] = True
 
-    # Add title slide
-    if custom_title:
-        title = custom_title
-        subtitle = ""
-    else:
-        title = data.get("presentation_title", "Bible Verses Collection")
-        subtitle = data.get("presentation_subtitle", "Selected Scriptures")
-    
-    add_title_slide(prs, title, subtitle, style=slide_style)
+    if not data.get("skip_title_slide"):
+        if custom_title:
+            title = custom_title
+            subtitle = ""
+        else:
+            title = data.get("presentation_title", "Bible Verses Collection")
+            subtitle = data.get("presentation_subtitle", "Selected Scriptures")
+        add_title_slide(prs, title, subtitle, style=slide_style)
     
     # Add slides for each verse with section slides
     for section_data in verses_data:

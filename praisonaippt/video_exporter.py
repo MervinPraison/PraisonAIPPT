@@ -258,7 +258,8 @@ class SlideVideoEntry:
 
 def iter_slide_plan(data: dict, custom_title: Optional[str] = None):
     """Mirror create_presentation slide order for manifest building."""
-    yield {"slide_role": "title", "verse": None, "slide_type": "title"}
+    if not data.get("skip_title_slide"):
+        yield {"slide_role": "title", "verse": None, "slide_type": "title"}
     for section in data.get("sections", []):
         if section.get("section") and not custom_title:
             yield {
@@ -487,6 +488,8 @@ def build_video_manifest(
             media_region = region_from_placement(
                 regions.get("media"), overlays.media, slide_w_in, slide_h_in, style, framing_kind,
             )
+            if slide_type == "avatar_media_3" and entry.media_path:
+                entry.skip_media_overlay = True
             panel = regions.get("text_panel")
             entry.text_panel_px = _box_px(
                 panel, slide_w_in, slide_h_in, options.width, options.height

@@ -114,6 +114,10 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "pip_margin_in": 0.45,
         "crop_y_ratio": 0.025,
         "zoom_ratio": 1.46,
+        "panel_width_ratio": 0.42,
+        "panel_height_in": 0.9,
+        "panel_margin_in": 0.35,
+        "panel_media_gap_in": 0.06,
     },
     "avatar_name_card": {
         "panel_width_ratio": 0.42,

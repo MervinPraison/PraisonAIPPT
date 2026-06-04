@@ -120,6 +120,9 @@ def pip_probe_dims_for_shape(
     """Probe width×height in px for circle, square, rect, h_rect, v_rect (matches compositor)."""
     pip = ((style or {}).get("layouts") or {}).get("pip") or {}
     ratio = float(pip.get("width_ratio") or layout_in(style, "pip", "width_ratio", 0.14))
+    hero = ((style or {}).get("layouts") or {}).get("avatar_media_3") or {}
+    if hero.get("pip_width_ratio") is not None:
+        ratio = min(ratio, float(hero["pip_width_ratio"]))
     w = max(64, int(round(slide_w_px * ratio)))
     s = str(shape).lower()
     if s in ("h_rect", "horizontal", "wide"):

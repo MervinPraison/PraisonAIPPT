@@ -59,7 +59,7 @@ _PIP_KINDS = frozenset({
 })
 
 # Live PiP is composited in video export; baking a still here duplicates FFmpeg overlay.
-_AVATAR_PIP_VIDEO_OVERLAY_ONLY = frozenset({"avatar_quote"})
+_AVATAR_PIP_VIDEO_OVERLAY_ONLY = frozenset({"avatar_quote", "avatar_media_3"})
 
 _VIDEO_EXTS = {".mp4": "video/mp4", ".mov": "video/quicktime", ".m4v": "video/mp4", ".webm": "video/webm"}
 _IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff"}
@@ -260,6 +260,23 @@ def _text_panel_box(prs, style: dict, kind: str, position: str) -> RegionBox:
     return RegionBox(cx + margin, cy + ch - ph - margin, pw, ph)
 
 
+def _media_region_below_panel(
+    cx: float,
+    cy: float,
+    cw: float,
+    ch: float,
+    panel: RegionBox,
+    style: dict,
+    kind: str,
+) -> RegionBox:
+    """Hero screenshot band under the top headline panel (``avatar_media_3``)."""
+    gap = float(layout_in(style, kind, "panel_media_gap_in", 0.06))
+    bottom_margin = float(layout_in(style, kind, "pip_margin_in", 0.32))
+    media_top = panel.top_in + panel.height_in + gap
+    media_h = (cy + ch) - media_top - bottom_margin
+    return RegionBox(cx, media_top, cw, max(1.0, media_h))
+
+
 def _name_card_pill_boxes(
     cx: float, cy: float, cw: float, ch: float, style: dict, kind: str, *, has_title: bool
 ) -> Tuple[RegionBox, Optional[RegionBox]]:
@@ -321,8 +338,14 @@ def _slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional[RegionBox]
             avatar.left_in, avatar.top_in, avatar.width_in, avatar.height_in, rounded, radius
         )
     elif kind in _PIP_KINDS:
-        regions["media"] = full if kind != "avatar_quote" else None
-        regions["avatar"] = _pip_box(cx, cy, cw, ch, style, kind)
+        if kind == "avatar_media_3":
+            panel = _text_panel_box(prs, style, kind, "top")
+            regions["text_panel"] = panel
+            regions["media"] = _media_region_below_panel(cx, cy, cw, ch, panel, style, kind)
+            regions["avatar"] = _pip_box(cx, cy, cw, ch, style, kind)
+        else:
+            regions["media"] = full if kind != "avatar_quote" else None
+            regions["avatar"] = _pip_box(cx, cy, cw, ch, style, kind)
     elif kind == "avatar_name_card":
         regions["avatar"] = full
         name_box, title_box = _name_card_pill_boxes(
@@ -437,6 +460,28 @@ def _draw_filled_rect(slide, box: RegionBox, rgb: RGBColor, rounded: bool = Fals
 def _place_empty_region(slide, box: RegionBox, zone: str) -> None:
     colour = _MEDIA_WHITE if zone == "media" else _AVATAR_GREY
     _draw_filled_rect(slide, box, colour, rounded=box.rounded)
+
+
+def _jpeg_pip_preview_enabled(style: Optional[dict], verse: dict) -> bool:
+    if verse.get("jpeg_show_pip_preview") is False:
+        return False
+    if verse.get("jpeg_show_pip_preview") is True:
+        return True
+    return bool((style or {}).get("_jpeg_show_pip_preview"))
+
+
+def _place_pip_preview_placeholder(slide, box: RegionBox, style: Optional[dict]) -> None:
+    """Grey circle for JPEG layout QA; live HeyGen PiP is composited in MP4 export."""
+    from pptx.enum.shapes import MSO_SHAPE
+    from pptx.util import Inches, Pt
+
+    left, top, width, height = _box_lengths(box)
+    shape = slide.shapes.add_shape(MSO_SHAPE.OVAL, left, top, width, height)
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = _PIP_BACKDROP_GREY
+    border = str(layout_in(style or {}, "pip", "border_color", "#FFFFFF"))
+    shape.line.color.rgb = _hex_rgb(border)
+    shape.line.width = Pt(float(layout_in(style or {}, "pip", "border_width_pt", 2.0)))
 
 
 def _fit_movie_in_box(slide, movie_path: str, poster: io.BytesIO, box: RegionBox, mime: str) -> None:
@@ -1001,15 +1046,18 @@ def render_avatar_slide(prs, kind: str, verse: dict, style=None, *, source_file:
 
     if kind == "avatar_quote":
         _render_avatar_quote(slide, prs, verse, style, regions, theme)
-        if avatar_box and kind not in _AVATAR_PIP_VIDEO_OVERLAY_ONLY:
-            _place_avatar_in_box(
-                slide,
-                avatar_box,
-                verse.get("avatar_video_path"),
-                poster_path=verse.get("avatar_poster_path"),
-                source_file=source_file,
-                style=style,
-            )
+        if avatar_box:
+            if kind not in _AVATAR_PIP_VIDEO_OVERLAY_ONLY:
+                _place_avatar_in_box(
+                    slide,
+                    avatar_box,
+                    verse.get("avatar_video_path"),
+                    poster_path=verse.get("avatar_poster_path"),
+                    source_file=source_file,
+                    style=style,
+                )
+            elif _jpeg_pip_preview_enabled(style, verse):
+                _place_pip_preview_placeholder(slide, avatar_box, style)
         _stamp_slide_type_note(slide, kind, verse)
         return slide
 
@@ -1082,6 +1130,7 @@ def render_avatar_slide(prs, kind: str, verse: dict, style=None, *, source_file:
             poster_path=verse.get("avatar_poster_path"),
             source_file=source_file,
             style=style,
+            draw_frame=False if kind in _AVATAR_PIP_VIDEO_OVERLAY_ONLY else None,
         )
 
     if kind == "avatar_name_card":

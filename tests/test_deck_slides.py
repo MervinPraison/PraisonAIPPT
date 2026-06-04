@@ -103,14 +103,25 @@ def test_rect_avatar_shape_for_split_layouts():
         assert deck_avatar_shape(kind, {}, "circle") == "rect"
 
 
+def test_circle_pip_overrides_rect_deck_layouts():
+    style = {
+        "layouts": {
+            "deck_channel_analysis": {"avatar_shape": "circle"},
+            "deck_thank_you": {"avatar_shape": "circle"},
+        },
+    }
+    assert deck_avatar_shape("deck_channel_analysis", style, "circle") == "circle"
+    assert deck_avatar_shape("deck_thank_you", style, "circle") == "circle"
+
+
 def test_circle_avatar_shape_for_pip_layouts():
     assert deck_avatar_shape("deck_exec_summary", {}, "circle") == "circle"
     assert deck_avatar_shape("deck_region_grid", {}, "circle") == "circle"
 
 
 def test_deck_skips_avatar_overlay():
-    assert deck_skips_avatar_overlay("deck_thank_you")
     assert deck_skips_avatar_overlay("deck_title_split")
+    assert not deck_skips_avatar_overlay("deck_thank_you")
     assert not deck_skips_avatar_overlay("deck_exec_summary")
 
 

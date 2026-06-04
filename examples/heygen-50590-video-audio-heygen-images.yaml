@@ -1,0 +1,191 @@
+# HeyGen 50590 — media-first hero screenshots; same HeyGen MP4 + transcript timings as base variant.
+# Build: praisonaippt -i examples/heygen-50590-video-audio-heygen-images.yaml \
+#          -o examples/heygen-50590-video-audio-heygen-images.pptx \
+#          --convert-video --video-output examples/heygen-50590-video-audio-heygen-images.mp4
+
+presentation_title: Dreaming, outcomes, and webhooks
+presentation_subtitle: Claude Managed Agents · with product visuals
+slide_size: widescreen
+slide_images_dir: slide_images/heygen-50590-images
+skip_title_slide: true
+jpeg_show_pip_preview: true
+slide_qa:
+  expect_pip: true
+  min_media_width_ratio: 0.35
+auto_upload_gdrive: false
+pipeline:
+  transcript_path: examples/short-script-50590_timestamps.json
+  auto_sync: false
+  validate_pip: true
+  validate_slide_qa: true
+  golden_slide_dir: slide_images/heygen-50590-images/golden
+  export_mp4_frames: true
+  mp4_frames_dir: slide_images/heygen-50590-images/mp4-frames
+  content_approved: true
+  rights_acknowledged: true
+  require_rights_ack: false
+avatar_calibration:
+  auto: true
+  method: hybrid
+  crop_x_preferred: 0.53
+  crop_x_window:
+  - 0.5
+  - 0.56
+  crop_y_preferred: 0.1
+  anchor_weight: 0.15
+  detector: auto
+slide_style:
+  background_color: '#121212'
+  text_color: '#FFFFFF'
+  subtitle_color: '#B8B8B8'
+  title_color: '#FFFFFF'
+  reference_color: '#AAAAAA'
+  highlight_color: '#FFD700'
+  font_name: Calibri
+  layouts:
+    pip:
+      width_ratio: 0.2
+      margin_in: 0.38
+      shape: circle
+      avatar_shape: circle
+    avatar_media_3:
+      pip_width_ratio: 0.15
+      pip_margin_in: 0.32
+      pip_position: bottom_right
+      crop_y_ratio: 0.1
+      zoom_ratio: 1.3
+    deck_thank_you:
+      avatar_shape: circle
+      pip_position: bottom_right
+      pip_width_ratio: 0.2
+      pip_margin_in: 0.38
+      zoom_ratio: 1.0
+      crop_y_ratio: 0.12
+_pip_overlay: &pip_overlay
+  avatar:
+    anchor: bottom_right
+    width_ratio: 0.2
+    margin_in: 0.38
+    shape: circle
+    zoom_ratio: 1.3
+    crop_y_ratio: 0.1
+_pip_hero_overlay: &pip_hero_overlay
+  avatar:
+    anchor: bottom_right
+    width_ratio: 0.15
+    margin_in: 0.32
+    shape: circle
+    zoom_ratio: 1.3
+    crop_y_ratio: 0.1
+sections:
+- verses:
+  - slide_type: big_number
+    number: '3'
+    label: Dreaming · Outcomes · Webhooks
+    reference: AI agents just got a serious upgrade
+    duration_sec: 4.54
+    audio_start_sec: 0.0
+    notes: AI agents just got a serious upgrade and it comes down to three things.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    video_overlay: *pip_overlay
+    qa:
+      expect_media: false
+  - slide_type: avatar_media_3
+    headline: Dreaming
+    subheader: Persistent, proactive agents — work between sessions
+    media_path: slide_images/HHt8A9BbYAAUfvZ.jpg
+    media_fit: cover
+    duration_sec: 13.66
+    audio_start_sec: 4.54
+    notes: First, dreaming. Claude agents can now work in the background between sessions
+      without you keeping anything open. Persistent, proactive agents, not just reactive
+      ones.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    video_overlay: *pip_hero_overlay
+  - slide_type: avatar_media_3
+    headline: Outcomes
+    subheader: Define success, not every step — rubric grader
+    media_path: slide_images/HHt8A77aUAAOCdt.jpg
+    media_fit: cover
+    duration_sec: 8.1
+    audio_start_sec: 18.2
+    notes: Instead of scripting every step, you tell the agent what to achieve. That's
+      a fundamentally different way to build. Third, webhooks.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    video_overlay: *pip_hero_overlay
+    qa:
+      expect_media: true
+  - slide_type: avatar_media_3
+    headline: Webhooks
+    subheader: Production infrastructure — notify instantly, no polling
+    media_path: slide_images/HHpoqNAXcAcHY8h.jpg
+    media_fit: contain
+    qa:
+      expect_media: true
+      min_media_width_ratio: 0.28
+    duration_sec: 10.68
+    audio_start_sec: 26.3
+    notes: When an agent finishes or fails, your system gets notified instantly. No
+      polling, no guessing. Real production infrastructure.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    video_overlay: *pip_hero_overlay
+  - slide_type: avatar_quote
+    text: How do you actually run AI agents in the real world?
+    reference: All three answer the same question
+    duration_sec: 7.56
+    audio_start_sec: 36.98
+    notes: What makes this update interesting isn't any one feature. It's that all
+      three together answer the same question.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    video_overlay: *pip_overlay
+    qa:
+      expect_media: false
+  - slide_type: avatar_media_3
+    headline: Production foundation
+    subheader: Dreaming · Outcomes · Webhooks
+    media_path: slide_images/managed-agents-lifecycle-1200x800.png
+    media_fit: contain
+    duration_sec: 7.34
+    audio_start_sec: 44.54
+    notes: How do you actually run AI agents in the real world? Background processing,
+      goal-based evaluation, async notifications.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    video_overlay: *pip_hero_overlay
+  - slide_type: deck_thank_you
+    color_scheme: thank_you_blue
+    text: THANK
+    reference: YOU
+    contact: claude.com/blog/new-in-claude-managed-agents
+    duration_sec: 5.05
+    audio_start_sec: 51.88
+    notes: That's a foundation, not a demo. Read the full piece online.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    video_overlay: *pip_overlay
+slide_timestamps:
+- 0.0
+- 4.54
+- 18.2
+- 26.3
+- 36.98
+- 44.54
+- 51.88
+- 56.93
+video_export:
+  backend: compositor
+  preset: standard
+  narration_mode: avatar
+  audio_source: heygen_video
+  avatar_timeline: continuous
+  slide_duration_sec: 3.0
+  avatar:
+    fit: cover
+    shape: circle
+    anchor: bottom_right
+    width_ratio: 0.2
+    margin_in: 0.38
+    crop_y_ratio: 0.1
+    zoom_ratio: 1.3
+  media:
+    fit: cover
+  captions:
+    enabled: true

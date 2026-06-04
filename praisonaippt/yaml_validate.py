@@ -66,7 +66,8 @@ _VIDEO_RESOLUTION_KEYS = frozenset({"width", "height"})
 
 _PIPELINE_KEYS = frozenset({
     "content_master", "transcript_path", "auto_sync", "validate_pip", "strict_pip",
-    "variant_prefix", "golden_slide_dir", "require_rights_ack", "rights_acknowledged",
+    "variant_prefix", "golden_slide_dir", "export_mp4_frames", "mp4_frames_dir",
+    "validate_slide_qa", "require_rights_ack", "rights_acknowledged",
     "content_approved", "plan_approved", "plan_draft",
     "export_mp4", "export_slide_jpegs", "post_render_qc", "strict_post_render",
     "fail_fast", "validate_plan", "validate_rights", "seed_timing", "report_path",
@@ -376,6 +377,23 @@ def validate_slide_timestamps(timestamps: Any, path: str = "slide_timestamps") -
         prev = val
 
 
+def _validate_qa_block(qa: Any, path: str) -> None:
+    if qa is None:
+        return
+    if not isinstance(qa, dict):
+        raise SchemaError(f"{path} must be a mapping")
+    for key in ("expect_pip", "expect_media"):
+        if qa.get(key) is not None:
+            _check_bool(qa[key], f"{path}.{key}")
+    if qa.get("min_media_width_ratio") is not None:
+        try:
+            ratio = float(qa["min_media_width_ratio"])
+        except (TypeError, ValueError):
+            raise SchemaError(f"{path}.min_media_width_ratio must be a number")
+        if ratio < 0.0 or ratio > 1.0:
+            raise SchemaError(f"{path}.min_media_width_ratio must be between 0 and 1")
+
+
 def validate_verse_options(verse: dict, path: str) -> None:
     """Enum and shape checks shared by all verse types (after renderer-specific rules)."""
     _check_enum(verse.get("alignment"), _ALIGNMENT, f"{path}.alignment")
@@ -409,6 +427,8 @@ def validate_verse_options(verse: dict, path: str) -> None:
 
     _check_positive_number(verse.get("duration_sec"), f"{path}.duration_sec", allow_zero=True)
     _check_positive_number(verse.get("audio_start_sec"), f"{path}.audio_start_sec", allow_zero=True)
+
+    _validate_qa_block(verse.get("qa"), f"{path}.qa")
 
     if verse.get("avatar_shape") is not None:
         _check_enum(verse["avatar_shape"], _AVATAR_SHAPES, f"{path}.avatar_shape")
@@ -521,8 +541,11 @@ def validate_deck_options(data: dict) -> None:
     validate_pipeline(data.get("pipeline"))
     validate_avatar_calibration(data.get("avatar_calibration"))
     _validate_slide_timestamp_count(data)
+    _validate_qa_block(data.get("slide_qa"), "slide_qa")
     if data.get("slide_images_dir") is not None and not isinstance(data.get("slide_images_dir"), str):
         raise SchemaError("slide_images_dir must be a string path")
+    if data.get("jpeg_show_pip_preview") is not None:
+        _check_bool(data["jpeg_show_pip_preview"], "jpeg_show_pip_preview")
 
 
 def _validate_slide_timestamp_count(data: dict) -> None:

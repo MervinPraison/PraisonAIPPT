@@ -177,6 +177,22 @@ def resolve_deck_style(deck_style: dict, verse: dict, kind: str) -> dict:
     return style
 
 
+def _layout_circle_pip(
+    style: dict, kind: str, verse: Optional[dict] = None,
+) -> bool:
+    """True when verse or ``layouts.<kind>`` requests a circular PiP (not full-bleed rect)."""
+    if verse and verse.get("avatar_shape"):
+        return str(verse["avatar_shape"]).lower() in ("circle", "round", "rounded")
+    raw = layout_in(style, kind, "avatar_shape", None)
+    if raw is None and kind != "pip":
+        raw = layout_in(style, "pip", "avatar_shape", None)
+    return str(raw or "").lower() in ("circle", "round", "rounded")
+
+
+def _deck_pip_anchor(style: dict, kind: str, default: str = "bottom_right") -> str:
+    return str(layout_in(style, kind, "pip_position", default) or default)
+
+
 def deck_avatar_shape(
     kind: str,
     style: dict,
@@ -188,6 +204,8 @@ def deck_avatar_shape(
     """Resolve FFmpeg avatar mask from YAML ``avatar_shape`` or layout-aware ``auto``."""
     from .avatar_layouts import resolve_avatar_shape, shape_for_video_overlay
 
+    if _layout_circle_pip(style, kind, verse):
+        return shape_for_video_overlay("circle")
     if kind in DECK_RECT_AVATAR_TYPES:
         return shape_for_video_overlay("h_rect")
     shape = resolve_avatar_shape(
@@ -562,8 +580,13 @@ def export_deck_slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional
         ratio = float(layout_in(style, kind, "left_width_ratio", 0.45))
         lw = sw * ratio
         regions["text_panel"] = RegionBox(margin, margin, lw - margin * 2, 1.6)
-        av_h = float(layout_in(style, kind, "avatar_height_in", 3.0))
-        regions["avatar"] = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
+        if _layout_circle_pip(style, kind):
+            regions["avatar"] = _pip_box_at(
+                0, 0, sw, sh, style, kind, _deck_pip_anchor(style, kind),
+            )
+        else:
+            av_h = float(layout_in(style, kind, "avatar_height_in", 3.0))
+            regions["avatar"] = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
         regions["content"] = RegionBox(lw, 0.0, sw - lw, sh)
     elif kind == "deck_region_grid":
         regions["text_panel"] = RegionBox(margin, margin, sw * 0.55, 1.2)
@@ -582,8 +605,13 @@ def export_deck_slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional
         ratio = float(layout_in(style, kind, "left_width_ratio", 0.45))
         lw = sw * ratio
         regions["text_panel"] = RegionBox(margin, margin, lw - margin * 2, 1.6)
-        av_h = float(layout_in(style, kind, "avatar_height_in", 3.0))
-        regions["avatar"] = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
+        if _layout_circle_pip(style, kind):
+            regions["avatar"] = _pip_box_at(
+                0, 0, sw, sh, style, kind, _deck_pip_anchor(style, kind),
+            )
+        else:
+            av_h = float(layout_in(style, kind, "avatar_height_in", 3.0))
+            regions["avatar"] = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
         regions["content"] = RegionBox(lw, 0.0, sw - lw, sh)
     elif kind == "deck_customer_segments":
         regions["text_panel"] = RegionBox(margin, margin, sw * 0.55, 1.2)
@@ -591,10 +619,16 @@ def export_deck_slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional
         col_top = float(layout_in(style, kind, "columns_top_in", 1.55))
         regions["content"] = RegionBox(margin, col_top, sw - 2 * margin, sh - col_top - margin)
     elif kind == "deck_thank_you":
-        ratio = float(layout_in(style, kind, "avatar_width_ratio", 0.5))
-        split = sw * ratio
-        regions["text_panel"] = RegionBox(margin, margin, split - margin * 1.5, sh - margin * 2)
-        regions["avatar"] = RegionBox(split, 0.0, sw - split, sh)
+        if _layout_circle_pip(style, kind):
+            regions["text_panel"] = RegionBox(margin, margin, sw * 0.72, sh - margin * 2)
+            regions["avatar"] = _pip_box_at(
+                0, 0, sw, sh, style, kind, _deck_pip_anchor(style, kind),
+            )
+        else:
+            ratio = float(layout_in(style, kind, "avatar_width_ratio", 0.5))
+            split = sw * ratio
+            regions["text_panel"] = RegionBox(margin, margin, split - margin * 1.5, sh - margin * 2)
+            regions["avatar"] = RegionBox(split, 0.0, sw - split, sh)
     elif kind == "deck_agenda":
         list_top = float(layout_in(style, kind, "list_top_in", 1.55))
         regions["text_panel"] = RegionBox(margin, margin, sw * 0.4, 1.0)
@@ -705,12 +739,23 @@ def _render_split_performance(slide, prs, verse: dict, style: dict, theme: dict,
     title_h = _add_title_block(
         slide, margin, margin, title_w, title, subtitle, style, left_theme, max_height_in=max_title_h,
     )
-    avatar_box = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
-    _place_avatar_in_box(
-        slide, avatar_box, verse.get("avatar_video_path"),
-        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
-        layout_kind="deck_split_performance", verse=verse, panel_fill_rgb=_hex_rgb(left_bg),
-    )
+    if _layout_circle_pip(style, "deck_split_performance", verse):
+        pip = _pip_box_at(
+            0, 0, sw, sh, style, "deck_split_performance",
+            _deck_pip_anchor(style, "deck_split_performance"),
+        )
+        _place_avatar_in_box(
+            slide, pip, verse.get("avatar_video_path"),
+            poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+            layout_kind="deck_split_performance", verse=verse, draw_frame=False,
+        )
+    else:
+        avatar_box = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
+        _place_avatar_in_box(
+            slide, avatar_box, verse.get("avatar_video_path"),
+            poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+            layout_kind="deck_split_performance", verse=verse, panel_fill_rgb=_hex_rgb(left_bg),
+        )
     header = str(verse.get("header") or "")
     rows = _resolve_rows(verse.get("rows") or [])
     rx = lw + margin
@@ -888,13 +933,24 @@ def _render_channel_analysis(slide, prs, verse: dict, style: dict, theme: dict, 
     line2 = str(verse.get("reference") or verse.get("subheader") or "")
     title_w = lw - margin * 2
     _add_dual_tone_title(slide, margin, margin, title_w, line1, line2, style, theme)
-    av_h = float(layout_in(style, "deck_channel_analysis", "avatar_height_in", 3.0))
-    avatar_box = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
-    _place_avatar_in_box(
-        slide, avatar_box, verse.get("avatar_video_path"),
-        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
-        layout_kind="deck_channel_analysis", verse=verse, panel_fill_rgb=_hex_rgb(left_bg),
-    )
+    if _layout_circle_pip(style, "deck_channel_analysis", verse):
+        pip = _pip_box_at(
+            0, 0, sw, sh, style, "deck_channel_analysis",
+            _deck_pip_anchor(style, "deck_channel_analysis"),
+        )
+        _place_avatar_in_box(
+            slide, pip, verse.get("avatar_video_path"),
+            poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+            layout_kind="deck_channel_analysis", verse=verse, draw_frame=False,
+        )
+    else:
+        av_h = float(layout_in(style, "deck_channel_analysis", "avatar_height_in", 3.0))
+        avatar_box = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
+        _place_avatar_in_box(
+            slide, avatar_box, verse.get("avatar_video_path"),
+            poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+            layout_kind="deck_channel_analysis", verse=verse, panel_fill_rgb=_hex_rgb(left_bg),
+        )
     header = str(verse.get("header") or "")
     rows = _resolve_rows(verse.get("rows") or [])
     rx = lw + margin
@@ -992,18 +1048,36 @@ def _render_customer_segments(slide, prs, verse: dict, style: dict, theme: dict,
 
 def _render_thank_you(slide, prs, verse: dict, style: dict, theme: dict, *, source_file: Optional[str]) -> None:
     sw, sh = prs.slide_width.inches, prs.slide_height.inches
-    ratio = float(layout_in(style, "deck_thank_you", "avatar_width_ratio", 0.5))
-    split = sw * ratio
     left_bg = str(style.get("left_panel_color") or style.get("background_color") or "#2563EB")
-    _draw_filled_rect(slide, RegionBox(0, 0, split, sh), _hex_rgb(left_bg))
-    _draw_filled_rect(slide, RegionBox(split, 0, sw - split, sh), _hex_rgb(left_bg))
     margin = float(layout_in(style, "deck_thank_you", "margin_in", 0.75))
     line1 = str(verse.get("text") or verse.get("headline") or "THANK")
     line2 = str(verse.get("reference") or verse.get("subheader") or "YOU")
+    contact = str(verse.get("contact") or verse.get("email") or "")
+
+    if _layout_circle_pip(style, "deck_thank_you", verse):
+        _draw_filled_rect(slide, RegionBox(0, 0, sw, sh), _hex_rgb(left_bg))
+        title_top = sh * 0.22
+        title_w = sw * 0.72 - margin * 1.6
+        title_h = _add_dual_tone_title(slide, margin, title_top, title_w, line1, line2, style, theme)
+        if contact:
+            _add_contact_bar(slide, margin, title_top + title_h + 0.35, title_w, contact, style)
+        pip = _pip_box_at(
+            0, 0, sw, sh, style, "deck_thank_you", _deck_pip_anchor(style, "deck_thank_you"),
+        )
+        _place_avatar_in_box(
+            slide, pip, verse.get("avatar_video_path"),
+            poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+            layout_kind="deck_thank_you", verse=verse, draw_frame=False,
+        )
+        return
+
+    ratio = float(layout_in(style, "deck_thank_you", "avatar_width_ratio", 0.5))
+    split = sw * ratio
+    _draw_filled_rect(slide, RegionBox(0, 0, split, sh), _hex_rgb(left_bg))
+    _draw_filled_rect(slide, RegionBox(split, 0, sw - split, sh), _hex_rgb(left_bg))
     title_top = sh * 0.22
     title_w = split - margin * 1.6
     title_h = _add_dual_tone_title(slide, margin, title_top, title_w, line1, line2, style, theme)
-    contact = str(verse.get("contact") or verse.get("email") or "")
     if contact:
         _add_contact_bar(slide, margin, title_top + title_h + 0.35, split - margin * 2, contact, style)
     avatar_box = RegionBox(split, 0.0, sw - split, sh)

@@ -76,6 +76,20 @@ def test_border_split_ratios_differ():
     assert m1.width_in > m2.width_in
 
 
+def test_avatar_media_3_media_below_text_panel():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _slide_regions
+
+    prs = Presentation()
+    regions = _slide_regions(prs, "avatar_media_3", {})
+    panel = regions["text_panel"]
+    media = regions["media"]
+    assert panel is not None
+    assert media is not None
+    assert media.top_in >= panel.top_in + panel.height_in - 0.02
+    assert media.height_in > 3.0
+
+
 def test_avatar_quote_has_no_media_region():
     from pptx import Presentation
     from praisonaippt.avatar_layouts import _slide_regions

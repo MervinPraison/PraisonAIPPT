@@ -31,6 +31,17 @@ def test_expected_deck_duration_positive():
     assert expected_deck_duration(data) > 10
 
 
+def test_expected_deck_duration_skips_title_slide():
+    data = {
+        "skip_title_slide": True,
+        "video_export": {"slide_duration_sec": 3.0},
+        "sections": [{"verses": [{"duration_sec": 4.0}, {"duration_sec": 5.0}]}],
+    }
+    assert expected_deck_duration(data) == 9.0
+    data["skip_title_slide"] = False
+    assert expected_deck_duration(data) == 12.0
+
+
 @pytest.mark.skipif(not TRANSCRIPT.is_file(), reason="transcript fixture missing")
 def test_timing_drift_tight_when_seeded():
     data = yaml.safe_load((PKG / "examples" / "heygen-50590-content.yaml").read_text(encoding="utf-8"))
