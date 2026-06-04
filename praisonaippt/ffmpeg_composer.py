@@ -256,9 +256,7 @@ def render_slide_segment(
         if ov.is_video:
             if ov.loop_video:
                 cmd += ["-stream_loop", "-1"]
-            if ov.video_start_sec > 0:
-                cmd += ["-ss", f"{ov.video_start_sec:.3f}"]
-            cmd += ["-t", f"{dur:.3f}", "-i", ov.path]
+            cmd += ["-i", ov.path]
         else:
             cmd += ["-loop", "1", "-t", f"{dur:.3f}", "-i", ov.path]
         overlay_inputs.append(ov)
@@ -295,10 +293,14 @@ def render_slide_segment(
         tag = f"ov{idx}"
         out = f"v{idx}"
         chain = scale
+        if ov.is_video:
+            start = max(0.0, float(ov.video_start_sec))
+            chain = f"trim=start={start:.3f}:duration={dur:.3f},setpts=PTS-STARTPTS,{scale}"
         if str(ov.shape).lower() in ("circle", "round", "rounded"):
-            chain = f"{scale},{_circle_alpha_filter()}"
+            chain = f"{chain},{_circle_alpha_filter()}"
         filters.append(f"[{idx}:v]{chain},setsar=1[{tag}]")
-        filters.append(f"[{prev}][{tag}]overlay={ox}:{oy}:format=auto[{out}]")
+        fmt = "auto" if str(ov.shape).lower() in ("circle", "round", "rounded") else "auto"
+        filters.append(f"[{prev}][{tag}]overlay={ox}:{oy}:format={fmt}[{out}]")
         prev = out
 
     filters.append(f"[{prev}]format=yuv420p[vout]")

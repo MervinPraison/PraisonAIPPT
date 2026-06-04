@@ -57,13 +57,13 @@ class VideoOptions:
     dpi: int = 192
     preset: str = "standard"
     slide_duration_sec: float = 5.0
-    avatar_timeline: str = "per_slide"
+    avatar_timeline: str = "auto"
     slide_range: Optional[Tuple[int, int]] = None
     keep_temp: bool = False
     avatar_fit: str = "cover"
     avatar_shape: str = "circle"
-    avatar_crop_y_ratio: float = 0.10
-    avatar_zoom_ratio: float = 1.35
+    avatar_crop_y_ratio: float = 0.06
+    avatar_zoom_ratio: float = 1.45
     media_fit_default: str = "contain"
     loop_avatar_if_shorter: bool = True
     tts_provider: str = "edge"
@@ -80,7 +80,7 @@ class VideoOptions:
             "fixed", "audio_file", "avatar", "tts", "auto",
         ):
             raise ValueError(f"Invalid narration_mode: {self.narration_mode}")
-        if self.avatar_timeline not in ("per_slide", "continuous"):
+        if self.avatar_timeline not in ("per_slide", "continuous", "auto"):
             raise ValueError(f"Invalid avatar_timeline: {self.avatar_timeline}")
 
     def __post_init__(self) -> None:
@@ -150,8 +150,22 @@ class VideoOptions:
         ts = deck.get("slide_timestamps")
         if ts:
             opts._slide_timestamps = list(ts)  # type: ignore[attr-defined]
+        _merge_slide_style_pip(opts, deck.get("slide_style") or {})
         opts.validate()
         return opts
+
+
+def _merge_slide_style_pip(opts: VideoOptions, slide_style: dict) -> None:
+    """Apply ``slide_style.layouts.pip`` crop/zoom/shape defaults to video options."""
+    pip = (slide_style.get("layouts") or {}).get("pip") or {}
+    if not isinstance(pip, dict):
+        return
+    if pip.get("crop_y_ratio") is not None:
+        opts.avatar_crop_y_ratio = float(pip["crop_y_ratio"])
+    if pip.get("zoom_ratio") is not None:
+        opts.avatar_zoom_ratio = float(pip["zoom_ratio"])
+    if pip.get("shape"):
+        opts.avatar_shape = str(pip["shape"])
 
 
 def resolve_video_backend(options: VideoOptions) -> str:
@@ -414,6 +428,13 @@ def build_video_manifest(
                 entry.avatar_box_px = _box_px(
                     pip, slide_w_in, slide_h_in, options.width, options.height
                 )
+                from .avatar_layouts import _pip_shape_kind
+
+                pip_shape = _pip_shape_kind(style)
+                if pip_shape in ("square", "rect", "rectangle"):
+                    entry.avatar_shape = "rect"
+                else:
+                    entry.avatar_shape = "circle"
 
         entries.append(entry)
     return entries
@@ -745,20 +766,37 @@ def _overlays_for_entry(
     return overlays
 
 
+def _resolve_avatar_timeline(options: VideoOptions, entries: List[SlideVideoEntry]) -> str:
+    """``auto`` → continuous when one shared avatar file spans content slides."""
+    mode = options.avatar_timeline
+    if mode != "auto":
+        return mode
+    paths = {
+        e.avatar_video_path
+        for e in entries
+        if e.avatar_video_path and e.slide_role == "content"
+    }
+    if len(paths) == 1:
+        return "continuous"
+    return "per_slide"
+
+
 def _apply_avatar_overlay_timing(
     overlays: List[OverlaySpec],
     entry: SlideVideoEntry,
     options: VideoOptions,
     avatar_offset: float,
+    *,
+    timeline: str,
 ) -> float:
     """Set continuous timeline offset and loop flags on avatar video overlays."""
     if not entry.avatar_video_path:
         return avatar_offset
-    resolved = entry.avatar_video_path
+    av_path = entry.avatar_video_path
     for ov in overlays:
-        if not ov.is_video or ov.path != resolved:
+        if not ov.is_video or ov.path != av_path:
             continue
-        if options.avatar_timeline == "continuous":
+        if timeline == "continuous":
             ov.video_start_sec = avatar_offset
         if options.loop_avatar_if_shorter:
             try:
@@ -766,7 +804,7 @@ def _apply_avatar_overlay_timing(
                     ov.loop_video = True
             except Exception:
                 pass
-    if options.avatar_timeline == "continuous":
+    if timeline == "continuous":
         return avatar_offset + entry.duration_sec
     return avatar_offset
 
@@ -788,11 +826,12 @@ def compose_video(
         lo, hi = sr
         pairs = [(e, p) for e, p in pairs if lo <= e.index + 1 <= hi]
     avatar_offset = 0.0
+    timeline = _resolve_avatar_timeline(options, [e for e, _ in pairs])
     for entry, png in pairs:
         seg = str(temp_dir / f"seg_{entry.index:03d}.mp4")
         overlays = _overlays_for_entry(entry, options, source_file=source_file)
         avatar_offset = _apply_avatar_overlay_timing(
-            overlays, entry, options, avatar_offset,
+            overlays, entry, options, avatar_offset, timeline=timeline,
         )
         audio = None
         avatar_start = 0.0
@@ -800,7 +839,7 @@ def compose_video(
             audio = entry.audio_path
         elif entry.audio_primary == "avatar" and entry.avatar_video_path:
             audio = entry.avatar_video_path
-            if options.avatar_timeline == "continuous":
+            if timeline == "continuous":
                 for ov in overlays:
                     if ov.is_video and ov.path == entry.avatar_video_path:
                         avatar_start = ov.video_start_sec

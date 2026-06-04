@@ -5,7 +5,12 @@ Designed sales-deck slide types (`deck_*`) are defined in `praisonaippt/deck_sli
 ## Build gallery
 
 ```bash
-praisonaippt -i examples/deck_template_gallery.yaml -o examples/deck_template_gallery.pptx
+python examples/build_showcase_examples.py
+```
+
+Or individually:
+
+```bash
 praisonaippt -i examples/deck_template_gallery.yaml -o examples/deck_template_gallery.pptx --convert-video
 ```
 
@@ -32,8 +37,10 @@ Set `color_scheme` on a verse (e.g. `sales_blue`, `agenda_periwinkle`). Presets 
 
 ## Video export
 
-- **Avatar shape:** full-bleed layouts (`deck_title_split`, `deck_thank_you`, `deck_split_performance`, `deck_channel_analysis`) use rectangular overlays; PiP layouts use `circle` unless overridden via layout `avatar_shape`.
+- **Avatar shape:** set `slide_style.layouts.pip.shape` to `circle` (default) or `square` / `rect` for a rectangular PiP.
+- **Size:** `width_ratio` (default **0.20**) and `margin_in` (default **0.38**).
+- **Framing:** `crop_y_ratio` (default **0.06**, lower = face higher) and `zoom_ratio` (default **1.45**).
+- **Timeline:** `avatar_timeline: auto` uses continuous playback when one HeyGen file is shared across slides (reduces blink between slides).
 - **Media:** deck slides bake images in PPTX; the compositor skips duplicate media overlays (`skip_media_overlay`).
-- Regions come from `export_deck_slide_regions()` — `media` is only set for intro/forecast bottom heroes; text bands use `content`.
 
 See also `docs/video-export.md` for narration modes and compositor options.

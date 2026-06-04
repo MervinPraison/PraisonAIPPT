@@ -61,6 +61,24 @@ python -m praisonaippt.cli \
 
 For `audio-only`, narration mode is already set in YAML (`audio_file`). For others, the YAML `video_export.narration_mode` is used automatically.
 
+## Showcase galleries (avatar + deck layouts)
+
+Rebuild **all** advanced showcase PPTX + MP4 outputs in one step:
+
+```bash
+python examples/build_showcase_examples.py
+```
+
+This syncs HeyGen variants from [`heygen-50590-content.yaml`](heygen-50590-content.yaml) and builds:
+
+| Output stem | YAML | Features |
+|-------------|------|----------|
+| `avatar_layouts_built` | [`avatar_layouts.yaml`](avatar_layouts.yaml) | 16 avatar types, HeyGen PiP, circle overlay |
+| `deck_template_gallery` | [`deck_template_gallery.yaml`](deck_template_gallery.yaml) | 12 HeyGen deck layouts, colour presets |
+| `heygen-50590-*` | Five variant YAMLs | Article deck, transcript timing, captions |
+
+See also [`docs/deck-layouts.md`](../docs/deck-layouts.md) for deck protocol reference.
+
 ## Legacy filenames
 
 | File | Same as |

@@ -377,32 +377,137 @@ def add_picture_text_slide(prs, image_path, text, style=None, image_side="left",
     return slide
 
 
-def add_table_slide(prs, rows, style=None, font_size=24, header_row=True):
-    """Table layout — plain cell text."""
+def _table_palette(style: dict, theme: dict) -> dict:
+    """Contrasting header/body fills — avoids PowerPoint default light zebra stripes."""
+    dark = theme["dark_mode"]
+    if dark:
+        return {
+            "header_fill": _parse_color(layout_in(style, "table", "header_fill", "#2563EB")),
+            "header_text": _parse_color(layout_in(style, "table", "header_text", "#FFFFFF")),
+            "row_fill": _parse_color(layout_in(style, "table", "row_fill", "#1F2937")),
+            "row_alt_fill": _parse_color(layout_in(style, "table", "row_alt_fill", "#374151")),
+            "body_text": theme["body"],
+        }
+    return {
+        "header_fill": _parse_color(layout_in(style, "table", "header_fill", "#1E40AF")),
+        "header_text": _parse_color(layout_in(style, "table", "header_text", "#FFFFFF")),
+        "row_fill": _parse_color(layout_in(style, "table", "row_fill", "#F3F4F6")),
+        "row_alt_fill": _parse_color(layout_in(style, "table", "row_alt_fill", "#E5E7EB")),
+        "body_text": _parse_color(layout_in(style, "table", "body_text", "#111827")),
+    }
+
+
+def _apply_table_cell(cell, text, *, font_pt, text_rgb, fill_rgb, bold=False, font_name=None):
+    cell.text = str(text)
+    tf = cell.text_frame
+    tf.word_wrap = True
+    tf.margin_left = tf.margin_right = Pt(4)
+    tf.margin_top = tf.margin_bottom = Pt(2)
+    cell.fill.solid()
+    cell.fill.fore_color.rgb = fill_rgb
+    for para in tf.paragraphs:
+        para.font.size = Pt(font_pt)
+        para.font.color.rgb = text_rgb
+        para.font.bold = bold
+        if font_name:
+            para.font.name = font_name
+
+
+def _fit_table_layout(rows, width_in, usable_h_in, font_pt, header_row, min_pt):
+    """Shrink font and row heights until the table fits the vertical budget."""
+    row_count = len(rows)
+    col_count = max(len(r) for r in rows)
+    col_w_in = width_in / max(col_count, 1)
+    min_pt = int(min_pt)
+    pt = int(font_pt)
+    row_heights = []
+    for _ in range(12):
+        row_heights = []
+        for r_idx, row in enumerate(rows):
+            max_lines = 1
+            for c_idx in range(col_count):
+                val = row[c_idx] if c_idx < len(row) else ""
+                max_lines = max(max_lines, _estimate_text_lines(str(val), col_w_in, pt))
+            line_h = (pt / 72.0) * 1.38
+            row_heights.append(max(0.38, max_lines * line_h + 0.1))
+        total = sum(row_heights)
+        if total <= usable_h_in or pt <= min_pt:
+            break
+        pt = max(min_pt, int(pt * 0.88))
+    total = sum(row_heights)
+    if total > usable_h_in and total > 0:
+        scale = usable_h_in / total
+        row_heights = [h * scale for h in row_heights]
+    return pt, row_heights
+
+
+def add_table_slide(prs, rows, style=None, font_size=24, header_row=True, reference=None):
+    """Table layout with explicit fills, word wrap, and PiP-aware vertical fit."""
     style = style or {}
     theme = _resolve_theme(style)
+    palette = _table_palette(style, theme)
     if not rows:
         rows = [[" "]]
     row_count = len(rows)
     col_count = max(len(r) for r in rows)
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(slide, style, prs)
+    from .layout_tokens import pip_top_inches
+
     top_in = float(layout_in(style, "table", "top_in", 0.75))
-    left, width, width_in, margin_in = content_box(prs, style, "table")
-    table_h_in = min(prs.slide_height.inches - top_in - 0.5, 0.45 * row_count + 0.3)
-    table = slide.shapes.add_table(row_count, col_count, left, Inches(top_in), width, Inches(table_h_in)).table
+    left, width, width_in, _margin_in = content_box(prs, style, "table")
+    slide_h_in = prs.slide_height.inches
+    slide_w_in = prs.slide_width.inches
+    pip_top = pip_top_inches(style, slide_h_in, slide_w_in)
+    bottom_in = float(layout_in(style, "table", "bottom_in", 0.35))
+    ref_str = (reference or "").strip()
+    ref_h_in = 0.0
+    ref_pt = int(typography_pt(style, "reference_size_bottom_pt", 22))
+    if ref_str:
+        ref_lines = _estimate_text_lines(ref_str, width_in, ref_pt)
+        ref_h_in = min(0.35 + ref_lines * 0.32, 1.05) + float(layout_in(style, "table", "ref_gap_in", 0.15))
+    usable_h = max(1.2, pip_top - top_in - ref_h_in - bottom_in)
+    min_pt = int(layout_in(style, "table", "min_font_pt", 11))
+    body_pt, row_heights = _fit_table_layout(
+        rows, width_in, usable_h, font_size, header_row, min_pt,
+    )
+    table_h_in = sum(row_heights)
+    table = slide.shapes.add_table(
+        row_count, col_count, left, Inches(top_in), width, Inches(table_h_in),
+    ).table
+    font_name = theme["font_name"]
     for r_idx, row in enumerate(rows):
+        table.rows[r_idx].height = Inches(row_heights[r_idx])
+        is_header = header_row and r_idx == 0
+        if is_header:
+            fill, text_rgb = palette["header_fill"], palette["header_text"]
+        else:
+            body_idx = r_idx - (1 if header_row else 0)
+            fill = palette["row_alt_fill"] if body_idx % 2 else palette["row_fill"]
+            text_rgb = palette["body_text"]
         for c_idx in range(col_count):
-            cell = table.cell(r_idx, c_idx)
             val = row[c_idx] if c_idx < len(row) else ""
-            cell.text = str(val)
-            for para in cell.text_frame.paragraphs:
-                para.font.size = Pt(font_size)
-                para.font.color.rgb = theme["body"]
-                if header_row and r_idx == 0:
-                    para.font.bold = True
-                if theme["font_name"]:
-                    para.font.name = theme["font_name"]
+            _apply_table_cell(
+                table.cell(r_idx, c_idx),
+                val,
+                font_pt=body_pt,
+                text_rgb=text_rgb,
+                fill_rgb=fill,
+                bold=is_header,
+                font_name=font_name,
+            )
+    if ref_str:
+        ref_y = top_in + table_h_in + float(layout_in(style, "table", "ref_gap_in", 0.15))
+        ref_box_h = min(ref_h_in, max(0.45, pip_top - ref_y - 0.12))
+        rt = slide.shapes.add_textbox(left, Inches(ref_y), width, Inches(ref_box_h))
+        rp = rt.text_frame.paragraphs[0]
+        rp.text = ref_str
+        rp.alignment = PP_ALIGN.LEFT
+        rp.font.size = Pt(ref_pt)
+        rp.font.italic = True
+        rp.font.color.rgb = theme["reference"]
+        if font_name:
+            rp.font.name = font_name
     return slide
 
 
@@ -814,10 +919,26 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
         list_top_in += ref_h_in + float(layout_in(style, 'list', 'ref_gap_in', 0.18))
 
     item_line_h = body_pt / 72.0 * 0.62
-    list_h_in = max(len(items) * (item_line_h + 0.12), 1.2)
-    block_h = list_h_in + (ref_h_in + 0.18 if reference and ref_position == 'top' else 0)
+    ref_gap = float(layout_in(style, 'list', 'ref_gap_in', 0.18))
+    bottom_ref_h = 0.0
+    if reference and ref_position in ('bottom', 'below'):
+        ref_pt_b = int(typography_pt(style, 'list_ref_bottom_pt', 22))
+        ref_lines_b = _estimate_text_lines(reference, content_w_in, ref_pt_b)
+        bottom_ref_h = min(0.35 + ref_lines_b * 0.32, 1.0) + ref_gap
+
+    list_max_bottom = min(slide_h_in - 0.35, pip_top - 0.25)
+    if bottom_ref_h:
+        list_max_bottom = min(list_max_bottom, slide_h_in - bottom_ref_h - 0.35)
+
+    est_lines = sum(max(1, _estimate_text_lines(str(it), content_w_in, body_pt)) for it in items)
+    list_h_in = max(est_lines * (item_line_h + 0.12), 1.0)
+    list_h_in = min(list_h_in, max(1.0, list_max_bottom - list_top_in))
+
+    block_h = list_h_in + (ref_h_in + ref_gap if reference and ref_position == 'top' else 0)
+    block_h += bottom_ref_h if bottom_ref_h else 0
     if list_top_in + block_h > pip_top - 0.25:
         list_top_in = max(0.55, pip_top - block_h - 0.25)
+        list_h_in = min(list_h_in, max(1.0, list_max_bottom - list_top_in))
 
     tb = slide.shapes.add_textbox(
         Inches(margin_in), Inches(list_top_in), Inches(content_w_in), Inches(list_h_in),
@@ -843,7 +964,8 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
         ref_pt = int(typography_pt(style, 'list_ref_bottom_pt', 22))
         ref_lines = _estimate_text_lines(reference, content_w_in, ref_pt)
         ref_h_in = min(0.35 + ref_lines * 0.32, 1.0)
-        ref_y_in = min(slide_h_in - ref_h_in - 0.35, pip_top - ref_h_in - 0.15)
+        ref_y_in = min(list_top_in + list_h_in + ref_gap, pip_top - ref_h_in - 0.15)
+        ref_y_in = max(ref_y_in, list_top_in + list_h_in + 0.08)
         ref_tb = slide.shapes.add_textbox(
             Inches(margin_in), Inches(ref_y_in), Inches(content_w_in), Inches(ref_h_in),
         )

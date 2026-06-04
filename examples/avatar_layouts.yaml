@@ -1,53 +1,77 @@
 # All 16 avatar layout slide types (HeyGen-style gallery).
-# Optional: avatar_video_path, avatar_poster_path, media_path, media_poster_path
-#
-# Build:
-#   praisonaippt -i examples/avatar_layouts.yaml -o examples/avatar_layouts_built.pptx
+# Build PPTX + MP4:
+#   python examples/build_showcase_examples.py
+# Or:
+#   praisonaippt -i examples/avatar_layouts.yaml -o examples/avatar_layouts_built.pptx --convert-video
 
 presentation_title: Avatar layout gallery
-presentation_subtitle: Speaking-head video + media regions
+presentation_subtitle: Speaking-head avatar · PiP · media regions
 slide_size: widescreen
+auto_upload_gdrive: false
+
+x-avatar: &avatar
+  avatar_video_path: examples/heygen-article-50590.mp4
 
 sections:
   - section: Avatar layouts
     verses:
       - slide_type: avatar_only
+        <<: *avatar
       - slide_type: media_only
         media_path: assets/background_alt.jpg
       - slide_type: avatar_media_1
+        <<: *avatar
         media_path: assets/background_alt.jpg
       - slide_type: avatar_media_2
+        <<: *avatar
         media_path: assets/background_alt.jpg
       - slide_type: avatar_media_3
+        <<: *avatar
         media_path: assets/background_alt.jpg
       - slide_type: avatar_name_card
+        <<: *avatar
         headline: Jeremy Blank
         subheader: Lead Engineer
       - slide_type: avatar_headline
+        <<: *avatar
         headline: Headline
         subheader: Subheader
       - slide_type: avatar_headline_full
+        <<: *avatar
         headline: Headline
         subheader: Subheader
       - slide_type: avatar_quote
+        <<: *avatar
         text: Faith comes by hearing, and hearing by the word of God.
         reference: Romans 10:17
       - slide_type: avatar_border
+        <<: *avatar
       - slide_type: media_border
         media_path: assets/background_alt.jpg
       - slide_type: avatar_media_border_1
+        <<: *avatar
         media_path: assets/background_alt.jpg
       - slide_type: avatar_media_border_2
+        <<: *avatar
         media_path: assets/background_alt.jpg
       - slide_type: avatar_media_border_3
+        <<: *avatar
         media_path: assets/background_alt.jpg
       - slide_type: avatar_intro
+        <<: *avatar
       - slide_type: avatar_outro
+        <<: *avatar
 
 video_export:
   backend: compositor
   narration_mode: fixed
   preset: draft
   slide_duration_sec: 3
+  avatar_timeline: auto
+  avatar:
+    fit: cover
+    shape: circle
+    crop_y_ratio: 0.06
+    zoom_ratio: 1.45
   captions:
     enabled: false

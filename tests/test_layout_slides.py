@@ -122,3 +122,49 @@ def test_speaker_notes_on_title_only(tmp_path):
 def test_validate_comparison_requires_columns():
     with pytest.raises(SchemaError):
         validate_verse({"slide_type": "comparison"}, "v[0]")
+
+
+def test_table_dark_theme_readable_and_fits(tmp_path):
+    """Dark slides: explicit cell fills (not default light stripes) and no clipped rows."""
+    from pptx.dml.color import RGBColor
+
+    rows = [
+        ["Capability", "Status", "What it means"],
+        ["Dreaming", "Research preview", "Background memory curation between sessions"],
+        ["Outcomes", "Public beta", "Rubric grader · satisfied / needs_revision"],
+        ["Webhooks", "Public beta", "Signed HTTPS event callbacks"],
+        ["Multi-agent orchestration", "Public beta", "Coordinators delegate to specialists"],
+    ]
+    data = {
+        "presentation_title": "T",
+        "slide_style": {
+            "background_color": "#000000",
+            "text_color": "white",
+            "layouts": {
+                "pip": {"width_ratio": 0.2, "margin_in": 0.38, "shape": "circle"},
+            },
+        },
+        "sections": [{"section": "", "verses": [{
+            "slide_type": "table",
+            "table_rows": rows,
+            "reference": "Code with Claude SF · 6 May 2026",
+            "avatar_video_path": "examples/heygen-article-50590.mp4",
+        }]}],
+    }
+    out = tmp_path / "table_dark.pptx"
+    create_presentation(load_verses_from_dict(data), str(out))
+    slide = Presentation(out).slides[1]
+    tables = [sh for sh in slide.shapes if sh.has_table]
+    assert len(tables) == 1
+    table = tables[0].table
+    assert len(table.rows) == 5
+    body = table.cell(1, 0)
+    assert body.fill.type is not None
+    rgb = body.fill.fore_color.rgb
+    assert rgb[0] + rgb[1] + rgb[2] < 500
+    para = body.text_frame.paragraphs[0]
+    assert para.font.color.rgb == RGBColor(255, 255, 255)
+    total_row_h = sum(r.height.inches for r in table.rows)
+    assert total_row_h <= 6.5
+    refs = [sh for sh in slide.shapes if sh.has_text_frame and not sh.has_table]
+    assert any("Code with Claude" in (sh.text_frame.text or "") for sh in refs)

@@ -5,6 +5,8 @@ from __future__ import annotations
 import base64
 import io
 import os
+import subprocess
+import tempfile
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
@@ -128,10 +130,10 @@ def _pip_box_at(
 ) -> RegionBox:
     ratio_raw = layout_in(style, kind, "pip_width_ratio", None)
     margin_raw = layout_in(style, kind, "pip_margin_in", None)
-    ratio = float(ratio_raw if ratio_raw is not None else layout_in(style, "pip", "width_ratio", 0.14))
-    margin = float(margin_raw if margin_raw is not None else layout_in(style, "pip", "margin_in", 0.45))
+    ratio = float(ratio_raw if ratio_raw is not None else layout_in(style, "pip", "width_ratio", 0.20))
+    margin = float(margin_raw if margin_raw is not None else layout_in(style, "pip", "margin_in", 0.38))
     size = cw * ratio
-    shape = str(layout_in(style, "pip", "shape", "circle")).lower()
+    shape = _pip_shape_kind(style, kind)
     rounded = shape in ("circle", "round", "rounded")
     radius = size / 2 if shape == "circle" else float(layout_in(style, "pip", "corner_radius_in", 0.12))
     anchor = (anchor or "bottom_right").lower().replace("-", "_")
@@ -152,12 +154,20 @@ def export_floating_pip_box(prs, style: dict) -> RegionBox:
     return _pip_box(cx, cy, cw, ch, style, "pip")
 
 
+def _pip_shape_kind(style: dict, kind: str = "pip") -> str:
+    """Resolve PiP shape: ``circle``, ``square``/``rect``, or ``rounded``."""
+    raw = layout_in(style, kind, "pip_shape", None) or layout_in(style, kind, "shape", None)
+    if raw is None and kind != "pip":
+        raw = layout_in(style, "pip", "shape", "circle")
+    return str(raw or "circle").lower()
+
+
 def _content_beside_pip(
     cx: float, cy: float, cw: float, ch: float, pip: RegionBox, margin: float
 ) -> RegionBox:
     """Text area that leaves the bottom-right PiP corner clear."""
     text_w = max(cw - pip.width_in - 2 * margin, 1.0)
-    text_h = max(ch - 2 * margin, 1.0)
+    text_h = max(pip.top_in - cy - margin, 1.0)
     return RegionBox(cx + margin, cy + margin, text_w, text_h)
 
 
@@ -363,6 +373,86 @@ def _fit_movie_in_box(slide, movie_path: str, poster: io.BytesIO, box: RegionBox
     )
 
 
+def _pip_still_pixels(box: RegionBox, dpi: int = 150) -> tuple[int, int]:
+    px = max(96, int(round(box.width_in * dpi)))
+    return px, max(96, int(round(box.height_in * dpi)))
+
+
+def _save_pip_still_png(
+    video_path: str,
+    box: RegionBox,
+    style: dict,
+    *,
+    source_file: Optional[str] = None,
+    poster: Optional[io.BytesIO] = None,
+) -> Optional[str]:
+    """Extract a face-centred still PNG for PiP (circle mask when shape is circle)."""
+    w, h = _pip_still_pixels(box)
+    crop_y = float(layout_in(style, "pip", "crop_y_ratio", 0.06))
+    zoom = float(layout_in(style, "pip", "zoom_ratio", 1.45))
+    shape = _pip_shape_kind(style)
+    is_circle = shape in ("circle", "round", "rounded")
+    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    tmp.close()
+    out_path = tmp.name
+    try:
+        from .ffmpeg_composer import _circle_alpha_filter, _cover_scale_filter
+
+        vf = _cover_scale_filter(w, h, crop_y_ratio=crop_y, zoom_ratio=zoom)
+        if is_circle:
+            vf = f"{vf},{_circle_alpha_filter()}"
+        cmd = [
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            "-ss", "0.5", "-i", video_path,
+            "-vframes", "1", "-vf", vf, out_path,
+        ]
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        if proc.returncode == 0 and os.path.isfile(out_path):
+            return out_path
+    except Exception:
+        pass
+    if poster and poster.getbuffer().nbytes > 64:
+        try:
+            from PIL import Image, ImageDraw
+
+            poster.seek(0)
+            img = Image.open(poster).convert("RGBA")
+            img = img.resize((w, h), Image.Resampling.LANCZOS)
+            if is_circle:
+                mask = Image.new("L", (w, h), 0)
+                ImageDraw.Draw(mask).ellipse((0, 0, w - 1, h - 1), fill=255)
+                img.putalpha(mask)
+            img.save(out_path, "PNG")
+            return out_path
+        except Exception:
+            pass
+    try:
+        os.unlink(out_path)
+    except OSError:
+        pass
+    return None
+
+
+def _place_avatar_still_in_box(
+    slide,
+    video_path: str,
+    poster: io.BytesIO,
+    box: RegionBox,
+    style: dict,
+    *,
+    source_file: Optional[str] = None,
+) -> bool:
+    still = _save_pip_still_png(video_path, box, style, source_file=source_file, poster=poster)
+    if still:
+        _place_picture_in_box(slide, still, box, fit="fill")
+        try:
+            os.unlink(still)
+        except OSError:
+            pass
+        return True
+    return False
+
+
 def _place_picture_in_box(slide, path: str, box: RegionBox, fit: str) -> None:
     from .core import _fit_picture_in_box
 
@@ -430,17 +520,21 @@ def _draw_pip_backdrop(slide, box: RegionBox, style: dict) -> None:
 
 
 def _draw_pip_frame(slide, box: RegionBox, style: dict) -> None:
-    """White ring around the avatar PiP (circle or rounded rect)."""
+    """Ring around the avatar PiP (circle, rounded rect, or square)."""
     left, top, width, height = _box_lengths(box)
-    shape_kind = str(layout_in(style, "pip", "shape", "circle")).lower()
-    if shape_kind == "circle":
-        shape = slide.shapes.add_shape(MSO_SHAPE.OVAL, left, top, width, height)
+    shape_kind = _pip_shape_kind(style)
+    if shape_kind in ("circle", "round", "rounded"):
+        shape = slide.shapes.add_shape(
+            MSO_SHAPE.OVAL if shape_kind == "circle" else MSO_SHAPE.ROUNDED_RECTANGLE,
+            left, top, width, height,
+        )
+        if shape_kind != "circle":
+            try:
+                shape.adjustments[0] = 0.18
+            except (IndexError, AttributeError):
+                pass
     else:
-        shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height)
-        try:
-            shape.adjustments[0] = 0.18
-        except (IndexError, AttributeError):
-            pass
+        shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left, top, width, height)
     shape.fill.background()
     border = str(layout_in(style, "pip", "border_color", "#FFFFFF"))
     shape.line.color.rgb = _hex_rgb(border)
@@ -468,12 +562,22 @@ def _place_avatar_in_box(
         return
     poster = _poster_bytes(poster_path, source_file)
     pip_style = style or {}
-    shape_kind = str(layout_in(pip_style, "pip", "shape", "circle")).lower()
-    if draw_frame and box.rounded and shape_kind == "circle":
-        _draw_pip_backdrop(slide, box, pip_style)
-    _fit_movie_in_box(slide, path, poster, box, _video_mime(path))
-    if draw_frame and box.rounded:
-        _draw_pip_frame(slide, box, pip_style)
+    shape_kind = _pip_shape_kind(pip_style)
+    is_circle = shape_kind in ("circle", "round", "rounded")
+    is_square = shape_kind in ("square", "rect", "rectangle")
+    if is_circle:
+        if not _place_avatar_still_in_box(
+            slide, path, poster, box, pip_style, source_file=source_file,
+        ):
+            _fit_movie_in_box(slide, path, poster, box, _video_mime(path))
+        if draw_frame:
+            _draw_pip_frame(slide, box, pip_style)
+    else:
+        if draw_frame and not is_square:
+            _draw_pip_backdrop(slide, box, pip_style)
+        _fit_movie_in_box(slide, path, poster, box, _video_mime(path))
+        if draw_frame:
+            _draw_pip_frame(slide, box, pip_style)
 
 
 def place_floating_avatar_pip(

@@ -337,6 +337,7 @@ class TableRenderer:
             style=style,
             font_size=body_font_size(style, verse),
             header_row=verse.get("header_row", True),
+            reference=verse.get("reference"),
         )
         _finish_slide(slide, verse, style, prs, source_file=source_file)
 
@@ -383,8 +384,10 @@ class VerseRenderer:
                     verse.get("text_below_reference_large_text") if i == 0 else None
                 ),
             )
-            if i == 0 and notes:
+            if verse.get("avatar_video_path"):
                 _finish_slide(slide, verse, style, prs, source_file=source_file)
+            if i == 0 and notes:
+                _apply_notes(slide, verse)
 
 
 class AvatarKindRenderer:

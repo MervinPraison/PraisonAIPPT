@@ -97,7 +97,7 @@ _VERSE_KEYS = {
 
 def _warn_unknown(actual: Iterable[str], allowed: set, where: str) -> None:
     for key in actual:
-        if key in allowed:
+        if key in allowed or str(key).startswith("x-"):
             continue
         suggestion = difflib.get_close_matches(key, allowed, n=1)
         hint = f" (did you mean '{suggestion[0]}'?)" if suggestion else ""

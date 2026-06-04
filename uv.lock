@@ -3091,7 +3091,7 @@ wheels = [
 
 [[package]]
 name = "praisonaippt"
-version = "1.4.23"
+version = "1.4.24"
 source = { editable = "." }
 dependencies = [
     { name = "python-pptx", version = "0.6.23", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.8'" },
