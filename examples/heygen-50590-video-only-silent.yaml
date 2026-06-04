@@ -18,7 +18,7 @@ avatar_calibration:
   crop_x_window:
   - 0.5
   - 0.56
-  crop_y_preferred: 0.02
+  crop_y_preferred: 0.1
   anchor_weight: 0.15
   detector: auto
 slide_style:
@@ -31,10 +31,16 @@ slide_style:
   font_name: Calibri
   layouts:
     pip:
-      width_ratio: 0.24
+      width_ratio: 0.2
       margin_in: 0.38
       shape: circle
-      crop_y_ratio: 0.14
+    deck_exec_summary:
+      pip_position: top_right
+      pip_width_ratio: 0.2
+    deck_product_columns:
+      pip_position: top_right
+      pip_width_ratio: 0.2
+      crop_y_ratio: 0.1
       zoom_ratio: 1.45
       border_color: '#FFFFFF'
       border_width_pt: 2.5

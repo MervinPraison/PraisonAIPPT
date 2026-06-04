@@ -186,8 +186,8 @@ def resolve_slide_overlays(
         deck_block = vex.get(layer) if isinstance(vex.get(layer), dict) else {}
         return merge_placement(
             parse_placement(deck_block),
-            placement_from_layout(style, framing_kind),
             placement_from_layout(style, "pip"),
+            placement_from_layout(style, framing_kind),
             placement_from_verse_flat(vo, layer=layer),
             parse_placement(verse_overlay.get(layer)),
         )

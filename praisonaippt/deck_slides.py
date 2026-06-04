@@ -636,7 +636,7 @@ def _render_exec_summary(slide, prs, verse: dict, style: dict, theme: dict, *, s
     _place_avatar_in_box(
         slide, pip, verse.get("avatar_video_path"),
         poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
-        layout_kind="deck_exec_summary", verse=verse,
+        layout_kind="deck_exec_summary", verse=verse, draw_frame=False,
     )
     title_w = max(2.0, pip.left_in - margin - 0.25)
     title_h = _add_title_block(slide, margin, margin, title_w, title, subtitle, style, theme)
@@ -784,7 +784,7 @@ def _render_region_grid(slide, prs, verse: dict, style: dict, theme: dict, *, so
     _place_avatar_in_box(
         slide, pip, verse.get("avatar_video_path"),
         poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
-        layout_kind="deck_region_grid", verse=verse,
+        layout_kind="deck_region_grid", verse=verse, draw_frame=False,
     )
     cells = verse.get("cells") or verse.get("columns") or []
     grid_top = _content_top_after_title(
@@ -833,7 +833,7 @@ def _render_product_columns(slide, prs, verse: dict, style: dict, theme: dict, *
     _place_avatar_in_box(
         slide, pip, verse.get("avatar_video_path"),
         poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
-        layout_kind="deck_product_columns", verse=verse,
+        layout_kind="deck_product_columns", verse=verse, draw_frame=False,
     )
     title_w = max(2.0, pip.left_in - margin - 0.25)
     title_h = _add_title_block(slide, margin, margin, title_w, title, subtitle, style, theme)
@@ -949,7 +949,7 @@ def _render_customer_segments(slide, prs, verse: dict, style: dict, theme: dict,
     _place_avatar_in_box(
         slide, pip, verse.get("avatar_video_path"),
         poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
-        layout_kind="deck_customer_segments", verse=verse,
+        layout_kind="deck_customer_segments", verse=verse, draw_frame=False,
     )
     title_w = max(2.0, pip.left_in - margin - 0.25)
     title_h = _add_title_block(slide, margin, margin, title_w, title, "", style, theme)

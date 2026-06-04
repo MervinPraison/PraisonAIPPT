@@ -39,6 +39,23 @@ def test_merge_placement_precedence():
     assert merged.anchor == "top_right"
 
 
+def test_deck_layout_pip_width_beats_global_pip_ratio():
+    """``layouts.deck_*``.pip_width_ratio must not be overridden by ``layouts.pip``.width_ratio."""
+    resolved = resolve_slide_overlays(
+        verse={},
+        slide_type="deck_exec_summary",
+        style={
+            "layouts": {
+                "pip": {"width_ratio": 0.24, "margin_in": 0.38},
+                "deck_exec_summary": {"pip_position": "top_right", "pip_width_ratio": 0.20},
+            },
+        },
+        video_export={},
+        framing_kind="deck_exec_summary",
+    )
+    assert resolved.avatar.width_ratio == 0.20
+
+
 def test_resolve_slide_overlays_verse_wins():
     verse = {
         "video_overlay": {

@@ -338,11 +338,29 @@ def pip_face_balance(pip_rgba) -> float:
     return (right - left) / total if total else 0.0
 
 
-def _circle_alpha_filter() -> str:
+def _circle_alpha_filter(*, border_px: int = 0) -> str:
+    """
+    Circular alpha mask for PiP overlays.
+
+    ``border_px`` draws a white ring on the compositor (avoids PPTX stroke leaking
+    past a smaller video mask as a visible 'lid' behind the circle).
+    """
+    dist = "pow(X-W/2,2)+pow(Y-H/2,2)"
+    outer = "pow(W/2,2)"
+    if border_px <= 0:
+        return (
+            "format=rgba,"
+            "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
+            f"a='if(lte({dist},{outer}),255,0)'"
+        )
+    inner = f"pow(W/2-{border_px},2)"
+    ring = f"if(lte({dist},{inner}),0,if(lte({dist},{outer}),255,0))"
     return (
         "format=rgba,"
-        "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
-        "a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2-2,2)),255,0)'"
+        f"geq=r='if(eq({ring},255),255,r(X,Y))':"
+        f"g='if(eq({ring},255),255,g(X,Y))':"
+        f"b='if(eq({ring},255),255,b(X,Y))':"
+        f"a='if(lte({dist},{outer}),255,0)'"
     )
 
 
@@ -417,7 +435,7 @@ def render_slide_segment(
             start = max(0.0, float(ov.video_start_sec))
             chain = f"trim=start={start:.3f}:duration={dur:.3f},setpts=PTS-STARTPTS,{scale}"
         if str(ov.shape).lower() in ("circle", "round", "rounded"):
-            chain = f"{chain},{_circle_alpha_filter()}"
+            chain = f"{chain},{_circle_alpha_filter(border_px=3)}"
         filters.append(f"[{idx}:v]{chain},setsar=1[{tag}]")
         fmt = "auto" if str(ov.shape).lower() in ("circle", "round", "rounded") else "auto"
         filters.append(f"[{prev}][{tag}]overlay={ox}:{oy}:format={fmt}[{out}]")

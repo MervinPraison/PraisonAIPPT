@@ -749,7 +749,7 @@ def place_floating_avatar_pip(
         poster_path=verse.get("avatar_poster_path"),
         source_file=source_file,
         style=style,
-        draw_frame=True,
+        draw_frame=False,
     )
 
 
