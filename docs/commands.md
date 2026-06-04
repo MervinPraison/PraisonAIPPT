@@ -401,12 +401,85 @@ praisonaippt -i /full/path/to/verses.yaml -o /full/path/to/output.pptx
 praisonaippt -i "my verses.yaml" -o "my presentation.pptx"
 ```
 
+## Video, avatar, and HeyGen commands
+
+Full behaviour: [Video export](video-export.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md)
+
+### Video export
+
+```bash
+# Build deck + MP4
+praisonaippt -i deck.yaml -o deck.pptx --convert-video --video-output deck.mp4
+
+# PPTX only (loads deck.yaml sidecar for PiP paths when present)
+praisonaippt convert-video deck.pptx --video-output deck.mp4
+
+# Dependency check
+praisonaippt convert-video --check
+
+# Override narration
+praisonaippt -i deck.yaml -o deck.pptx --convert-video --narration-mode avatar
+```
+
+| Flag | Values |
+|------|--------|
+| `--convert-video` | Build and export MP4 |
+| `--video-output` | Output path |
+| `--video-preset` | `draft`, `standard`, `high`, `4k` |
+| `--narration-mode` | `fixed`, `audio_file`, `avatar`, `tts`, `auto` |
+| `--video-options` | JSON merged into `video_export` |
+| `--slide-range` | `START-END` (1-based) |
+| `--keep-temp` | Keep temp PNG/segments |
+| `--check` | With `convert-video`: preflight tools |
+
+### Slide JPEG export
+
+```bash
+praisonaippt build-slide-images -i deck.yaml -o deck.pptx
+praisonaippt export-slide-jpegs deck.pptx --slide-images-dir slide_images
+praisonaippt -i deck.yaml -o deck.pptx --export-slide-jpegs
+```
+
+### Avatar PiP calibration
+
+```bash
+praisonaippt calibrate-avatar examples/heygen-50590-video-audio-heygen.yaml --force
+praisonaippt calibrate-avatar --avatar-video examples/heygen-article-50590.mp4 --seek 6.0
+praisonaippt calibrate-avatar deck.yaml --write   # persist crop_x into YAML
+```
+
+| Flag | Purpose |
+|------|---------|
+| `--force` | Ignore `.praisonaippt/avatar-framing/` cache |
+| `--write` | Write calibrated `crop_x` into deck YAML |
+| `--seek-times` | Comma-separated probe times (seconds) |
+
+### Face centre probe
+
+```bash
+praisonaippt pip-face-centre -i deck.yaml --slide 6
+praisonaippt pip-face-centre --avatar-video speaker.mp4 --crop-x 0.53 --zoom 1.45
+praisonaippt pip-face-centre --pip-image probe.png
+praisonaippt pip-face-centre -i deck.yaml --validation-image out.png
+praisonaippt calibrate-avatar deck.yaml --force --validation-image
+```
+
+`--validation-image` saves an annotated PNG: green circle centre, yellow face box, **L/R/T/B** pixel gaps from each side of the head to the circle (see [Avatar calibration](avatar-calibration.md)).
+
+### Transcript → YAML (HeyGen variants)
+
+```bash
+praisonaippt transcript-to-yaml -i timestamps.json -o examples/heygen-article-50590 --variants all
+```
+
 ## 📚 Related Documentation
 
-- [Installation Guide]({{ '/installation' | relative_url }})
-- [Python API Documentation]({{ '/python-api' | relative_url }})
-- [PDF Conversion Guide]({{ '/pdf-conversion' | relative_url }})
-- [Examples and Templates]({{ '/examples' | relative_url }})
+- [Installation Guide](installation.md)
+- [Python API Documentation](python-api.md)
+- [PDF Conversion Guide](pdf-conversion.md)
+- [Examples and Templates](examples.md)
+- [Video export](video-export.md)
+- [HeyGen article examples](heygen-examples.md)
 
 ---
 

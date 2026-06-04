@@ -318,16 +318,18 @@ def write_deck_yaml(deck: dict, path: str | Path) -> None:
 # Media combination presets for HeyGen article examples.
 MEDIA_VARIANTS: Dict[str, Dict[str, Any]] = {
     "video-audio-heygen": {
-        "label": "HeyGen video + embedded audio",
+        "label": "HeyGen video + embedded audio (default)",
         "include_avatar": True,
         "include_audio_path": False,
         "narration_mode": "avatar",
+        "audio_source": "heygen_video",
     },
     "video-visual-mp3": {
-        "label": "HeyGen video (muted PiP) + MP3 narration",
+        "label": "HeyGen video (muted PiP) + separate MP3",
         "include_avatar": True,
         "include_audio_path": True,
         "narration_mode": "audio_file",
+        "audio_source": "external",
     },
     "audio-only": {
         "label": "Slides + MP3 only (no headshot video)",
@@ -374,6 +376,8 @@ def apply_media_variant(
 
     vex = out.setdefault("video_export", {})
     vex["narration_mode"] = spec["narration_mode"]
+    if spec.get("audio_source"):
+        vex["audio_source"] = spec["audio_source"]
     if spec["narration_mode"] == "fixed":
         vex["captions"] = {"enabled": False}
     else:

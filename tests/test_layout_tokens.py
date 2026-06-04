@@ -11,6 +11,7 @@ from praisonaippt.layout_tokens import (
     content_box,
     content_width_inches,
     layout_in,
+    pip_reserve_inches,
     split_max_length_default,
     typography_pt,
 )
@@ -32,6 +33,15 @@ def test_content_width_override():
     prs = Presentation()
     style = {"layouts": {"verse": {"content_width_in": 7.5}}}
     assert content_width_inches(prs, style, "verse") == 7.5
+
+
+def test_title_slide_ignores_pip_reserve():
+    prs = Presentation()
+    prs.slide_width = Inches(13.333)
+    style = {"layouts": {"pip": {"width_ratio": 0.24, "margin_in": 0.38}}}
+    assert pip_reserve_inches(style, prs.slide_width.inches, kind="title") == 0.0
+    left, width, width_in, _ = content_box(prs, style, "title")
+    assert left.inches == pytest.approx((13.333 - width_in) / 2, abs=0.02)
 
 
 def test_content_box_centres_on_slide():

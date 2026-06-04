@@ -31,6 +31,10 @@ Validation enforces `media_path` on `media_only` / `media_border`, `headline` on
 
 Without `avatar_video_path`, avatar regions render as grey placeholders in PPTX; the compositor skips missing files.
 
+### `avatar_quote` and double avatar
+
+For **`avatar_quote`**, the PPTX intentionally **does not** embed a second headshot shape — only the quote layout is drawn. The HeyGen PiP is added in **MP4 export** so you do not get two avatars on screen. Slide JPEG previews may show no face on that slide; compare the MP4. Tune PiP framing with [Avatar PiP calibration](avatar-calibration.md).
+
 ---
 
 ## `slide_style.layouts.pip`

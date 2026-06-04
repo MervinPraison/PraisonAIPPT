@@ -39,8 +39,18 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 | [Slide style reference](slide-style-reference.md) | Colours, `typography.*`, `layouts.*` |
 | [YAML deck reference](yaml-reference.md) | Top-level keys and `video_export` |
 | [Video export](video-export.md) | Compositor, narration modes, CLI |
+| [HeyGen article examples](heygen-examples.md) | Five media variants, assets, build workflow |
+| [Avatar PiP calibration](avatar-calibration.md) | Auto `crop_x`, hybrid face detect, CLI |
+| [Slide JPEG export](slide-images.md) | `slide_images_dir`, `build-slide-images` |
 
-Preview all docs locally: `pip install -r requirements-docs.txt && mkdocs serve`
+Preview all docs locally:
+
+```bash
+pip install -r requirements-docs.txt
+mkdocs serve
+```
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000). Site config: `mkdocs.yml` at the repo root.
 
 ## 🚀 Quick Start
 
@@ -179,12 +189,13 @@ The package creates a PowerPoint presentation with:
 
 ## 🎯 Next Steps
 
-- [Installation Guide]({{ '/installation' | relative_url }})
-- [Quick Start Tutorial]({{ '/quickstart' | relative_url }})
-- [Complete Command Reference]({{ '/commands' | relative_url }})
-- [Python API Documentation]({{ '/python-api' | relative_url }})
-- [PDF Conversion Guide]({{ '/pdf-conversion' | relative_url }})
-- [Examples and Templates]({{ '/examples' | relative_url }})
+- [Installation Guide](installation.md)
+- [Quick Start Tutorial](quickstart.md)
+- [Complete Command Reference](commands.md)
+- [Python API Documentation](python-api.md)
+- [PDF Conversion Guide](pdf-conversion.md)
+- [Examples and Templates](examples.md)
+- [HeyGen article examples](heygen-examples.md)
 
 ## 📞 Support
 

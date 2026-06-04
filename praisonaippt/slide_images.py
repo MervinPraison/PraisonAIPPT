@@ -23,9 +23,28 @@ class SlideImageOptions:
 
 
 def default_slide_images_dir(pptx_path: str | Path) -> Path:
-    """Default folder: ``<stem>_slides`` next to the PPTX."""
-    p = Path(pptx_path)
+    """Default JPEG folder: ``examples/slide_images`` for decks under ``examples/``, else ``<stem>_slides``."""
+    p = Path(pptx_path).resolve()
+    if p.parent.name == "examples":
+        return p.parent / "slide_images"
     return p.parent / f"{p.stem}_slides"
+
+
+def resolve_slide_images_dir(
+    deck: dict,
+    *,
+    pptx_path: str | Path,
+    source_file: Optional[str] = None,
+) -> Path:
+    """Resolve ``slide_images_dir`` from deck YAML (relative to source file or PPTX parent)."""
+    raw = (deck or {}).get("slide_images_dir")
+    if not raw:
+        return default_slide_images_dir(pptx_path)
+    path = Path(str(raw))
+    if path.is_absolute():
+        return path
+    base = Path(source_file).resolve().parent if source_file else Path(pptx_path).resolve().parent
+    return (base / path).resolve()
 
 
 def _parse_slide_range(slide_range: Optional[Tuple[int, int]]) -> tuple[Optional[int], Optional[int]]:

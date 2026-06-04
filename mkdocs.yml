@@ -59,8 +59,11 @@ nav:
       - YAML deck reference: yaml-reference.md
       - Rich text formatting: formatting.md
       - Theme templates: templates.md
-  - Video export:
+  - Video & media:
       - Video export: video-export.md
+      - HeyGen article examples: heygen-examples.md
+      - Avatar PiP calibration: avatar-calibration.md
+      - Slide JPEG export: slide-images.md
   - Reference:
       - Commands: commands.md
       - Python API: python-api.md

@@ -71,11 +71,26 @@ print(f"PPTX: {result['pptx']}")
 print(f"PDF: {result['pdf']}")
 ```
 
+## Video and HeyGen decks (optional)
+
+```bash
+brew install ffmpeg poppler
+brew install --cask libreoffice
+pip install praisonaippt[avatar-calibrate]
+
+praisonaippt -i examples/heygen-50590-video-audio-heygen.yaml \
+  -o examples/heygen-50590-video-audio-heygen.pptx \
+  --convert-video --video-output examples/heygen-50590-video-audio-heygen.mp4
+```
+
+See [HeyGen article examples](heygen-examples.md) and [Video export](video-export.md).
+
 ## ✅ You're Ready!
 
 You've successfully created your first presentation with PraisonAI PPT. 
 
 **Next Steps:**
-- [Complete Command Reference]({{ '/commands' | relative_url }})
-- [Python API Documentation]({{ '/python-api' | relative_url }})
-- [PDF Conversion Guide]({{ '/pdf-conversion' | relative_url }})
+- [Complete Command Reference](commands.md)
+- [Python API Documentation](python-api.md)
+- [PDF Conversion Guide](pdf-conversion.md)
+- [HeyGen article examples](heygen-examples.md)

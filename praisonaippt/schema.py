@@ -31,6 +31,9 @@ _TOP_LEVEL_KEYS = {
     "_source_file",
     "video_export",
     "slide_timestamps",
+    "slide_images_dir",
+    "avatar_calibration",
+    "_avatar_calibration",
 }
 
 _SECTION_KEYS = {"section", "section_subtitle", "verses"}
@@ -93,6 +96,13 @@ _VERSE_KEYS = {
     "description",
     "heading",
     "badge",
+    "video_overlay",
+    "avatar_crop_x_ratio",
+    "avatar_crop_y_ratio",
+    "avatar_zoom_ratio",
+    "avatar_fit",
+    "media_crop_y_ratio",
+    "media_zoom_ratio",
 }
 
 

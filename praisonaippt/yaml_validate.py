@@ -24,6 +24,9 @@ _LIST_TYPE = frozenset({"bullet", "numbered"})
 _IMAGE_FIT = frozenset({"contain", "cover", "fill"})
 _IMAGE_SIDE = frozenset({"left", "right"})
 _NARRATION_MODE = frozenset({"fixed", "audio_file", "avatar", "tts", "auto"})
+_AUDIO_SOURCE = frozenset({
+    "heygen_video", "heygen", "video", "external", "separate", "mp3", "tts",
+})
 _SYNC_MODE = frozenset({"avatar_lead", "notes_lead", "longest"})
 _AVATAR_TIMELINE = frozenset({"per_slide", "continuous", "auto"})
 _VIDEO_BACKEND = frozenset({"compositor", "auto", "powerpoint", "aspose_frames"})
@@ -39,12 +42,21 @@ _AVATAR_SHAPES = frozenset({
 _SLIDE_SIZE_PRESETS = frozenset({"widescreen", "16:9", "standard", "4:3", "16:10"})
 
 _VIDEO_EXPORT_KEYS = frozenset({
-    "backend", "narration_mode", "output_path", "preset", "resolution",
+    "backend", "narration_mode", "audio_source", "output_path", "preset", "resolution",
     "fps", "dpi", "slide_duration_sec", "avatar_timeline", "avatar",
-    "tts", "captions", "slide_cache",
+    "media", "overlay", "tts", "captions", "slide_cache",
 })
 _VIDEO_AVATAR_KEYS = frozenset({
-    "fit", "shape", "crop_y_ratio", "zoom_ratio", "loop_if_shorter",
+    "fit", "shape", "crop_x_ratio", "crop_y_ratio", "zoom_ratio", "loop_if_shorter",
+    "anchor", "position", "pip_position", "width_ratio", "pip_width_ratio",
+    "margin_in", "pip_margin_in", "left_in", "top_in", "width_in", "height_in",
+    "box", "offset_px",
+})
+_VIDEO_MEDIA_KEYS = _VIDEO_AVATAR_KEYS - {"loop_if_shorter", "shape"}
+_VIDEO_OVERLAY_ROOT_KEYS = frozenset({"offset_px"})
+_VERSE_VIDEO_FLAT_KEYS = frozenset({
+    "video_overlay", "avatar_crop_x_ratio", "avatar_crop_y_ratio", "avatar_zoom_ratio", "avatar_fit",
+    "media_crop_y_ratio", "media_zoom_ratio", "media_fit",
 })
 _VIDEO_TTS_KEYS = frozenset({"provider", "voice"})
 _VIDEO_CAPTIONS_KEYS = frozenset({"enabled"})
@@ -218,6 +230,41 @@ def validate_slide_style(slide_style: Any, path: str = "slide_style") -> None:
             if kind == "pip":
                 _check_enum(blk.get("shape"), _PIP_SHAPES, f"{path}.layouts.pip.shape")
                 _check_enum(blk.get("pip_shape"), _PIP_SHAPES, f"{path}.layouts.pip.pip_shape")
+            anchor = blk.get("pip_position") or blk.get("position")
+            if anchor is not None:
+                from .video_protocol import PIP_ANCHORS, _normalise_anchor
+
+                norm = _normalise_anchor(anchor)
+                if norm not in PIP_ANCHORS:
+                    opts = ", ".join(sorted(PIP_ANCHORS))
+                    raise SchemaError(
+                        f"{path}.layouts.{kind}.pip_position must be one of: {opts} (got {anchor!r})"
+                    )
+            for ratio_key in ("pip_width_ratio", "width_ratio"):
+                if blk.get(ratio_key) is not None:
+                    val = float(blk[ratio_key])
+                    if val <= 0 or val > 1:
+                        raise SchemaError(
+                            f"{path}.layouts.{kind}.{ratio_key} must be between 0 and 1, got {val}"
+                        )
+            if blk.get("crop_x_ratio") is not None:
+                val = float(blk["crop_x_ratio"])
+                if val < 0.2 or val > 0.8:
+                    raise SchemaError(
+                        f"{path}.layouts.{kind}.crop_x_ratio must be between 0.2 and 0.8, got {val}"
+                    )
+            if blk.get("crop_y_ratio") is not None:
+                val = float(blk["crop_y_ratio"])
+                if val < 0 or val > 0.45:
+                    raise SchemaError(
+                        f"{path}.layouts.{kind}.crop_y_ratio must be between 0 and 0.45, got {val}"
+                    )
+            if blk.get("zoom_ratio") is not None:
+                val = float(blk["zoom_ratio"])
+                if val < 0.5 or val > 3.0:
+                    raise SchemaError(
+                        f"{path}.layouts.{kind}.zoom_ratio must be between 0.5 and 3.0, got {val}"
+                    )
 
 
 def validate_video_export(video_export: Any, path: str = "video_export") -> None:
@@ -231,6 +278,7 @@ def validate_video_export(video_export: Any, path: str = "video_export") -> None
         _check_enum(raw["backend"], _VIDEO_BACKEND, f"{path}.backend")
 
     _check_enum(raw.get("narration_mode"), _NARRATION_MODE, f"{path}.narration_mode")
+    _check_enum(raw.get("audio_source"), _AUDIO_SOURCE, f"{path}.audio_source")
     _check_enum(raw.get("preset"), _VIDEO_PRESET, f"{path}.preset")
     _check_enum(raw.get("avatar_timeline"), _AVATAR_TIMELINE, f"{path}.avatar_timeline")
 
@@ -249,14 +297,30 @@ def validate_video_export(video_export: Any, path: str = "video_export") -> None
         if res_map.get("height") is not None:
             _check_positive_number(res_map["height"], f"{path}.resolution.height")
 
+    from .video_protocol import validate_overlay_placement, validate_video_overlay_block
+
     avatar = raw.get("avatar")
     if avatar is not None:
         av = _require_mapping(avatar, f"{path}.avatar")
         _warn_unknown(av.keys(), _VIDEO_AVATAR_KEYS, f"{path}.avatar")
+        validate_overlay_placement(av, f"{path}.avatar")
         _check_enum(av.get("fit"), _AVATAR_FIT, f"{path}.avatar.fit")
-        _check_enum(av.get("shape"), _PIP_SHAPES, f"{path}.avatar.shape")
+        _check_enum(av.get("shape"), _AVATAR_SHAPES, f"{path}.avatar.shape")
         if av.get("loop_if_shorter") is not None:
             _check_bool(av["loop_if_shorter"], f"{path}.avatar.loop_if_shorter")
+
+    media = raw.get("media")
+    if media is not None:
+        md = _require_mapping(media, f"{path}.media")
+        _warn_unknown(md.keys(), _VIDEO_MEDIA_KEYS, f"{path}.media")
+        validate_overlay_placement(md, f"{path}.media")
+        _check_enum(md.get("fit"), _AVATAR_FIT, f"{path}.media.fit")
+
+    overlay = raw.get("overlay")
+    if overlay is not None:
+        ov = _require_mapping(overlay, f"{path}.overlay")
+        _warn_unknown(ov.keys(), _VIDEO_OVERLAY_ROOT_KEYS, f"{path}.overlay")
+        validate_video_overlay_block(overlay, f"{path}.overlay")
 
     tts = raw.get("tts")
     if tts is not None:
@@ -333,6 +397,27 @@ def validate_verse_options(verse: dict, path: str) -> None:
     if verse.get("avatar_shape") is not None:
         _check_enum(verse["avatar_shape"], _AVATAR_SHAPES, f"{path}.avatar_shape")
 
+    from .video_protocol import validate_overlay_placement, validate_video_overlay_block
+
+    for flat_key in ("avatar_crop_x_ratio",):
+        if verse.get(flat_key) is not None:
+            val = float(verse[flat_key])
+            if val < 0.2 or val > 0.8:
+                raise SchemaError(f"{path}.{flat_key} must be between 0.2 and 0.8, got {val}")
+    for flat_key in ("avatar_crop_y_ratio", "media_crop_y_ratio"):
+        if verse.get(flat_key) is not None:
+            val = float(verse[flat_key])
+            if val < 0 or val > 0.45:
+                raise SchemaError(f"{path}.{flat_key} must be between 0 and 0.45, got {val}")
+    for flat_key in ("avatar_zoom_ratio", "media_zoom_ratio"):
+        if verse.get(flat_key) is not None:
+            val = float(verse[flat_key])
+            if val < 0.5 or val > 3.0:
+                raise SchemaError(f"{path}.{flat_key} must be between 0.5 and 3.0, got {val}")
+    _check_enum(verse.get("avatar_fit"), _AVATAR_FIT, f"{path}.avatar_fit")
+    if verse.get("video_overlay") is not None:
+        validate_video_overlay_block(verse["video_overlay"], f"{path}.video_overlay")
+
     preset = verse.get("color_scheme")
     if preset is not None:
         from .deck_slides import DECK_COLOR_PRESETS
@@ -370,3 +455,30 @@ def validate_deck_options(data: dict) -> None:
     validate_slide_style(data.get("slide_style"))
     validate_video_export(data.get("video_export"))
     validate_slide_timestamps(data.get("slide_timestamps"))
+    _validate_slide_timestamp_count(data)
+    if data.get("slide_images_dir") is not None and not isinstance(data.get("slide_images_dir"), str):
+        raise SchemaError("slide_images_dir must be a string path")
+
+
+def _validate_slide_timestamp_count(data: dict) -> None:
+    """Warn when ``slide_timestamps`` length does not match the slide plan."""
+    ts = data.get("slide_timestamps")
+    if not ts or not isinstance(ts, list):
+        return
+    try:
+        from .video_exporter import iter_slide_plan
+
+        plan_len = len(list(iter_slide_plan(data)))
+    except Exception:
+        return
+    if len(ts) not in (plan_len, plan_len + 1):
+        import logging
+
+        logging.getLogger("praisonaippt.schema").warning(
+            "slide_timestamps has %d entries but the slide plan has %d slides "
+            "(expected %d or %d boundaries); durations may drift unless every verse sets duration_sec",
+            len(ts),
+            plan_len,
+            plan_len,
+            plan_len + 1,
+        )

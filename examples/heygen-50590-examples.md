@@ -1,5 +1,7 @@
 # HeyGen 50590 — media combination examples
 
+> **Published docs:** [HeyGen article examples](https://ppt.praison.ai/heygen-examples/) (MkDocs: `docs/heygen-examples.md`). Edit this file or the doc page; keep workflow in sync.
+
 **Step 1 — content:** edit [`heygen-50590-content.yaml`](heygen-50590-content.yaml) with all slide copy,
 formats (`list`, `two_column`, `table`, `big_number`, `avatar_quote`, `avatar_headline`, …), and timing.
 
@@ -35,6 +37,14 @@ python -m praisonaippt.cli transcript-to-yaml \
   -o examples/heygen-article-50590 \
   --variants all
 ```
+
+## Narration source (pick one)
+
+1. **Default — HeyGen video audio** (`narration_mode: avatar` or `audio_source: heygen_video`): AAC from [heygen-article-50590.mp4](heygen-article-50590.mp4) (~57 s).
+2. **Optional — video + separate MP3** (`narration_mode: audio_file` or `audio_source: external`): PiP from HeyGen; timing/voice from [short-script-50590.mp3](short-script-50590.mp3).
+3. **TTS** (`narration_mode: tts`): synthesise from verse `notes` (avatar muted).
+
+With `narration_mode: auto`, HeyGen embedded audio wins when the avatar file has a track, even if `audio_path` is also set.
 
 ## Variant matrix
 
@@ -77,7 +87,7 @@ This syncs HeyGen variants from [`heygen-50590-content.yaml`](heygen-50590-conte
 | `deck_template_gallery` | [`deck_template_gallery.yaml`](deck_template_gallery.yaml) | 12 HeyGen deck layouts, colour presets |
 | `heygen-50590-*` | Five variant YAMLs | Article deck, transcript timing, captions |
 
-See also [`docs/deck-layouts.md`](../docs/deck-layouts.md) for deck protocol reference.
+See also [deck layouts](../docs/deck-layouts.md) and [HeyGen examples](../docs/heygen-examples.md) in `docs/`.
 
 ## Legacy filenames
 

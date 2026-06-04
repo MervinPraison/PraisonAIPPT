@@ -144,6 +144,10 @@ Thumbs.db
 *.swo
 *~
 
+# Local PraisonAIPPT caches (repo only; not ~/.praisonaippt user config)
+.praisonaippt/
+.praisonaippt-calibrate/
+
 # Temporary files
 *.tmp
 *.temp
@@ -156,5 +160,5 @@ Thumbs.db
 *timestamps.txt
 *timestamps.json
 *.srt
-assets/extracted_images
 examples/slide_images
+assets/extracted_images

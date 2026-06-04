@@ -54,6 +54,7 @@ Keys starting with `x-` are ignored (YAML anchors). Unknown keys log a warning; 
 | `audio_start_sec` | float | Offset into shared audio/avatar file |
 | `audio_path` | string | External narration MP3 |
 | `narration_mode` | string | `fixed`, `audio_file`, `avatar`, `tts`, `auto` |
+| `audio_source` | string | Optional alias: `heygen_video`, `external`, `tts` (used when `narration_mode` omitted) |
 | `sync_mode` | string | `avatar_lead`, `notes_lead`, `longest` |
 | `color_scheme` | string | Deck colour preset name (`deck_*` slides) |
 
@@ -132,7 +133,7 @@ video_export:
 2. `python examples/sync_heygen_variants.py`
 3. `praisonaippt -i examples/<variant>.yaml -o examples/<variant>.pptx --convert-video`
 
-Details: `examples/heygen-50590-examples.md` in the repository.
+Details: [HeyGen article examples](heygen-examples.md).
 
 ---
 

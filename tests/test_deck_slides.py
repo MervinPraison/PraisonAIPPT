@@ -13,6 +13,7 @@ from praisonaippt.deck_slides import (
     DECK_SLIDE_TYPES,
     _title_block_height,
     deck_avatar_shape,
+    deck_skips_avatar_overlay,
     deck_skips_media_overlay,
     export_deck_slide_regions,
     render_deck_slide,
@@ -107,6 +108,12 @@ def test_circle_avatar_shape_for_pip_layouts():
     assert deck_avatar_shape("deck_region_grid", {}, "circle") == "circle"
 
 
+def test_deck_skips_avatar_overlay():
+    assert deck_skips_avatar_overlay("deck_thank_you")
+    assert deck_skips_avatar_overlay("deck_title_split")
+    assert not deck_skips_avatar_overlay("deck_exec_summary")
+
+
 def test_deck_skips_media_overlay():
     for kind in DECK_SLIDE_TYPES:
         assert deck_skips_media_overlay(kind)
@@ -135,6 +142,14 @@ def test_deck_rect_avatar_forces_rect_shape_despite_circle_pip():
     strip = RegionBox(0.3, 4.0, 5.0, 3.0)
     assert resolve_avatar_shape(style, layout_kind="deck_split_performance", box=strip) == "h_rect"
     assert deck_avatar_shape("deck_exec_summary", style, "circle") == "circle"
+
+
+def test_public_slide_image_exports():
+    from praisonaippt import SlideImageOptions, default_slide_images_dir, export_pptx_slide_jpegs
+
+    assert SlideImageOptions is not None
+    assert callable(export_pptx_slide_jpegs)
+    assert callable(default_slide_images_dir)
 
 
 def test_exec_summary_pip_top_right():
@@ -171,10 +186,10 @@ def test_region_grid_content_clears_bottom_left_pip():
 def test_thank_you_avatar_framing_zoomed_out():
     from praisonaippt.avatar_layouts import avatar_framing
 
-    _, zoom = avatar_framing({}, "deck_thank_you")
-    _, pip_zoom = avatar_framing({}, "pip")
+    _, _, zoom = avatar_framing({}, "deck_thank_you")
+    _, _, pip_zoom = avatar_framing({}, "pip")
     assert zoom < pip_zoom
-    assert zoom == 1.1
+    assert zoom == 1.02
 
 
 def test_agenda_list_starts_below_title():

@@ -295,11 +295,37 @@ presentations/
     └── spanish/
 ```
 
+## HeyGen article deck (50590)
+
+Full walkthrough: **[HeyGen article examples](heygen-examples.md)**.
+
+| Example | Path |
+|---------|------|
+| Master content (edit here) | `examples/heygen-50590-content.yaml` |
+| Default export (HeyGen audio) | `examples/heygen-50590-video-audio-heygen.yaml` |
+| Video + separate MP3 | `examples/heygen-50590-video-visual-mp3.yaml` |
+| Avatar + deck galleries | `examples/avatar_layouts.yaml`, `examples/deck_template_gallery.yaml` |
+
+```bash
+python examples/sync_heygen_variants.py
+python examples/build_showcase_examples.py
+```
+
+## Showcase rebuild
+
+```bash
+python examples/build_showcase_examples.py
+```
+
+Builds avatar layout gallery, deck template gallery, and all five HeyGen variant PPTX/MP4 files. See [Layouts overview](layouts-overview.md).
+
 ## 🎯 Next Steps
 
-- [Installation Guide]({{ '/installation' | relative_url }})
-- [Command Reference]({{ '/commands' | relative_url }})
-- [Python API Documentation]({{ '/python-api' | relative_url }})
+- [Installation Guide](installation.md)
+- [Command Reference](commands.md)
+- [Video export](video-export.md)
+- [HeyGen article examples](heygen-examples.md)
+- [Python API Documentation](python-api.md)
 
 ---
 

@@ -1,6 +1,17 @@
 presentation_title: Dreaming, outcomes, and webhooks
 presentation_subtitle: Claude Managed Agents update · May 2026
 slide_size: widescreen
+slide_images_dir: slide_images
+avatar_calibration:
+  auto: true
+  method: hybrid
+  crop_x_preferred: 0.53
+  crop_x_window:
+  - 0.5
+  - 0.56
+  crop_y_preferred: 0.03
+  anchor_weight: 0.15
+  detector: auto
 slide_style:
   background_color: '#121212'
   text_color: '#FFFFFF'
@@ -11,10 +22,10 @@ slide_style:
   font_name: Calibri
   layouts:
     pip:
-      width_ratio: 0.2
+      width_ratio: 0.24
       margin_in: 0.38
       shape: circle
-      crop_y_ratio: 0.06
+      crop_y_ratio: 0.03
       zoom_ratio: 1.45
       border_color: '#FFFFFF'
       border_width_pt: 2.5
@@ -83,6 +94,13 @@ sections:
   - slide_type: avatar_quote
     text: How do you actually run AI agents in the real world?
     reference: All three answer the same question
+    video_overlay:
+      avatar:
+        anchor: bottom_right
+        width_ratio: 0.2
+        margin_in: 0.38
+        zoom_ratio: 1.3
+        crop_y_ratio: 0.08
     duration_sec: 7.56
     audio_start_sec: 36.98
     notes: What makes this update interesting isn't any one feature. It's that all
@@ -121,7 +139,7 @@ slide_timestamps:
 - 3.0
 - 7.54
 - 21.2
-- 28.3
+- 29.3
 - 38.98
 - 46.54
 - 53.88
@@ -130,6 +148,7 @@ video_export:
   backend: compositor
   preset: standard
   narration_mode: avatar
+  audio_source: heygen_video
   avatar_timeline: continuous
   slide_duration_sec: 3.0
   avatar:
@@ -137,5 +156,7 @@ video_export:
     shape: circle
     crop_y_ratio: 0.1
     zoom_ratio: 1.35
+  media:
+    fit: contain
   captions:
     enabled: true

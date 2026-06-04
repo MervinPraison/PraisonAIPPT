@@ -16,6 +16,12 @@ from .loader import load_verses_from_file, load_verses_from_dict
 from .template_resolver import list_templates, resolve_template_style, get_template_path
 from .slide_renderers import register_renderer, list_renderers
 from .pdf_converter import convert_pptx_to_pdf, PDFOptions, PDFConverter
+from .slide_images import (
+    SlideImageOptions,
+    default_slide_images_dir,
+    export_pptx_slide_jpegs,
+    resolve_slide_images_dir,
+)
 from .video_exporter import VideoOptions, convert_pptx_to_video, convert_deck_to_video, resolve_video_backend
 from .video_sidecar import load_deck_sidecar
 from .lazy_loader import lazy_import, check_optional_dependency, LazyImportError
@@ -31,6 +37,12 @@ from .exceptions import (
     BackendUnavailableError,
 )
 from .utils import resolve_asset_path
+from .avatar_calibrate import (
+    AvatarFramingResult,
+    calibrate_avatar_framing,
+    calibrate_deck_avatars,
+    maybe_auto_calibrate_deck,
+)
 
 
 def _read_version() -> str:
@@ -69,6 +81,7 @@ __all__ = [
     "SlideImageOptions",
     "export_pptx_slide_jpegs",
     "default_slide_images_dir",
+    "resolve_slide_images_dir",
     "VideoOptions",
     "convert_pptx_to_video",
     "convert_deck_to_video",
@@ -89,4 +102,8 @@ __all__ = [
     "SchemaError",
     "BackendUnavailableError",
     "resolve_asset_path",
+    "AvatarFramingResult",
+    "calibrate_avatar_framing",
+    "calibrate_deck_avatars",
+    "maybe_auto_calibrate_deck",
 ]

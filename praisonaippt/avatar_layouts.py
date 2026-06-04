@@ -58,6 +58,9 @@ _PIP_KINDS = frozenset({
     "avatar_quote",
 })
 
+# Live PiP is composited in video export; baking a still here duplicates FFmpeg overlay.
+_AVATAR_PIP_VIDEO_OVERLAY_ONLY = frozenset({"avatar_quote"})
+
 _VIDEO_EXTS = {".mp4": "video/mp4", ".mov": "video/quicktime", ".m4v": "video/mp4", ".webm": "video/webm"}
 _IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff"}
 
@@ -454,17 +457,28 @@ def _pip_still_pixels(box: RegionBox, dpi: int = 150) -> tuple[int, int]:
     return px, max(96, int(round(box.height_in * dpi)))
 
 
-def avatar_framing(style: dict, layout_kind: str = "pip") -> Tuple[float, float]:
+def avatar_framing(style: dict, layout_kind: str = "pip") -> Tuple[float, float, float]:
     """Per-layout avatar crop/zoom; falls back to ``layouts.pip`` defaults."""
-    crop_kind = layout_in(style, layout_kind, "crop_y_ratio", None)
+    crop_x_kind = layout_in(style, layout_kind, "crop_x_ratio", None)
+    crop_y_kind = layout_in(style, layout_kind, "crop_y_ratio", None)
     zoom_kind = layout_in(style, layout_kind, "zoom_ratio", None)
-    crop = float(
-        crop_kind if crop_kind is not None else layout_in(style, "pip", "crop_y_ratio", 0.06)
+    crop_x = float(
+        crop_x_kind if crop_x_kind is not None else layout_in(style, "pip", "crop_x_ratio", 0.5)
+    )
+    crop_y = float(
+        crop_y_kind if crop_y_kind is not None else layout_in(style, "pip", "crop_y_ratio", 0.06)
     )
     zoom = float(
         zoom_kind if zoom_kind is not None else layout_in(style, "pip", "zoom_ratio", 1.45)
     )
-    return crop, zoom
+    return crop_x, crop_y, zoom
+
+
+def _pip_video_seek_sec(verse: Optional[dict], *, default: float = 0.5) -> float:
+    """Match video overlay timing: sample near ``audio_start_sec`` when set."""
+    if verse and verse.get("audio_start_sec") is not None:
+        return max(0.0, float(verse["audio_start_sec"]) + 0.35)
+    return default
 
 
 def _save_pip_still_png(
@@ -476,10 +490,13 @@ def _save_pip_still_png(
     poster: Optional[io.BytesIO] = None,
     rect_mask: bool = False,
     layout_kind: str = "pip",
+    seek_sec: Optional[float] = None,
+    verse: Optional[dict] = None,
 ) -> Optional[str]:
     """Extract a face-centred still PNG; circle mask only for PiP (not full-bleed panels)."""
     w, h = _pip_still_pixels(box)
-    crop_y, zoom = avatar_framing(style, layout_kind)
+    crop_x, crop_y, zoom = avatar_framing(style, layout_kind)
+    zoom = max(1.0, float(zoom))
     shape = _pip_shape_kind(style)
     is_circle = not rect_mask and shape in ("circle", "round", "rounded")
     tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
@@ -488,12 +505,15 @@ def _save_pip_still_png(
     try:
         from .ffmpeg_composer import _circle_alpha_filter, _cover_scale_filter
 
-        vf = _cover_scale_filter(w, h, crop_y_ratio=crop_y, zoom_ratio=zoom)
+        vf = _cover_scale_filter(
+            w, h, crop_x_ratio=crop_x, crop_y_ratio=crop_y, zoom_ratio=zoom,
+        )
         if is_circle:
             vf = f"{vf},{_circle_alpha_filter()}"
+        ss = _pip_video_seek_sec(verse) if seek_sec is None else max(0.0, float(seek_sec))
         cmd = [
             "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-            "-ss", "0.5", "-i", video_path,
+            "-ss", f"{ss:.3f}", "-i", video_path,
             "-vframes", "1", "-vf", vf, out_path,
         ]
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
@@ -533,10 +553,11 @@ def _place_avatar_still_in_box(
     source_file: Optional[str] = None,
     rect_mask: bool = False,
     layout_kind: str = "pip",
+    verse: Optional[dict] = None,
 ) -> bool:
     still = _save_pip_still_png(
         video_path, box, style, source_file=source_file, poster=poster,
-        rect_mask=rect_mask, layout_kind=layout_kind,
+        rect_mask=rect_mask, layout_kind=layout_kind, verse=verse,
     )
     if still:
         _place_picture_in_box(slide, still, box, fit="cover" if rect_mask else "fill")
@@ -675,7 +696,7 @@ def _place_avatar_in_box(
     if is_circle:
         if not _place_avatar_still_in_box(
             slide, path, poster, box, pip_style, source_file=source_file,
-            layout_kind=layout_kind,
+            layout_kind=layout_kind, verse=verse,
         ):
             _fit_movie_in_box(slide, path, poster, box, _video_mime(path))
         if draw_frame:
@@ -684,7 +705,7 @@ def _place_avatar_in_box(
 
     if not _place_avatar_still_in_box(
         slide, path, poster, box, pip_style, source_file=source_file, rect_mask=True,
-        layout_kind=layout_kind,
+        layout_kind=layout_kind, verse=verse,
     ):
         _fit_movie_in_box(slide, path, poster, box, _video_mime(path))
     if draw_frame and is_square:
@@ -966,7 +987,7 @@ def render_avatar_slide(prs, kind: str, verse: dict, style=None, *, source_file:
 
     if kind == "avatar_quote":
         _render_avatar_quote(slide, prs, verse, style, regions, theme)
-        if avatar_box:
+        if avatar_box and kind not in _AVATAR_PIP_VIDEO_OVERLAY_ONLY:
             _place_avatar_in_box(
                 slide,
                 avatar_box,

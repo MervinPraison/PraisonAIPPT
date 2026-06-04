@@ -46,6 +46,28 @@ pip install praisonaippt[pdf-aspose]
 pip install praisonaippt[pdf-all]
 ```
 
+### Optional: video export and avatar calibration
+
+MP4 export uses **FFmpeg**, **LibreOffice**, and **poppler** on the system PATH (see [Video export](video-export.md)).
+
+```bash
+# TTS narration (edge-tts)
+pip install praisonaippt[video-tts]
+
+# Auto PiP face centre (MediaPipe + OpenCV)
+pip install praisonaippt[avatar-calibrate]
+
+# YOLO face detector (AGPL-3.0; hard angles only)
+pip install praisonaippt[avatar-calibrate-yolo]
+```
+
+macOS example:
+
+```bash
+brew install ffmpeg poppler
+brew install --cask libreoffice
+```
+
 ### Method 3: Development Installation
 
 ```bash

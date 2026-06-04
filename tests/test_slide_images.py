@@ -17,7 +17,20 @@ PKG = Path(__file__).resolve().parent.parent
 
 
 def test_default_slide_images_dir():
-    assert default_slide_images_dir("/tmp/deck.pptx") == Path("/tmp/deck_slides")
+    assert default_slide_images_dir("/tmp/deck.pptx").resolve() == Path("/tmp/deck_slides").resolve()
+    root = Path(__file__).resolve().parent.parent / "examples"
+    assert default_slide_images_dir(root / "deck.pptx") == root / "slide_images"
+
+
+def test_resolve_slide_images_dir_from_yaml():
+    from praisonaippt.slide_images import resolve_slide_images_dir
+
+    deck = {"slide_images_dir": "slide_images"}
+    root = Path(__file__).resolve().parent.parent / "examples"
+    out = resolve_slide_images_dir(
+        deck, pptx_path=root / "heygen-50590-video-visual-mp3.pptx", source_file=str(root / "heygen-50590-content.yaml"),
+    )
+    assert out == (root / "slide_images").resolve()
 
 
 def test_normalise_jpeg_names(tmp_path):
@@ -63,8 +76,13 @@ def test_export_requires_pdftoppm(mock_tools, tmp_path):
 def test_pdf_to_jpeg_pages_invokes_pdftoppm(mock_run, tmp_path):
     out_dir = tmp_path / "pages"
     out_dir.mkdir()
-    (out_dir / "slide-1.jpg").write_bytes(b"j")
-    mock_run.return_value = MagicMock(returncode=0, stderr="")
+    (out_dir / "slide-000.jpg").write_bytes(b"old")
+
+    def _fake_pdftoppm(*_args, **_kwargs):
+        (out_dir / "slide-1.jpg").write_bytes(b"j")
+        return MagicMock(returncode=0, stderr="")
+
+    mock_run.side_effect = _fake_pdftoppm
     paths = pdf_to_jpeg_pages(str(tmp_path / "x.pdf"), out_dir, dpi=120, jpeg_quality=80)
     assert paths
     cmd = mock_run.call_args[0][0]

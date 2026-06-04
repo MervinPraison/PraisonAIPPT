@@ -4,7 +4,7 @@ PraisonAIPPT can export presentations to MP4 on **Mac and Linux** using a **comp
 backend: LibreOffice rasterises slides to PNG, then FFmpeg overlays avatar and media
 regions using geometry from `avatar_layouts` and `deck_slides`.
 
-**Related docs:** [Layouts overview](layouts-overview.md) · [Avatar layouts & PiP](avatar-layouts.md) · [Deck layouts](deck-layouts.md) · [YAML deck reference](yaml-reference.md) · [Slide style reference](slide-style-reference.md)
+**Related docs:** [Layouts overview](layouts-overview.md) · [Avatar layouts & PiP](avatar-layouts.md) · [Deck layouts](deck-layouts.md) · [YAML deck reference](yaml-reference.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md) · [Commands](commands.md#video-avatar-and-heygen-commands)
 
 PowerPoint `CreateVideo` (Windows, on-prem) is **Phase 3** and not implemented in v1.
 
@@ -121,6 +121,62 @@ Use `continuous` (or `auto` with one HeyGen file) and per-slide `audio_start_sec
 
 `slide_style.layouts.pip` (`crop_y_ratio`, `zoom_ratio`, `shape`) merges into video options when not set under `video_export.avatar`.
 
+### Video overlay protocol (position, zoom, framing)
+
+Compositor overlays use inch regions from layout engines, then apply the **video overlay protocol** (`praisonaippt.video_protocol`).
+
+**Precedence** (later wins): `video_export.avatar` / `media` → `slide_style.layouts.<slide_type>` → `layouts.pip` → verse flat keys → `verse.video_overlay`.
+
+| Layer | Keys | Purpose |
+|-------|------|---------|
+| Deck | `video_export.avatar`, `video_export.media` | Defaults for all slides |
+| Layout | `slide_style.layouts.pip` or `layouts.<slide_type>` | PiP anchor, size, crop, zoom |
+| Verse (short) | `avatar_zoom_ratio`, `avatar_crop_y_ratio`, `avatar_fit`, `media_*` | One-off tweaks |
+| Verse (full) | `video_overlay.avatar`, `video_overlay.media` | Per-slide override |
+
+**Placement fields** (avatar or media block):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `anchor` / `pip_position` | enum | `bottom_right`, `bottom_left`, `top_right`, `top_left`, `center` |
+| `width_ratio` / `pip_width_ratio` | 0–1 | PiP width vs slide width (anchor mode) |
+| `margin_in` / `pip_margin_in` | inches | Inset from slide edge |
+| `box` | mapping | Explicit `{left_in, top_in, width_in, height_in}` (overrides layout region) |
+| `left_in`, `top_in`, `width_in`, `height_in` | inches | Shorthand explicit box |
+| `offset_px` | `{x, y}` | Nudge overlay after pixel mapping (integers) |
+| `crop_y_ratio` | 0–0.45 | Vertical crop bias when `fit: cover` |
+| `zoom_ratio` | 0.5–3.0 | Cover scale (clamped ≥ 1.0 at render) |
+| `fit` | enum | `cover`, `contain`, `stretch` |
+| `shape` | enum | Avatar mask: `circle`, `rect`, `auto`, … |
+
+Example — per-slide PiP on a quote slide:
+
+```yaml
+- slide_type: avatar_quote
+  avatar_video_path: examples/heygen-article-50590.mp4
+  video_overlay:
+    avatar:
+      anchor: bottom_right
+      width_ratio: 0.20
+      margin_in: 0.38
+      zoom_ratio: 1.30
+      crop_y_ratio: 0.08
+```
+
+Example — deck-wide defaults + explicit media framing:
+
+```yaml
+video_export:
+  avatar:
+    fit: cover
+    zoom_ratio: 1.35
+    crop_y_ratio: 0.10
+  media:
+    fit: contain
+```
+
+Validation runs on load via `yaml_validate.validate_video_export` and `validate_verse_options`. `slide_timestamps` length is checked against the slide plan (warning if mismatched).
+
 ## Transcript-driven HeyGen decks
 
 Generate YAML from Whisper JSON:
@@ -139,16 +195,21 @@ praisonaippt transcript-to-yaml \
 | `--transcript-mode` | `full`, `thematic`, or `both` deck variants |
 | `--transcript-audio` | MP3 for silence/RMS alignment |
 | `--align` | `silence`, `emphasis`, `karaoke` (comma-separated) |
-| `--variants all` | Write media combination YAMLs (see `examples/heygen-50590-examples.md` in the repo) |
+| `--variants all` | Write media combination YAMLs |
 
-Example deck: `examples/heygen-article-50590-short.yaml`. See `examples/heygen-50590-examples.md` in the repository for all audio/video combinations.
+Example deck: `examples/heygen-article-50590-short.yaml`. Full matrix and build steps: **[HeyGen article examples](heygen-examples.md)**.
 
 **Timing:** use wall-clock merge (`last_segment.end - first_segment.start`) so pauses between
 Whisper segments are held on the correct slide. Sum of segment durations alone is shorter than
 total audio length.
 
-**Warning:** with `narration_mode: auto`, if both `audio_path` and `avatar_video_path` are set,
-`audio_path` wins. Use explicit `avatar` or `audio_file` for HeyGen article exports.
+**HeyGen audio:** default export uses HeyGen MP4 embedded audio (`narration_mode: avatar` or
+`audio_source: heygen_video`). Use `audio_file` / `audio_source: external` when video is visual-only
+and a separate MP3 drives narration.
+
+With `narration_mode: auto`, if both `audio_path` and `avatar_video_path` are set, **HeyGen video
+audio wins** when the avatar file has an audio track; otherwise external `audio_path` is used.
+Use explicit `avatar` or `audio_file` to override.
 
 ## Narration modes
 
@@ -158,7 +219,10 @@ total audio length.
 | `audio_file` | verse `duration_sec`, else `slide_timestamps`, else ffprobe | external file (trimmed with `audio_start_sec`) |
 | `avatar` | verse `duration_sec`, else `slide_timestamps`, else ffprobe | avatar track |
 | `tts` | ffprobe on generated MP3 | TTS (avatar muted) |
-| `auto` | precedence: audio_path → avatar (if audio) → notes→TTS → fixed | per rules |
+| `auto` | precedence: avatar (if audio) → audio_path → notes→TTS → fixed | per rules |
+
+Optional alias in `video_export`: `audio_source: heygen_video | external | tts` (maps to
+`narration_mode` when `narration_mode` is omitted).
 
 Avatar video audio is muted when TTS or `audio_file` is primary to avoid double narration.
 

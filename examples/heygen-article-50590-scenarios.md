@@ -53,4 +53,4 @@ python -m praisonaippt.cli \
 
 Remove `avatar_video_path` from content slides, then export with `--narration-mode audio_file`.
 
-**Note:** Do not use `narration_mode: auto` when both `audio_path` and `avatar_video_path` are set.
+**Note:** With `narration_mode: auto`, HeyGen video audio wins when the MP4 has a track. Use explicit `audio_file` for MP3-only narration.

@@ -34,11 +34,11 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "extra_ref_reserve_in": 1.32,
     },
     "list": {
-        "margin_in": 0.6,
+        "margin_in": 0.75,
         "list_top_in": 0.35,
-        "list_bottom_margin_in": 0.4,
+        "list_bottom_margin_in": 1.0,
         "list_bottom_reserve_in": 6.0,
-        "ref_gap_in": 0.12,
+        "ref_gap_in": 0.18,
         "ref_bottom_offset_in": 0.35,
     },
     "image": {
@@ -140,15 +140,11 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "margin_in": 0.38,
         "text_gap_in": 0.35,
         "shape": "circle",
-        "crop_y_ratio": 0.06,
+        "crop_x_ratio": 0.5,
+        "crop_y_ratio": 0.03,
         "zoom_ratio": 1.45,
         "border_color": "#FFFFFF",
         "border_width_pt": 2.5,
-    },
-    "list": {
-        "margin_in": 0.75,
-        "list_bottom_margin_in": 1.0,
-        "ref_gap_in": 0.18,
     },
     "avatar_border": {
         "border_inset_in": 0.25,
@@ -192,8 +188,10 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
     "deck_exec_summary": {
         "margin_in": 0.65,
         "pip_position": "top_right",
-        "pip_width_ratio": 0.18,
-        "columns_top_in": 2.05,
+        "pip_width_ratio": 0.26,
+        "columns_top_in": 1.0,
+        "column_block_height_in": 1.35,
+        "title_content_gap_in": 0.22,
         "column_gap_in": 0.35,
         "color_scheme": "exec_grey",
     },
@@ -202,6 +200,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "left_width_ratio": 0.45,
         "left_bg_color": "#4338CA",
         "avatar_height_in": 3.0,
+        "row_height_in": 0.72,
+        "row_gap_in": 0.28,
         "avatar_shape": "auto",
         "color_scheme": "split_blue",
     },
@@ -215,8 +215,10 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
     "deck_product_columns": {
         "margin_in": 0.65,
         "pip_position": "top_right",
-        "pip_width_ratio": 0.18,
-        "columns_top_in": 1.85,
+        "pip_width_ratio": 0.26,
+        "columns_top_in": 1.0,
+        "column_block_height_in": 1.45,
+        "title_content_gap_in": 0.22,
         "column_gap_in": 0.25,
         "color_scheme": "product_lavender",
     },
@@ -224,6 +226,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "margin_in": 0.65,
         "left_width_ratio": 0.45,
         "avatar_height_in": 3.0,
+        "row_height_in": 0.88,
+        "row_gap_in": 0.32,
         "avatar_shape": "auto",
         "badge_width_in": 0.95,
         "badge_height_in": 0.55,
@@ -241,8 +245,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "margin_in": 0.75,
         "avatar_width_ratio": 0.5,
         "avatar_shape": "auto",
-        "zoom_ratio": 1.1,
-        "crop_y_ratio": 0.08,
+        "zoom_ratio": 1.02,
+        "crop_y_ratio": 0.14,
         "color_scheme": "thank_you_blue",
     },
     "deck_agenda": {
@@ -344,7 +348,7 @@ def content_width_inches(prs, style: dict, kind: str, default_margin_in: Optiona
     if fixed is not None:
         return float(fixed)
     slide_w_in = prs.slide_width.inches
-    reserve = pip_reserve_inches(style, slide_w_in)
+    reserve = pip_reserve_inches(style, slide_w_in, kind=kind)
     if reserve and kind == "list":
         natural = slide_w_in - float(margin_in) - reserve
     elif reserve:
@@ -370,8 +374,14 @@ def pip_size_inches(style: dict, slide_w_in: float) -> float:
     return slide_w_in * ratio
 
 
-def pip_reserve_inches(style: dict, slide_w_in: float) -> float:
+# Full-bleed slides: no avatar PiP — do not shrink/offset the text box.
+_PIP_RESERVE_SKIP_KINDS = frozenset({"title", "section", "title_only"})
+
+
+def pip_reserve_inches(style: dict, slide_w_in: float, *, kind: Optional[str] = None) -> float:
     """Horizontal space to keep clear for the bottom-right avatar PiP."""
+    if kind in _PIP_RESERVE_SKIP_KINDS:
+        return 0.0
     if not _pip_enabled(style):
         return 0.0
     gap = float(layout_in(style, "pip", "text_gap_in", 0.35))
@@ -398,7 +408,7 @@ def content_box(
     )
     slide_w_in = prs.slide_width.inches
     width_in = content_width_inches(prs, style, kind, margin_in)
-    reserve = pip_reserve_inches(style, slide_w_in)
+    reserve = pip_reserve_inches(style, slide_w_in, kind=kind)
     if reserve:
         usable_w = slide_w_in - reserve
         left_in = max(margin_in, (usable_w - width_in) / 2.0)

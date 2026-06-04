@@ -63,9 +63,12 @@ class VideoOptions:
     keep_temp: bool = False
     avatar_fit: str = "cover"
     avatar_shape: str = "circle"
+    avatar_crop_x_ratio: float = 0.5
     avatar_crop_y_ratio: float = 0.06
     avatar_zoom_ratio: float = 1.45
     media_fit_default: str = "contain"
+    media_crop_y_ratio: float = 0.12
+    media_zoom_ratio: float = 1.0
     loop_avatar_if_shorter: bool = True
     tts_provider: str = "edge"
     tts_voice: str = "en-GB-RyanNeural"
@@ -86,6 +89,7 @@ class VideoOptions:
                 "avatar": {
                     "fit": self.avatar_fit,
                     "shape": self.avatar_shape,
+                    "crop_x_ratio": self.avatar_crop_x_ratio,
                     "crop_y_ratio": self.avatar_crop_y_ratio,
                     "zoom_ratio": self.avatar_zoom_ratio,
                     "loop_if_shorter": self.loop_avatar_if_shorter,
@@ -112,6 +116,10 @@ class VideoOptions:
             opts.backend = str(raw["backend"])
         if raw.get("narration_mode"):
             opts.narration_mode = str(raw["narration_mode"])
+        elif raw.get("audio_source"):
+            mapped = narration_mode_from_audio_source(str(raw["audio_source"]))
+            if mapped:
+                opts.narration_mode = mapped
         if raw.get("output_path"):
             opts.output_path = str(raw["output_path"])
         if raw.get("preset"):
@@ -141,12 +149,22 @@ class VideoOptions:
                 opts.avatar_fit = str(avatar["fit"])
             if avatar.get("shape"):
                 opts.avatar_shape = str(avatar["shape"])
+            if avatar.get("crop_x_ratio") is not None:
+                opts.avatar_crop_x_ratio = float(avatar["crop_x_ratio"])
             if avatar.get("crop_y_ratio") is not None:
                 opts.avatar_crop_y_ratio = float(avatar["crop_y_ratio"])
             if avatar.get("zoom_ratio") is not None:
                 opts.avatar_zoom_ratio = float(avatar["zoom_ratio"])
             if avatar.get("loop_if_shorter") is not None:
                 opts.loop_avatar_if_shorter = bool(avatar["loop_if_shorter"])
+        media = raw.get("media") or {}
+        if isinstance(media, dict):
+            if media.get("fit"):
+                opts.media_fit_default = str(media["fit"])
+            if media.get("crop_y_ratio") is not None:
+                opts.media_crop_y_ratio = float(media["crop_y_ratio"])
+            if media.get("zoom_ratio") is not None:
+                opts.media_zoom_ratio = max(1.0, float(media["zoom_ratio"]))
         tts = raw.get("tts") or {}
         if isinstance(tts, dict):
             if tts.get("provider"):
@@ -174,6 +192,8 @@ def _merge_slide_style_pip(opts: VideoOptions, slide_style: dict) -> None:
     pip = (slide_style.get("layouts") or {}).get("pip") or {}
     if not isinstance(pip, dict):
         return
+    if pip.get("crop_x_ratio") is not None:
+        opts.avatar_crop_x_ratio = float(pip["crop_x_ratio"])
     if pip.get("crop_y_ratio") is not None:
         opts.avatar_crop_y_ratio = float(pip["crop_y_ratio"])
     if pip.get("zoom_ratio") is not None:
@@ -228,8 +248,12 @@ class SlideVideoEntry:
     media_fit: str = "contain"
     avatar_shape: Optional[str] = None
     skip_media_overlay: bool = False
+    skip_avatar_overlay: bool = False
+    avatar_crop_x_ratio: Optional[float] = None
     avatar_crop_y_ratio: Optional[float] = None
     avatar_zoom_ratio: Optional[float] = None
+    media_crop_y_ratio: Optional[float] = None
+    media_zoom_ratio: Optional[float] = None
     avatar_box_px: Optional[dict] = None
     media_box_px: Optional[dict] = None
     text_panel_px: Optional[dict] = None
@@ -291,6 +315,22 @@ def ffprobe_has_audio_safe(path: str, source_file: Optional[str] = None) -> bool
     return False
 
 
+# Optional video_export.audio_source alias (maps to narration_mode in VideoOptions.from_dict).
+_AUDIO_SOURCE_TO_MODE = {
+    "heygen_video": "avatar",
+    "heygen": "avatar",
+    "video": "avatar",
+    "external": "audio_file",
+    "separate": "audio_file",
+    "mp3": "audio_file",
+    "tts": "tts",
+}
+
+
+def narration_mode_from_audio_source(audio_source: str) -> Optional[str]:
+    return _AUDIO_SOURCE_TO_MODE.get(str(audio_source).strip().lower())
+
+
 def _resolve_narration_mode(
     verse: Optional[dict], deck_mode: str, source_file: Optional[str] = None,
 ) -> str:
@@ -300,11 +340,11 @@ def _resolve_narration_mode(
         return deck_mode
     if not verse:
         return "fixed"
-    if verse.get("audio_path"):
-        return "audio_file"
     av = verse.get("avatar_video_path")
     if av and ffprobe_has_audio_safe(av, source_file):
         return "avatar"
+    if verse.get("audio_path"):
+        return "audio_file"
     notes = (verse.get("notes") or "").strip()
     if notes:
         return "tts"
@@ -341,9 +381,8 @@ def build_video_manifest(
     source_file: Optional[str] = None,
     custom_title: Optional[str] = None,
 ) -> List[SlideVideoEntry]:
-    style = dict((data or {}).get("slide_style") or {})
-    if source_file:
-        style["_source_file"] = source_file
+    slide_style_base = dict((data or {}).get("slide_style") or {})
+    video_export = dict((data or {}).get("video_export") or {})
     slide_w_in = prs.slide_width.inches
     slide_h_in = prs.slide_height.inches
     entries: List[SlideVideoEntry] = []
@@ -380,6 +419,14 @@ def build_video_manifest(
     for idx, item in enumerate(plan):
         verse = item.get("verse")
         slide_type = item.get("slide_type")
+        from .deck_slides import DECK_SLIDE_TYPES, resolve_deck_style
+
+        style = slide_style_base
+        if slide_type in DECK_SLIDE_TYPES:
+            style = resolve_deck_style(slide_style_base, verse or {}, slide_type)
+        style = dict(style)
+        if source_file:
+            style["_source_file"] = source_file
         mode = _resolve_narration_mode(verse, options.narration_mode, source_file)
         entry = SlideVideoEntry(
             index=idx,
@@ -406,67 +453,122 @@ def build_video_manifest(
             else:
                 entry.media_fit = options.media_fit_default
 
+        from .deck_slides import (
+            DECK_SLIDE_TYPES,
+            deck_avatar_shape,
+            deck_skips_avatar_overlay,
+            deck_skips_media_overlay,
+            export_deck_slide_regions,
+        )
+        from .video_protocol import (
+            apply_pixel_offset,
+            region_from_placement,
+            resolve_framing,
+            resolve_slide_overlays,
+        )
+
+        framing_kind = (
+            slide_type
+            if slide_type in AVATAR_SLIDE_TYPES or slide_type in DECK_SLIDE_TYPES
+            else "pip"
+        )
+        overlays = resolve_slide_overlays(
+            verse=verse,
+            slide_type=slide_type,
+            style=style,
+            video_export=video_export,
+            framing_kind=framing_kind,
+        )
+        g_off = overlays.global_offset_px
+        av_region = None
+        media_region = None
+
         if slide_type in AVATAR_SLIDE_TYPES:
             regions = export_slide_regions(prs, slide_type, style)
-            entry.avatar_box_px = _box_px(
-                regions.get("avatar"), slide_w_in, slide_h_in, options.width, options.height
+            av_region = region_from_placement(
+                regions.get("avatar"), overlays.avatar, slide_w_in, slide_h_in, style, framing_kind,
             )
-            entry.media_box_px = _box_px(
-                regions.get("media"), slide_w_in, slide_h_in, options.width, options.height
+            media_region = region_from_placement(
+                regions.get("media"), overlays.media, slide_w_in, slide_h_in, style, framing_kind,
             )
             panel = regions.get("text_panel")
             entry.text_panel_px = _box_px(
                 panel, slide_w_in, slide_h_in, options.width, options.height
             )
-        else:
-            from .deck_slides import DECK_SLIDE_TYPES, export_deck_slide_regions
+        elif slide_type in DECK_SLIDE_TYPES:
+            regions = export_deck_slide_regions(prs, slide_type, style)
+            av_region = region_from_placement(
+                regions.get("avatar"), overlays.avatar, slide_w_in, slide_h_in, style, framing_kind,
+            )
+            entry.avatar_shape = deck_avatar_shape(
+                slide_type, style, options.avatar_shape, box=av_region, verse=verse,
+            )
+            if deck_skips_avatar_overlay(slide_type):
+                entry.skip_avatar_overlay = True
+            if deck_skips_media_overlay(slide_type):
+                entry.skip_media_overlay = True
+            else:
+                media_region = region_from_placement(
+                    regions.get("media"), overlays.media, slide_w_in, slide_h_in, style, framing_kind,
+                )
+            panel = regions.get("text_panel") or regions.get("content")
+            entry.text_panel_px = _box_px(
+                panel, slide_w_in, slide_h_in, options.width, options.height
+            )
+        elif verse and verse.get("avatar_video_path"):
+            pip = export_floating_pip_box(prs, style)
+            av_region = region_from_placement(
+                pip, overlays.avatar, slide_w_in, slide_h_in, style, "pip",
+            )
+            from .avatar_layouts import _pip_shape_kind
 
-            if slide_type in DECK_SLIDE_TYPES:
-                from .deck_slides import deck_avatar_shape, deck_skips_media_overlay
+            pip_shape = _pip_shape_kind(style)
+            if pip_shape in ("square", "rect", "rectangle"):
+                entry.avatar_shape = "rect"
+            else:
+                entry.avatar_shape = "circle"
 
-                regions = export_deck_slide_regions(prs, slide_type, style)
-                entry.avatar_box_px = _box_px(
-                    regions.get("avatar"), slide_w_in, slide_h_in, options.width, options.height
-                )
-                av_region = regions.get("avatar")
-                entry.avatar_shape = deck_avatar_shape(
-                    slide_type, style, options.avatar_shape, box=av_region, verse=verse,
-                )
-                if deck_skips_media_overlay(slide_type):
-                    entry.skip_media_overlay = True
-                else:
-                    entry.media_box_px = _box_px(
-                        regions.get("media"), slide_w_in, slide_h_in, options.width, options.height
-                    )
-                panel = regions.get("text_panel") or regions.get("content")
-                entry.text_panel_px = _box_px(
-                    panel, slide_w_in, slide_h_in, options.width, options.height
-                )
-            elif verse and verse.get("avatar_video_path"):
-                pip = export_floating_pip_box(prs, style)
-                entry.avatar_box_px = _box_px(
-                    pip, slide_w_in, slide_h_in, options.width, options.height
-                )
-                from .avatar_layouts import _pip_shape_kind
-
-                pip_shape = _pip_shape_kind(style)
-                if pip_shape in ("square", "rect", "rectangle"):
-                    entry.avatar_shape = "rect"
-                else:
-                    entry.avatar_shape = "circle"
+        av_off = (
+            overlays.avatar.offset_px[0] + g_off[0],
+            overlays.avatar.offset_px[1] + g_off[1],
+        )
+        md_off = (
+            overlays.media.offset_px[0] + g_off[0],
+            overlays.media.offset_px[1] + g_off[1],
+        )
+        entry.avatar_box_px = apply_pixel_offset(
+            _box_px(av_region, slide_w_in, slide_h_in, options.width, options.height), av_off,
+        )
+        entry.media_box_px = apply_pixel_offset(
+            _box_px(media_region, slide_w_in, slide_h_in, options.width, options.height), md_off,
+        )
 
         if entry.avatar_video_path and entry.avatar_box_px:
-            from .avatar_layouts import avatar_framing
-            from .deck_slides import DECK_SLIDE_TYPES
-
-            framing_kind = (
-                slide_type
-                if slide_type in AVATAR_SLIDE_TYPES or slide_type in DECK_SLIDE_TYPES
-                else "pip"
+            crop_x, crop_y, zoom, fit, shape = resolve_framing(
+                overlays.avatar, style, framing_kind,
+                default_crop=options.avatar_crop_y_ratio,
+                default_zoom=options.avatar_zoom_ratio,
+                default_fit=options.avatar_fit,
+                default_shape=entry.avatar_shape or options.avatar_shape,
             )
-            crop, zoom = avatar_framing(style, framing_kind)
-            entry.avatar_crop_y_ratio = crop
+            entry.avatar_crop_x_ratio = crop_x
+            entry.avatar_crop_y_ratio = crop_y
             entry.avatar_zoom_ratio = zoom
+            if overlays.avatar.shape:
+                entry.avatar_shape = shape
+
+        if entry.media_path and entry.media_box_px:
+            _, mcrop, mzoom, mfit, _ = resolve_framing(
+                overlays.media, style, framing_kind,
+                default_crop=options.media_crop_y_ratio,
+                default_zoom=options.media_zoom_ratio,
+                default_fit=entry.media_fit,
+                default_shape="rect",
+            )
+            entry.media_crop_y_ratio = mcrop
+            entry.media_zoom_ratio = mzoom
+            if overlays.media.fit:
+                entry.media_fit = mfit
 
         entries.append(entry)
     return entries
@@ -475,12 +577,6 @@ def build_video_manifest(
 def _timestamp_duration(ts: list, index: int) -> Optional[float]:
     if ts and index < len(ts) - 1:
         return float(ts[index + 1]) - float(ts[index])
-    return None
-
-
-def _timestamp_start(ts: list, index: int) -> Optional[float]:
-    if ts and index < len(ts):
-        return float(ts[index])
     return None
 
 
@@ -498,7 +594,6 @@ def resolve_slide_durations(
         sf = source_file or verse.get("_source_file")
         explicit_duration = verse.get("duration_sec") is not None
         ts_dur = _timestamp_duration(ts, entry.index) if ts else None
-        ts_start = _timestamp_start(ts, entry.index) if ts else None
 
         if entry.slide_role in ("title", "section"):
             entry.duration_sec = float(options.slide_duration_sec)
@@ -527,12 +622,8 @@ def resolve_slide_durations(
                     entry.duration_sec = ffprobe_duration(path)
                 if verse.get("audio_start_sec") is not None:
                     entry.audio_start_sec = float(verse["audio_start_sec"])
-                elif ts_start is not None:
-                    entry.audio_start_sec = ts_start
             elif ts_dur is not None:
                 entry.duration_sec = ts_dur
-                if ts_start is not None:
-                    entry.audio_start_sec = ts_start
                 entry.audio_primary = "none"
             else:
                 entry.duration_sec = float(
@@ -553,8 +644,6 @@ def resolve_slide_durations(
                     entry.duration_sec = ffprobe_duration(path)
                 if verse.get("audio_start_sec") is not None:
                     entry.audio_start_sec = float(verse["audio_start_sec"])
-                elif ts_start is not None:
-                    entry.audio_start_sec = ts_start
             else:
                 entry.duration_sec = float(
                     verse.get("duration_sec") or options.slide_duration_sec
@@ -760,6 +849,16 @@ def _overlays_for_entry(
         p = _resolve_path(entry.media_path, sf)
         if p:
             box = entry.media_box_px
+            m_crop = (
+                entry.media_crop_y_ratio
+                if entry.media_crop_y_ratio is not None
+                else options.media_crop_y_ratio
+            )
+            m_zoom = (
+                entry.media_zoom_ratio
+                if entry.media_zoom_ratio is not None
+                else options.media_zoom_ratio
+            )
             overlays.append(
                 OverlaySpec(
                     path=p,
@@ -769,16 +868,23 @@ def _overlays_for_entry(
                     height=box["height"],
                     is_video=is_video_path(p),
                     fit=entry.media_fit,
+                    crop_y_ratio=m_crop,
+                    zoom_ratio=max(1.0, m_zoom),
                 )
             )
         else:
             logger.warning("Media overlay skipped; file not found: %s", entry.media_path)
 
-    if entry.avatar_box_px and entry.avatar_video_path:
+    if entry.avatar_box_px and entry.avatar_video_path and not entry.skip_avatar_overlay:
         p = _resolve_path(entry.avatar_video_path, sf)
         if p:
             box = entry.avatar_box_px
             shape = entry.avatar_shape or options.avatar_shape
+            crop_x = (
+                entry.avatar_crop_x_ratio
+                if entry.avatar_crop_x_ratio is not None
+                else options.avatar_crop_x_ratio
+            )
             crop_y = (
                 entry.avatar_crop_y_ratio
                 if entry.avatar_crop_y_ratio is not None
@@ -799,6 +905,7 @@ def _overlays_for_entry(
                     is_video=True,
                     fit=options.avatar_fit,
                     shape=shape,
+                    crop_x_ratio=crop_x,
                     crop_y_ratio=crop_y,
                     zoom_ratio=zoom,
                 )
@@ -839,7 +946,11 @@ def _apply_avatar_overlay_timing(
         if not ov.is_video or ov.path != av_path:
             continue
         if timeline == "continuous":
-            ov.video_start_sec = avatar_offset
+            seek = (entry.verse or {}).get("audio_start_sec")
+            if seek is not None and entry.slide_role not in ("title", "section"):
+                ov.video_start_sec = float(seek)
+            else:
+                ov.video_start_sec = avatar_offset
         if options.loop_avatar_if_shorter:
             try:
                 if ffprobe_duration(ov.path) < entry.duration_sec:
@@ -881,7 +992,10 @@ def compose_video(
             audio = entry.audio_path
         elif entry.audio_primary == "avatar" and entry.avatar_video_path:
             audio = entry.avatar_video_path
-            if timeline == "continuous":
+            seek = (entry.verse or {}).get("audio_start_sec")
+            if seek is not None:
+                avatar_start = float(seek)
+            elif timeline == "continuous":
                 for ov in overlays:
                     if ov.is_video and ov.path == entry.avatar_video_path:
                         avatar_start = ov.video_start_sec

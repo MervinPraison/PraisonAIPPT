@@ -336,12 +336,30 @@ echo '{"presentation_title":"Test","sections":[{"section":"Test","verses":[{"ref
 praisonaippt -i test.json --convert-pdf
 ```
 
+## Video export and HeyGen PiP
+
+| Symptom | Fix |
+|---------|-----|
+| `convert-video --check` fails | Install FFmpeg, LibreOffice, poppler — see [Video export](video-export.md) |
+| Export sounds wrong vs HeyGen MP4 | Use `heygen-50590-video-audio-heygen.yaml` (`narration_mode: avatar`), not the MP3 variant — [HeyGen examples](heygen-examples.md) |
+| Face off-centre in PiP | `praisonaippt calibrate-avatar deck.yaml --force` — [Avatar calibration](avatar-calibration.md) |
+| `ImportError: mediapipe` | `pip install praisonaippt[avatar-calibrate]` or `avatar_calibration.method: balance` |
+| Two avatars on quote slide | Expected fix: `avatar_quote` uses video-only PiP — rebuild MP4; JPEG may omit face — [Avatar layouts](avatar-layouts.md) |
+| Slide plan vs PPTX count mismatch | Rebuild PPTX from the same YAML |
+
+```bash
+praisonaippt convert-video --check
+praisonaippt calibrate-avatar examples/heygen-50590-video-audio-heygen.yaml --force
+```
+
 ## 📚 Additional Resources
 
 - [GitHub Issues](https://github.com/MervinPraison/PraisonAIPPT/issues)
-- [Installation Guide]({{ '/installation' | relative_url }})
-- [Command Reference]({{ '/commands' | relative_url }})
-- [Python API Documentation]({{ '/python-api' | relative_url }})
+- [Installation Guide](installation.md)
+- [Command Reference](commands.md)
+- [Video export](video-export.md)
+- [HeyGen examples](heygen-examples.md)
+- [Python API Documentation](python-api.md)
 
 ---
 

@@ -207,6 +207,7 @@ def pdf_to_jpeg_pages(
 ) -> List[str]:
     """Rasterise each PDF page to JPEG via pdftoppm (Poppler)."""
     out_dir.mkdir(parents=True, exist_ok=True)
+    before = {p.resolve() for p in out_dir.glob("slide*.jpg")}
     prefix = out_dir / "slide"
     quality = max(1, min(int(jpeg_quality), 100))
     cmd = ["pdftoppm", "-jpeg", "-r", str(dpi), "-jpegopt", f"quality={quality}"]
@@ -218,9 +219,9 @@ def pdf_to_jpeg_pages(
     proc = _run(cmd, timeout=600)
     if proc.returncode != 0:
         raise RuntimeError(f"pdftoppm failed: {proc.stderr}")
-    pages = sorted(out_dir.glob("slide-*.jpg"))
-    if not pages:
-        pages = sorted(out_dir.glob("slide*.jpg"))
+    pages = sorted(
+        p for p in out_dir.glob("slide*.jpg") if p.resolve() not in before
+    )
     return [str(p) for p in pages]
 
 
@@ -236,18 +237,81 @@ class OverlaySpec:
     video_start_sec: float = 0.0
     loop_video: bool = False
     shape: str = "rect"
+    crop_x_ratio: float = 0.5
     crop_y_ratio: float = 0.12
     zoom_ratio: float = 1.35
 
 
-def _cover_scale_filter(w: int, h: int, *, crop_y_ratio: float, zoom_ratio: float) -> str:
+def scaled_cover_size(
+    source_w: int,
+    source_h: int,
+    out_w: int,
+    out_h: int,
+    *,
+    zoom_ratio: float = 1.0,
+) -> Tuple[float, float]:
+    """Pixel size after ``scale:zw:zh:force_original_aspect_ratio=increase`` (ffmpeg parity)."""
+    zw = max(2, int(round(out_w * zoom_ratio)))
+    zh = max(2, int(round(out_h * zoom_ratio)))
+    scale = max(zw / max(1, source_w), zh / max(1, source_h))
+    return source_w * scale, source_h * scale
+
+
+def face_x_to_crop_x_ratio(
+    face_x_norm: float,
+    source_w: int,
+    source_h: int,
+    out_w: int,
+    out_h: int,
+    *,
+    zoom_ratio: float = 1.0,
+) -> float:
+    """``crop_x_ratio`` so normalised face *x* maps to horizontal centre of cropped output."""
+    swp, _ = scaled_cover_size(source_w, source_h, out_w, out_h, zoom_ratio=zoom_ratio)
+    ow = max(2, out_w)
+    if swp <= ow + 1e-6:
+        return 0.5
+    crop_x = (face_x_norm * swp - 0.5 * ow) / (swp - ow)
+    return max(0.2, min(0.8, float(crop_x)))
+
+
+def _cover_scale_filter(
+    w: int,
+    h: int,
+    *,
+    crop_x_ratio: float = 0.5,
+    crop_y_ratio: float,
+    zoom_ratio: float,
+) -> str:
     zw = max(2, int(round(w * zoom_ratio)))
     zh = max(2, int(round(h * zoom_ratio)))
+    x_bias = max(0.2, min(float(crop_x_ratio), 0.8))
     y_bias = max(0.0, min(float(crop_y_ratio), 0.45))
     return (
         f"scale={zw}:{zh}:force_original_aspect_ratio=increase,"
-        f"crop={w}:{h}:(iw-ow)/2:(ih-oh)*{y_bias}"
+        f"crop={w}:{h}:(iw-ow)*{x_bias}:(ih-oh)*{y_bias}"
     )
+
+
+def pip_face_balance(pip_rgba) -> float:
+    """Signed horizontal balance in upper face band: 0 centred, + face right, − face left."""
+    import numpy as np
+    from PIL import Image
+
+    if isinstance(pip_rgba, (str, Path)):
+        img = np.array(Image.open(pip_rgba).convert("RGBA"))
+    else:
+        img = np.asarray(pip_rgba.convert("RGBA"))
+    h, w = img.shape[:2]
+    alpha = img[:, :, 3] > 128
+    lum = np.mean(img[:, :, :3], axis=2)
+    band = np.zeros((h, w), dtype=bool)
+    band[: int(h * 0.55), int(w * 0.1) : int(w * 0.9)] = True
+    mask = alpha & band & (lum < 210)
+    left = float(mask[:, : w // 2].sum())
+    right = float(mask[:, w // 2 :].sum())
+    total = left + right
+    return (right - left) / total if total else 0.0
 
 
 def _circle_alpha_filter() -> str:
@@ -311,7 +375,11 @@ def render_slide_segment(
         ox, oy = ov.x, ov.y
         if ov.fit == "cover":
             scale = _cover_scale_filter(
-                w, h, crop_y_ratio=ov.crop_y_ratio, zoom_ratio=ov.zoom_ratio,
+                w,
+                h,
+                crop_x_ratio=ov.crop_x_ratio,
+                crop_y_ratio=ov.crop_y_ratio,
+                zoom_ratio=ov.zoom_ratio,
             )
         elif ov.fit == "contain":
             sw, sh, ox, oy = contain_overlay_geometry(ov.path, w, h, ov.x, ov.y)

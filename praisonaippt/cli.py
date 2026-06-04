@@ -19,7 +19,12 @@ from .list_slides import print_slide_outline
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
 from .video_exporter import VideoOptions, convert_pptx_to_video, convert_deck_to_video, resolve_video_backend
 from .video_sidecar import load_deck_sidecar
-from .slide_images import SlideImageOptions, export_pptx_slide_jpegs, default_slide_images_dir
+from .slide_images import (
+    SlideImageOptions,
+    default_slide_images_dir,
+    export_pptx_slide_jpegs,
+    resolve_slide_images_dir,
+)
 from .ffmpeg_composer import check_video_tools, print_tool_check_report, pick_video_encoder
 from .config import load_config, init_config
 
@@ -190,7 +195,7 @@ Examples:
     parser.add_argument(
         '--slide-images-dir',
         metavar='DIR',
-        help='Output folder for slide JPEGs (default: <pptx_stem>_slides/)'
+        help='Output folder for slide JPEGs (default: examples/slide_images for decks under examples/)'
     )
 
     parser.add_argument(
@@ -250,7 +255,12 @@ Examples:
     parser.add_argument(
         'command',
         nargs='?',
-        choices=['convert-pdf', 'convert-video', 'convert-json', 'convert-yaml', 'transcript-to-yaml', 'list-slides', 'export-slide-jpegs', 'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
+        choices=[
+            'convert-pdf', 'convert-video', 'convert-json', 'convert-yaml',
+            'transcript-to-yaml', 'list-slides', 'export-slide-jpegs', 'build-slide-images',
+            'calibrate-avatar', 'pip-face-centre',
+            'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials',
+        ],
         help='Command to execute (e.g., list-slides, convert-pdf, convert-video, export-slide-jpegs, template, config)'
     )
     
@@ -340,6 +350,74 @@ Examples:
         metavar='PATH',
         default='examples/heygen-article-50590.mp4',
         help='Default avatar video path for generated deck',
+    )
+
+    parser.add_argument(
+        '--seek',
+        metavar='SEC',
+        help='Comma-separated seek times for calibrate-avatar (e.g. 0.5,6.0)',
+    )
+
+    parser.add_argument(
+        '--write',
+        action='store_true',
+        help='Write calibrated crop_x into deck YAML (calibrate-avatar)',
+    )
+
+    parser.add_argument(
+        '--force',
+        action='store_true',
+        help='Ignore avatar framing cache and re-calibrate',
+    )
+
+    parser.add_argument(
+        '--slide',
+        type=int,
+        metavar='N',
+        help='Slide number (1-based) for pip-face-centre when using a deck YAML',
+    )
+
+    parser.add_argument(
+        '--crop-x',
+        type=float,
+        metavar='RATIO',
+        help='Horizontal crop ratio for pip-face-centre probe (default: from deck pip layout)',
+    )
+
+    parser.add_argument(
+        '--crop-y',
+        type=float,
+        metavar='RATIO',
+        help='Vertical crop ratio for pip-face-centre probe',
+    )
+
+    parser.add_argument(
+        '--zoom',
+        type=float,
+        metavar='RATIO',
+        help='Zoom ratio for pip-face-centre probe',
+    )
+
+    parser.add_argument(
+        '--detector',
+        choices=['auto', 'mediapipe', 'yunet', 'yolo'],
+        default='auto',
+        help='Face detector for pip-face-centre (default: auto)',
+    )
+
+    parser.add_argument(
+        '--pip-image',
+        metavar='PATH',
+        help='Measure face centre on an existing PiP/circle PNG (pip-face-centre)',
+    )
+
+    parser.add_argument(
+        '--validation-image',
+        nargs='?',
+        const='',
+        metavar='PATH',
+        help='Save annotated PiP centre/margin diagram (pip-face-centre / calibrate-avatar); '
+        'default path beside probe if PATH omitted',
     )
 
     parser.add_argument(
@@ -443,17 +521,74 @@ def parse_slide_image_options(args) -> SlideImageOptions:
     return opts
 
 
-def handle_export_slide_jpegs_command(args, *, pptx_path: Optional[str] = None, pdf_path: Optional[str] = None) -> int:
+def _deck_yaml_from_args(args) -> Optional[Path]:
+    for attr in ("input_file", "input"):
+        raw = getattr(args, attr, None)
+        if not raw:
+            continue
+        p = Path(raw)
+        if p.is_file() and p.suffix.lower() in (".yaml", ".yml", ".json"):
+            return p
+    return None
+
+
+def handle_build_slide_images_command(args) -> int:
+    """Build PPTX from deck YAML (if needed) and export slide JPEGs — parity with main build flag."""
+    deck = _deck_yaml_from_args(args)
+    if not deck:
+        return handle_export_slide_jpegs_command(args)
+
+    print(f"Loading deck: {deck}")
+    data = load_verses_from_file(str(deck), template=getattr(args, "template", None))
+    if not data:
+        return 1
+    data["_source_file"] = str(deck.resolve())
+
+    from .avatar_calibrate import maybe_auto_calibrate_deck
+
+    data = maybe_auto_calibrate_deck(data, source_file=data["_source_file"])
+
+    out = getattr(args, "output", None)
+    pptx_path = out or str(deck.with_suffix(".pptx"))
+    print(f"Building presentation: {pptx_path}")
+    built = create_presentation(data, output_file=pptx_path, custom_title=getattr(args, "title", None))
+    if not built:
+        return 1
+
+    return handle_export_slide_jpegs_command(
+        args, pptx_path=built, data=data,
+    )
+
+
+def handle_export_slide_jpegs_command(
+    args,
+    *,
+    pptx_path: Optional[str] = None,
+    pdf_path: Optional[str] = None,
+    data: Optional[dict] = None,
+) -> int:
     """Export JPEG for each slide from a PPTX (standalone command or build flag)."""
-    inp = pptx_path or args.input_file
+    if not pptx_path and not args.input_file:
+        deck = _deck_yaml_from_args(args)
+        if deck:
+            return handle_build_slide_images_command(args)
+
+    inp = pptx_path or args.input_file or getattr(args, "input", None)
     if not inp:
-        print("Error: Input PPTX required for export-slide-jpegs")
-        print("Usage: praisonaippt export-slide-jpegs deck.pptx [--slide-images-dir out/]")
+        print("Error: Input required for export-slide-jpegs / build-slide-images")
+        print("Usage: praisonaippt export-slide-jpegs deck.pptx [--slide-images-dir DIR]")
+        print("       praisonaippt build-slide-images -i deck.yaml [-o deck.pptx] [--slide-images-dir DIR]")
         return 1
     if not Path(inp).is_file():
         print(f"Error: File not found: {inp}")
         return 1
-    out_dir = getattr(args, "slide_images_dir", None) or str(default_slide_images_dir(inp))
+    if getattr(args, "slide_images_dir", None):
+        out_dir = str(Path(args.slide_images_dir))
+    elif data:
+        sf = data.get("_source_file")
+        out_dir = str(resolve_slide_images_dir(data, pptx_path=inp, source_file=sf))
+    else:
+        out_dir = str(default_slide_images_dir(inp))
     opts = parse_slide_image_options(args)
     if pdf_path and Path(pdf_path).is_file():
         opts.keep_pdf = True
@@ -681,6 +816,247 @@ def handle_convert_yaml_command(args):
         return 1
 
 
+def _resolve_validation_image_path(arg: Optional[str], default: Path) -> Path:
+    if arg is None:
+        return default
+    if arg == "":
+        return default
+    return Path(arg)
+
+
+def _emit_validation_diagram(
+    probe: Path,
+    metrics,
+    validation_arg: Optional[str],
+) -> None:
+    from .pip_face_measure import default_validation_image_path, write_validation_for_probe
+
+    out = _resolve_validation_image_path(
+        validation_arg, default_validation_image_path(probe),
+    )
+    saved = write_validation_for_probe(probe, metrics, out)
+    print(f"✓ Validation diagram: {saved.resolve()}")
+
+
+def handle_calibrate_avatar_command(args) -> int:
+    """Calibrate pip crop/zoom for avatar video(s) referenced in a deck YAML."""
+    import yaml
+    from .avatar_calibrate import (
+        AvatarFramingResult,
+        CalibrationConfig,
+        calibrate_avatar_framing,
+        calibrate_deck_avatars,
+        calibration_deps_hint,
+        format_calibration_report,
+        merge_framing_into_slide_style,
+        pip_probe_size_px,
+    )
+    from .pip_face_measure import measure_pip_video
+
+    deck_path = getattr(args, "input_file", None) or getattr(args, "input", None)
+    video_arg = getattr(args, "avatar_video", None)
+    force = getattr(args, "force", False)
+    write = getattr(args, "write", False)
+    validation_arg = getattr(args, "validation_image", None)
+
+    if deck_path and Path(deck_path).is_file():
+        with open(deck_path, encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+        data["_source_file"] = str(Path(deck_path).resolve())
+        results = calibrate_deck_avatars(data, force=force, source_file=data["_source_file"])
+        print(format_calibration_report(results))
+        cfg = CalibrationConfig.from_dict(
+            data.get("avatar_calibration"),
+            pip_layout=((data.get("slide_style") or {}).get("layouts") or {}).get("pip"),
+        )
+        hint = calibration_deps_hint(cfg)
+        if hint:
+            print(hint)
+        if write and results:
+            primary = next(iter(results.values()))
+            data["slide_style"] = merge_framing_into_slide_style(
+                data.get("slide_style") or {}, primary,
+            )
+            if "avatar_calibration" not in data:
+                data["avatar_calibration"] = {"auto": True}
+            data.pop("_avatar_calibration", None)
+            data.pop("_source_file", None)
+            Path(deck_path).write_text(
+                yaml.dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False),
+                encoding="utf-8",
+            )
+            print(f"✓ Updated {deck_path}")
+        if validation_arg is not None and results:
+            pip = ((data.get("slide_style") or {}).get("layouts") or {}).get("pip") or {}
+            pw, ph = pip_probe_size_px(data.get("slide_style") or {})
+            for vid, result in results.items():
+                seek = result.seek_samples[0] if result.seek_samples else 0.5
+                metrics, probe = measure_pip_video(
+                    vid,
+                    seek_sec=seek,
+                    crop_x=result.crop_x_ratio,
+                    crop_y=result.crop_y_ratio,
+                    zoom=result.zoom_ratio,
+                    width=pw,
+                    height=ph,
+                    shape=result.shape or "circle",
+                )
+                default = Path(deck_path).with_name(
+                    f"{Path(deck_path).stem}_pip_validation.png",
+                )
+                _emit_validation_diagram(probe, metrics, validation_arg or str(default))
+                break
+        return 0
+
+    if not video_arg:
+        print("Usage: praisonaippt calibrate-avatar <deck.yaml> [--write] [--force]")
+        print("       praisonaippt calibrate-avatar --avatar-video path.mp4 [--seek 6.0]")
+        return 1
+
+    seeks = None
+    seek_raw = getattr(args, "seek", None)
+    if seek_raw:
+        seeks = [float(s.strip()) for s in str(seek_raw).split(",") if s.strip()]
+
+    style = {"layouts": {"pip": {"width_ratio": 0.24, "shape": "circle"}}}
+    pw, ph = pip_probe_size_px(style)
+    cfg = CalibrationConfig()
+    result = calibrate_avatar_framing(
+        video_arg,
+        seek_secs=seeks,
+        source_file=str(Path.cwd()),
+        config=cfg,
+        probe_width=pw,
+        probe_height=ph,
+        shape="circle",
+    )
+    print(format_calibration_report({video_arg: result}))
+    hint = calibration_deps_hint()
+    if hint:
+        print(hint)
+    print("\nYAML snippet (slide_style.layouts.pip):")
+    import json
+
+    print(json.dumps(result.to_layout_dict(), indent=2))
+    if validation_arg is not None:
+        seek = result.seek_samples[0] if result.seek_samples else 0.5
+        metrics, probe = measure_pip_video(
+            video_arg,
+            seek_sec=seek,
+            crop_x=result.crop_x_ratio,
+            crop_y=result.crop_y_ratio,
+            zoom=result.zoom_ratio,
+            width=pw,
+            height=ph,
+            shape="circle",
+        )
+        default = Path(video_arg).with_name(
+            f"{Path(video_arg).stem}_pip_validation.png",
+        )
+        _emit_validation_diagram(probe, metrics, validation_arg or str(default))
+    return 0
+
+
+def handle_pip_face_centre_command(args) -> int:
+    """Measure face centre vs circular PiP border (MediaPipe / balance)."""
+    from .avatar_calibrate import pip_probe_size_px
+    from .pip_face_measure import format_pip_face_report, measure_pip_image, measure_pip_video
+    from .utils import resolve_asset_path
+
+    image_arg = getattr(args, "pip_image", None)
+    validation_arg = getattr(args, "validation_image", None)
+    deck = _deck_yaml_from_args(args)
+    video_arg = getattr(args, "avatar_video", None)
+    seek_raw = getattr(args, "seek", None)
+    seeks = [float(s.strip()) for s in str(seek_raw).split(",") if s.strip()] if seek_raw else [0.5]
+
+    crop_x = getattr(args, "crop_x", None)
+    crop_y = getattr(args, "crop_y", None)
+    zoom = getattr(args, "zoom", None)
+    detector = getattr(args, "detector", "auto") or "auto"
+    slide_n = getattr(args, "slide", None)
+
+    if deck and not video_arg:
+        data = load_verses_from_file(str(deck), template=getattr(args, "template", None))
+        if not data:
+            return 1
+        sf = str(deck.resolve())
+        data["_source_file"] = sf
+        pip = ((data.get("slide_style") or {}).get("layouts") or {}).get("pip") or {}
+        crop_x = float(crop_x if crop_x is not None else pip.get("crop_x_ratio", 0.5))
+        crop_y = float(crop_y if crop_y is not None else pip.get("crop_y_ratio", 0.03))
+        zoom = float(zoom if zoom is not None else pip.get("zoom_ratio", 1.45))
+        shape = str(pip.get("shape", "circle"))
+        pw, ph = pip_probe_size_px(data.get("slide_style") or {})
+
+        verses = []
+        for section in data.get("sections") or []:
+            for v in section.get("verses") or []:
+                verses.append(v)
+        if slide_n is not None:
+            if slide_n < 1 or slide_n > len(verses):
+                print(f"Error: --slide {slide_n} out of range (deck has {len(verses)} slides)")
+                return 1
+            verse = verses[slide_n - 1]
+            av = verse.get("avatar_video_path")
+            if not av:
+                print(f"Error: slide {slide_n} has no avatar_video_path")
+                return 1
+            video_arg = av
+            if verse.get("audio_start_sec") is not None:
+                seeks = [max(0.0, float(verse["audio_start_sec"]) + 0.35)]
+        else:
+            for v in verses:
+                if v.get("avatar_video_path"):
+                    video_arg = v["avatar_video_path"]
+                    if v.get("audio_start_sec") is not None:
+                        seeks = [max(0.0, float(v["audio_start_sec"]) + 0.35)]
+                    break
+        if not video_arg:
+            print("Error: deck has no avatar_video_path")
+            return 1
+        resolved = resolve_asset_path(video_arg, source_file=sf)
+        video_arg = resolved or video_arg
+    else:
+        pip = {}
+        crop_x = float(crop_x if crop_x is not None else 0.5)
+        crop_y = float(crop_y if crop_y is not None else 0.03)
+        zoom = float(zoom if zoom is not None else 1.45)
+        shape = "circle"
+        pw, ph = pip_probe_size_px({"layouts": {"pip": {"width_ratio": 0.24}}})
+
+    if image_arg and Path(image_arg).is_file():
+        metrics = measure_pip_image(image_arg, detector=detector)
+        probe = Path(image_arg)
+        print(format_pip_face_report(metrics, probe_path=probe))
+        if validation_arg is not None:
+            _emit_validation_diagram(probe, metrics, validation_arg)
+        return 0
+
+    if not video_arg:
+        print("Usage: praisonaippt pip-face-centre -i deck.yaml [--slide N]")
+        print("       praisonaippt pip-face-centre --avatar-video path.mp4 [--seek 6] [--crop-x 0.53]")
+        return 1
+
+    for seek in seeks:
+        metrics, probe = measure_pip_video(
+            video_arg,
+            seek_sec=seek,
+            crop_x=crop_x,
+            crop_y=crop_y,
+            zoom=zoom,
+            width=pw,
+            height=ph,
+            shape=shape,
+            detector=detector,
+        )
+        print(f"seek={seek:.2f}s crop_x={crop_x} crop_y={crop_y} zoom={zoom}")
+        print(format_pip_face_report(metrics, probe_path=probe))
+        if validation_arg is not None:
+            _emit_validation_diagram(probe, metrics, validation_arg)
+    return 0
+
+
 def handle_convert_video_command(args, data: Optional[dict] = None):
     """Handle standalone convert-video command or --check preflight."""
     if getattr(args, "check", False):
@@ -713,6 +1089,19 @@ def handle_convert_video_command(args, data: Optional[dict] = None):
             data = load_deck_sidecar(args.input_file)
             if data:
                 print(f"Using deck sidecar: {data.get('_source_file')}")
+        if data:
+            from .avatar_calibrate import format_calibration_report, maybe_auto_calibrate_deck
+
+            sf = data.get("_source_file") or str(Path(args.input_file).resolve())
+            data = maybe_auto_calibrate_deck(data, source_file=sf)
+            if data.get("_avatar_calibration"):
+                from .avatar_calibrate import AvatarFramingResult
+
+                report = {
+                    k: AvatarFramingResult(**v)
+                    for k, v in data["_avatar_calibration"].items()
+                }
+                print(format_calibration_report(report))
         opts = parse_video_options(args, data)
         if args.video_output:
             video_path = args.video_output
@@ -1360,8 +1749,17 @@ def main():
     if args.command == 'export-slide-jpegs':
         return handle_export_slide_jpegs_command(args)
 
+    if args.command == 'build-slide-images':
+        return handle_build_slide_images_command(args)
+
+    if args.command == 'pip-face-centre':
+        return handle_pip_face_centre_command(args)
+
     if args.command == 'template':
         return handle_template_show_command(args.input_file)
+
+    if args.command == 'calibrate-avatar':
+        return handle_calibrate_avatar_command(args)
 
     # List templates if requested
     if args.list_templates:
@@ -1417,6 +1815,28 @@ def main():
     if not data:
         return 1
 
+    from .avatar_calibrate import (
+        AvatarFramingResult,
+        CalibrationConfig,
+        calibration_deps_hint,
+        format_calibration_report,
+        maybe_auto_calibrate_deck,
+    )
+
+    data = maybe_auto_calibrate_deck(data, source_file=str(Path(input_file).resolve()))
+    if data.get("_avatar_calibration"):
+        report = {
+            k: AvatarFramingResult(**v) for k, v in data["_avatar_calibration"].items()
+        }
+        print(format_calibration_report(report))
+        cfg = CalibrationConfig.from_dict(
+            data.get("avatar_calibration"),
+            pip_layout=((data.get("slide_style") or {}).get("layouts") or {}).get("pip"),
+        )
+        hint = calibration_deps_hint(cfg)
+        if hint:
+            print(hint)
+
     if data.get('auto_upload_gdrive'):
         args.upload_gdrive = True
     
@@ -1471,8 +1891,10 @@ def main():
     # Upload PPTX (and PDF if generated) to Google Drive
     handle_gdrive_upload(output_file, args, config, pdf_path=pdf_path)
 
-    if getattr(args, "export_slide_jpegs", False):
-        rc = handle_export_slide_jpegs_command(args, pptx_path=output_file, pdf_path=pdf_path)
+    if getattr(args, "export_slide_jpegs", False) or data.get("slide_images_dir"):
+        rc = handle_export_slide_jpegs_command(
+            args, pptx_path=output_file, pdf_path=pdf_path, data=data,
+        )
         if rc != 0:
             return rc
 

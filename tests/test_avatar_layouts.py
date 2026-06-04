@@ -86,6 +86,24 @@ def test_avatar_quote_has_no_media_region():
     assert regions["avatar"] is not None
 
 
+def test_avatar_quote_does_not_bake_movie_shape():
+    """Quote slides use FFmpeg PiP only — no embedded video shape (avoids double avatar)."""
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import render_avatar_slide
+
+    prs = Presentation()
+    verse = {
+        "text": "How do you run agents?",
+        "reference": "Subtitle",
+        "avatar_video_path": "nonexistent.mp4",
+    }
+    from pptx.enum.shapes import MSO_SHAPE_TYPE
+
+    slide = render_avatar_slide(prs, "avatar_quote", verse, {})
+    movies = [s for s in slide.shapes if s.shape_type == MSO_SHAPE_TYPE.MEDIA]
+    assert len(movies) == 0
+
+
 def test_avatar_headline_uses_pip_not_full_frame():
     from pptx import Presentation
     from praisonaippt.avatar_layouts import _slide_regions

@@ -22,6 +22,9 @@ Open [http://127.0.0.1:8000](http://127.0.0.1:8000). Configuration: `mkdocs.yml`
 | [slide-style-reference.md](slide-style-reference.md) | `slide_style`, `typography.*`, `layouts.*` |
 | [yaml-reference.md](yaml-reference.md) | Top-level deck and video keys |
 | [video-export.md](video-export.md) | PPTX → MP4 compositor |
+| [heygen-examples.md](heygen-examples.md) | HeyGen 50590 — five media variants |
+| [avatar-calibration.md](avatar-calibration.md) | Auto PiP `crop_x`, face detect |
+| [slide-images.md](slide-images.md) | `slide_images_dir`, JPEG export |
 
 ## Jekyll site (ppt.praison.ai)
 
@@ -43,4 +46,4 @@ python examples/build_showcase_examples.py
 
 - `examples/avatar_layouts.yaml` — all avatar `slide_type`s
 - `examples/deck_template_gallery.yaml` — all `deck_*` layouts
-- `examples/heygen-50590-content.yaml` — article deck with PiP and timing
+- `examples/heygen-50590-content.yaml` — article deck with PiP and timing ([HeyGen examples](heygen-examples.md))

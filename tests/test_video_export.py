@@ -115,6 +115,27 @@ def test_resolve_narration_mode_auto_fixed():
     assert _resolve_narration_mode({"audio_path": "a.mp3"}, "auto") == "audio_file"
 
 
+@patch("praisonaippt.video_exporter.ffprobe_has_audio_safe", return_value=True)
+def test_resolve_narration_mode_auto_prefers_heygen_video(mock_has_audio):
+    verse = {
+        "audio_path": "n.mp3",
+        "avatar_video_path": "heygen.mp4",
+    }
+    assert _resolve_narration_mode(verse, "auto") == "avatar"
+    mock_has_audio.assert_called()
+
+
+def test_video_options_audio_source_maps_to_narration_mode():
+    opts = VideoOptions.from_dict({"audio_source": "heygen_video"})
+    assert opts.narration_mode == "avatar"
+    opts2 = VideoOptions.from_dict({"audio_source": "external"})
+    assert opts2.narration_mode == "audio_file"
+    opts3 = VideoOptions.from_dict(
+        {"audio_source": "external", "narration_mode": "avatar"},
+    )
+    assert opts3.narration_mode == "avatar"
+
+
 def test_resolve_slide_durations_fixed(tmp_path):
     entries = [
         SlideVideoEntry(index=0, slide_role="content", slide_type="avatar_only", verse={}),
@@ -514,6 +535,62 @@ def test_manifest_deck_layout_regions(slide_type, expect_avatar, expect_rect, sk
     if skip_media:
         assert content.skip_media_overlay is True
         assert content.media_box_px is None
+
+
+def test_avatar_overlay_uses_audio_start_sec():
+    from praisonaippt.ffmpeg_composer import OverlaySpec
+    from praisonaippt.video_exporter import SlideVideoEntry, VideoOptions, _apply_avatar_overlay_timing
+
+    entry = SlideVideoEntry(
+        index=2,
+        slide_role="content",
+        slide_type="deck_exec_summary",
+        verse={"audio_start_sec": 21.2, "avatar_video_path": "heygen.mp4"},
+        narration_mode="avatar",
+        duration_sec=8.0,
+        avatar_video_path="heygen.mp4",
+    )
+    ov = OverlaySpec(path="heygen.mp4", x=0, y=0, width=100, height=100, is_video=True)
+    _apply_avatar_overlay_timing(
+        [ov], entry, VideoOptions(), avatar_offset=99.0, timeline="continuous",
+    )
+    assert ov.video_start_sec == 21.2
+
+
+@patch("praisonaippt.video_exporter.ffprobe_duration", return_value=57.0)
+def test_timestamps_do_not_set_audio_seek(mock_dur, tmp_path):
+    entries = [
+        SlideVideoEntry(index=0, slide_role="title", slide_type="title", verse=None, narration_mode="avatar"),
+        SlideVideoEntry(
+            index=1,
+            slide_role="content",
+            slide_type="avatar_only",
+            verse={"avatar_video_path": "heygen.mp4"},
+            narration_mode="avatar",
+        ),
+    ]
+    opts = VideoOptions(slide_duration_sec=3.0)
+    opts._slide_timestamps = [0.0, 3.0, 10.0]  # type: ignore[attr-defined]
+    with patch("praisonaippt.video_exporter.resolve_asset_path", return_value="heygen.mp4"):
+        with patch("pathlib.Path.is_file", return_value=True):
+            resolve_slide_durations(entries, opts, temp_dir=tmp_path)
+    assert entries[1].audio_start_sec == 0.0
+
+
+def test_overlays_skip_baked_deck_avatar():
+    from praisonaippt.video_exporter import _overlays_for_entry
+
+    entry = SlideVideoEntry(
+        index=0,
+        slide_role="content",
+        slide_type="deck_thank_you",
+        verse={"avatar_video_path": "examples/heygen-article-50590.mp4"},
+        avatar_video_path="examples/heygen-article-50590.mp4",
+        avatar_box_px={"x": 960, "y": 0, "width": 960, "height": 1080},
+        skip_avatar_overlay=True,
+    )
+    overlays = _overlays_for_entry(entry, VideoOptions(), source_file=str(PKG))
+    assert overlays == []
 
 
 def test_overlays_skip_baked_deck_media():

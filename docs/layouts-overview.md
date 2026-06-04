@@ -22,11 +22,14 @@ PraisonAI PPT builds slides from YAML (or JSON). Layout behaviour is controlled 
 | Highlights, alignment, list types | [Rich text formatting](formatting.md) |
 | Reusable themes (`template: sermon-dark`) | [Theme templates](templates.md) |
 
-## Video
+## Video and media
 
 | Topic | Doc page |
 |-------|----------|
 | MP4 export, narration modes, `avatar_timeline` | [Video export](video-export.md) |
+| HeyGen 50590 workflow and five media variants | [HeyGen article examples](heygen-examples.md) |
+| Auto `crop_x`, hybrid face detection | [Avatar PiP calibration](avatar-calibration.md) |
+| `slide_images_dir`, JPEG previews | [Slide JPEG export](slide-images.md) |
 | Top-level deck keys, per-verse timing | [YAML deck reference](yaml-reference.md) |
 
 ## Example galleries
@@ -39,7 +42,7 @@ python examples/build_showcase_examples.py
 |---------|------|
 | All avatar `slide_type`s | `examples/avatar_layouts.yaml` |
 | All `deck_*` layouts | `examples/deck_template_gallery.yaml` |
-| HeyGen 50590 article (content + PiP) | `examples/heygen-50590-content.yaml` |
+| HeyGen 50590 article (content + PiP) | `examples/heygen-50590-content.yaml` — see [HeyGen examples](heygen-examples.md) |
 
 ## Preview docs locally (MkDocs)
 
