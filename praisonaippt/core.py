@@ -14,7 +14,6 @@ from .layout_tokens import (
     content_box,
     content_width_inches,
     split_max_length_default,
-    title_custom_threshold,
 )
 
 
@@ -549,10 +548,18 @@ def _slide_content_width(prs, style, slide_type, default_margin_in=0.6):
 def _render_title_textboxes(slide, prs, title, subtitle, style, theme):
     """Word-wrapped title and subtitle blocks, centred on the slide."""
     left, width = _slide_content_width(prs, style, 'title')
-    title_top_in = layout_in(style, 'title', 'title_top_in', 2.5)
     title_pt = typography_pt(style, 'title_size_pt', 44)
     title_lines = _estimate_text_lines(title, width.inches, title_pt)
-    title_h = Inches(min(0.55 + title_lines * 0.52, 3.2))
+    title_h_in = min(0.55 + title_lines * 0.52, 3.2)
+    gap = float(layout_in(style, 'title', 'subtitle_gap_in', 0.25))
+    subtitle_h_in = 0.0
+    if subtitle:
+        subtitle_pt = typography_pt(style, 'subtitle_size_pt', 28)
+        subtitle_lines = _estimate_text_lines(subtitle, width.inches, subtitle_pt)
+        subtitle_h_in = min(0.45 + subtitle_lines * 0.38, 2.5)
+    block_h_in = title_h_in + (gap + subtitle_h_in if subtitle else 0.0)
+    title_top_in = max(0.6, (prs.slide_height.inches - block_h_in) / 2.0)
+    title_h = Inches(title_h_in)
     tb = slide.shapes.add_textbox(left, Inches(title_top_in), width, title_h)
     tf = tb.text_frame
     tf.word_wrap = True
@@ -566,10 +573,8 @@ def _render_title_textboxes(slide, prs, title, subtitle, style, theme):
         p.font.name = theme['font_name']
     if subtitle:
         subtitle_pt = typography_pt(style, 'subtitle_size_pt', 28)
-        subtitle_lines = _estimate_text_lines(subtitle, width.inches, subtitle_pt)
-        gap = layout_in(style, 'title', 'subtitle_gap_in', 0.25)
-        subtitle_top_in = title_top_in + title_h.inches + gap
-        subtitle_h = Inches(min(0.45 + subtitle_lines * 0.38, 2.5))
+        subtitle_top_in = title_top_in + title_h_in + gap
+        subtitle_h = Inches(subtitle_h_in)
         tb2 = slide.shapes.add_textbox(left, Inches(subtitle_top_in), width, subtitle_h)
         tf2 = tb2.text_frame
         tf2.word_wrap = True
@@ -583,32 +588,12 @@ def _render_title_textboxes(slide, prs, title, subtitle, style, theme):
 
 
 def add_title_slide(prs, title, subtitle="", style=None):
-    """
-    Add a title slide. Custom word-wrapped layout when a background is set or
-    the subtitle is long; otherwise uses the default template layout.
-    """
+    """Add a title slide with centred title and subtitle (blank layout, not template placeholders)."""
     style = style or {}
-    has_background = bool(style.get('background_image') or style.get('background_color'))
     theme = _resolve_theme(style)
-    use_custom = has_background or bool(subtitle and len(subtitle) > title_custom_threshold(style))
-
-    if use_custom:
-        slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
-        _apply_slide_background(slide, style, prs)
-        _render_title_textboxes(slide, prs, title, subtitle, style, theme)
-    else:
-        slide = prs.slides.add_slide(prs.slide_layouts[0])
-        _apply_slide_background(slide, style, prs)
-        title_shape = slide.shapes.title
-        title_shape.text = title
-        if theme['font_name']:
-            title_shape.text_frame.paragraphs[0].font.name = theme['font_name']
-        if subtitle and len(slide.placeholders) > 1:
-            sub = slide.placeholders[1]
-            sub.text = subtitle
-            if theme['font_name']:
-                sub.text_frame.paragraphs[0].font.name = theme['font_name']
-
+    slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank — avoids left-biased layout 0
+    _apply_slide_background(slide, style, prs)
+    _render_title_textboxes(slide, prs, title, subtitle, style, theme)
     return slide
 
 

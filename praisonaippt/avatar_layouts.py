@@ -154,8 +154,84 @@ def export_floating_pip_box(prs, style: dict) -> RegionBox:
     return _pip_box(cx, cy, cw, ch, style, "pip")
 
 
+AVATAR_SHAPE_VALUES = frozenset({
+    "auto", "circle", "round", "rounded", "square", "rect", "rectangle",
+    "h_rect", "horizontal", "wide", "v_rect", "vertical", "tall",
+})
+
+_PIP_LAYOUT_KINDS = frozenset({
+    "deck_exec_summary", "deck_region_grid", "deck_product_columns",
+    "deck_customer_segments",
+})
+
+_STRIP_LAYOUT_KINDS = frozenset({"deck_split_performance", "deck_channel_analysis"})
+
+
+def _shape_from_box_aspect(box: RegionBox) -> str:
+    ar = box.width_in / max(box.height_in, 0.01)
+    if ar >= 1.2:
+        return "h_rect"
+    if ar <= 0.82:
+        return "v_rect"
+    return "square"
+
+
+def default_avatar_shape_for_layout(kind: str, box: Optional[RegionBox]) -> str:
+    """Layout-aware default when ``avatar_shape: auto``."""
+    try:
+        from .deck_slides import DECK_RECT_AVATAR_TYPES
+
+        if kind in DECK_RECT_AVATAR_TYPES:
+            return _shape_from_box_aspect(box) if box else "h_rect"
+    except ImportError:
+        pass
+    if kind in _STRIP_LAYOUT_KINDS:
+        return "h_rect"
+    if kind in _PIP_LAYOUT_KINDS:
+        return "circle"
+    if box:
+        return _shape_from_box_aspect(box)
+    return "circle"
+
+
+def resolve_avatar_shape(
+    style: dict,
+    *,
+    layout_kind: str = "pip",
+    box: Optional[RegionBox] = None,
+    verse: Optional[dict] = None,
+) -> str:
+    """verse.avatar_shape > layouts.<kind>.avatar_shape > layouts.pip > layout default."""
+    if verse and verse.get("avatar_shape"):
+        raw = str(verse["avatar_shape"]).lower().strip()
+    else:
+        raw = layout_in(style, layout_kind, "avatar_shape", None)
+        if raw is None and layout_kind != "pip":
+            raw = layout_in(style, "pip", "avatar_shape", None)
+        if raw is None:
+            raw = layout_in(style, layout_kind, "shape", None) or layout_in(
+                style, "pip", "shape", None,
+            )
+        raw = str(raw or "auto").lower().strip() if raw is not None else "auto"
+    if raw == "auto":
+        return default_avatar_shape_for_layout(layout_kind, box)
+    return raw
+
+
+def shape_uses_circle_mask(shape: str) -> bool:
+    return str(shape).lower() in ("circle", "round", "rounded")
+
+
+def shape_for_video_overlay(shape: str) -> str:
+    """FFmpeg overlay mask: circle vs rectangular."""
+    s = str(shape).lower()
+    if shape_uses_circle_mask(s):
+        return "circle"
+    return "rect"
+
+
 def _pip_shape_kind(style: dict, kind: str = "pip") -> str:
-    """Resolve PiP shape: ``circle``, ``square``/``rect``, or ``rounded``."""
+    """Legacy PiP shape from ``shape`` / ``pip_shape`` keys."""
     raw = layout_in(style, kind, "pip_shape", None) or layout_in(style, kind, "shape", None)
     if raw is None and kind != "pip":
         raw = layout_in(style, "pip", "shape", "circle")
@@ -378,6 +454,19 @@ def _pip_still_pixels(box: RegionBox, dpi: int = 150) -> tuple[int, int]:
     return px, max(96, int(round(box.height_in * dpi)))
 
 
+def avatar_framing(style: dict, layout_kind: str = "pip") -> Tuple[float, float]:
+    """Per-layout avatar crop/zoom; falls back to ``layouts.pip`` defaults."""
+    crop_kind = layout_in(style, layout_kind, "crop_y_ratio", None)
+    zoom_kind = layout_in(style, layout_kind, "zoom_ratio", None)
+    crop = float(
+        crop_kind if crop_kind is not None else layout_in(style, "pip", "crop_y_ratio", 0.06)
+    )
+    zoom = float(
+        zoom_kind if zoom_kind is not None else layout_in(style, "pip", "zoom_ratio", 1.45)
+    )
+    return crop, zoom
+
+
 def _save_pip_still_png(
     video_path: str,
     box: RegionBox,
@@ -385,13 +474,14 @@ def _save_pip_still_png(
     *,
     source_file: Optional[str] = None,
     poster: Optional[io.BytesIO] = None,
+    rect_mask: bool = False,
+    layout_kind: str = "pip",
 ) -> Optional[str]:
-    """Extract a face-centred still PNG for PiP (circle mask when shape is circle)."""
+    """Extract a face-centred still PNG; circle mask only for PiP (not full-bleed panels)."""
     w, h = _pip_still_pixels(box)
-    crop_y = float(layout_in(style, "pip", "crop_y_ratio", 0.06))
-    zoom = float(layout_in(style, "pip", "zoom_ratio", 1.45))
+    crop_y, zoom = avatar_framing(style, layout_kind)
     shape = _pip_shape_kind(style)
-    is_circle = shape in ("circle", "round", "rounded")
+    is_circle = not rect_mask and shape in ("circle", "round", "rounded")
     tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
     tmp.close()
     out_path = tmp.name
@@ -441,10 +531,15 @@ def _place_avatar_still_in_box(
     style: dict,
     *,
     source_file: Optional[str] = None,
+    rect_mask: bool = False,
+    layout_kind: str = "pip",
 ) -> bool:
-    still = _save_pip_still_png(video_path, box, style, source_file=source_file, poster=poster)
+    still = _save_pip_still_png(
+        video_path, box, style, source_file=source_file, poster=poster,
+        rect_mask=rect_mask, layout_kind=layout_kind,
+    )
     if still:
-        _place_picture_in_box(slide, still, box, fit="fill")
+        _place_picture_in_box(slide, still, box, fit="cover" if rect_mask else "fill")
         try:
             os.unlink(still)
         except OSError:
@@ -549,7 +644,10 @@ def _place_avatar_in_box(
     poster_path: Optional[str] = None,
     source_file: Optional[str] = None,
     style: Optional[dict] = None,
-    draw_frame: bool = True,
+    draw_frame: Optional[bool] = None,
+    layout_kind: str = "pip",
+    verse: Optional[dict] = None,
+    panel_fill_rgb: Optional[RGBColor] = None,
 ) -> None:
     if not avatar_path:
         _place_empty_region(slide, box, "avatar")
@@ -562,22 +660,35 @@ def _place_avatar_in_box(
         return
     poster = _poster_bytes(poster_path, source_file)
     pip_style = style or {}
-    shape_kind = _pip_shape_kind(pip_style)
-    is_circle = shape_kind in ("circle", "round", "rounded")
-    is_square = shape_kind in ("square", "rect", "rectangle")
+    shape_kind = resolve_avatar_shape(
+        pip_style, layout_kind=layout_kind, box=box, verse=verse,
+    )
+    is_circle = shape_uses_circle_mask(shape_kind)
+    is_square = shape_kind in ("square", "rect", "rectangle", "h_rect", "v_rect", "horizontal", "vertical", "wide", "tall")
+
+    if draw_frame is None:
+        draw_frame = is_circle
+
+    if panel_fill_rgb is not None and not is_circle:
+        _draw_filled_rect(slide, box, panel_fill_rgb)
+
     if is_circle:
         if not _place_avatar_still_in_box(
             slide, path, poster, box, pip_style, source_file=source_file,
+            layout_kind=layout_kind,
         ):
             _fit_movie_in_box(slide, path, poster, box, _video_mime(path))
         if draw_frame:
             _draw_pip_frame(slide, box, pip_style)
-    else:
-        if draw_frame and not is_square:
-            _draw_pip_backdrop(slide, box, pip_style)
+        return
+
+    if not _place_avatar_still_in_box(
+        slide, path, poster, box, pip_style, source_file=source_file, rect_mask=True,
+        layout_kind=layout_kind,
+    ):
         _fit_movie_in_box(slide, path, poster, box, _video_mime(path))
-        if draw_frame:
-            _draw_pip_frame(slide, box, pip_style)
+    if draw_frame and is_square:
+        _draw_pip_frame(slide, box, pip_style)
 
 
 def place_floating_avatar_pip(

@@ -19,6 +19,7 @@ from .list_slides import print_slide_outline
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
 from .video_exporter import VideoOptions, convert_pptx_to_video, convert_deck_to_video, resolve_video_backend
 from .video_sidecar import load_deck_sidecar
+from .slide_images import SlideImageOptions, export_pptx_slide_jpegs, default_slide_images_dir
 from .ffmpeg_composer import check_video_tools, print_tool_check_report, pick_video_encoder
 from .config import load_config, init_config
 
@@ -179,6 +180,33 @@ Examples:
         '--pdf-output',
         help='Custom PDF output filename (auto-generated if not specified)'
     )
+
+    parser.add_argument(
+        '--export-slide-jpegs',
+        action='store_true',
+        help='Export each slide as a JPEG image (requires pdftoppm / Poppler)'
+    )
+
+    parser.add_argument(
+        '--slide-images-dir',
+        metavar='DIR',
+        help='Output folder for slide JPEGs (default: <pptx_stem>_slides/)'
+    )
+
+    parser.add_argument(
+        '--slide-images-dpi',
+        type=int,
+        default=192,
+        help='DPI for slide JPEG rasterisation (default: 192)'
+    )
+
+    parser.add_argument(
+        '--slide-images-quality',
+        type=int,
+        default=90,
+        metavar='1-100',
+        help='JPEG quality for slide images (default: 90)'
+    )
     
     parser.add_argument(
         '--upload-gdrive',
@@ -222,8 +250,8 @@ Examples:
     parser.add_argument(
         'command',
         nargs='?',
-        choices=['convert-pdf', 'convert-video', 'convert-json', 'convert-yaml', 'transcript-to-yaml', 'list-slides', 'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
-        help='Command to execute (e.g., list-slides, convert-pdf, convert-video, template, config)'
+        choices=['convert-pdf', 'convert-video', 'convert-json', 'convert-yaml', 'transcript-to-yaml', 'list-slides', 'export-slide-jpegs', 'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
+        help='Command to execute (e.g., list-slides, convert-pdf, convert-video, export-slide-jpegs, template, config)'
     )
     
     parser.add_argument(
@@ -398,6 +426,54 @@ def parse_video_options(args, data: Optional[dict] = None) -> VideoOptions:
         if len(parts) == 2:
             opts.slide_range = (int(parts[0]), int(parts[1]))
     return opts
+
+
+def parse_slide_image_options(args) -> SlideImageOptions:
+    """Build SlideImageOptions from CLI flags."""
+    opts = SlideImageOptions(
+        dpi=max(72, int(getattr(args, "slide_images_dpi", 192) or 192)),
+        jpeg_quality=max(1, min(int(getattr(args, "slide_images_quality", 90) or 90), 100)),
+        keep_pdf=bool(getattr(args, "convert_pdf", False)),
+    )
+    sr = getattr(args, "slide_range", None)
+    if sr:
+        parts = sr.split("-", 1)
+        if len(parts) == 2:
+            opts.slide_range = (int(parts[0]), int(parts[1]))
+    return opts
+
+
+def handle_export_slide_jpegs_command(args, *, pptx_path: Optional[str] = None, pdf_path: Optional[str] = None) -> int:
+    """Export JPEG for each slide from a PPTX (standalone command or build flag)."""
+    inp = pptx_path or args.input_file
+    if not inp:
+        print("Error: Input PPTX required for export-slide-jpegs")
+        print("Usage: praisonaippt export-slide-jpegs deck.pptx [--slide-images-dir out/]")
+        return 1
+    if not Path(inp).is_file():
+        print(f"Error: File not found: {inp}")
+        return 1
+    out_dir = getattr(args, "slide_images_dir", None) or str(default_slide_images_dir(inp))
+    opts = parse_slide_image_options(args)
+    if pdf_path and Path(pdf_path).is_file():
+        opts.keep_pdf = True
+    print(f"Exporting slide JPEGs from {inp} …")
+    try:
+        paths = export_pptx_slide_jpegs(
+            inp,
+            out_dir,
+            pdf_path=pdf_path if pdf_path and Path(pdf_path).is_file() else None,
+            options=opts,
+            pdf_backend=getattr(args, "pdf_backend", "auto"),
+            pdf_options=parse_pdf_options(getattr(args, "pdf_options", None)),
+        )
+    except Exception as e:
+        print(f"Error: Slide JPEG export failed: {e}")
+        return 1
+    print(f"✓ {len(paths)} slide JPEG(s) in {out_dir}")
+    for p in paths:
+        print(f"  {p}")
+    return 0
 
 
 def handle_convert_json_command(args):
@@ -1281,6 +1357,9 @@ def main():
     if args.command == 'list-slides':
         return handle_list_slides_command(args)
 
+    if args.command == 'export-slide-jpegs':
+        return handle_export_slide_jpegs_command(args)
+
     if args.command == 'template':
         return handle_template_show_command(args.input_file)
 
@@ -1391,6 +1470,11 @@ def main():
 
     # Upload PPTX (and PDF if generated) to Google Drive
     handle_gdrive_upload(output_file, args, config, pdf_path=pdf_path)
+
+    if getattr(args, "export_slide_jpegs", False):
+        rc = handle_export_slide_jpegs_command(args, pptx_path=output_file, pdf_path=pdf_path)
+        if rc != 0:
+            return rc
 
     # Convert to video if requested (reuse PDF when both flags set)
     if getattr(args, "convert_video", False):

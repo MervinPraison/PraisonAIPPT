@@ -104,7 +104,7 @@ Sizes use `typography.section_title_size_pt` / `section_subtitle_size_pt`.
 | `caption_bottom_in` | 0.45 |
 | `caption_margin_in` | 0.5 |
 
-See [templates.md](../templates.md) for merge priority, examples, and custom slide types.
+See [Slide style reference](../slide-style-reference.md) for full `layouts.*` tables (table colours, pip, avatar, deck), [templates.md](../templates.md) for merge priority, and [layouts overview](../layouts-overview.md) for navigation.
 
 !!! note
     **Package defaults**: When `background_image` or `background_color` is set, all text colors automatically default to white/light variants. Individual color keys override these auto-defaults. `font_name`, `alignment`, and `reference_position` have opinionated defaults (Palatino / left / bottom).

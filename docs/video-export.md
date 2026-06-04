@@ -2,7 +2,9 @@
 
 PraisonAIPPT can export presentations to MP4 on **Mac and Linux** using a **compositor**
 backend: LibreOffice rasterises slides to PNG, then FFmpeg overlays avatar and media
-regions using geometry from `avatar_layouts` and `deck_slides` YAML. See [deck-layouts.md](deck-layouts.md) for `deck_*` slide types.
+regions using geometry from `avatar_layouts` and `deck_slides`.
+
+**Related docs:** [Layouts overview](layouts-overview.md) · [Avatar layouts & PiP](avatar-layouts.md) · [Deck layouts](deck-layouts.md) · [YAML deck reference](yaml-reference.md) · [Slide style reference](slide-style-reference.md)
 
 PowerPoint `CreateVideo` (Windows, on-prem) is **Phase 3** and not implemented in v1.
 
@@ -40,8 +42,26 @@ praisonaippt convert-video deck.pptx
 praisonaippt convert-video --check
 ```
 
-Flags: `--convert-video`, `--video-output`, `--video-backend`, `--video-preset`,
-`--narration-mode`, `--video-options` (JSON), `--slide-range`, `--keep-temp`.
+### CLI flags (video)
+
+| Flag | Values / type | Notes |
+|------|---------------|-------|
+| `--convert-video` | flag | Build + export in one command |
+| `--video-output` | path | Overrides `video_export.output_path` |
+| `--video-backend` | `compositor`, `auto`, `powerpoint` | Overrides YAML `backend` |
+| `--video-preset` | `draft`, `standard`, `high`, `4k` | Overrides YAML `preset` |
+| `--narration-mode` | `fixed`, `audio_file`, `avatar`, `tts`, `auto` | Overrides YAML |
+| `--video-options` | JSON string | Merged via `VideoOptions.from_dict` |
+| `--slide-range` | `START-END` (1-based) | Export subset only |
+| `--keep-temp` | flag | Retain temp files for debugging |
+| `--check` | flag | Dependency check |
+
+| Preset | Resolution | FPS | DPI |
+|--------|------------|-----|-----|
+| `draft` | 1280×720 | 24 | 120 |
+| `standard` | 1920×1080 | 30 | 192 |
+| `high` | 1920×1080 | 30 | 240 |
+| `4k` | 3840×2160 | 30 | 300 |
 
 ## YAML configuration
 
@@ -57,10 +77,14 @@ video_export:
   dpi: 192
   preset: standard               # draft | standard | high
   slide_duration_sec: 5
-  avatar_timeline: per_slide     # per_slide | continuous
+  avatar_timeline: auto          # per_slide | continuous | auto
   avatar:
-    fit: stretch                 # matches PPTX add_movie stretch
+    fit: cover                   # cover | stretch (PPTX stretch uses stretch)
+    shape: circle                # circle | square | rect
+    crop_y_ratio: 0.06
+    zoom_ratio: 1.45
     loop_if_shorter: true
+  slide_cache: true              # PNG cache under ~/.praisonaippt/video_cache/
   tts:                           # requires pip install praisonaippt[video-tts]
     provider: edge
     voice: en-GB-RyanNeural
@@ -83,8 +107,19 @@ Schema keys: `duration_sec`, `audio_start_sec`, `audio_path`, `narration_mode`, 
 `video_export`, `slide_timestamps` (deck level).
 
 When `duration_sec` and `audio_start_sec` are set on a verse, they take precedence over
-`ffprobe` on shared HeyGen MP4 or MP3 files. Use `avatar_timeline: continuous` with per-slide
-`audio_start_sec` to slice one narration track across many slides.
+`ffprobe` on shared HeyGen MP4 or MP3 files.
+
+### `avatar_timeline`
+
+| Value | Behaviour |
+|-------|-----------|
+| `per_slide` | Avatar video restarts at each slide |
+| `continuous` | One shared file; offset advances by each slide’s duration |
+| `auto` (default) | **`continuous`** when all content slides share one `avatar_video_path`; otherwise `per_slide` |
+
+Use `continuous` (or `auto` with one HeyGen file) and per-slide `audio_start_sec` to slice one narration track across many slides without blink between slides.
+
+`slide_style.layouts.pip` (`crop_y_ratio`, `zoom_ratio`, `shape`) merges into video options when not set under `video_export.avatar`.
 
 ## Transcript-driven HeyGen decks
 
@@ -104,10 +139,9 @@ praisonaippt transcript-to-yaml \
 | `--transcript-mode` | `full`, `thematic`, or `both` deck variants |
 | `--transcript-audio` | MP3 for silence/RMS alignment |
 | `--align` | `silence`, `emphasis`, `karaoke` (comma-separated) |
-| `--variants all` | Write media combination YAMLs (see [heygen-50590-examples.md](../examples/heygen-50590-examples.md)) |
+| `--variants all` | Write media combination YAMLs (see `examples/heygen-50590-examples.md` in the repo) |
 
-Example deck: `examples/heygen-article-50590-short.yaml`. See
-`examples/heygen-50590-examples.md` for all audio/video combinations.
+Example deck: `examples/heygen-article-50590-short.yaml`. See `examples/heygen-50590-examples.md` in the repository for all audio/video combinations.
 
 **Timing:** use wall-clock merge (`last_segment.end - first_segment.start`) so pauses between
 Whisper segments are held on the correct slide. Sum of segment durations alone is shorter than
@@ -145,11 +179,12 @@ Disable with `slide_cache: false` in `video_export` (via JSON `--video-options`)
 
 ## Compositor behaviour
 
-LibreOffice PNG is **static chrome only** (text, borders, placeholders). For every avatar
-layout slide, FFmpeg overlays:
+LibreOffice PNG is **static chrome** (text, borders, baked deck images). FFmpeg overlays:
 
-- `avatar_video_path` → `regions["avatar"]` box
-- `media_path` → `regions["media"]` box when present
+- `avatar_video_path` → `regions["avatar"]` when the region exists
+- `media_path` → `regions["media"]` when present and **`skip_media_overlay` is false**
+
+All `deck_*` slides set `skip_media_overlay: true` (images are already in the PPTX). Avatar layout slides overlay both regions when paths are set.
 
 Split layouts (`avatar_media_1` vs `avatar_media_2`) use distinct width ratios from
 `layout_tokens.py`, visible in both PPTX and video.

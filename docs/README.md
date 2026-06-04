@@ -1,93 +1,46 @@
-# PraisonAI PPT - Documentation
+# PraisonAI PPT — documentation
 
 [![PyPI version](https://badge.fury.io/py/praisonaippt.svg)](https://badge.fury.io/py/praisonaippt)
 
-Welcome to the PraisonAI PPT documentation directory!
+## MkDocs (recommended local preview)
 
-## 📚 Documentation Index
-
-### User Documentation
-- **[Main README](../README.md)** - Complete user guide and package overview
-- **[Quick Start Guide](../QUICKSTART.md)** - Get started in 3 easy steps
-- **[Highlights Feature](HIGHLIGHTS_FEATURE.md)** - Text highlighting documentation
-
-### Development Documentation
-- **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Complete implementation overview
-- **[Highlights Implementation](HIGHLIGHTS_IMPLEMENTATION.md)** - Highlighting feature implementation details
-- **[Restructuring Plan](RESTRUCTURING_PLAN.md)** - Original package restructuring plan
-- **[Plan Review](PLAN_REVIEW.md)** - Plan review and validation
-
-## 🎯 Quick Links
-
-### For Users
-- [Installation Instructions](../README.md#-installation)
-- [Usage Examples](../README.md#-usage)
-- [JSON Format Guide](../README.md#-json-file-format)
-- [Highlighting Feature Guide](HIGHLIGHTS_FEATURE.md)
-
-### For Developers
-- [Package Structure](IMPLEMENTATION_SUMMARY.md#-final-package-structure)
-- [Features Implemented](IMPLEMENTATION_SUMMARY.md#-features-implemented)
-- [Code Organization](IMPLEMENTATION_SUMMARY.md#-key-improvements)
-
-## 📖 Feature Documentation
-
-### Text Highlighting
-The text highlighting feature allows you to emphasize specific words or phrases in your presentations. See the [complete guide](HIGHLIGHTS_FEATURE.md) for:
-- Usage examples
-- YAML or JSON format
-- Best practices
-- Troubleshooting
-
-## 🏗️ Architecture Documentation
-
-### Package Structure
-```
-praisonaippt/
-├── __init__.py       # Public API
-├── core.py          # Presentation creation
-├── utils.py         # Utility functions
-├── loader.py        # JSON loading
-└── cli.py           # Command-line interface
+```bash
+pip install -r requirements-docs.txt
+mkdocs serve
 ```
 
-### Key Design Decisions
-- Modular code separation for maintainability
-- Both CLI and Python API supported
-- Built-in examples for easy start
-- Text highlighting with minimal configuration
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000). Configuration: `mkdocs.yml` at the repository root.
 
-## 🔧 Development Notes
+### Layout and styling docs
 
-### Font Sizes
-- Verse Text: 32pt
-- Reference Text: 22pt
-- Section Titles: 44pt
+| Page | Topic |
+|------|--------|
+| [layouts-overview.md](layouts-overview.md) | Hub — choose standard, avatar, or deck layouts |
+| [slide-layouts.md](slide-layouts.md) | `verse`, `list`, `table`, `quote`, … |
+| [avatar-layouts.md](avatar-layouts.md) | `avatar_*`, PiP, `avatar_timeline` |
+| [deck-layouts.md](deck-layouts.md) | `deck_*` sales templates |
+| [slide-style-reference.md](slide-style-reference.md) | `slide_style`, `typography.*`, `layouts.*` |
+| [yaml-reference.md](yaml-reference.md) | Top-level deck and video keys |
+| [video-export.md](video-export.md) | PPTX → MP4 compositor |
 
-### Highlight Formatting
-- Bold text
-- Orange color (RGB: 255, 140, 0)
-- Case-insensitive matching
+## Jekyll site (ppt.praison.ai)
 
-## 📝 Version History
+The same Markdown files publish via `docs/_config.yml` (Jekyll). MkDocs includes the full layout nav; Jekyll nav is a subset — use MkDocs locally for complete layout reference.
 
-### v1.0.0 (2025-10-26)
-- Initial release
-- Package restructuring completed
-- Text highlighting feature added
-- UV package manager support
-- Comprehensive documentation
+## Other docs
 
-## 🤝 Contributing
+- [Main README](../README.md) — package overview
+- [Quick start](quickstart.md)
+- [Formatting](formatting.md) — highlights and rich text
+- [Templates](templates.md) — theme presets
+- [Configuration](configuration.md) — `~/.praisonaippt/config.yaml`
 
-For development setup and contribution guidelines, see the main [README](../README.md).
+## Example galleries
 
-## 📞 Support
+```bash
+python examples/build_showcase_examples.py
+```
 
-- **PyPI**: https://pypi.org/project/praisonaippt/
-- **Repository**: https://github.com/MervinPraison/PraisonAIPPT
-- **Issues**: https://github.com/MervinPraison/PraisonAIPPT/issues
-
----
-
-**Last Updated**: 2025-10-26
+- `examples/avatar_layouts.yaml` — all avatar `slide_type`s
+- `examples/deck_template_gallery.yaml` — all `deck_*` layouts
+- `examples/heygen-50590-content.yaml` — article deck with PiP and timing

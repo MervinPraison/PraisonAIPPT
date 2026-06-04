@@ -25,6 +25,22 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 - 📄 **PDF Conversion** - Convert presentations to PDF with multiple backends
 - 🔄 **Multiple PDF Backends** - Support for Aspose.Slides and LibreOffice
 - ⚙️ **Advanced PDF Options** - Quality settings, password protection, and more
+- 🎬 **Video export** - PPTX → MP4 with avatar PiP and HeyGen timing
+- 📐 **Layout reference** - Standard, avatar, and `deck_*` slide types with full `slide_style` tokens
+
+## Layout and video documentation
+
+| Guide | Description |
+|-------|-------------|
+| [Layouts overview](layouts-overview.md) | Choose standard, avatar, or deck layouts |
+| [Standard slide layouts](slide-layouts.md) | `verse`, `list`, `table`, `quote`, … |
+| [Avatar layouts & PiP](avatar-layouts.md) | HeyGen regions, floating PiP, `avatar_timeline` |
+| [Deck layouts](deck-layouts.md) | Twelve `deck_*` sales templates |
+| [Slide style reference](slide-style-reference.md) | Colours, `typography.*`, `layouts.*` |
+| [YAML deck reference](yaml-reference.md) | Top-level keys and `video_export` |
+| [Video export](video-export.md) | Compositor, narration modes, CLI |
+
+Preview all docs locally: `pip install -r requirements-docs.txt && mkdocs serve`
 
 ## 🚀 Quick Start
 

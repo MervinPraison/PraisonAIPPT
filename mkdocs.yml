@@ -1,0 +1,76 @@
+site_name: PraisonAI PPT
+site_description: Create PowerPoint decks from YAML with avatar video, deck layouts, and MP4 export
+site_url: https://ppt.praison.ai
+repo_url: https://github.com/MervinPraison/PraisonAIPPT
+repo_name: MervinPraison/PraisonAIPPT
+
+docs_dir: docs
+
+exclude_docs: |
+  lazy-loading.md
+  snippets/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - toc.follow
+    - search.suggest
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      use_pygments: false
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Installation: installation.md
+      - Quick start: quickstart.md
+      - Examples: examples.md
+  - Layouts & styling:
+      - Overview: layouts-overview.md
+      - Standard slide layouts: slide-layouts.md
+      - Avatar layouts & PiP: avatar-layouts.md
+      - Deck layouts (deck_*): deck-layouts.md
+      - Slide style reference: slide-style-reference.md
+      - YAML deck reference: yaml-reference.md
+      - Rich text formatting: formatting.md
+      - Theme templates: templates.md
+  - Video export:
+      - Video export: video-export.md
+  - Reference:
+      - Commands: commands.md
+      - Python API: python-api.md
+      - Configuration file: configuration.md
+      - PDF conversion: pdf-conversion.md
+      - PPTX to JSON: pptx-to-json.md
+  - Integrations:
+      - Google Drive upload: google-drive-upload.md
+      - OAuth setup: oauth-setup.md
+  - Troubleshooting: troubleshooting.md
+
+plugins:
+  - search

@@ -171,11 +171,23 @@ def resolve_deck_style(deck_style: dict, verse: dict, kind: str) -> dict:
     return style
 
 
-def deck_avatar_shape(kind: str, style: dict, default: str = "circle") -> str:
-    """Resolve FFmpeg avatar mask: rect for full-bleed halves, circle for PiP deck layouts."""
-    if kind in DECK_RECT_AVATAR_TYPES:
-        return str(layout_in(style, kind, "avatar_shape", "rect"))
-    return str(layout_in(style, kind, "avatar_shape", default))
+def deck_avatar_shape(
+    kind: str,
+    style: dict,
+    default: str = "circle",
+    *,
+    box: Optional[RegionBox] = None,
+    verse: Optional[dict] = None,
+) -> str:
+    """Resolve FFmpeg avatar mask from YAML ``avatar_shape`` or layout-aware ``auto``."""
+    from .avatar_layouts import resolve_avatar_shape, shape_for_video_overlay
+
+    shape = resolve_avatar_shape(
+        style or {}, layout_kind=kind, box=box, verse=verse,
+    )
+    if str(shape).lower() == "auto":
+        shape = default if kind not in DECK_RECT_AVATAR_TYPES else "h_rect"
+    return shape_for_video_overlay(shape)
 
 
 def deck_skips_media_overlay(kind: str) -> bool:
@@ -254,6 +266,8 @@ def _draw_index_badge(slide, left_in: float, top_in: float, size_in: float, labe
     shape.fill.fore_color.rgb = _badge_rgb(style)
     shape.line.fill.background()
     tf = shape.text_frame
+    tf.word_wrap = False
+    tf.margin_left = tf.margin_right = Pt(2)
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
     p = tf.paragraphs[0]
     p.text = str(label)
@@ -278,6 +292,7 @@ def _draw_percent_badge(
     shape.fill.fore_color.rgb = _badge_rgb(style)
     shape.line.fill.background()
     tf = shape.text_frame
+    tf.word_wrap = False
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
     p = tf.paragraphs[0]
     p.text = str(percent)
@@ -289,10 +304,11 @@ def _draw_percent_badge(
 
 def _add_dual_tone_title(
     slide, left_in: float, top_in: float, width_in: float, line1: str, line2: str, style: dict, theme: dict
-) -> None:
+) -> float:
     from .core import _write_body_paragraph
 
-    tb = slide.shapes.add_textbox(Inches(left_in), Inches(top_in), Inches(width_in), Inches(2.0))
+    h_in = _dual_tone_title_height(line1, line2, width_in, style)
+    tb = slide.shapes.add_textbox(Inches(left_in), Inches(top_in), Inches(width_in), Inches(h_in))
     tf = tb.text_frame
     tf.word_wrap = True
     head_pt = int(typography_pt(style, "title_size_pt", 44))
@@ -306,6 +322,7 @@ def _add_dual_tone_title(
     if line2:
         p2 = tf.add_paragraph()
         _write_body_paragraph(p2, line2, sub_pt, t2, style=style, alignment=PP_ALIGN.LEFT)
+    return h_in
 
 
 def _add_contact_bar(slide, left_in: float, top_in: float, width_in: float, contact: str, style: dict) -> None:
@@ -322,8 +339,48 @@ def _add_contact_bar(slide, left_in: float, top_in: float, width_in: float, cont
     p.font.color.rgb = _hex_rgb(str(style.get("panel_text_color") or "#1E40AF"))
 
 
-def _draw_badge(slide, left_in: float, top_in: float, size_in: float, label: str, style: dict) -> None:
-    left, top, w, h = Inches(left_in), Inches(top_in), Inches(size_in), Inches(size_in)
+def _grid_area_clear_of_pip(
+    sw: float,
+    sh: float,
+    margin: float,
+    grid_top: float,
+    pip: RegionBox,
+    pip_anchor: str,
+) -> RegionBox:
+    """2×2 grid bounds that stay clear of the circular PiP (no overlap with bottom-left cells)."""
+    gap = 0.18
+    left, top = margin, grid_top
+    right, bottom = sw - margin, sh - margin
+    anchor = (pip_anchor or "bottom_left").lower().replace("-", "_")
+    if pip:
+        if anchor in ("bottom_left", "bl"):
+            left = max(left, pip.left_in + pip.width_in + gap)
+            bottom = min(bottom, pip.top_in - gap)
+        elif anchor in ("bottom_right", "br"):
+            right = min(right, pip.left_in - gap)
+            bottom = min(bottom, pip.top_in - gap)
+        elif anchor in ("top_left", "tl"):
+            left = max(left, pip.left_in + pip.width_in + gap)
+            top = max(top, pip.top_in + pip.height_in + gap)
+        elif anchor in ("top_right", "tr"):
+            right = min(right, pip.left_in - gap)
+            top = max(top, pip.top_in + pip.height_in + gap)
+    return RegionBox(left, top, max(0.5, right - left), max(0.5, bottom - top))
+
+
+def _badge_width_in(label: str, size_in: float) -> float:
+    """Wide enough for Q1-style labels on one line (square size_in is too narrow)."""
+    n = len(str(label).strip()) or 1
+    return max(float(size_in), 0.22 + n * 0.13)
+
+
+def _draw_badge(slide, left_in: float, top_in: float, size_in: float, label: str, style: dict) -> float:
+    """Rounded badge; returns drawn width in inches for row layout."""
+    text = str(label)
+    width_in = _badge_width_in(text, size_in)
+    height_in = float(size_in) * 0.72
+    left, top = Inches(left_in), Inches(top_in)
+    w, h = Inches(width_in), Inches(height_in)
     shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, top, w, h)
     try:
         shape.adjustments[0] = 0.22
@@ -333,36 +390,117 @@ def _draw_badge(slide, left_in: float, top_in: float, size_in: float, label: str
     shape.fill.fore_color.rgb = _badge_rgb(style)
     shape.line.fill.background()
     tf = shape.text_frame
+    tf.word_wrap = False
+    tf.margin_left = tf.margin_right = Pt(2)
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
     p = tf.paragraphs[0]
-    p.text = str(label)
+    p.text = text
     p.alignment = PP_ALIGN.CENTER
     badge_text = style.get("badge_text_color") or style.get("text_color") or "#1E40AF"
     p.font.size = Pt(11)
     p.font.bold = True
     p.font.color.rgb = _hex_rgb(str(badge_text))
+    return width_in
+
+
+def _deck_font_name(style: dict, theme: dict) -> str:
+    return str(theme.get("font_name") or style.get("font_name") or "Calibri")
+
+
+def _shrink_font_pt(text: str, width_in: float, max_pt: int, min_pt: int = 16) -> int:
+    from .core import _estimate_text_lines
+
+    pt = int(max_pt)
+    while pt > min_pt and _estimate_text_lines(text or "", width_in, pt) > 3:
+        pt -= 2
+    return max(min_pt, pt)
+
+
+def _set_paragraph_font(p, pt: int, rgb: RGBColor, style: dict, theme: dict, *, bold: bool = False) -> None:
+    p.font.size = Pt(pt)
+    p.font.color.rgb = rgb
+    p.font.bold = bold
+    fn = _deck_font_name(style, theme)
+    if fn:
+        p.font.name = fn
+
+
+def _title_block_height(title: str, subtitle: str, width_in: float, style: dict) -> float:
+    """Estimated title + subtitle block height in inches (word-wrapped)."""
+    from .core import _estimate_text_lines
+
+    head_pt = _shrink_font_pt(title, width_in, int(typography_pt(style, "title_size_pt", 44)), min_pt=22)
+    sub_pt = int(typography_pt(style, "subtitle_size_pt", 28))
+    if subtitle:
+        sub_pt = _shrink_font_pt(subtitle, width_in, sub_pt, min_pt=14)
+    title_lines = _estimate_text_lines(title, width_in, head_pt)
+    block_h = 0.12 + title_lines * (head_pt / 72.0) * 1.45
+    if subtitle:
+        sub_lines = _estimate_text_lines(subtitle, width_in, sub_pt)
+        block_h += 0.1 + sub_lines * (sub_pt / 72.0) * 1.45
+    return min(4.0, max(0.55, block_h))
+
+
+def _dual_tone_title_height(line1: str, line2: str, width_in: float, style: dict) -> float:
+    h = _title_block_height(line1, "", width_in, style)
+    if (line2 or "").strip():
+        sub_pt = int(typography_pt(style, "subtitle_size_pt", 28) * 1.05)
+        from .core import _estimate_text_lines
+
+        lines = _estimate_text_lines(line2, width_in, sub_pt)
+        h += 0.1 + lines * (sub_pt / 72.0) * 1.45
+    return min(4.0, max(0.55, h))
+
+
+def _title_content_gap(style: dict, kind: str) -> float:
+    return float(layout_in(style, kind, "title_content_gap_in", 0.28))
+
+
+def _content_top_after_title(
+    margin: float, title_h: float, kind: str, style: dict, *, min_top_key: str, min_default: float
+) -> float:
+    """Place body content below the title block with a consistent gap."""
+    min_top = float(layout_in(style, kind, min_top_key, min_default))
+    return max(min_top, margin + title_h + _title_content_gap(style, kind))
+
+
+def _header_block_height(header: str, width_in: float, style: dict, *, scale: float = 0.72) -> float:
+    from .core import _estimate_text_lines
+
+    if not (header or "").strip():
+        return 0.0
+    head_pt = _shrink_font_pt(
+        header, width_in, int(typography_pt(style, "title_size_pt", 36) * scale), min_pt=18,
+    )
+    lines = _estimate_text_lines(header, width_in, head_pt)
+    return 0.12 + lines * (head_pt / 72.0) * 1.4
 
 
 def _add_title_block(
     slide, left_in: float, top_in: float, width_in: float, title: str, subtitle: str, style: dict, theme: dict
-) -> None:
+) -> float:
     from .core import _write_body_paragraph
 
-    h_in = 2.8 if subtitle else 1.8
+    head_pt = _shrink_font_pt(title, width_in, int(typography_pt(style, "title_size_pt", 44)), min_pt=22)
+    sub_pt = int(typography_pt(style, "subtitle_size_pt", 28))
+    if subtitle:
+        sub_pt = _shrink_font_pt(subtitle, width_in, sub_pt, min_pt=14)
+    h_in = _title_block_height(title, subtitle, width_in, style)
     tb = slide.shapes.add_textbox(Inches(left_in), Inches(top_in), Inches(width_in), Inches(h_in))
     tf = tb.text_frame
     tf.word_wrap = True
     title_theme = dict(theme)
     title_theme["body"] = theme.get("title") or theme.get("body")
+    title_theme["font_name"] = _deck_font_name(style, theme)
     sub_theme = dict(theme)
     sub_theme["body"] = theme.get("subtitle") or theme.get("reference") or theme.get("body")
-    head_pt = int(typography_pt(style, "title_size_pt", 44))
-    sub_pt = int(typography_pt(style, "subtitle_size_pt", 28))
+    sub_theme["font_name"] = title_theme["font_name"]
     p = tf.paragraphs[0]
     _write_body_paragraph(p, title, head_pt, title_theme, style=style, alignment=PP_ALIGN.LEFT)
     if subtitle:
         p2 = tf.add_paragraph()
         _write_body_paragraph(p2, subtitle, sub_pt, sub_theme, style=style, alignment=PP_ALIGN.LEFT)
+    return h_in
 
 
 def export_deck_slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional[RegionBox]]:
@@ -397,11 +535,12 @@ def export_deck_slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional
         regions["content"] = RegionBox(lw, 0.0, sw - lw, sh)
     elif kind == "deck_region_grid":
         regions["text_panel"] = RegionBox(margin, margin, sw * 0.55, 1.2)
-        regions["avatar"] = _pip_box_at(0, 0, sw, sh, style, kind, "bottom_left")
+        pip_anchor = str(layout_in(style, kind, "pip_position", "bottom_left"))
+        regions["avatar"] = _pip_box_at(0, 0, sw, sh, style, kind, pip_anchor)
         grid_top = float(layout_in(style, kind, "grid_top_in", 1.55))
-        pip = regions["avatar"]
-        pip_w = pip.width_in + 0.25 if pip else 0.0
-        regions["content"] = RegionBox(margin, grid_top, sw - margin - pip_w, sh - grid_top - margin)
+        regions["content"] = _grid_area_clear_of_pip(
+            sw, sh, margin, grid_top, regions["avatar"], pip_anchor
+        )
     elif kind == "deck_product_columns":
         regions["text_panel"] = RegionBox(margin, margin, sw * 0.55, 1.35)
         regions["avatar"] = _pip_box_at(0, 0, sw, sh, style, kind, "top_right")
@@ -450,9 +589,11 @@ def _render_title_split(slide, prs, verse: dict, style: dict, theme: dict, *, so
     margin = float(layout_in(style, "deck_title_split", "margin_in", 0.75))
     _add_title_block(slide, margin, sh * 0.28, split - margin * 1.6, title, subtitle, style, theme)
     avatar_box = RegionBox(split, 0.0, sw - split, sh)
+    panel_bg = str(style.get("avatar_panel_color") or "#111827")
     _place_avatar_in_box(
         slide, avatar_box, verse.get("avatar_video_path"),
-        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style, draw_frame=False,
+        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+        layout_kind="deck_title_split", verse=verse, panel_fill_rgb=_hex_rgb(panel_bg),
     )
 
 
@@ -461,16 +602,21 @@ def _render_exec_summary(slide, prs, verse: dict, style: dict, theme: dict, *, s
     margin = float(layout_in(style, "deck_exec_summary", "margin_in", 0.65))
     title = str(verse.get("text") or verse.get("headline") or "")
     subtitle = str(verse.get("reference") or verse.get("subheader") or "")
-    _add_title_block(slide, margin, margin, sw * 0.5, title, subtitle, style, theme)
     pip = _pip_box_at(0, 0, sw, sh, style, "deck_exec_summary", "top_right")
     _place_avatar_in_box(
         slide, pip, verse.get("avatar_video_path"),
         poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+        layout_kind="deck_exec_summary", verse=verse,
     )
+    title_w = max(2.0, pip.left_in - margin - 0.25)
+    title_h = _add_title_block(slide, margin, margin, title_w, title, subtitle, style, theme)
     items = _resolve_items(verse.get("items") or [])
     col_count = max(len(items), 1)
     gap = float(layout_in(style, "deck_exec_summary", "column_gap_in", 0.35))
-    col_top = float(layout_in(style, "deck_exec_summary", "columns_top_in", 2.05))
+    min_col_top = float(layout_in(style, "deck_exec_summary", "columns_top_in", 2.05))
+    col_top = _content_top_after_title(
+        margin, title_h, "deck_exec_summary", style, min_top_key="columns_top_in", min_default=min_col_top,
+    )
     usable = sw - 2 * margin - gap * (col_count - 1)
     col_w = usable / col_count
     body_pt = int(typography_pt(style, "body_size_pt", 22) * 0.82)
@@ -510,61 +656,73 @@ def _render_split_performance(slide, prs, verse: dict, style: dict, theme: dict,
     left_theme = dict(theme)
     left_theme["body"] = RGBColor(0xFF, 0xFF, 0xFF)
     left_theme["title"] = RGBColor(0xFF, 0xFF, 0xFF)
+    left_theme["font_name"] = _deck_font_name(style, theme)
     margin = float(layout_in(style, "deck_split_performance", "margin_in", 0.65))
     title = str(verse.get("text") or verse.get("headline") or "")
     subtitle = str(verse.get("reference") or verse.get("subheader") or "")
-    _add_title_block(slide, margin, margin, lw - margin * 2, title, subtitle, style, left_theme)
     av_h = float(layout_in(style, "deck_split_performance", "avatar_height_in", 3.0))
+    title_w = lw - margin * 2
+    title_h = _add_title_block(slide, margin, margin, title_w, title, subtitle, style, left_theme)
     avatar_box = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
     _place_avatar_in_box(
         slide, avatar_box, verse.get("avatar_video_path"),
-        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style, draw_frame=False,
+        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+        layout_kind="deck_split_performance", verse=verse, panel_fill_rgb=_hex_rgb(left_bg),
     )
     header = str(verse.get("header") or "")
     rows = _resolve_rows(verse.get("rows") or [])
     rx = lw + margin
     rw = sw - lw - margin * 2
+    body_rgb = theme.get("title") or theme.get("body")
+    header_h = 0.0
     if header:
-        ht = slide.shapes.add_textbox(Inches(rx), Inches(margin), Inches(rw), Inches(0.7))
+        header_h = _header_block_height(header, rw, style)
+        head_pt = _shrink_font_pt(header, rw, int(typography_pt(style, "title_size_pt", 36) * 0.72), min_pt=18)
+        ht = slide.shapes.add_textbox(Inches(rx), Inches(margin), Inches(rw), Inches(header_h))
+        ht.text_frame.word_wrap = True
         hp = ht.text_frame.paragraphs[0]
         hp.text = header
-        hp.font.bold = True
-        hp.font.size = Pt(int(typography_pt(style, "title_size_pt", 36) * 0.75))
-        hp.font.color.rgb = theme.get("title") or theme.get("body")
-    row_top = margin + (0.85 if header else 0.2)
+        _set_paragraph_font(hp, head_pt, body_rgb, style, theme, bold=True)
+    row_top = margin + header_h + (_title_content_gap(style, "deck_split_performance") if header else 0.12)
     row_h = (sh - row_top - margin) / max(len(rows), 1)
     from .core import _write_body_paragraph
+
+    row_theme = dict(theme)
+    row_theme["font_name"] = _deck_font_name(style, theme)
+    body_pt = int(typography_pt(style, "body_size_pt", 22) * 0.78)
 
     for i, row in enumerate(rows):
         y = row_top + i * row_h
         badge = str(row.get("badge") or row.get("label") or "")
+        badge_w = 0.0
         if badge:
-            _draw_badge(slide, rx, y, 0.38, badge[:8], style)
+            badge_w = _draw_badge(slide, rx, y, 0.38, badge[:8], style)
         num = str(row.get("number") or row.get("metric") or "")
         desc = str(row.get("text") or "")
-        nx = rx + 0.48
+        nx = rx + (badge_w + 0.1 if badge_w else 0.0)
         if num:
             nt = slide.shapes.add_textbox(Inches(nx), Inches(y), Inches(1.2), Inches(0.55))
             np = nt.text_frame.paragraphs[0]
             np.text = num
-            np.font.bold = True
-            np.font.size = Pt(26)
-            np.font.color.rgb = theme.get("title") or theme.get("body")
+            _set_paragraph_font(np, min(26, body_pt + 4), body_rgb, style, theme, bold=True)
         if desc:
             dt = slide.shapes.add_textbox(Inches(nx + 1.35), Inches(y), Inches(rw - 1.6), Inches(row_h - 0.1))
+            dt.text_frame.word_wrap = True
             dp = dt.text_frame.paragraphs[0]
-            dp.text = desc
-            dp.font.size = Pt(16)
-            dp.font.color.rgb = theme.get("body")
+            desc_pt = _shrink_font_pt(desc, rw - 1.6, body_pt, min_pt=12)
+            _write_body_paragraph(dp, desc, desc_pt, row_theme, style=style, alignment=PP_ALIGN.LEFT)
 
 
 def _render_region_grid(slide, prs, verse: dict, style: dict, theme: dict, *, source_file: Optional[str]) -> None:
     sw, sh = prs.slide_width.inches, prs.slide_height.inches
     margin = float(layout_in(style, "deck_region_grid", "margin_in", 0.65))
     title = str(verse.get("text") or verse.get("headline") or "")
-    _add_title_block(slide, margin, margin, sw * 0.5, title, "", style, theme)
+    title_w = sw * 0.5
+    title_h = _add_title_block(slide, margin, margin, title_w, title, "", style, theme)
     if verse.get("map_path"):
-        map_top = 1.35
+        map_top = _content_top_after_title(
+            margin, title_h, "deck_region_grid", style, min_top_key="grid_top_in", min_default=1.55,
+        )
         map_h = 1.1
         _place_media_in_box(
             slide,
@@ -573,25 +731,30 @@ def _render_region_grid(slide, prs, verse: dict, style: dict, theme: dict, *, so
             fit="contain",
             source_file=source_file,
         )
-    pip = _pip_box_at(0, 0, sw, sh, style, "deck_region_grid", "bottom_left")
+    pip_anchor = str(layout_in(style, "deck_region_grid", "pip_position", "bottom_left"))
+    pip = _pip_box_at(0, 0, sw, sh, style, "deck_region_grid", pip_anchor)
     _place_avatar_in_box(
         slide, pip, verse.get("avatar_video_path"),
         poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+        layout_kind="deck_region_grid", verse=verse,
     )
     cells = verse.get("cells") or verse.get("columns") or []
-    grid_top = float(layout_in(style, "deck_region_grid", "grid_top_in", 1.55))
-    pip_w = pip.width_in + 0.3
-    grid_w = sw - margin - pip_w
-    cell_w = grid_w / 2 - 0.15
-    cell_h = (sh - grid_top - margin) / 2 - 0.1
+    grid_top = _content_top_after_title(
+        margin, title_h, "deck_region_grid", style, min_top_key="grid_top_in", min_default=1.55,
+    )
+    grid = _grid_area_clear_of_pip(sw, sh, margin, grid_top, pip, pip_anchor)
+    col_gap = 0.3
+    row_gap = 0.15
+    cell_w = grid.width_in / 2 - col_gap / 2
+    cell_h = (grid.height_in - row_gap) / 2
     from .core import _write_body_paragraph
 
     for i, cell in enumerate(cells[:4]):
         if not isinstance(cell, dict):
             cell = {"text": str(cell)}
         col, row = i % 2, i // 2
-        x = margin + col * (cell_w + 0.3)
-        y = grid_top + row * (cell_h + 0.15)
+        x = grid.left_in + col * (cell_w + col_gap)
+        y = grid.top_in + row * (cell_h + row_gap)
         num = str(cell.get("number") or cell.get("metric") or "")
         label = str(cell.get("label") or cell.get("heading") or "")
         desc = str(cell.get("text") or "")
@@ -618,14 +781,19 @@ def _render_product_columns(slide, prs, verse: dict, style: dict, theme: dict, *
     margin = float(layout_in(style, "deck_product_columns", "margin_in", 0.65))
     title = str(verse.get("text") or verse.get("headline") or "")
     subtitle = str(verse.get("reference") or verse.get("subheader") or "")
-    _add_title_block(slide, margin, margin, sw * 0.52, title, subtitle, style, theme)
     pip = _pip_box_at(0, 0, sw, sh, style, "deck_product_columns", "top_right")
     _place_avatar_in_box(
         slide, pip, verse.get("avatar_video_path"),
         poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+        layout_kind="deck_product_columns", verse=verse,
     )
+    title_w = max(2.0, pip.left_in - margin - 0.25)
+    title_h = _add_title_block(slide, margin, margin, title_w, title, subtitle, style, theme)
     cols = verse.get("columns") or []
-    col_top = float(layout_in(style, "deck_product_columns", "columns_top_in", 1.85))
+    min_col_top = float(layout_in(style, "deck_product_columns", "columns_top_in", 1.85))
+    col_top = _content_top_after_title(
+        margin, title_h, "deck_product_columns", style, min_top_key="columns_top_in", min_default=min_col_top,
+    )
     gap = float(layout_in(style, "deck_product_columns", "column_gap_in", 0.25))
     count = max(len(cols), 1)
     col_w = (sw - 2 * margin - gap * (count - 1)) / count
@@ -666,25 +834,30 @@ def _render_channel_analysis(slide, prs, verse: dict, style: dict, theme: dict, 
     margin = float(layout_in(style, "deck_channel_analysis", "margin_in", 0.65))
     line1 = str(verse.get("text") or verse.get("headline") or "")
     line2 = str(verse.get("reference") or verse.get("subheader") or "")
-    _add_dual_tone_title(slide, margin, margin, lw - margin * 2, line1, line2, style, theme)
+    title_w = lw - margin * 2
+    _add_dual_tone_title(slide, margin, margin, title_w, line1, line2, style, theme)
     av_h = float(layout_in(style, "deck_channel_analysis", "avatar_height_in", 3.0))
     avatar_box = RegionBox(0.35, sh - av_h - 0.35, lw - 0.5, av_h)
     _place_avatar_in_box(
         slide, avatar_box, verse.get("avatar_video_path"),
-        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style, draw_frame=False,
+        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+        layout_kind="deck_channel_analysis", verse=verse, panel_fill_rgb=_hex_rgb(left_bg),
     )
     header = str(verse.get("header") or "")
     rows = _resolve_rows(verse.get("rows") or [])
     rx = lw + margin
     rw = sw - lw - margin * 2
+    header_h = 0.0
     if header:
-        ht = slide.shapes.add_textbox(Inches(rx), Inches(margin), Inches(rw), Inches(0.7))
+        header_h = _header_block_height(header, rw, style, scale=0.75)
+        ht = slide.shapes.add_textbox(Inches(rx), Inches(margin), Inches(rw), Inches(header_h))
+        ht.text_frame.word_wrap = True
         hp = ht.text_frame.paragraphs[0]
         hp.text = header
         hp.font.bold = True
         hp.font.size = Pt(int(typography_pt(style, "title_size_pt", 36) * 0.75))
         hp.font.color.rgb = theme.get("title") or theme.get("body")
-    row_top = margin + (0.85 if header else 0.2)
+    row_top = margin + header_h + (_title_content_gap(style, "deck_channel_analysis") if header else 0.12)
     row_h = (sh - row_top - margin) / max(len(rows), 1)
     badge_w = float(layout_in(style, "deck_channel_analysis", "badge_width_in", 0.95))
     badge_h = float(layout_in(style, "deck_channel_analysis", "badge_height_in", 0.55))
@@ -719,14 +892,19 @@ def _render_customer_segments(slide, prs, verse: dict, style: dict, theme: dict,
     sw, sh = prs.slide_width.inches, prs.slide_height.inches
     margin = float(layout_in(style, "deck_customer_segments", "margin_in", 0.65))
     title = str(verse.get("text") or verse.get("headline") or "")
-    _add_title_block(slide, margin, margin, sw * 0.52, title, "", style, theme)
     pip = _pip_box_at(0, 0, sw, sh, style, "deck_customer_segments", "top_right")
     _place_avatar_in_box(
         slide, pip, verse.get("avatar_video_path"),
         poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+        layout_kind="deck_customer_segments", verse=verse,
     )
+    title_w = max(2.0, pip.left_in - margin - 0.25)
+    title_h = _add_title_block(slide, margin, margin, title_w, title, "", style, theme)
     cols = verse.get("columns") or []
-    col_top = float(layout_in(style, "deck_customer_segments", "columns_top_in", 1.55))
+    min_col_top = float(layout_in(style, "deck_customer_segments", "columns_top_in", 1.55))
+    col_top = _content_top_after_title(
+        margin, title_h, "deck_customer_segments", style, min_top_key="columns_top_in", min_default=min_col_top,
+    )
     gap = float(layout_in(style, "deck_customer_segments", "column_gap_in", 0.35))
     count = max(len(cols), 1)
     col_w = (sw - 2 * margin - gap * (count - 1)) / count
@@ -767,15 +945,17 @@ def _render_thank_you(slide, prs, verse: dict, style: dict, theme: dict, *, sour
     margin = float(layout_in(style, "deck_thank_you", "margin_in", 0.75))
     line1 = str(verse.get("text") or verse.get("headline") or "THANK")
     line2 = str(verse.get("reference") or verse.get("subheader") or "YOU")
-    _add_dual_tone_title(slide, margin, sh * 0.22, split - margin * 1.6, line1, line2, style, theme)
+    title_top = sh * 0.22
+    title_w = split - margin * 1.6
+    title_h = _add_dual_tone_title(slide, margin, title_top, title_w, line1, line2, style, theme)
     contact = str(verse.get("contact") or verse.get("email") or "")
     if contact:
-        bar_top = sh * 0.22 + 1.85
-        _add_contact_bar(slide, margin, bar_top, split - margin * 2, contact, style)
+        _add_contact_bar(slide, margin, title_top + title_h + 0.35, split - margin * 2, contact, style)
     avatar_box = RegionBox(split, 0.0, sw - split, sh)
     _place_avatar_in_box(
         slide, avatar_box, verse.get("avatar_video_path"),
-        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style, draw_frame=False,
+        poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
+        layout_kind="deck_thank_you", verse=verse, panel_fill_rgb=_hex_rgb(left_bg),
     )
 
 
@@ -783,12 +963,19 @@ def _render_agenda(slide, prs, verse: dict, style: dict, theme: dict, *, source_
     sw, sh = prs.slide_width.inches, prs.slide_height.inches
     margin = float(layout_in(style, "deck_agenda", "margin_in", 0.65))
     title = str(verse.get("text") or verse.get("headline") or "Agenda")
-    _add_title_block(slide, margin, margin, sw * 0.4, title, "", style, theme)
+    title_w = sw * 0.4
+    title_h = _add_title_block(slide, margin, margin, title_w, title, "", style, theme)
     items = _resolve_items(verse.get("items") or verse.get("agenda") or [])
     col_count = int(layout_in(style, "deck_agenda", "agenda_columns", 2))
-    list_top = float(layout_in(style, "deck_agenda", "list_top_in", 1.35))
-    row_h = float(layout_in(style, "deck_agenda", "row_height_in", 0.52))
+    list_top = _content_top_after_title(
+        margin, title_h, "deck_agenda", style, min_top_key="list_top_in", min_default=1.35,
+    )
+    min_row_h = float(layout_in(style, "deck_agenda", "row_height_in", 0.52))
+    rows = max(1, (len(items) + col_count - 1) // col_count)
+    available = sh - list_top - margin
+    row_h = max(min_row_h, available / rows)
     badge_w = float(layout_in(style, "deck_agenda", "badge_width_in", 0.42))
+    badge_h = badge_w * 0.72
     gap = float(layout_in(style, "deck_agenda", "column_gap_in", 0.55))
     usable_w = sw - 2 * margin - gap * (col_count - 1)
     col_w = usable_w / col_count
@@ -798,11 +985,12 @@ def _render_agenda(slide, prs, verse: dict, style: dict, theme: dict, *, source_
         col, row = i % col_count, i // col_count
         x = margin + col * (col_w + gap)
         y = list_top + row * row_h
+        badge_y = y + max(0.0, (row_h - badge_h) * 0.12)
         badge = str(item.get("badge") or f"{i + 1:02d}")
         label = str(item.get("label") or item.get("heading") or item.get("text") or "")
-        _draw_index_badge(slide, x, y, badge_w, badge, style)
+        _draw_index_badge(slide, x, badge_y, badge_w, badge, style)
         tb = slide.shapes.add_textbox(
-            Inches(x + badge_w + 0.18), Inches(y + 0.05), Inches(col_w - badge_w - 0.25), Inches(row_h - 0.05)
+            Inches(x + badge_w + 0.22), Inches(y + 0.06), Inches(col_w - badge_w - 0.28), Inches(row_h - 0.08)
         )
         p = tb.text_frame.paragraphs[0]
         _write_body_paragraph(p, label, 16, theme, style=style, alignment=PP_ALIGN.LEFT)
@@ -843,9 +1031,12 @@ def _render_opportunity_cards(slide, prs, verse: dict, style: dict, theme: dict,
     sw, sh = prs.slide_width.inches, prs.slide_height.inches
     margin = float(layout_in(style, "deck_opportunity_cards", "margin_in", 0.65))
     title = str(verse.get("text") or verse.get("headline") or "")
-    _add_title_block(slide, margin, margin, sw * 0.45, title, "", style, theme)
+    title_w = sw * 0.45
+    title_h = _add_title_block(slide, margin, margin, title_w, title, "", style, theme)
     cards = _resolve_items(verse.get("columns") or verse.get("items") or [])
-    col_top = float(layout_in(style, "deck_opportunity_cards", "columns_top_in", 1.25))
+    col_top = _content_top_after_title(
+        margin, title_h, "deck_opportunity_cards", style, min_top_key="columns_top_in", min_default=1.25,
+    )
     gap = float(layout_in(style, "deck_opportunity_cards", "column_gap_in", 0.3))
     img_h = float(layout_in(style, "deck_opportunity_cards", "image_height_in", 1.35))
     count = max(len(cards), 1)
@@ -886,9 +1077,12 @@ def _render_forecast_split(slide, prs, verse: dict, style: dict, theme: dict, *,
     panel_bg = str(style.get("panel_color") or style.get("background_color") or "#F8F9FB")
     _draw_filled_rect(slide, RegionBox(0, 0, sw, top_h), _hex_rgb(panel_bg))
     title = str(verse.get("text") or verse.get("headline") or "")
-    _add_title_block(slide, margin, margin, sw * 0.35, title, "", style, theme)
+    title_w = sw * 0.35
+    title_h = _add_title_block(slide, margin, margin, title_w, title, "", style, theme)
     items = _resolve_items(verse.get("items") or [])
-    col_top = float(layout_in(style, "deck_forecast_split", "items_top_in", 1.15))
+    col_top = _content_top_after_title(
+        margin, title_h, "deck_forecast_split", style, min_top_key="items_top_in", min_default=1.15,
+    )
     gap = float(layout_in(style, "deck_forecast_split", "column_gap_in", 0.35))
     count = max(len(items), 1)
     col_w = (sw - 2 * margin - gap * (count - 1)) / min(count, 3)

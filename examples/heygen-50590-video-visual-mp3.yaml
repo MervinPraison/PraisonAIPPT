@@ -18,67 +18,67 @@ slide_style:
       zoom_ratio: 1.45
       border_color: '#FFFFFF'
       border_width_pt: 2.5
-    list:
-      margin_in: 0.75
 sections:
 - verses:
   - slide_type: big_number
     number: '3'
     label: Dreaming · Outcomes · Webhooks
     reference: AI agents just got a serious upgrade
-    duration_sec: 4.0
+    duration_sec: 4.54
     audio_start_sec: 0.0
     notes: AI agents just got a serious upgrade and it comes down to three things.
     avatar_video_path: examples/heygen-article-50590.mp4
     audio_path: examples/short-script-50590.mp3
-  - slide_type: list
-    reference: 'First: Dreaming — persistent, proactive agents'
-    text: 'Work in the background between sessions — no app left open
-
-      Not just reactive: persistent, proactive agents
-
-      Async memory curation (research preview)
-
-      Reads memory store + up to 100 session transcripts
-
-      Writes merged store; source read-only until you adopt output'
-    duration_sec: 12.94
+  - slide_type: deck_exec_summary
+    color_scheme: exec_grey
+    text: Dreaming
+    reference: First — persistent, proactive agents
+    items:
+    - badge: '01'
+      heading: Background
+      text: Work between sessions — no tab open
+    - badge: '02'
+      heading: Proactive
+      text: Persistent agents, not reactive
+    - badge: '03'
+      heading: Preview
+      text: Async memory curation · research preview
+    duration_sec: 13.66
     audio_start_sec: 4.54
     notes: First, dreaming. Claude agents can now work in the background between sessions
       without you keeping anything open. Persistent, proactive agents, not just reactive
-      ones. Second, outcomes.
+      ones.
     avatar_video_path: examples/heygen-article-50590.mp4
     audio_path: examples/short-script-50590.mp3
-  - slide_type: two_column
-    reference: 'Second: Outcomes — define success, not every step'
-    left: 'Old approach
-
-      Script every step in the workflow
-
-      Brittle when requirements change'
-    right: 'Outcomes (public beta)
-
-      Tell the agent what to achieve
-
-      Rubric-backed iterations with an isolated grader
-
-      satisfied · needs_revision · max_iterations'
+  - slide_type: deck_split_performance
+    color_scheme: split_blue
+    text: Outcomes
+    reference: Second — define success, not every step
+    header: A different way to build
+    rows:
+    - badge: Was
+      text: Script every step in the workflow
+    - badge: Now
+      text: Tell the agent what to achieve · rubric grader
     duration_sec: 8.1
     audio_start_sec: 18.2
     notes: Instead of scripting every step, you tell the agent what to achieve. That's
       a fundamentally different way to build. Third, webhooks.
     avatar_video_path: examples/heygen-article-50590.mp4
     audio_path: examples/short-script-50590.mp3
-  - slide_type: list
-    reference: 'Third: Webhooks — production infrastructure'
-    text: 'Signed HTTPS callbacks on port 443 (public beta)
-
-      session.status_* · thread.* · outcome_evaluation_ended · vault.*
-
-      Notify when agents finish or fail — instantly
-
-      No polling · no guessing · real production hooks'
-    duration_sec: 10.02
+  - slide_type: deck_channel_analysis
+    color_scheme: channel_violet
+    text: Webhooks
+    reference: Third — production infrastructure
+    header: Notify instantly
+    rows:
+    - number: 443
+      label: HTTPS callbacks
+      text: Agent finish or fail — your system knows
+    - number: '0'
+      label: No polling
+      text: Real hooks · no guessing
+    duration_sec: 10.68
     audio_start_sec: 26.3
     notes: When an agent finishes or fails, your system gets notified instantly. No
       polling, no guessing. Real production infrastructure.
@@ -86,42 +86,38 @@ sections:
     audio_path: examples/short-script-50590.mp3
   - slide_type: avatar_quote
     text: How do you actually run AI agents in the real world?
-    reference: Background processing · goal-based evaluation · async notifications
-    duration_sec: 7.3
+    reference: All three answer the same question
+    duration_sec: 7.56
     audio_start_sec: 36.98
     notes: What makes this update interesting isn't any one feature. It's that all
       three together answer the same question.
     avatar_video_path: examples/heygen-article-50590.mp4
     audio_path: examples/short-script-50590.mp3
-  - slide_type: table
-    header_row: true
-    table_rows:
-    - - Capability
-      - Status
-      - What it means
-    - - Dreaming
-      - Research preview
-      - Background memory curation between sessions
-    - - Outcomes
-      - Public beta
-      - Rubric grader · satisfied / needs_revision
-    - - Webhooks
-      - Public beta
-      - Signed HTTPS event callbacks
-    - - Multi-agent orchestration
-      - Public beta
-      - Coordinators delegate to specialists · shared filesystem
-    reference: Code with Claude SF · 6 May 2026
+  - slide_type: deck_product_columns
+    color_scheme: product_lavender
+    text: Production foundation
+    reference: Background · goals · async events
+    columns:
+    - number: '1'
+      label: Dreaming
+      text: Background processing between sessions
+    - number: '2'
+      label: Outcomes
+      text: Goal-based evaluation
+    - number: '3'
+      label: Webhooks
+      text: Async notifications
     duration_sec: 7.34
     audio_start_sec: 44.54
     notes: How do you actually run AI agents in the real world? Background processing,
       goal-based evaluation, async notifications.
     avatar_video_path: examples/heygen-article-50590.mp4
     audio_path: examples/short-script-50590.mp3
-  - slide_type: avatar_headline
-    headline: Foundation, not a demo
-    subheader: Read the full article online · Managed Agents docs · Request dreaming
-      access for your organisation
+  - slide_type: deck_thank_you
+    color_scheme: thank_you_blue
+    text: THANK
+    reference: YOU
+    contact: claude.com/blog/new-in-claude-managed-agents
     duration_sec: 5.05
     audio_start_sec: 51.88
     notes: That's a foundation, not a demo. Read the full piece online.
@@ -130,13 +126,13 @@ sections:
 slide_timestamps:
 - 0.0
 - 3.0
-- 7.0
-- 19.94
-- 28.04
-- 38.06
-- 45.36
-- 52.7
-- 57.75
+- 7.54
+- 21.2
+- 28.3
+- 38.98
+- 46.54
+- 53.88
+- 58.93
 video_export:
   backend: compositor
   preset: standard

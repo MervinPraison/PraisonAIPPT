@@ -34,6 +34,7 @@ from .ffmpeg_composer import (
     render_slide_segment,
 )
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
+from .exceptions import SchemaError
 from .utils import resolve_asset_path
 
 logger = logging.getLogger(__name__)
@@ -74,14 +75,24 @@ class VideoOptions:
     slide_cache: bool = True
 
     def validate(self) -> None:
-        if self.backend not in ("compositor", "auto", "powerpoint", "aspose_frames"):
-            raise ValueError(f"Invalid video backend: {self.backend}")
-        if self.narration_mode not in (
-            "fixed", "audio_file", "avatar", "tts", "auto",
-        ):
-            raise ValueError(f"Invalid narration_mode: {self.narration_mode}")
-        if self.avatar_timeline not in ("per_slide", "continuous", "auto"):
-            raise ValueError(f"Invalid avatar_timeline: {self.avatar_timeline}")
+        from .yaml_validate import validate_video_export
+
+        try:
+            validate_video_export({
+                "backend": self.backend,
+                "narration_mode": self.narration_mode,
+                "preset": self.preset,
+                "avatar_timeline": self.avatar_timeline,
+                "avatar": {
+                    "fit": self.avatar_fit,
+                    "shape": self.avatar_shape,
+                    "crop_y_ratio": self.avatar_crop_y_ratio,
+                    "zoom_ratio": self.avatar_zoom_ratio,
+                    "loop_if_shorter": self.loop_avatar_if_shorter,
+                },
+            })
+        except SchemaError as exc:
+            raise ValueError(str(exc)) from exc
 
     def __post_init__(self) -> None:
         if self.preset in _PRESETS:
@@ -151,6 +162,9 @@ class VideoOptions:
         if ts:
             opts._slide_timestamps = list(ts)  # type: ignore[attr-defined]
         _merge_slide_style_pip(opts, deck.get("slide_style") or {})
+        from .yaml_validate import validate_video_export
+
+        validate_video_export(raw)
         opts.validate()
         return opts
 
@@ -214,6 +228,8 @@ class SlideVideoEntry:
     media_fit: str = "contain"
     avatar_shape: Optional[str] = None
     skip_media_overlay: bool = False
+    avatar_crop_y_ratio: Optional[float] = None
+    avatar_zoom_ratio: Optional[float] = None
     avatar_box_px: Optional[dict] = None
     media_box_px: Optional[dict] = None
     text_panel_px: Optional[dict] = None
@@ -412,7 +428,10 @@ def build_video_manifest(
                 entry.avatar_box_px = _box_px(
                     regions.get("avatar"), slide_w_in, slide_h_in, options.width, options.height
                 )
-                entry.avatar_shape = deck_avatar_shape(slide_type, style, options.avatar_shape)
+                av_region = regions.get("avatar")
+                entry.avatar_shape = deck_avatar_shape(
+                    slide_type, style, options.avatar_shape, box=av_region, verse=verse,
+                )
                 if deck_skips_media_overlay(slide_type):
                     entry.skip_media_overlay = True
                 else:
@@ -435,6 +454,19 @@ def build_video_manifest(
                     entry.avatar_shape = "rect"
                 else:
                     entry.avatar_shape = "circle"
+
+        if entry.avatar_video_path and entry.avatar_box_px:
+            from .avatar_layouts import avatar_framing
+            from .deck_slides import DECK_SLIDE_TYPES
+
+            framing_kind = (
+                slide_type
+                if slide_type in AVATAR_SLIDE_TYPES or slide_type in DECK_SLIDE_TYPES
+                else "pip"
+            )
+            crop, zoom = avatar_framing(style, framing_kind)
+            entry.avatar_crop_y_ratio = crop
+            entry.avatar_zoom_ratio = zoom
 
         entries.append(entry)
     return entries
@@ -747,6 +779,16 @@ def _overlays_for_entry(
         if p:
             box = entry.avatar_box_px
             shape = entry.avatar_shape or options.avatar_shape
+            crop_y = (
+                entry.avatar_crop_y_ratio
+                if entry.avatar_crop_y_ratio is not None
+                else options.avatar_crop_y_ratio
+            )
+            zoom = (
+                entry.avatar_zoom_ratio
+                if entry.avatar_zoom_ratio is not None
+                else options.avatar_zoom_ratio
+            )
             overlays.append(
                 OverlaySpec(
                     path=p,
@@ -757,8 +799,8 @@ def _overlays_for_entry(
                     is_video=True,
                     fit=options.avatar_fit,
                     shape=shape,
-                    crop_y_ratio=options.avatar_crop_y_ratio,
-                    zoom_ratio=options.avatar_zoom_ratio,
+                    crop_y_ratio=crop_y,
+                    zoom_ratio=zoom,
                 )
             )
         else:

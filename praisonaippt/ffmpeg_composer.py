@@ -196,6 +196,34 @@ def pdf_to_png_pages(
     return [str(p) for p in pages]
 
 
+def pdf_to_jpeg_pages(
+    pdf_path: str,
+    out_dir: Path,
+    dpi: int = 192,
+    *,
+    jpeg_quality: int = 90,
+    first_page: Optional[int] = None,
+    last_page: Optional[int] = None,
+) -> List[str]:
+    """Rasterise each PDF page to JPEG via pdftoppm (Poppler)."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    prefix = out_dir / "slide"
+    quality = max(1, min(int(jpeg_quality), 100))
+    cmd = ["pdftoppm", "-jpeg", "-r", str(dpi), "-jpegopt", f"quality={quality}"]
+    if first_page is not None:
+        cmd.extend(["-f", str(first_page)])
+    if last_page is not None:
+        cmd.extend(["-l", str(last_page)])
+    cmd.extend([str(pdf_path), str(prefix)])
+    proc = _run(cmd, timeout=600)
+    if proc.returncode != 0:
+        raise RuntimeError(f"pdftoppm failed: {proc.stderr}")
+    pages = sorted(out_dir.glob("slide-*.jpg"))
+    if not pages:
+        pages = sorted(out_dir.glob("slide*.jpg"))
+    return [str(p) for p in pages]
+
+
 @dataclass
 class OverlaySpec:
     path: str

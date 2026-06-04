@@ -67,6 +67,7 @@ _VERSE_KEYS = {
     "table_rows",
     "rows",
     "header_row",
+    "avatar_shape",
     "avatar_video_path",
     "avatar_poster_path",
     "media_path",
@@ -116,6 +117,10 @@ def validate_verses(data: Any) -> Dict[str, Any]:
 
     _warn_unknown(data.keys(), _TOP_LEVEL_KEYS, "top-level")
 
+    from .yaml_validate import validate_deck_options
+
+    validate_deck_options(data)
+
     sections = data.get("sections")
     if sections is None:
         data["sections"] = []
@@ -144,7 +149,9 @@ def validate_verses(data: Any) -> Dict[str, Any]:
             )
             path = f"sections[{s_idx}].verses[{v_idx}]"
             from .slide_renderers import validate_verse
+            from .yaml_validate import validate_verse_options
 
             validate_verse(verse, path)
+            validate_verse_options(verse, path)
 
     return data
