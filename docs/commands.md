@@ -403,6 +403,8 @@ praisonaippt -i "my verses.yaml" -o "my presentation.pptx"
 
 ## Video, avatar, and HeyGen commands
 
+**Feature overview:** [Recent features](recent-features.md)
+
 Full behaviour: [Video export](video-export.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md)
 
 ### Video export
@@ -453,6 +455,7 @@ praisonaippt calibrate-avatar deck.yaml --write   # persist crop_x into YAML
 | `--force` | Ignore `.praisonaippt/avatar-framing/` cache |
 | `--write` | Write calibrated `crop_x` into deck YAML |
 | `--seek-times` | Comma-separated probe times (seconds) |
+| `--validation-image` | Save annotated centring diagram PNG (optional path) |
 
 ### Face centre probe
 

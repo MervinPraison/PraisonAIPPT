@@ -4,7 +4,7 @@ PraisonAIPPT can export presentations to MP4 on **Mac and Linux** using a **comp
 backend: LibreOffice rasterises slides to PNG, then FFmpeg overlays avatar and media
 regions using geometry from `avatar_layouts` and `deck_slides`.
 
-**Related docs:** [Layouts overview](layouts-overview.md) · [Avatar layouts & PiP](avatar-layouts.md) · [Deck layouts](deck-layouts.md) · [YAML deck reference](yaml-reference.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md) · [Commands](commands.md#video-avatar-and-heygen-commands)
+**Related docs:** [Recent features](recent-features.md) · [Layouts overview](layouts-overview.md) · [Avatar layouts & PiP](avatar-layouts.md) · [Deck layouts](deck-layouts.md) · [YAML deck reference](yaml-reference.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md) · [Commands](commands.md#video-avatar-and-heygen-commands)
 
 PowerPoint `CreateVideo` (Windows, on-prem) is **Phase 3** and not implemented in v1.
 

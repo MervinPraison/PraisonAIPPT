@@ -295,6 +295,10 @@ presentations/
     └── spanish/
 ```
 
+## Recent video and HeyGen features
+
+Overview of all new capabilities: **[Recent features](recent-features.md)** (narration sources, PiP calibration, validation diagrams, slide JPEGs).
+
 ## HeyGen article deck (50590)
 
 Full walkthrough: **[HeyGen article examples](heygen-examples.md)**.

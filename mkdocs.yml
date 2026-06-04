@@ -49,6 +49,7 @@ nav:
   - Getting started:
       - Installation: installation.md
       - Quick start: quickstart.md
+      - Recent features: recent-features.md
       - Examples: examples.md
   - Layouts & styling:
       - Overview: layouts-overview.md

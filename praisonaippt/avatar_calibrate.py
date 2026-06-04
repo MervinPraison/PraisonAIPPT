@@ -245,7 +245,7 @@ def _pip_metrics_at_seek(
     )
 
 
-def _iter_crop_y_values(centre: float, *, radius: float = 0.04, step: float = 0.01) -> List[float]:
+def _iter_crop_y_values(centre: float, *, radius: float = 0.06, step: float = 0.01) -> List[float]:
     lo = max(0.0, centre - radius)
     hi = min(0.14, centre + radius)
     values: List[float] = []

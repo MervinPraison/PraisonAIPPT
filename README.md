@@ -770,6 +770,23 @@ Upload presentations directly to Google Drive with service account authenticatio
 
 **Full Documentation**: [`docs/google-drive-upload.md`](docs/google-drive-upload.md) | [`QUICKSTART_GDRIVE.md`](QUICKSTART_GDRIVE.md)
 
+### Video export, HeyGen decks, and PiP calibration
+
+- **MP4 export** — compositor backend (FFmpeg + LibreOffice); avatar PiP overlays  
+- **Narration sources** — HeyGen MP4 audio (default), external MP3, or TTS (`audio_source` / `narration_mode`)  
+- **HeyGen 50590 examples** — five media variants from one content YAML  
+- **Avatar calibration** — hybrid face detect; auto `crop_x` / `crop_y`  
+- **Validation diagram** — `pip-face-centre --validation-image` (L/R/T/B pixel gaps)  
+- **Slide JPEGs** — `build-slide-images` and `slide_images_dir`  
+
+```bash
+pip install praisonaippt[avatar-calibrate]
+praisonaippt -i examples/heygen-50590-video-audio-heygen.yaml -o deck.pptx --convert-video
+praisonaippt pip-face-centre -i deck.yaml --validation-image validation.png
+```
+
+**Documentation**: [`docs/recent-features.md`](docs/recent-features.md) · [MkDocs site](https://ppt.praison.ai)
+
 ### Text Highlighting
 
 Highlight specific words or phrases in your verses.

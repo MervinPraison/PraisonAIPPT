@@ -2,6 +2,8 @@
 
 End-to-end workflow for a HeyGen talking-head video, Whisper transcript timing, slide deck layouts, PiP calibration, and five **media variant** MP4 exports.
 
+**Overview of all new video/PiP features:** [Recent features](recent-features.md).
+
 Repository paths are under `examples/` in the [PraisonAIPPT](https://github.com/MervinPraison/PraisonAIPPT) repo.
 
 ## Workflow overview

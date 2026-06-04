@@ -65,6 +65,8 @@ Uses the same LibreOffice → PDF → image pipeline as [video export](video-exp
 
 ## Related
 
+- [Recent features](recent-features.md)
 - [HeyGen examples](heygen-examples.md)
 - [Video export](video-export.md)
+- [Avatar PiP calibration](avatar-calibration.md)
 - [Commands reference](commands.md#video-avatar-and-heygen-commands)

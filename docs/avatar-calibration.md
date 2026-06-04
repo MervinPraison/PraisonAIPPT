@@ -62,6 +62,19 @@ The PNG shows:
 
 Omit the path after `--validation-image` to write `{probe}_pip_validation.png` beside the probe frame.
 
+### Reading the diagram / SDK
+
+CLI output includes `centred: yes/no` and **adjust** hints from `centring_advice()`:
+
+| Symptom on diagram | Meaning | Move |
+|--------------------|---------|------|
+| **L** much larger than **R** | Face too far right | **Increase** `crop_x_ratio` |
+| **R** much larger than **L** | Face too far left | **Decrease** `crop_x_ratio` |
+| **T** much larger than **B** | Face too low | **Decrease** `crop_y_ratio` |
+| **B** much larger than **T** | Face too high | **Increase** `crop_y_ratio` |
+
+When centred, L≈R and T≈B (within ~5% offset). Hybrid calibration optimises the same L/R/T/B symmetry score used in tests (`face_centre_symmetry_score`).
+
 Build the deck as usual; when `avatar_calibration.auto` is true, framing is applied before export:
 
 ```bash
@@ -86,13 +99,13 @@ avatar_calibration:
   # cache_dir: /custom/path
 ```
 
-Results are cached under `.praisonaippt/avatar-framing/` next to your deck YAML.
+Results are cached under `.praisonaippt/avatar-framing/` next to your deck YAML (add `.praisonaippt/` to `.gitignore` — local cache, not source).
 
 ## Methods
 
 | Method | Description |
 |--------|-------------|
-| `hybrid` | MediaPipe (or YuNet) face centre → seed, then narrow balance refine near `crop_x_preferred` (**default**) |
+| `hybrid` | MediaPipe face seed → **face-centred refine** (minimise L/R/T/B on validation diagram), then `crop_y` refine (**default**) |
 | `balance` | Anchored luminance balance sweep only (no ML); needs no extra packages |
 | `mediapipe` | Face detector only; no balance refine |
 | `fixed` | Use `crop_x_preferred` from YAML |

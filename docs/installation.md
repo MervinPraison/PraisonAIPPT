@@ -54,12 +54,14 @@ MP4 export uses **FFmpeg**, **LibreOffice**, and **poppler** on the system PATH 
 # TTS narration (edge-tts)
 pip install praisonaippt[video-tts]
 
-# Auto PiP face centre (MediaPipe + OpenCV)
+# Auto PiP face centre (MediaPipe + OpenCV; mediapipe requires Python >= 3.8)
 pip install praisonaippt[avatar-calibrate]
 
-# YOLO face detector (AGPL-3.0; hard angles only)
+# YOLO face detector (AGPL-3.0; hard angles only; Python >= 3.8)
 pip install praisonaippt[avatar-calibrate-yolo]
 ```
+
+See [Recent features](recent-features.md) and [Avatar PiP calibration](avatar-calibration.md) for CLI and validation diagram usage.
 
 macOS example:
 

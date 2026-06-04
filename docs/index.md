@@ -25,8 +25,14 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 - 📄 **PDF Conversion** - Convert presentations to PDF with multiple backends
 - 🔄 **Multiple PDF Backends** - Support for Aspose.Slides and LibreOffice
 - ⚙️ **Advanced PDF Options** - Quality settings, password protection, and more
-- 🎬 **Video export** - PPTX → MP4 with avatar PiP and HeyGen timing
-- 📐 **Layout reference** - Standard, avatar, and `deck_*` slide types with full `slide_style` tokens
+- 🎬 **Video export** — PPTX → MP4 with avatar PiP and HeyGen timing
+- 🎙️ **Flexible narration** — HeyGen MP4 audio (default), external MP3, or TTS
+- 🎯 **PiP calibration** — hybrid face detect + validation diagram (`pip-face-centre`)
+- 🖼️ **Slide JPEG export** — `slide_images_dir` and `build-slide-images`
+- 📐 **Layout reference** — standard, avatar, and `deck_*` slide types with full `slide_style` tokens
+
+!!! tip "New in recent releases"
+    See **[Recent features](recent-features.md)** for HeyGen variants, `audio_source`, validation PNGs, and calibration SDK.
 
 ## Layout and video documentation
 
@@ -195,6 +201,7 @@ The package creates a PowerPoint presentation with:
 - [Python API Documentation](python-api.md)
 - [PDF Conversion Guide](pdf-conversion.md)
 - [Examples and Templates](examples.md)
+- [Recent features](recent-features.md)
 - [HeyGen article examples](heygen-examples.md)
 
 ## 📞 Support

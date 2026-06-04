@@ -764,4 +764,83 @@ The CLI falls back automatically to Google Drive API for PDF conversion when Lib
 
 ---
 
+## Video export and avatar calibration
+
+### Deck → MP4
+
+```python
+from praisonaippt import load_verses_from_file, convert_deck_to_video, VideoOptions
+
+data = load_verses_from_file("deck.yaml")
+opts = VideoOptions.from_dict(data.get("video_export"), data)
+convert_deck_to_video(data, "deck.pptx", video_options=opts, output_path="deck.mp4")
+```
+
+`video_export.narration_mode` and optional `audio_source` (`heygen_video`, `external`, `tts`) control which audio track is muxed. See [Video export](video-export.md).
+
+### Auto-calibration before build
+
+```python
+from praisonaippt import maybe_auto_calibrate_deck, calibrate_deck_avatars
+
+data = load_verses_from_file("deck.yaml")
+data = maybe_auto_calibrate_deck(data, source_file="deck.yaml")
+# slide_style.layouts.pip now has crop_x_ratio / crop_y_ratio from cache or fresh run
+
+results = calibrate_deck_avatars(data, force=True, source_file="deck.yaml")
+primary = next(iter(results.values()))
+print(primary.crop_x_ratio, primary.crop_y_ratio, primary.method)
+```
+
+Requires `pip install praisonaippt[avatar-calibrate]` for `method: hybrid`. See [Avatar PiP calibration](avatar-calibration.md).
+
+### PiP face measurement and centring advice
+
+```python
+from praisonaippt.pip_face_measure import (
+    measure_pip_video,
+    centring_advice,
+    save_pip_validation_diagram,
+)
+
+metrics, probe_path = measure_pip_video(
+    "heygen-article.mp4",
+    seek_sec=6.0,
+    crop_x=0.545,
+    crop_y=0.07,
+    zoom=1.45,
+    width=461,
+    height=461,
+    shape="circle",
+)
+advice = centring_advice(metrics)
+print(advice.is_centred, advice.summary)
+print("suggested deltas:", advice.crop_x_delta, advice.crop_y_delta)
+
+save_pip_validation_diagram(probe_path, metrics, "validation.png")
+```
+
+| Function | Purpose |
+|----------|---------|
+| `measure_pip_video` | Render PiP probe + return `PipFaceMetrics` |
+| `measure_pip_image` | Metrics on an existing PiP PNG |
+| `centring_advice` | Human-readable move hints (`increase crop_x`, etc.) |
+| `face_centre_symmetry_score` | Lower = better L/R/T/B balance (used in calibration) |
+| `save_pip_validation_diagram` | Annotated PNG with L/R/T/B pixel labels |
+
+### Slide JPEG export
+
+```python
+from praisonaippt import export_pptx_slide_jpegs, SlideImageOptions
+
+export_pptx_slide_jpegs(
+    "deck.pptx",
+    SlideImageOptions(output_dir="slide_images"),
+)
+```
+
+See [Slide JPEG export](slide-images.md) and [Recent features](recent-features.md).
+
+---
+
 **Need help?** [Open an issue on GitHub](https://github.com/MervinPraison/PraisonAIPPT/issues)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "praisonaippt"
-version = "1.4.28"
+version = "1.4.29"
 description = "PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON or YAML format"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -43,14 +43,17 @@ gdrive = [
     "google-api-python-client>=2.80.0",
 ]
 avatar-calibrate = [
-    "mediapipe>=0.10.14",
-    "opencv-python-headless>=4.8",
+    "mediapipe>=0.10.14; python_version>='3.8'",
+    "opencv-python-headless>=4.8; python_version>='3.8'",
     "numpy>=1.20",
     "pillow>=9.0",
 ]
 avatar-calibrate-yolo = [
-    "ultralytics>=8.3",
-    "avatar-calibrate",
+    "ultralytics>=8.3; python_version>='3.8'",
+    "mediapipe>=0.10.14; python_version>='3.8'",
+    "opencv-python-headless>=4.8; python_version>='3.8'",
+    "numpy>=1.20",
+    "pillow>=9.0",
 ]
 all = [
     "aspose.slides>=24.0.0",

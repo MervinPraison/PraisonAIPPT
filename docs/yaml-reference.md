@@ -127,6 +127,26 @@ video_export:
 
 ---
 
+## `avatar_calibration` (PiP framing)
+
+Optional top-level block. When `auto: true`, runs before PPTX/video build and merges `crop_x_ratio` / `crop_y_ratio` into `slide_style.layouts.pip`.
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `auto` | bool | Run calibration when building (default false if block omitted) |
+| `method` | string | `hybrid`, `balance`, `mediapipe`, `fixed`, `yolo` |
+| `crop_x_preferred` | float | Visual anchor (e.g. `0.53`) |
+| `crop_x_window` | `[lo, hi]` | Allowed `crop_x` range |
+| `crop_y_preferred` | float | Default vertical crop |
+| `anchor_weight` | float | Penalty for drifting from `crop_x_preferred` |
+| `detector` | string | `auto`, `mediapipe`, `yunet`, `yolo` |
+| `min_detection_confidence` | float | Face detector threshold |
+| `force` | bool | Ignore cache |
+
+Cache directory: `.praisonaippt/avatar-framing/` beside the deck (gitignored). See [Avatar PiP calibration](avatar-calibration.md).
+
+---
+
 ## HeyGen 50590 workflow
 
 1. Edit `examples/heygen-50590-content.yaml`
