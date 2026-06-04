@@ -296,12 +296,17 @@ def add_quote_slide(prs, text, style=None, reference=None, font_size=None, align
     theme = _resolve_theme(style)
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(slide, style, prs)
+    from .layout_tokens import pip_top_inches
+
     quote_pt = int(font_size or typography_pt(style, "quote_size_pt", 36))
     left, width, width_in, _ = content_box(prs, style, "quote")
-    top_in = float(layout_in(style, "quote", "top_in", 2.0))
-    body_h_in = prs.slide_height.inches - top_in - 1.2
+    slide_h_in = prs.slide_height.inches
+    slide_w_in = prs.slide_width.inches
+    pip_top = pip_top_inches(style, slide_h_in, slide_w_in)
+    top_in = float(layout_in(style, "quote", "top_in", 1.6))
+    body_h_in = max(pip_top - top_in - 0.35, 2.5)
     align = _resolve_alignment(alignment)
-    tb = slide.shapes.add_textbox(left, Inches(top_in), width, Inches(body_h_in * 0.75))
+    tb = slide.shapes.add_textbox(left, Inches(top_in), width, Inches(body_h_in * 0.68))
     tf = tb.text_frame
     tf.word_wrap = True
     tf.vertical_anchor = MSO_ANCHOR.MIDDLE
@@ -309,9 +314,10 @@ def add_quote_slide(prs, text, style=None, reference=None, font_size=None, align
     _write_body_paragraph(p, text, quote_pt, theme, style=style, alignment=align)
     ref_str = (reference or "").strip()
     if ref_str:
-        ref_pt = int(typography_pt(style, "reference_size_pt", 28))
-        ref_y = top_in + body_h_in * 0.78
-        rt = slide.shapes.add_textbox(left, Inches(ref_y), width, Inches(0.7))
+        ref_pt = int(typography_pt(style, "reference_size_pt", 24))
+        ref_y = top_in + body_h_in * 0.72
+        ref_h = max(min(pip_top - ref_y - 0.15, 1.0), 0.55)
+        rt = slide.shapes.add_textbox(left, Inches(ref_y), width, Inches(ref_h))
         rp = rt.text_frame.paragraphs[0]
         rp.text = f"— {ref_str}"
         rp.alignment = align
@@ -776,17 +782,22 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     _apply_slide_background(slide, style, prs)
 
-    ref_position = theme['ref_position']
-    margin_in = float(layout_in(style, 'list', 'margin_in', 0.6))
-    slide_h_in = prs.slide_height.inches
-    content_w_in = content_width_inches(prs, style, 'list', margin_in)
-    list_top_in = float(layout_in(style, 'list', 'list_top_in', 0.35))
-    list_bottom_in = slide_h_in - float(layout_in(style, 'list', 'list_bottom_margin_in', 0.4))
+    from .layout_tokens import pip_top_inches
 
+    ref_position = theme['ref_position']
+    margin_in = float(layout_in(style, 'list', 'margin_in', 0.75))
+    slide_h_in = prs.slide_height.inches
+    slide_w_in = prs.slide_width.inches
+    content_w_in = content_width_inches(prs, style, 'list', margin_in)
+    pip_top = pip_top_inches(style, slide_h_in, slide_w_in)
+    ref_pt = int(typography_pt(style, 'section_title_size_pt', 36) * 0.82)
+    body_pt = int(font_size or typography_pt(style, 'body_size_pt', 28) * 0.88)
+
+    ref_h_in = 0.0
+    list_top_in = 0.75
     if reference and ref_position == 'top':
-        ref_pt = int(typography_pt(style, 'list_ref_top_pt', 26))
         ref_lines = _estimate_text_lines(reference, content_w_in, ref_pt)
-        ref_h_in = min(0.35 + ref_lines * 0.36, 1.2)
+        ref_h_in = min(0.4 + ref_lines * 0.38, 1.4)
         ref_tb = slide.shapes.add_textbox(
             Inches(margin_in), Inches(list_top_in), Inches(content_w_in), Inches(ref_h_in),
         )
@@ -797,19 +808,23 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
         ref_p.alignment = PP_ALIGN.LEFT
         ref_p.font.size = Pt(ref_pt)
         ref_p.font.bold = True
-        ref_p.font.color.rgb = theme['reference']
+        ref_p.font.color.rgb = theme['title']
         if theme['font_name']:
             ref_p.font.name = theme['font_name']
-        list_top_in += ref_h_in + float(layout_in(style, 'list', 'ref_gap_in', 0.12))
-    elif reference:
-        list_bottom_in = float(layout_in(style, 'list', 'list_bottom_reserve_in', 6.0))
+        list_top_in += ref_h_in + float(layout_in(style, 'list', 'ref_gap_in', 0.18))
 
-    list_h_in = max(list_bottom_in - list_top_in, 1.2)
+    item_line_h = body_pt / 72.0 * 0.62
+    list_h_in = max(len(items) * (item_line_h + 0.12), 1.2)
+    block_h = list_h_in + (ref_h_in + 0.18 if reference and ref_position == 'top' else 0)
+    if list_top_in + block_h > pip_top - 0.25:
+        list_top_in = max(0.55, pip_top - block_h - 0.25)
+
     tb = slide.shapes.add_textbox(
         Inches(margin_in), Inches(list_top_in), Inches(content_w_in), Inches(list_h_in),
     )
     tf = tb.text_frame
     tf.word_wrap = True
+    tf.vertical_anchor = MSO_ANCHOR.TOP
     align = _resolve_alignment(alignment)
 
     for idx, item in enumerate(items):
@@ -817,17 +832,18 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
         prefix = f"{idx + 1}. " if list_type == 'numbered' else "\u2022  "
         p.text = prefix + item
         p.alignment = align
-        p.font.size = Pt(font_size)
+        p.font.size = Pt(body_pt)
         p.font.color.rgb = theme['body']
         if theme['font_name']:
             p.font.name = theme['font_name']
-        p.space_after = Pt(10)
+        p.space_after = Pt(12)
+        p.line_spacing = 1.15
 
     if reference and ref_position in ('bottom', 'below'):
         ref_pt = int(typography_pt(style, 'list_ref_bottom_pt', 22))
         ref_lines = _estimate_text_lines(reference, content_w_in, ref_pt)
         ref_h_in = min(0.35 + ref_lines * 0.32, 1.0)
-        ref_y_in = slide_h_in - ref_h_in - float(layout_in(style, 'list', 'ref_bottom_offset_in', 0.35))
+        ref_y_in = min(slide_h_in - ref_h_in - 0.35, pip_top - ref_h_in - 0.15)
         ref_tb = slide.shapes.add_textbox(
             Inches(margin_in), Inches(ref_y_in), Inches(content_w_in), Inches(ref_h_in),
         )
@@ -835,7 +851,7 @@ def add_list_slide(prs, items, reference, list_type='bullet', font_size=32,
         ref_tf.word_wrap = True
         ref_p = ref_tf.paragraphs[0]
         ref_p.text = reference
-        ref_p.alignment = PP_ALIGN.CENTER
+        ref_p.alignment = PP_ALIGN.LEFT
         ref_p.font.size = Pt(ref_pt)
         ref_p.font.color.rgb = theme['reference']
         ref_p.font.italic = True

@@ -16,6 +16,8 @@ from .loader import load_verses_from_file, load_verses_from_dict
 from .template_resolver import list_templates, resolve_template_style, get_template_path
 from .slide_renderers import register_renderer, list_renderers
 from .pdf_converter import convert_pptx_to_pdf, PDFOptions, PDFConverter
+from .video_exporter import VideoOptions, convert_pptx_to_video, convert_deck_to_video, resolve_video_backend
+from .video_sidecar import load_deck_sidecar
 from .lazy_loader import lazy_import, check_optional_dependency, LazyImportError
 from .config import load_config, init_config, Config
 from .pptx_to_json import pptx_to_json
@@ -64,6 +66,11 @@ __all__ = [
     "convert_pptx_to_pdf",
     "PDFConverter",
     "PDFOptions",
+    "VideoOptions",
+    "convert_pptx_to_video",
+    "convert_deck_to_video",
+    "resolve_video_backend",
+    "load_deck_sidecar",
     "lazy_import",
     "check_optional_dependency",
     "LazyImportError",

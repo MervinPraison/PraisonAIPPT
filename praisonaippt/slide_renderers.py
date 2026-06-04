@@ -60,6 +60,20 @@ def _apply_notes(slide, verse: dict) -> None:
     _apply_speaker_notes(slide, verse.get("notes"))
 
 
+def _finish_slide(
+    slide, verse: dict, style: dict, prs, *, source_file: Optional[str] = None,
+) -> None:
+    _apply_notes(slide, verse)
+    if not verse.get("avatar_video_path"):
+        return
+    st = verse.get("slide_type")
+    from .avatar_layouts import AVATAR_SLIDE_TYPES, place_floating_avatar_pip
+
+    if st in AVATAR_SLIDE_TYPES:
+        return
+    place_floating_avatar_pip(slide, verse, style, prs=prs, source_file=source_file)
+
+
 def _column_texts(verse: dict) -> tuple:
     """Parse two column texts from ``columns`` or ``left``/``right`` keys."""
     cols = verse.get("columns")
@@ -109,7 +123,7 @@ class ImageRenderer:
             image_fit=verse.get("image_fit", "contain"),
             source_file=source_file,
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class HebrewRenameRenderer:
@@ -131,7 +145,7 @@ class HebrewRenameRenderer:
             caption=verse.get("text"),
             highlight_color=verse.get("hebrew_highlight_color"),
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class ListRenderer:
@@ -156,7 +170,7 @@ class ListRenderer:
             alignment=verse.get("alignment", style.get("alignment", "left")),
             style=style,
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class TitleOnlyRenderer:
@@ -176,7 +190,7 @@ class TitleOnlyRenderer:
             style=style,
             font_size=verse.get("font_size") or verse.get("reference_font_size"),
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class TwoColumnRenderer:
@@ -201,7 +215,7 @@ class TwoColumnRenderer:
             alignment=verse.get("alignment", style.get("alignment", "left")),
             left_highlights=left_hl, right_highlights=right_hl,
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class ComparisonRenderer:
@@ -224,7 +238,7 @@ class ComparisonRenderer:
             alignment=verse.get("alignment", style.get("alignment", "left")),
             reference=verse.get("reference"),
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class BigNumberRenderer:
@@ -244,7 +258,7 @@ class BigNumberRenderer:
             style=style,
             reference=verse.get("reference"),
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class QuoteRenderer:
@@ -266,7 +280,7 @@ class QuoteRenderer:
             font_size=verse.get("font_size") or body_font_size(style, verse),
             alignment=verse.get("alignment", "center"),
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class PictureTextRenderer:
@@ -299,7 +313,7 @@ class PictureTextRenderer:
             alignment=verse.get("alignment", style.get("alignment", "left")),
             source_file=source_file,
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class TableRenderer:
@@ -320,7 +334,7 @@ class TableRenderer:
             font_size=body_font_size(style, verse),
             header_row=verse.get("header_row", True),
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class VerseRenderer:
@@ -366,7 +380,7 @@ class VerseRenderer:
                 ),
             )
             if i == 0 and notes:
-                _apply_notes(slide, verse)
+                _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 class AvatarKindRenderer:
@@ -395,7 +409,7 @@ class AvatarKindRenderer:
         slide = render_avatar_slide(
             prs, self.kind, verse, style=style, source_file=source_file
         )
-        _apply_notes(slide, verse)
+        _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
 def _register_builtins() -> None:

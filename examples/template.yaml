@@ -155,18 +155,26 @@ sections:
         notes: Remind the congregation of the historical context before reading aloud.
 
   # --- Avatar layouts (optional avatar_video_path + media_path) ----------------
+  # All 13 types (Intro/Outro not included):
   # - slide_type: avatar_only
-  #   avatar_video_path: assets/speaker.mp4
   # - slide_type: media_only
-  #   media_path: assets/background_alt.jpg
+  #     media_path: assets/background_alt.jpg
   # - slide_type: avatar_media_1
-  #   media_path: assets/background_alt.jpg
+  # - slide_type: avatar_media_2
+  # - slide_type: avatar_media_3
+  #     media_path: assets/background_alt.jpg
   # - slide_type: avatar_name_card
-  #   headline: Your Name
-  #   subheader: Your Role
+  #     headline: Your Name
+  #     subheader: Your Role
+  # - slide_type: avatar_headline
   # - slide_type: avatar_quote
-  #   text: Example quote text.
-  #   reference: Author Name
+  #     text: Example quote text.
+  #     reference: Author Name
+  # - slide_type: avatar_border
+  # - slide_type: media_border
+  # - slide_type: avatar_media_border_1
+  # - slide_type: avatar_media_border_2
+  # - slide_type: avatar_media_border_3
 
   - section: Avatar layouts
     verses:

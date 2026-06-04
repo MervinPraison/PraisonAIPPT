@@ -100,8 +100,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "gap_in": 0,
     },
     "avatar_media_3": {
-        "pip_width_ratio": 0.18,
-        "pip_margin_in": 0.35,
+        "pip_width_ratio": 0.14,
+        "pip_margin_in": 0.45,
     },
     "avatar_name_card": {
         "panel_width_ratio": 0.42,
@@ -109,15 +109,31 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "panel_margin_in": 0.35,
     },
     "avatar_headline": {
-        "panel_width_ratio": 0.42,
-        "panel_height_in": 1.1,
-        "panel_margin_in": 0.35,
+        "panel_margin_in": 0.75,
+        "pip_width_ratio": 0.14,
+        "pip_margin_in": 0.45,
     },
     "avatar_quote": {
         "quote_bg_color": "#1E3A5F",
-        "pip_width_ratio": 0.16,
-        "pip_margin_in": 0.35,
-        "top_in": 1.8,
+        "pip_width_ratio": 0.14,
+        "pip_margin_in": 0.45,
+        "margin_in": 0.75,
+        "top_in": 1.4,
+    },
+    "pip": {
+        "width_ratio": 0.14,
+        "margin_in": 0.45,
+        "text_gap_in": 0.35,
+        "shape": "circle",
+        "crop_y_ratio": 0.10,
+        "zoom_ratio": 1.35,
+        "border_color": "#FFFFFF",
+        "border_width_pt": 2.5,
+    },
+    "list": {
+        "margin_in": 0.75,
+        "list_bottom_margin_in": 1.0,
+        "ref_gap_in": 0.18,
     },
     "avatar_border": {
         "border_inset_in": 0.25,
@@ -219,23 +235,66 @@ def content_width_inches(prs, style: dict, kind: str, default_margin_in: Optiona
     if fixed is not None:
         return float(fixed)
     slide_w_in = prs.slide_width.inches
-    natural = slide_w_in - 2 * float(margin_in)
+    reserve = pip_reserve_inches(style, slide_w_in)
+    if reserve and kind == "list":
+        natural = slide_w_in - float(margin_in) - reserve
+    elif reserve:
+        natural = slide_w_in - 2 * float(margin_in) - reserve
+    else:
+        natural = slide_w_in - 2 * float(margin_in)
     if kind in ("verse", "list"):
-        return min(9.0, natural)
-    return natural
+        return min(9.0, max(natural, 5.0))
+    return max(natural, 4.5)
+
+
+def _pip_enabled(style: dict) -> bool:
+    if (style or {}).get("avatar_pip"):
+        return True
+    pip = ((style or {}).get("layouts") or {}).get("pip")
+    return isinstance(pip, dict) and bool(pip)
+
+
+def pip_size_inches(style: dict, slide_w_in: float) -> float:
+    if not _pip_enabled(style):
+        return 0.0
+    ratio = float(layout_in(style, "pip", "width_ratio", 0.14))
+    return slide_w_in * ratio
+
+
+def pip_reserve_inches(style: dict, slide_w_in: float) -> float:
+    """Horizontal space to keep clear for the bottom-right avatar PiP."""
+    if not _pip_enabled(style):
+        return 0.0
+    gap = float(layout_in(style, "pip", "text_gap_in", 0.35))
+    margin = float(layout_in(style, "pip", "margin_in", 0.45))
+    return pip_size_inches(style, slide_w_in) + margin + gap
+
+
+def pip_top_inches(style: dict, slide_h_in: float, slide_w_in: float) -> float:
+    """Top edge (inches) of the PiP region — content should stay above this."""
+    if not _pip_enabled(style):
+        return slide_h_in
+    margin = float(layout_in(style, "pip", "margin_in", 0.45))
+    return slide_h_in - pip_size_inches(style, slide_w_in) - margin
 
 
 def content_box(
     prs, style: dict, kind: str, default_margin_in: Optional[float] = None
 ) -> Tuple[Length, Length, float, float]:
-    """Return (left, width, width_in, margin_in) centred on the slide."""
+    """Return (left, width, width_in, margin_in) centred on the slide (PiP-aware)."""
     margin_in = float(
         layout_in(
             style, kind, "margin_in", default_margin_in if default_margin_in is not None else 0.6
         )
     )
+    slide_w_in = prs.slide_width.inches
     width_in = content_width_inches(prs, style, kind, margin_in)
-    left_in = (prs.slide_width.inches - width_in) / 2
+    reserve = pip_reserve_inches(style, slide_w_in)
+    if reserve:
+        usable_w = slide_w_in - reserve
+        left_in = max(margin_in, (usable_w - width_in) / 2.0)
+    else:
+        left_in = (slide_w_in - width_in) / 2.0
     return Inches(left_in), Inches(width_in), width_in, margin_in
 
 

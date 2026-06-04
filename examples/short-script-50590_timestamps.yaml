@@ -1,0 +1,9 @@
+# Whisper transcript companion — not a presentation deck.
+# Generate decks with: praisonaippt transcript-to-yaml -i examples/short-script-50590_timestamps.json -o examples/heygen-article-50590
+
+presentation_title: Transcript source (50590)
+sections:
+  - section: Meta
+    verses:
+      - reference: heygen-article-50590-short.yaml
+        text: Use transcript-to-yaml to build HeyGen article decks from the JSON file.

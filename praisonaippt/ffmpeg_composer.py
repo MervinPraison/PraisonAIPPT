@@ -1,0 +1,356 @@
+"""FFmpeg / ffprobe helpers for PPTX-to-video export (subprocess, no ffmpeg-python)."""
+
+from __future__ import annotations
+
+import json
+import logging
+import platform
+import shutil
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
+
+_VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".webm", ".mkv"}
+_IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"}
+
+
+@dataclass
+class ToolCheck:
+    name: str
+    found: bool
+    path: Optional[str] = None
+    version: Optional[str] = None
+
+
+def find_binary(name: str) -> Optional[str]:
+    return shutil.which(name)
+
+
+def _run(cmd: List[str], *, timeout: int = 600) -> subprocess.CompletedProcess:
+    logger.debug("Running: %s", " ".join(cmd))
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=False)
+
+
+def probe_tool(name: str, version_args: Optional[List[str]] = None) -> ToolCheck:
+    path = find_binary(name)
+    if not path:
+        return ToolCheck(name=name, found=False)
+    args = [path] + (version_args or ["-version"])
+    proc = _run(args, timeout=15)
+    version = (proc.stdout or proc.stderr or "").splitlines()[0] if proc.returncode == 0 else None
+    return ToolCheck(name=name, found=True, path=path, version=version)
+
+
+def check_video_tools() -> Dict[str, ToolCheck]:
+    from .pdf_converter import PDFConverter
+
+    probe = PDFConverter.__new__(PDFConverter)
+    probe.config = {}
+    probe._available_backends = probe._detect_backends()
+    lo_ok = "libreoffice" in probe._available_backends
+    lo_path = getattr(probe, "_libreoffice_path", None) if lo_ok else None
+    tools = {
+        "ffmpeg": probe_tool("ffmpeg"),
+        "ffprobe": probe_tool("ffprobe"),
+        "pdftoppm": probe_tool("pdftoppm"),
+        "libreoffice": ToolCheck(
+            name="libreoffice",
+            found=lo_ok,
+            path=lo_path,
+            version="available" if lo_ok else None,
+        ),
+    }
+    return tools
+
+
+def print_tool_check_report(tools: Optional[Dict[str, ToolCheck]] = None) -> int:
+    tools = tools or check_video_tools()
+    ok = True
+    for key in ("ffmpeg", "ffprobe", "pdftoppm", "libreoffice"):
+        t = tools[key]
+        status = "OK" if t.found else "MISSING"
+        line = f"  {key}: {status}"
+        if t.path:
+            line += f" ({t.path})"
+        if t.version:
+            line += f" — {t.version[:80]}"
+        print(line)
+        if not t.found:
+            ok = False
+    if not ok:
+        print("\nInstall on macOS: brew install ffmpeg poppler")
+        print("LibreOffice: brew install --cask libreoffice (or use existing install)")
+    return 0 if ok else 1
+
+
+def pick_video_encoder() -> str:
+    """Prefer Apple VideoToolbox on macOS, else libx264."""
+    if platform.system().lower() != "darwin":
+        return "libx264"
+    proc = _run(["ffmpeg", "-hide_banner", "-encoders"], timeout=15)
+    text = proc.stdout or ""
+    if "h264_videotoolbox" in text:
+        return "h264_videotoolbox"
+    return "libx264"
+
+
+def ffprobe_duration(path: str) -> float:
+    proc = _run(
+        [
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "json", path,
+        ],
+        timeout=60,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(f"ffprobe failed for {path}: {proc.stderr}")
+    data = json.loads(proc.stdout or "{}")
+    dur = float(data.get("format", {}).get("duration", 0) or 0)
+    if dur <= 0:
+        raise RuntimeError(f"Could not read duration for {path}")
+    return dur
+
+
+def ffprobe_has_audio(path: str) -> bool:
+    proc = _run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "a",
+            "-show_entries", "stream=codec_type",
+            "-of", "json", path,
+        ],
+        timeout=30,
+    )
+    if proc.returncode != 0:
+        return False
+    streams = json.loads(proc.stdout or "{}").get("streams") or []
+    return len(streams) > 0
+
+
+def ffprobe_media_size(path: str) -> Tuple[int, int]:
+    proc = _run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=width,height",
+            "-of", "json", path,
+        ],
+        timeout=30,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(f"ffprobe size failed for {path}: {proc.stderr}")
+    streams = json.loads(proc.stdout or "{}").get("streams") or []
+    if not streams:
+        raise RuntimeError(f"No video stream for {path}")
+    return int(streams[0]["width"]), int(streams[0]["height"])
+
+
+def is_video_path(path: str) -> bool:
+    return Path(path).suffix.lower() in _VIDEO_EXTS
+
+
+def is_image_path(path: str) -> bool:
+    return Path(path).suffix.lower() in _IMAGE_EXTS
+
+
+def contain_overlay_geometry(
+    path: str, box_w: int, box_h: int, box_x: int, box_y: int,
+) -> Tuple[int, int, int, int]:
+    """Return scale_w, scale_h, overlay_x, overlay_y for contain-fit in a region box."""
+    iw, ih = ffprobe_media_size(path)
+    box_w, box_h = max(2, box_w), max(2, box_h)
+    scale = min(box_w / iw, box_h / ih)
+    sw = max(1, int(round(iw * scale)))
+    sh = max(1, int(round(ih * scale)))
+    ox = box_x + (box_w - sw) // 2
+    oy = box_y + (box_h - sh) // 2
+    return sw, sh, ox, oy
+
+
+def pdf_to_png_pages(
+    pdf_path: str,
+    out_dir: Path,
+    dpi: int = 192,
+    *,
+    first_page: Optional[int] = None,
+    last_page: Optional[int] = None,
+) -> List[str]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    prefix = out_dir / "slide"
+    cmd = ["pdftoppm", "-png", "-r", str(dpi)]
+    if first_page is not None:
+        cmd.extend(["-f", str(first_page)])
+    if last_page is not None:
+        cmd.extend(["-l", str(last_page)])
+    cmd.extend([str(pdf_path), str(prefix)])
+    proc = _run(cmd, timeout=600)
+    if proc.returncode != 0:
+        raise RuntimeError(f"pdftoppm failed: {proc.stderr}")
+    pages = sorted(out_dir.glob("slide-*.png"))
+    if not pages:
+        pages = sorted(out_dir.glob("slide*.png"))
+    return [str(p) for p in pages]
+
+
+@dataclass
+class OverlaySpec:
+    path: str
+    x: int
+    y: int
+    width: int
+    height: int
+    is_video: bool
+    fit: str = "stretch"
+    video_start_sec: float = 0.0
+    loop_video: bool = False
+    shape: str = "rect"
+    crop_y_ratio: float = 0.12
+    zoom_ratio: float = 1.35
+
+
+def _cover_scale_filter(w: int, h: int, *, crop_y_ratio: float, zoom_ratio: float) -> str:
+    zw = max(2, int(round(w * zoom_ratio)))
+    zh = max(2, int(round(h * zoom_ratio)))
+    y_bias = max(0.0, min(float(crop_y_ratio), 0.45))
+    return (
+        f"scale={zw}:{zh}:force_original_aspect_ratio=increase,"
+        f"crop={w}:{h}:(iw-ow)/2:(ih-oh)*{y_bias}"
+    )
+
+
+def _circle_alpha_filter() -> str:
+    return (
+        "format=rgba,"
+        "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
+        "a='if(lte(pow(X-W/2,2)+pow(Y-H/2,2),pow(W/2-2,2)),255,0)'"
+    )
+
+
+def render_slide_segment(
+    base_png: str,
+    duration: float,
+    output: str,
+    *,
+    fps: int = 30,
+    width: int = 1920,
+    height: int = 1080,
+    encoder: Optional[str] = None,
+    overlays: Optional[List[OverlaySpec]] = None,
+    audio_path: Optional[str] = None,
+    audio_start_sec: float = 0.0,
+) -> None:
+    """Render one slide segment MP4 from PNG base + optional overlays + audio."""
+    overlays = overlays or []
+    encoder = encoder or pick_video_encoder()
+    dur = max(duration, 0.1)
+
+    cmd: List[str] = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
+    cmd += ["-loop", "1", "-t", f"{dur:.3f}", "-i", base_png]
+
+    overlay_inputs = []
+    for ov in overlays:
+        if ov.is_video:
+            if ov.loop_video:
+                cmd += ["-stream_loop", "-1"]
+            if ov.video_start_sec > 0:
+                cmd += ["-ss", f"{ov.video_start_sec:.3f}"]
+            cmd += ["-t", f"{dur:.3f}", "-i", ov.path]
+        else:
+            cmd += ["-loop", "1", "-t", f"{dur:.3f}", "-i", ov.path]
+        overlay_inputs.append(ov)
+
+    if audio_path:
+        if audio_start_sec > 0:
+            cmd += ["-ss", f"{audio_start_sec:.3f}"]
+        cmd += ["-i", audio_path]
+    else:
+        cmd += [
+            "-f", "lavfi", "-t", f"{dur:.3f}",
+            "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
+        ]
+
+    filters: List[str] = []
+    base = "[0:v]"
+    filters.append(
+        f"{base}scale={width}:{height}:force_original_aspect_ratio=decrease,"
+        f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps={fps}[v0]"
+    )
+    prev = "v0"
+    for idx, ov in enumerate(overlay_inputs, start=1):
+        w, h = max(2, ov.width), max(2, ov.height)
+        ox, oy = ov.x, ov.y
+        if ov.fit == "cover":
+            scale = _cover_scale_filter(
+                w, h, crop_y_ratio=ov.crop_y_ratio, zoom_ratio=ov.zoom_ratio,
+            )
+        elif ov.fit == "contain":
+            sw, sh, ox, oy = contain_overlay_geometry(ov.path, w, h, ov.x, ov.y)
+            scale = f"scale={sw}:{sh}"
+        else:
+            scale = f"scale={w}:{h}"
+        tag = f"ov{idx}"
+        out = f"v{idx}"
+        chain = scale
+        if str(ov.shape).lower() in ("circle", "round", "rounded"):
+            chain = f"{scale},{_circle_alpha_filter()}"
+        filters.append(f"[{idx}:v]{chain},setsar=1[{tag}]")
+        filters.append(f"[{prev}][{tag}]overlay={ox}:{oy}:format=auto[{out}]")
+        prev = out
+
+    filters.append(f"[{prev}]format=yuv420p[vout]")
+    cmd += ["-filter_complex", ";".join(filters), "-map", "[vout]"]
+
+    audio_idx = 1 + len(overlay_inputs)
+    cmd += ["-map", f"{audio_idx}:a", "-c:a", "aac", "-b:a", "192k", "-shortest"]
+
+    if encoder == "h264_videotoolbox":
+        cmd += ["-c:v", "h264_videotoolbox", "-b:v", "8M"]
+    else:
+        cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p"]
+
+    cmd += ["-t", f"{dur:.3f}", output]
+    proc = _run(cmd, timeout=max(int(dur * 20) + 120, 180))
+    if proc.returncode != 0:
+        raise RuntimeError(f"ffmpeg segment failed: {proc.stderr}")
+
+
+def _concat_list_path(path: str) -> str:
+    """Escape path for ffmpeg concat demuxer."""
+    return Path(path).resolve().as_posix().replace("'", "'\\''")
+
+
+def concat_segments(segment_paths: List[str], output: str) -> None:
+    if not segment_paths:
+        raise RuntimeError("No segments to concat")
+    if len(segment_paths) == 1:
+        shutil.copyfile(segment_paths[0], output)
+        return
+    list_file = Path(output).with_suffix(".concat.txt")
+    lines = [f"file '{_concat_list_path(p)}'" for p in segment_paths]
+    list_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    proc = _run(
+        [
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            "-f", "concat", "-safe", "0", "-i", str(list_file),
+            "-c", "copy", output,
+        ],
+        timeout=600,
+    )
+    if proc.returncode != 0:
+        enc = pick_video_encoder()
+        venc = enc if enc != "h264_videotoolbox" else "libx264"
+        proc = _run(
+            [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-f", "concat", "-safe", "0", "-i", str(list_file),
+                "-c:v", venc, "-c:a", "aac", "-b:a", "192k", output,
+            ],
+            timeout=900,
+        )
+    list_file.unlink(missing_ok=True)
+    if proc.returncode != 0:
+        raise RuntimeError(f"ffmpeg concat failed: {proc.stderr}")

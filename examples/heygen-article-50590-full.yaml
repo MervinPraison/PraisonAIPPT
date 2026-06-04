@@ -1,0 +1,134 @@
+presentation_title: 'AI Agents: A Serious Upgrade'
+presentation_subtitle: ''
+slide_size: widescreen
+sections:
+- section: Article
+  verses:
+  - slide_type: title_only
+    text: 'AI Agents: A Serious Upgrade'
+    duration_sec: 3.0
+  - slide_type: avatar_headline
+    duration_sec: 4.0
+    audio_start_sec: 0.0
+    notes: AI agents just got a serious upgrade and it comes down to three things.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: agents just got a serious upgrade
+  - slide_type: avatar_headline
+    duration_sec: 6.02
+    audio_start_sec: 4.539999961853027
+    notes: First, dreaming. Claude agents can now work in the background between sessions
+      without you
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: work in the background between sessions
+  - slide_type: avatar_headline
+    duration_sec: 3.24
+    audio_start_sec: 10.5600004196167
+    notes: keeping anything open. Persistent, proactive agents,
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: keeping anything open. Persistent, proactive agents,
+  - slide_type: avatar_headline
+    duration_sec: 3.18
+    audio_start_sec: 14.300000190734863
+    notes: not just reactive ones. Second, outcomes.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: reactive ones Second outcomes Instead of
+  - slide_type: avatar_headline
+    duration_sec: 3.64
+    audio_start_sec: 18.200000762939453
+    notes: Instead of scripting every step, you tell the agent what to achieve.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: agent what to achieve That's a
+  - slide_type: avatar_headline
+    duration_sec: 4.26
+    audio_start_sec: 22.040000915527344
+    notes: That's a fundamentally different way to build. Third, webhooks.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: fundamentally different way to build Third
+  - slide_type: avatar_headline
+    duration_sec: 2.42
+    audio_start_sec: 26.299999237060547
+    notes: When an agent finishes or fails,
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: agent finishes or fails your system
+  - slide_type: avatar_headline
+    duration_sec: 3.54
+    audio_start_sec: 29.31999969482422
+    notes: your system gets notified instantly. No polling,
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: your system gets notified instantly No
+  - slide_type: avatar_headline
+    duration_sec: 2.76
+    audio_start_sec: 33.560001373291016
+    notes: no guessing. Real production infrastructure.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: Real production infrastructure What makes this
+  - slide_type: avatar_quote
+    duration_sec: 3.54
+    audio_start_sec: 36.97999954223633
+    notes: What makes this update interesting isn't any one feature.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    text: What makes this update interesting isn't any one feature.
+  - slide_type: avatar_headline
+    duration_sec: 3.34
+    audio_start_sec: 40.939998626708984
+    notes: It's that all three together answer the same question.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    text: It's that all three together answer the same question.
+    headline: all three together answer the same
+  - slide_type: avatar_headline
+    duration_sec: 4.32
+    audio_start_sec: 44.540000915527344
+    notes: How do you actually run AI agents in the real world? Background processing,
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    text: How do you actually run AI agents in the real world? Background processing,
+    headline: you actually run AI agents in
+  - slide_type: avatar_headline
+    duration_sec: 2.64
+    audio_start_sec: 49.2400016784668
+    notes: goal-based evaluation, async notifications.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: goal based evaluation async notifications That's
+  - slide_type: avatar_headline
+    duration_sec: 5.05
+    audio_start_sec: 51.880001068115234
+    notes: That's a foundation, not a demo. Read the full piece online.
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+    headline: full piece online
+slide_timestamps:
+- 0.0
+- 3.0
+- 7.0
+- 13.02
+- 16.26
+- 19.44
+- 23.08
+- 27.34
+- 29.76
+- 33.3
+- 36.06
+- 39.6
+- 42.94
+- 47.26
+- 49.9
+- 54.95
+video_export:
+  backend: compositor
+  preset: standard
+  narration_mode: avatar
+  avatar_timeline: continuous
+  captions:
+    enabled: true

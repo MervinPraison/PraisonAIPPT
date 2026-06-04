@@ -23,3 +23,33 @@ sections:
         highlights:
           - God so loved
           - one and only Son
+
+  - section: Avatar layouts
+    verses:
+      - slide_type: avatar_only
+      - slide_type: media_only
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_1
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_2
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_3
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_name_card
+        headline: Demo Name
+        subheader: Role title
+      - slide_type: avatar_headline
+        headline: Headline
+        subheader: Subheader
+      - slide_type: avatar_quote
+        text: Example quote for layout preview.
+        reference: Author Name
+      - slide_type: avatar_border
+      - slide_type: media_border
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_border_1
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_border_2
+        media_path: assets/background_alt.jpg
+      - slide_type: avatar_media_border_3
+        media_path: assets/background_alt.jpg

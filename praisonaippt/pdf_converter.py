@@ -118,6 +118,24 @@ class PDFConverter:
             if os.path.exists(path):
                 self._libreoffice_path = path
                 return True
+
+        import shutil
+        for name in ("soffice", "libreoffice"):
+            found = shutil.which(name)
+            if not found:
+                continue
+            try:
+                proc = subprocess.run(
+                    [found, "--version"],
+                    capture_output=True,
+                    check=True,
+                    timeout=5,
+                )
+                if proc.returncode == 0:
+                    self._libreoffice_path = found
+                    return True
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+                continue
         
         # Try to find in PATH
         try:

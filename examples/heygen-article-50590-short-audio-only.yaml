@@ -1,0 +1,67 @@
+presentation_title: 'AI Agents: A Serious Upgrade'
+presentation_subtitle: Three pillars for production AI agents
+slide_size: widescreen
+sections:
+- verses:
+  - slide_type: avatar_headline
+    duration_sec: 4.0
+    audio_start_sec: 0.0
+    notes: AI agents just got a serious upgrade and it comes down to three things.
+    headline: Three upgrades for AI agents
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_only
+    duration_sec: 12.94
+    audio_start_sec: 4.54
+    notes: First, dreaming. Claude agents can now work in the background between sessions
+      without you keeping anything open. Persistent, proactive agents, not just reactive
+      ones. Second, outcomes.
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_headline
+    duration_sec: 8.1
+    audio_start_sec: 18.2
+    notes: Instead of scripting every step, you tell the agent what to achieve. That's
+      a fundamentally different way to build. Third, webhooks.
+    headline: Second, outcomes.
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_only
+    duration_sec: 10.02
+    audio_start_sec: 26.3
+    notes: When an agent finishes or fails, your system gets notified instantly. No
+      polling, no guessing. Real production infrastructure.
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_quote
+    duration_sec: 7.3
+    audio_start_sec: 36.98
+    notes: What makes this update interesting isn't any one feature. It's that all
+      three together answer the same question.
+    text: How do you actually run AI agents in the real world?
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_only
+    duration_sec: 7.34
+    audio_start_sec: 44.54
+    notes: How do you actually run AI agents in the real world? Background processing,
+      goal-based evaluation, async notifications.
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_headline
+    duration_sec: 5.05
+    audio_start_sec: 51.88
+    notes: That's a foundation, not a demo. Read the full piece online.
+    headline: Read the full piece online
+    audio_path: examples/short-script-50590.mp3
+slide_timestamps:
+- 0.0
+- 4.0
+- 16.94
+- 25.04
+- 35.06
+- 42.36
+- 49.7
+- 54.75
+video_export:
+  backend: compositor
+  preset: standard
+  narration_mode: audio_file
+  avatar_timeline: continuous
+  slide_duration_sec: 3.0
+  captions:
+    enabled: true

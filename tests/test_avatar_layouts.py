@@ -86,6 +86,23 @@ def test_avatar_quote_has_no_media_region():
     assert regions["avatar"] is not None
 
 
+def test_avatar_headline_uses_pip_not_full_frame():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _slide_regions
+
+    prs = Presentation()
+    regions = _slide_regions(prs, "avatar_headline", {})
+    avatar = regions["avatar"]
+    panel = regions["text_panel"]
+    assert avatar is not None
+    assert panel is not None
+    sw, sh = prs.slide_width.inches, prs.slide_height.inches
+    assert avatar.width_in < sw * 0.25
+    assert avatar.left_in > sw * 0.7
+    assert panel.left_in + panel.width_in <= avatar.left_in + 0.05
+    assert panel.top_in + panel.height_in <= sh - 0.5
+
+
 @pytest.mark.skipif(not IMG.is_file(), reason="sample image missing")
 def test_avatar_layouts_build(tmp_path):
     verses = [{"slide_type": "avatar_only"}]

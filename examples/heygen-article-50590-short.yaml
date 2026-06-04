@@ -1,0 +1,94 @@
+presentation_title: Dreaming, outcomes, and webhooks
+presentation_subtitle: Claude Managed Agents update · May 2026
+slide_size: widescreen
+sections:
+- verses:
+  - slide_type: avatar_headline
+    duration_sec: 4.0
+    audio_start_sec: 0.0
+    notes: AI agents just got a serious upgrade and it comes down to three things.
+    headline: Claude Managed Agents — a serious upgrade
+    subheader: Dreaming · Outcomes · Webhooks — three pillars for production agent
+      stacks
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_headline
+    duration_sec: 12.94
+    audio_start_sec: 4.54
+    notes: First, dreaming. Claude agents can now work in the background between sessions
+      without you keeping anything open. Persistent, proactive agents, not just reactive
+      ones. Second, outcomes.
+    headline: 'First: Dreaming'
+    subheader: Async memory curation (research preview) · Reads a memory store and
+      up to 100 session transcripts · Writes a new store — merged facts, fewer contradictions
+      · Source store stays read-only until you adopt output
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_headline
+    duration_sec: 8.1
+    audio_start_sec: 18.2
+    notes: Instead of scripting every step, you tell the agent what to achieve. That's
+      a fundamentally different way to build. Third, webhooks.
+    headline: 'Second: Outcomes'
+    subheader: Rubric-backed iterations with an isolated grader (public beta) · satisfied
+      / needs_revision / max_iterations · Define success — not every step
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_headline
+    duration_sec: 10.02
+    audio_start_sec: 26.3
+    notes: When an agent finishes or fails, your system gets notified instantly. No
+      polling, no guessing. Real production infrastructure.
+    headline: 'Third: Webhooks'
+    subheader: Signed HTTPS callbacks on port 443 (public beta) · session.status_*,
+      thread.*, outcome_evaluation_ended, vault.* · No polling — notify when agents
+      finish or fail
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_quote
+    duration_sec: 7.3
+    audio_start_sec: 36.98
+    notes: What makes this update interesting isn't any one feature. It's that all
+      three together answer the same question.
+    text: How do you actually run AI agents in the real world?
+    reference: Background processing · goal-based evaluation · async notifications
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_headline
+    duration_sec: 7.34
+    audio_start_sec: 44.54
+    notes: How do you actually run AI agents in the real world? Background processing,
+      goal-based evaluation, async notifications.
+    headline: What changed — 6 May 2026
+    subheader: 'Code with Claude SF · Dreaming: research preview · Outcomes, multi-agent
+      orchestration, webhooks: public beta · Coordinators delegate to specialists
+      with shared filesystem'
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+  - slide_type: avatar_headline
+    duration_sec: 5.05
+    audio_start_sec: 51.88
+    notes: That's a foundation, not a demo. Read the full piece online.
+    headline: Foundation, not a demo
+    subheader: Read the full article online · Managed Agents docs · Request dreaming
+      access for your organisation
+    avatar_video_path: examples/heygen-article-50590.mp4
+    audio_path: examples/short-script-50590.mp3
+slide_timestamps:
+- 0.0
+- 3.0
+- 7.0
+- 19.94
+- 28.04
+- 38.06
+- 45.36
+- 52.7
+- 57.75
+video_export:
+  backend: compositor
+  preset: standard
+  narration_mode: avatar
+  avatar_timeline: continuous
+  slide_duration_sec: 3.0
+  captions:
+    enabled: true

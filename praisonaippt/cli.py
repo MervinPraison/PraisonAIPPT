@@ -8,6 +8,7 @@ import logging
 import sys
 import json
 from pathlib import Path
+from typing import Optional
 from . import __version__
 from .exceptions import SchemaError
 from .loader import load_verses_from_file, get_example_path, list_examples
@@ -16,6 +17,9 @@ from .schema import validate_verses
 from .core import create_presentation
 from .list_slides import print_slide_outline
 from .pdf_converter import PDFOptions, convert_pptx_to_pdf
+from .video_exporter import VideoOptions, convert_pptx_to_video, convert_deck_to_video, resolve_video_backend
+from .video_sidecar import load_deck_sidecar
+from .ffmpeg_composer import check_video_tools, print_tool_check_report, pick_video_encoder
 from .config import load_config, init_config
 
 
@@ -103,6 +107,61 @@ Examples:
         action='store_true',
         help='Convert the generated PowerPoint to PDF'
     )
+
+    parser.add_argument(
+        '--convert-video',
+        action='store_true',
+        help='Convert the generated PowerPoint to MP4 video'
+    )
+
+    parser.add_argument(
+        '--video-output',
+        help='Custom MP4 output filename (auto-generated if not specified)'
+    )
+
+    parser.add_argument(
+        '--video-backend',
+        choices=['compositor', 'auto', 'powerpoint'],
+        default=None,
+        help='Video export backend (default: compositor or video_export.backend in YAML)'
+    )
+
+    parser.add_argument(
+        '--video-preset',
+        choices=['draft', 'standard', 'high', '4k'],
+        default=None,
+        help='Video quality preset (default: standard or video_export.preset in YAML)'
+    )
+
+    parser.add_argument(
+        '--narration-mode',
+        choices=['fixed', 'audio_file', 'avatar', 'tts', 'auto'],
+        default=None,
+        help='Narration timing mode (default: fixed or video_export.narration_mode in YAML)'
+    )
+
+    parser.add_argument(
+        '--video-options',
+        help='Video export options as JSON string'
+    )
+
+    parser.add_argument(
+        '--slide-range',
+        metavar='START-END',
+        help='Export only slides in range (e.g. 1-5)'
+    )
+
+    parser.add_argument(
+        '--keep-temp',
+        action='store_true',
+        help='Keep temporary video export files for debugging'
+    )
+
+    parser.add_argument(
+        '--check',
+        action='store_true',
+        help='Check video export dependencies (use with convert-video)'
+    )
     
     parser.add_argument(
         '--pdf-backend',
@@ -163,8 +222,8 @@ Examples:
     parser.add_argument(
         'command',
         nargs='?',
-        choices=['convert-pdf', 'convert-json', 'convert-yaml', 'list-slides', 'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
-        help='Command to execute (e.g., list-slides, convert-pdf, template, config)'
+        choices=['convert-pdf', 'convert-video', 'convert-json', 'convert-yaml', 'transcript-to-yaml', 'list-slides', 'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials'],
+        help='Command to execute (e.g., list-slides, convert-pdf, convert-video, template, config)'
     )
     
     parser.add_argument(
@@ -222,6 +281,52 @@ Examples:
         help='Do not print slide outline after building a presentation'
     )
 
+    parser.add_argument(
+        '--transcript-mode',
+        choices=['full', 'thematic', 'both'],
+        default=None,
+        help='Deck variant for transcript-to-yaml (default: both when no --variants)',
+    )
+
+    parser.add_argument(
+        '--transcript-audio',
+        metavar='PATH',
+        help='Audio file for silence/emphasis alignment (transcript-to-yaml)',
+    )
+
+    parser.add_argument(
+        '--align',
+        metavar='MODES',
+        help='Comma-separated alignment modes: silence, emphasis, karaoke',
+    )
+
+    parser.add_argument(
+        '--transcript-title',
+        metavar='TEXT',
+        default='AI Agents: A Serious Upgrade',
+        help='Presentation title for transcript-to-yaml',
+    )
+
+    parser.add_argument(
+        '--avatar-video',
+        metavar='PATH',
+        default='examples/heygen-article-50590.mp4',
+        help='Default avatar video path for generated deck',
+    )
+
+    parser.add_argument(
+        '--narration-audio',
+        metavar='PATH',
+        default='examples/short-script-50590.mp3',
+        help='Default narration audio path for generated deck',
+    )
+
+    parser.add_argument(
+        '--variants',
+        metavar='NAMES',
+        help='Comma-separated media variants for transcript-to-yaml (or "all")',
+    )
+
     return parser.parse_args()
 
 
@@ -262,6 +367,37 @@ def parse_pdf_options(options_str: str) -> PDFOptions:
         raise ValueError(f"Invalid JSON in PDF options: {e}")
     except TypeError as e:
         raise ValueError(f"Invalid PDF options: {e}")
+
+
+def parse_video_options(args, data: Optional[dict] = None) -> VideoOptions:
+    """Build VideoOptions from CLI flags, optional JSON, and deck YAML."""
+    opts = VideoOptions()
+    if data and data.get("video_export"):
+        opts = VideoOptions.from_dict(data["video_export"], data)
+    if getattr(args, "video_options", None):
+        opts = VideoOptions.from_dict(json.loads(args.video_options), data)
+    if getattr(args, "video_backend", None) is not None:
+        opts.backend = args.video_backend
+    if getattr(args, "video_preset", None) is not None:
+        opts.preset = args.video_preset
+        if opts.preset in {"draft", "standard", "high", "4k"}:
+            from .video_exporter import _PRESETS
+            p = _PRESETS[opts.preset]
+            opts.width, opts.height, opts.fps, opts.dpi = (
+                p["width"], p["height"], p["fps"], p["dpi"],
+            )
+    if getattr(args, "narration_mode", None) is not None:
+        opts.narration_mode = args.narration_mode
+    if getattr(args, "video_output", None):
+        opts.output_path = args.video_output
+    if getattr(args, "keep_temp", False):
+        opts.keep_temp = True
+    sr = getattr(args, "slide_range", None)
+    if sr:
+        parts = sr.split("-", 1)
+        if len(parts) == 2:
+            opts.slide_range = (int(parts[0]), int(parts[1]))
+    return opts
 
 
 def handle_convert_json_command(args):
@@ -341,6 +477,91 @@ def handle_convert_json_command(args):
         return 1
 
 
+def handle_transcript_to_yaml_command(args):
+    """Generate HeyGen article deck YAML from Whisper transcript JSON."""
+    from .transcript_loader import (
+        generate_decks,
+        generate_media_variants,
+        load_whisper_json,
+        build_deck_yaml,
+        write_deck_yaml,
+        MEDIA_VARIANTS,
+    )
+    from .audio_align import align_deck, write_word_srt
+
+    json_path = args.input_file or args.input
+    if not json_path:
+        print("Error: Whisper JSON required for transcript-to-yaml")
+        print("Usage: praisonaippt transcript-to-yaml -i timestamps.json -o prefix")
+        return 1
+
+    if not Path(json_path).is_file():
+        print(f"Error: File not found: {json_path}")
+        return 1
+
+    out_prefix = args.output or "examples/heygen-article-50590"
+    mode = getattr(args, "transcript_mode", None)
+    align_raw = (getattr(args, "align", None) or "").strip()
+    align_modes = [m.strip() for m in align_raw.split(",") if m.strip()]
+    audio_path = getattr(args, "transcript_audio", None) or getattr(args, "narration_audio", None)
+
+    paths: list = []
+    variants_raw = (getattr(args, "variants", None) or "").strip()
+    if variants_raw:
+        names = list(MEDIA_VARIANTS.keys()) if variants_raw.lower() == "all" else [
+            v.strip() for v in variants_raw.split(",") if v.strip()
+        ]
+        out_dir = Path(out_prefix).parent
+        paths.extend(generate_media_variants(
+            json_path,
+            out_dir,
+            mode="thematic",
+            avatar_video_path=getattr(args, "avatar_video", "examples/heygen-article-50590.mp4"),
+            audio_path=getattr(args, "narration_audio", "examples/short-script-50590.mp3"),
+            presentation_title=getattr(args, "transcript_title", "AI Agents: A Serious Upgrade"),
+            variants=names,
+        ))
+
+    if mode or not variants_raw:
+        deck_mode = mode or "both"
+        paths.extend(generate_decks(
+            json_path,
+            out_prefix,
+            mode=deck_mode,
+            avatar_video_path=getattr(args, "avatar_video", "examples/heygen-article-50590.mp4"),
+            audio_path=getattr(args, "narration_audio", "examples/short-script-50590.mp3"),
+            presentation_title=getattr(args, "transcript_title", "AI Agents: A Serious Upgrade"),
+        ))
+
+    data = load_whisper_json(json_path)
+
+    if align_modes and audio_path and Path(audio_path).is_file():
+        import yaml
+
+        samples = None
+        sr = 16000
+        for p in paths:
+            deck = yaml.safe_load(p.read_text(encoding="utf-8"))
+            align_deck(deck, data, audio_path, align_modes)
+            write_deck_yaml(deck, p)
+            print(f"✓ Aligned {p.name} ({', '.join(align_modes)})")
+        if "karaoke" in align_modes:
+            try:
+                from .audio_align import decode_mono_pcm
+                samples, sr = decode_mono_pcm(audio_path)
+            except Exception:
+                samples = None
+            word_srt = Path(out_prefix).parent / f"{Path(out_prefix).name}-words.srt"
+            write_word_srt(data.words, word_srt, samples=samples, sample_rate=sr)
+            print(f"✓ Word SRT: {word_srt}")
+    elif align_modes:
+        print("Warning: --align ignored; provide --transcript-audio with existing file")
+
+    for p in paths:
+        print(f"✓ Wrote {p}")
+    return 0
+
+
 def handle_convert_yaml_command(args):
     """Handle convert-yaml command: convert verses.json to verses.yaml."""
     if not args.input_file:
@@ -381,6 +602,61 @@ def handle_convert_yaml_command(args):
         return 1
     except Exception as e:
         print(f"Error during YAML conversion: {e}")
+        return 1
+
+
+def handle_convert_video_command(args, data: Optional[dict] = None):
+    """Handle standalone convert-video command or --check preflight."""
+    if getattr(args, "check", False):
+        print("Video export dependency check:")
+        code = print_tool_check_report()
+        enc = pick_video_encoder()
+        print(f"  encoder: {enc}")
+        return code
+
+    if not args.input_file:
+        print("Error: Input file required for convert-video command")
+        print("Usage: praisonaippt convert-video <file.pptx> [--video-output out.mp4]")
+        print("       praisonaippt convert-video --check")
+        return 1
+
+    if not Path(args.input_file).exists():
+        print(f"Error: Input file not found: {args.input_file}")
+        return 1
+
+    if not args.input_file.lower().endswith(('.pptx', '.ppt')):
+        print("Error: Input file must be a PowerPoint presentation")
+        return 1
+
+    if args.video_backend == "powerpoint":
+        print("Error: PowerPoint backend is not implemented (Phase 3, on-prem Windows only)")
+        return 1
+
+    try:
+        if data is None:
+            data = load_deck_sidecar(args.input_file)
+            if data:
+                print(f"Using deck sidecar: {data.get('_source_file')}")
+        opts = parse_video_options(args, data)
+        if args.video_output:
+            video_path = args.video_output
+        else:
+            video_path = opts.output_path or str(Path(args.input_file).with_suffix(".mp4"))
+
+        print(f"Converting {args.input_file} to video...")
+        result = convert_pptx_to_video(
+            args.input_file,
+            video_path,
+            data=data,
+            options=opts,
+        )
+        print(f"✓ Successfully converted to: {result}")
+        srt = Path(result).with_suffix(".srt")
+        if srt.is_file():
+            print(f"✓ Captions sidecar: {srt}")
+        return 0
+    except Exception as e:
+        print(f"Error: {e}")
         return 1
 
 
@@ -981,6 +1257,16 @@ def main():
     if args.command == 'convert-pdf':
         return handle_convert_pdf_command(args)
 
+    # Handle standalone convert-video command
+    if args.command == 'convert-video':
+        return handle_convert_video_command(args)
+
+    if getattr(args, "check", False) and not args.command:
+        print("Video export dependency check:")
+        code = print_tool_check_report()
+        print(f"  encoder: {pick_video_encoder()}")
+        return code
+
     # Handle convert-json command
     if args.command == 'convert-json':
         return handle_convert_json_command(args)
@@ -988,6 +1274,9 @@ def main():
     # Handle convert-yaml command
     if args.command == 'convert-yaml':
         return handle_convert_yaml_command(args)
+
+    if args.command == 'transcript-to-yaml':
+        return handle_transcript_to_yaml_command(args)
 
     if args.command == 'list-slides':
         return handle_list_slides_command(args)
@@ -1102,6 +1391,32 @@ def main():
 
     # Upload PPTX (and PDF if generated) to Google Drive
     handle_gdrive_upload(output_file, args, config, pdf_path=pdf_path)
+
+    # Convert to video if requested (reuse PDF when both flags set)
+    if getattr(args, "convert_video", False):
+        try:
+            if args.video_backend == "powerpoint":
+                print("Error: PowerPoint backend is not implemented (Phase 3, on-prem Windows only)")
+                return 1
+            opts = parse_video_options(args, data)
+            if args.video_output:
+                video_path = args.video_output
+            else:
+                video_path = opts.output_path or str(Path(output_file).with_suffix(".mp4"))
+            print("Converting to video...")
+            result = convert_deck_to_video(
+                data,
+                output_file,
+                video_options=opts,
+                pdf_path=pdf_path,
+                custom_title=args.title,
+            )
+            print(f"✓ Video created: {result}")
+            srt = Path(result).with_suffix(".srt")
+            if srt.is_file():
+                print(f"✓ Captions sidecar: {srt}")
+        except Exception as e:
+            print(f"Warning: Video conversion failed: {e}")
 
     return 0
 

@@ -151,5 +151,9 @@ Thumbs.db
 *.pptx
 *.pdf
 *.png
-
+*.mp3
+*.mp4
+*timestamps.txt
+*timestamps.json
+*.srt
 assets/extracted_images

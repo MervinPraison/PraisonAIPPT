@@ -38,3 +38,11 @@ sections:
         media_path: assets/background_alt.jpg
       - slide_type: avatar_media_border_3
         media_path: assets/background_alt.jpg
+
+video_export:
+  backend: compositor
+  narration_mode: fixed
+  preset: draft
+  slide_duration_sec: 3
+  captions:
+    enabled: false

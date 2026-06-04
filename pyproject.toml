@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "praisonaippt"
-version = "1.4.20"
+version = "1.4.22"
 description = "PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON or YAML format"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -34,6 +34,9 @@ dependencies = [
 [project.optional-dependencies]
 pdf-aspose = ["aspose.slides>=24.0.0"]
 pdf-all = ["aspose.slides>=24.0.0", "psutil>=5.9.0", "tqdm>=4.64.0"]
+video-tts = ["edge-tts>=6.0"]
+video-tts-azure = ["azure-cognitiveservices-speech>=1.32"]
+video-windows = ["pywin32>=306"]
 gdrive = [
     "google-auth>=2.16.0",
     "google-auth-oauthlib>=1.0.0",
@@ -43,6 +46,7 @@ all = [
     "aspose.slides>=24.0.0",
     "psutil>=5.9.0",
     "tqdm>=4.64.0",
+    "edge-tts>=6.0",
     "google-auth>=2.16.0",
     "google-auth-oauthlib>=1.0.0",
     "google-api-python-client>=2.80.0",
@@ -61,7 +65,7 @@ Homepage = "https://github.com/MervinPraison/PraisonAIPPT"
 praisonaippt = "praisonaippt.cli:main"
 
 [tool.setuptools]
-packages = ["praisonaippt", "examples", "templates"]
+packages = ["praisonaippt", "praisonaippt.workers", "examples", "templates"]
 
 [tool.setuptools.package-data]
 examples = ["*.json", "*.yaml", "*.yml"]

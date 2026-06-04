@@ -29,6 +29,8 @@ _TOP_LEVEL_KEYS = {
     # implementation/extension hooks
     "_source",
     "_source_file",
+    "video_export",
+    "slide_timestamps",
 }
 
 _SECTION_KEYS = {"section", "section_subtitle", "verses"}
@@ -72,6 +74,11 @@ _VERSE_KEYS = {
     "media_fit",
     "headline",
     "subheader",
+    "duration_sec",
+    "audio_start_sec",
+    "audio_path",
+    "narration_mode",
+    "sync_mode",
 }
 
 
