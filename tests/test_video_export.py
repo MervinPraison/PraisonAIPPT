@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from pptx import Presentation
+from pptx.util import Inches
 
 from praisonaippt.avatar_layouts import export_slide_regions, region_box_to_pixels
 from praisonaippt.ffmpeg_composer import (
@@ -465,3 +466,68 @@ def test_compose_passes_audio_start(mock_concat, mock_render, tmp_path):
     compose_video(entries, ["a.png"], "out.mp4", VideoOptions(), tmp_path)
     kwargs = mock_render.call_args[1]
     assert kwargs.get("audio_start_sec") == 18.2
+
+
+@pytest.mark.parametrize("slide_type,expect_avatar,expect_rect,skip_media", [
+    ("deck_title_split", True, True, True),
+    ("deck_exec_summary", True, False, True),
+    ("deck_agenda", False, False, True),
+    ("deck_intro_split", False, False, True),
+    ("deck_thank_you", True, True, True),
+])
+def test_manifest_deck_layout_regions(slide_type, expect_avatar, expect_rect, skip_media):
+    from praisonaippt.deck_slides import DECK_SLIDE_TYPES
+
+    assert slide_type in DECK_SLIDE_TYPES
+    verse = {"slide_type": slide_type, "text": "Title"}
+    if slide_type == "deck_exec_summary":
+        verse["items"] = [{"text": "one"}]
+    elif slide_type == "deck_agenda":
+        verse["items"] = ["One"]
+    elif slide_type == "deck_intro_split":
+        verse["reference"] = "Body"
+        verse["media_path"] = "assets/background_alt.jpg"
+    elif slide_type == "deck_thank_you":
+        verse["reference"] = "YOU"
+    if expect_avatar:
+        verse["avatar_video_path"] = "examples/heygen-article-50590.mp4"
+
+    data = {"sections": [{"verses": [verse]}]}
+    prs = Presentation()
+    prs.slide_width = Inches(13.33)
+    prs.slide_height = Inches(7.5)
+    prs.slides.add_slide(prs.slide_layouts[6])
+    prs.slides.add_slide(prs.slide_layouts[6])
+    data["_source_file"] = str(PKG)
+    entries = build_video_manifest(data, prs, VideoOptions(), source_file=str(PKG))
+    content = [e for e in entries if e.slide_role == "content"][0]
+    assert content.slide_type == slide_type
+    if expect_avatar:
+        assert content.avatar_box_px is not None
+        assert content.avatar_box_px["width"] > 0
+        if expect_rect:
+            assert content.avatar_shape == "rect"
+        else:
+            assert content.avatar_shape == "circle"
+    else:
+        assert content.avatar_box_px is None
+    if skip_media:
+        assert content.skip_media_overlay is True
+        assert content.media_box_px is None
+
+
+def test_overlays_skip_baked_deck_media():
+    from praisonaippt.video_exporter import _overlays_for_entry
+
+    entry = SlideVideoEntry(
+        index=0,
+        slide_role="content",
+        slide_type="deck_intro_split",
+        verse={"media_path": "assets/background_alt.jpg"},
+        media_path="assets/background_alt.jpg",
+        media_box_px={"x": 0, "y": 100, "width": 640, "height": 360},
+        skip_media_overlay=True,
+    )
+    overlays = _overlays_for_entry(entry, VideoOptions(), source_file=str(PKG))
+    assert overlays == []
+

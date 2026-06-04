@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Dict, List, Optional, Protocol, runtime_checkable
 
 from .exceptions import SchemaError
+
+logger = logging.getLogger(__name__)
 
 
 @runtime_checkable
@@ -68,8 +71,9 @@ def _finish_slide(
         return
     st = verse.get("slide_type")
     from .avatar_layouts import AVATAR_SLIDE_TYPES, place_floating_avatar_pip
+    from .deck_slides import DECK_SLIDE_TYPES
 
-    if st in AVATAR_SLIDE_TYPES:
+    if st in AVATAR_SLIDE_TYPES or st in DECK_SLIDE_TYPES:
         return
     place_floating_avatar_pip(slide, verse, style, prs=prs, source_file=source_file)
 
@@ -387,7 +391,11 @@ class AvatarKindRenderer:
     """Factory renderer for avatar layout slide types."""
 
     _MEDIA_REQUIRED = frozenset({"media_only", "media_border"})
-    _HEADLINE_REQUIRED = frozenset({"avatar_name_card", "avatar_headline"})
+    _HEADLINE_REQUIRED = frozenset({
+        "avatar_name_card",
+        "avatar_headline",
+        "avatar_headline_full",
+    })
 
     def __init__(self, kind: str) -> None:
         self.kind = kind
@@ -412,8 +420,70 @@ class AvatarKindRenderer:
         _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
+class DeckKindRenderer:
+    """HeyGen-style designed deck layouts."""
+
+    def __init__(self, kind: str) -> None:
+        self.kind = kind
+
+    def validate(self, verse: dict, path: str) -> None:
+        def _require_list(key: str, alt: Optional[str] = None) -> list:
+            raw = verse.get(key) if alt is None else (verse.get(key) or verse.get(alt))
+            if not isinstance(raw, list) or not raw:
+                keys = f"{key!r}" if alt is None else f"{key!r} or {alt!r}"
+                raise SchemaError(f"{path} with slide_type {self.kind!r} requires {keys}")
+            return raw
+
+        def _warn_truncated(items: list, limit: int, label: str) -> None:
+            if len(items) > limit:
+                logger.warning(
+                    "%s with slide_type %r has %d %s; only first %d are rendered",
+                    path, self.kind, len(items), label, limit,
+                )
+
+        if self.kind == "deck_exec_summary":
+            items = _require_list("items")
+            _warn_truncated(items, 3, "items")
+        elif self.kind == "deck_region_grid":
+            data = verse.get("cells") or verse.get("columns")
+            if not isinstance(data, list) or not data:
+                raise SchemaError(
+                    f"{path} with slide_type {self.kind!r} requires 'cells' or 'columns'"
+                )
+            _warn_truncated(data, 4, "cells")
+        elif self.kind in ("deck_product_columns", "deck_customer_segments"):
+            key = "columns"
+            cols = _require_list(key)
+            limit = 4 if self.kind == "deck_product_columns" else 3
+            _warn_truncated(cols, limit, "columns")
+        elif self.kind in ("deck_split_performance", "deck_channel_analysis"):
+            rows = _require_list("rows")
+            for i, row in enumerate(rows):
+                if not isinstance(row, (dict, str)):
+                    raise SchemaError(
+                        f"{path} rows[{i}] must be a mapping or string, got {type(row).__name__}"
+                    )
+        elif self.kind == "deck_agenda":
+            _require_list("items", "agenda")
+        elif self.kind == "deck_opportunity_cards":
+            cards = _require_list("columns", "items")
+            _warn_truncated(cards, 3, "columns")
+        elif self.kind == "deck_forecast_split":
+            items = _require_list("items")
+            _warn_truncated(items, 3, "items")
+        elif not (verse.get("text") or verse.get("headline")):
+            raise SchemaError(f"{path} with slide_type {self.kind!r} requires 'text' or 'headline'")
+
+    def render(self, prs, verse: dict, style: dict, *, source_file: Optional[str] = None) -> None:
+        from .deck_slides import render_deck_slide
+
+        slide = render_deck_slide(prs, self.kind, verse, deck_style=style, source_file=source_file)
+        _apply_notes(slide, verse)
+
+
 def _register_builtins() -> None:
     from .avatar_layouts import AVATAR_SLIDE_TYPES
+    from .deck_slides import DECK_SLIDE_TYPES
 
     renderers = [
         ImageRenderer(),
@@ -429,6 +499,7 @@ def _register_builtins() -> None:
         VerseRenderer(),
     ]
     renderers.extend(AvatarKindRenderer(kind) for kind in AVATAR_SLIDE_TYPES)
+    renderers.extend(DeckKindRenderer(kind) for kind in DECK_SLIDE_TYPES)
     for renderer in renderers:
         register_renderer(renderer)
 

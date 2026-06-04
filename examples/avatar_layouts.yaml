@@ -1,4 +1,4 @@
-# All 13 avatar layout slide types (Intro/Outro not included).
+# All 16 avatar layout slide types (HeyGen-style gallery).
 # Optional: avatar_video_path, avatar_poster_path, media_path, media_poster_path
 #
 # Build:
@@ -26,6 +26,9 @@ sections:
       - slide_type: avatar_headline
         headline: Headline
         subheader: Subheader
+      - slide_type: avatar_headline_full
+        headline: Headline
+        subheader: Subheader
       - slide_type: avatar_quote
         text: Faith comes by hearing, and hearing by the word of God.
         reference: Romans 10:17
@@ -38,6 +41,8 @@ sections:
         media_path: assets/background_alt.jpg
       - slide_type: avatar_media_border_3
         media_path: assets/background_alt.jpg
+      - slide_type: avatar_intro
+      - slide_type: avatar_outro
 
 video_export:
   backend: compositor

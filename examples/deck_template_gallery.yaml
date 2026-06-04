@@ -1,0 +1,203 @@
+# HeyGen-style designed deck gallery — twelve layouts with colour presets.
+# Build PPTX:  praisonaippt -i examples/deck_template_gallery.yaml -o examples/deck_template_gallery.pptx
+# Build MP4:   praisonaippt -i examples/deck_template_gallery.yaml -o examples/deck_template_gallery.pptx --convert-video
+
+presentation_title: Sales deck templates
+presentation_subtitle: HeyGen-style layouts · colour presets
+slide_size: widescreen
+
+sections:
+- section: Designed layouts
+  verses:
+  - slide_type: deck_title_split
+    color_scheme: sales_blue
+    text: SALES REPORT
+    reference: '2040'
+    avatar_video_path: examples/heygen-article-50590.mp4
+    notes: Title split — royal blue, title left, avatar right.
+
+  - slide_type: deck_exec_summary
+    color_scheme: exec_grey
+    text: Executive Summary
+    avatar_video_path: examples/heygen-article-50590.mp4
+    items:
+    - badge: '01'
+      heading: Sustained growth
+      text: Sustained annual growth accompanied by steady revenue increases.
+    - badge: '02'
+      heading: Leading regions
+      text: The leading regions in performance are North America and Europe.
+    - badge: '03'
+      heading: Digital expansion
+      text: Digital sales improved conversion rates and broader customer reach.
+    notes: Three numbered columns with circular avatar top-right.
+
+  - slide_type: deck_split_performance
+    color_scheme: split_blue
+    text: Quarterly Sales Performance
+    header: Revenue By Quarter
+    avatar_video_path: examples/heygen-article-50590.mp4
+    rows:
+    - badge: Q1
+      number: 950 K
+      text: Steady start, supported by enterprise deals
+    - badge: Q2
+      number: 1100 K
+      text: Strongest quarter with major campaign success
+    - badge: Q3
+      number: 1050 K
+      text: Slight slowdown due to supply chain constraints
+    - badge: Q4
+      number: 1100 K
+      text: Year-end rebound with festive promotions
+    notes: Split panel — coloured left with avatar, metrics right.
+
+  - slide_type: deck_region_grid
+    color_scheme: region_navy
+    text: Sales by Region
+    avatar_video_path: examples/heygen-article-50590.mp4
+    cells:
+    - number: 40%
+      label: North America
+      text: Strong enterprise uptake across key accounts
+    - number: 30%
+      label: Europe
+      text: Steady growth in regulated industries
+    - number: 20%
+      label: Asia Pacific
+      text: Expanding partner channel programmes
+    - number: 10%
+      label: Other
+      text: Emerging markets pilot programmes
+    notes: 2×2 region grid with avatar bottom-left PiP.
+
+  - slide_type: deck_product_columns
+    color_scheme: product_lavender
+    text: Top Product Performance
+    reference: Product Revenue Distribution
+    avatar_video_path: examples/heygen-article-50590.mp4
+    columns:
+    - number: 40%
+      label: Product A
+      text: Best-selling item, especially in enterprise sector
+    - number: 20%
+      label: Product B
+      text: Strong mid-market adoption
+    - number: 30%
+      label: Product C
+      text: Fastest-growing SKU this quarter
+    - number: 10%
+      label: Other
+      text: Long-tail catalogue and services
+    notes: Four product columns with avatar top-right.
+
+  - slide_type: deck_channel_analysis
+    color_scheme: channel_violet
+    text: Sales Channel
+    reference: Analysis
+    header: Channel Sales Comparison
+    avatar_video_path: examples/heygen-article-50590.mp4
+    rows:
+    - number: 55%
+      label: Direct Sales
+      text: Impressive results achieved by field teams.
+    - number: 30%
+      label: Online Sales
+      text: Enhanced E-Commerce experience fuels growth.
+    - number: 15%
+      label: Partner Sales
+      text: Potential opportunities for channel expansion and training.
+    notes: Violet split — percent badges on white panel, avatar bottom-left.
+
+  - slide_type: deck_customer_segments
+    color_scheme: segments_sky
+    text: Customer Segments
+    avatar_video_path: examples/heygen-article-50590.mp4
+    columns:
+    - number: 40%
+      label: Enterprise Customers
+      text: Large accounts with multi-year contracts and dedicated support.
+    - number: 20%
+      label: SMB Segment
+      text: Growing mid-market adoption through self-serve channels.
+    - number: 30%
+      label: Retail/Consumers
+      text: Direct-to-consumer sales via online storefronts.
+    notes: Pastel blue — three metric columns, circular avatar top-right.
+
+  - slide_type: deck_thank_you
+    color_scheme: thank_you_blue
+    text: THANK
+    reference: YOU
+    contact: name@company.com
+    avatar_video_path: examples/heygen-article-50590.mp4
+    notes: Thank-you split — dual-tone title, contact bar, avatar right half.
+
+  - slide_type: deck_agenda
+    color_scheme: agenda_periwinkle
+    text: Agenda
+    items:
+    - Introduction
+    - Executive Summary
+    - Quarterly Sales Performance
+    - Sales by Region
+    - Top Product Performance
+    - Sales Channel Analysis
+    - Customer Segments
+    - Opportunities
+    - Forecast
+    - Conclusion & Next Steps
+    notes: Two-column numbered agenda — strings auto-number 01–10.
+
+  - slide_type: deck_intro_split
+    color_scheme: intro_grey
+    text: Introduction
+    reference: >-
+      This presentation provides an overview of our annual sales performance,
+      significant achievements, market insights, and the strategic direction
+      we will pursue moving forward.
+    media_path: assets/background_alt.jpg
+    notes: Top text split — title left, body right; bottom hero image.
+
+  - slide_type: deck_opportunity_cards
+    color_scheme: opportunity_grey
+    text: Opportunities
+    columns:
+    - badge: '01'
+      heading: Emerging Markets
+      text: Robust demand from emerging markets presents significant opportunities.
+      image_path: assets/background_alt.jpg
+    - badge: '02'
+      heading: New Product Launches
+      text: Upcoming product launches are anticipated to enhance our market share.
+      image_path: assets/background_crimson.jpg
+    - badge: '03'
+      heading: Strategic Partnerships
+      text: Partnerships to improve distribution and customer success.
+      image_path: assets/background_alt.jpg
+    notes: Three image cards — badge, photo, heading, description.
+
+  - slide_type: deck_forecast_split
+    color_scheme: forecast_grey
+    text: Forecast
+    items:
+    - badge: '01'
+      text: 18% revenue growth expected for the next fiscal year.
+    - badge: '02'
+      text: 'Projected revenue: Over $5 million.'
+    - badge: '03'
+      text: Expansion through digital sales and new channels.
+    media_path: assets/background_crimson.jpg
+    notes: Top numbered forecast points; bottom hero image.
+
+video_export:
+  backend: compositor
+  narration_mode: fixed
+  preset: draft
+  slide_duration_sec: 4
+  avatar:
+    fit: cover
+    shape: circle
+    zoom_ratio: 1.35
+  captions:
+    enabled: false

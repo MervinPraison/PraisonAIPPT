@@ -79,6 +79,19 @@ _VERSE_KEYS = {
     "audio_path",
     "narration_mode",
     "sync_mode",
+    "color_scheme",
+    "items",
+    "rows",
+    "cells",
+    "header",
+    "map_path",
+    "contact",
+    "email",
+    "agenda",
+    "body",
+    "description",
+    "heading",
+    "badge",
 }
 
 

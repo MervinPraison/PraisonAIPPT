@@ -198,6 +198,8 @@ class SlideVideoEntry:
     avatar_video_path: Optional[str] = None
     media_path: Optional[str] = None
     media_fit: str = "contain"
+    avatar_shape: Optional[str] = None
+    skip_media_overlay: bool = False
     avatar_box_px: Optional[dict] = None
     media_box_px: Optional[dict] = None
     text_panel_px: Optional[dict] = None
@@ -386,11 +388,32 @@ def build_video_manifest(
             entry.text_panel_px = _box_px(
                 panel, slide_w_in, slide_h_in, options.width, options.height
             )
-        elif verse and verse.get("avatar_video_path"):
-            pip = export_floating_pip_box(prs, style)
-            entry.avatar_box_px = _box_px(
-                pip, slide_w_in, slide_h_in, options.width, options.height
-            )
+        else:
+            from .deck_slides import DECK_SLIDE_TYPES, export_deck_slide_regions
+
+            if slide_type in DECK_SLIDE_TYPES:
+                from .deck_slides import deck_avatar_shape, deck_skips_media_overlay
+
+                regions = export_deck_slide_regions(prs, slide_type, style)
+                entry.avatar_box_px = _box_px(
+                    regions.get("avatar"), slide_w_in, slide_h_in, options.width, options.height
+                )
+                entry.avatar_shape = deck_avatar_shape(slide_type, style, options.avatar_shape)
+                if deck_skips_media_overlay(slide_type):
+                    entry.skip_media_overlay = True
+                else:
+                    entry.media_box_px = _box_px(
+                        regions.get("media"), slide_w_in, slide_h_in, options.width, options.height
+                    )
+                panel = regions.get("text_panel") or regions.get("content")
+                entry.text_panel_px = _box_px(
+                    panel, slide_w_in, slide_h_in, options.width, options.height
+                )
+            elif verse and verse.get("avatar_video_path"):
+                pip = export_floating_pip_box(prs, style)
+                entry.avatar_box_px = _box_px(
+                    pip, slide_w_in, slide_h_in, options.width, options.height
+                )
 
         entries.append(entry)
     return entries
@@ -678,8 +701,9 @@ def _overlays_for_entry(
 ) -> List[OverlaySpec]:
     overlays: List[OverlaySpec] = []
     sf = source_file
+    logger = logging.getLogger(__name__)
 
-    if entry.media_box_px and entry.media_path:
+    if entry.media_box_px and entry.media_path and not entry.skip_media_overlay:
         p = _resolve_path(entry.media_path, sf)
         if p:
             box = entry.media_box_px
@@ -694,11 +718,14 @@ def _overlays_for_entry(
                     fit=entry.media_fit,
                 )
             )
+        else:
+            logger.warning("Media overlay skipped; file not found: %s", entry.media_path)
 
     if entry.avatar_box_px and entry.avatar_video_path:
         p = _resolve_path(entry.avatar_video_path, sf)
         if p:
             box = entry.avatar_box_px
+            shape = entry.avatar_shape or options.avatar_shape
             overlays.append(
                 OverlaySpec(
                     path=p,
@@ -708,11 +735,13 @@ def _overlays_for_entry(
                     height=box["height"],
                     is_video=True,
                     fit=options.avatar_fit,
-                    shape=options.avatar_shape,
+                    shape=shape,
                     crop_y_ratio=options.avatar_crop_y_ratio,
                     zoom_ratio=options.avatar_zoom_ratio,
                 )
             )
+        else:
+            logger.warning("Avatar overlay skipped; file not found: %s", entry.avatar_video_path)
     return overlays
 
 

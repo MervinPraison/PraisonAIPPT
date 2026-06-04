@@ -24,7 +24,7 @@ def test_resolve_avatar_renderer(slide_type):
     verse = {"slide_type": slide_type}
     if slide_type in ("media_only", "media_border"):
         verse["media_path"] = "assets/x.jpg"
-    elif slide_type in ("avatar_name_card", "avatar_headline"):
+    elif slide_type in ("avatar_name_card", "avatar_headline", "avatar_headline_full"):
         verse["headline"] = "Title"
     elif slide_type == "avatar_quote":
         verse["text"] = "Quote"
@@ -103,6 +103,59 @@ def test_avatar_headline_uses_pip_not_full_frame():
     assert panel.top_in + panel.height_in <= sh - 0.5
 
 
+def test_avatar_headline_full_uses_full_frame_and_top_panel():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _slide_regions
+
+    prs = Presentation()
+    regions = _slide_regions(prs, "avatar_headline_full", {})
+    avatar = regions["avatar"]
+    panel = regions["text_panel"]
+    sw, sh = prs.slide_width.inches, prs.slide_height.inches
+    assert avatar.width_in >= sw * 0.95
+    assert avatar.height_in >= sh * 0.95
+    assert panel is not None
+    assert panel.top_in < sh * 0.2
+    assert panel.left_in < sw * 0.2
+
+
+def test_avatar_name_card_has_separate_pill_regions():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _slide_regions
+
+    prs = Presentation()
+    regions = _slide_regions(prs, "avatar_name_card", {})
+    name = regions["name_pill"]
+    title = regions["title_pill"]
+    assert name is not None
+    assert title is not None
+    assert name.top_in < title.top_in
+    assert name.left_in == title.left_in
+    assert name.width_in >= title.width_in
+
+
+def test_avatar_intro_has_no_avatar_region():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _slide_regions
+
+    prs = Presentation()
+    regions = _slide_regions(prs, "avatar_intro", {})
+    assert regions["avatar"] is None
+    assert regions["media"] is None
+
+
+def test_avatar_outro_full_frame_avatar():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _slide_regions
+
+    prs = Presentation()
+    regions = _slide_regions(prs, "avatar_outro", {})
+    avatar = regions["avatar"]
+    sw, sh = prs.slide_width.inches, prs.slide_height.inches
+    assert avatar is not None
+    assert avatar.width_in >= sw * 0.95
+
+
 @pytest.mark.skipif(not IMG.is_file(), reason="sample image missing")
 def test_avatar_layouts_build(tmp_path):
     verses = [{"slide_type": "avatar_only"}]
@@ -112,7 +165,7 @@ def test_avatar_layouts_build(tmp_path):
         entry = {"slide_type": kind}
         if kind in ("media_only", "media_border") or kind.startswith("avatar_media"):
             entry["media_path"] = "assets/background_alt.jpg"
-        if kind in ("avatar_name_card", "avatar_headline"):
+        if kind in ("avatar_name_card", "avatar_headline", "avatar_headline_full"):
             entry["headline"] = "Demo"
             entry["subheader"] = "Role"
         if kind == "avatar_quote":

@@ -1,0 +1,7 @@
+# Colour presets for HeyGen-style deck slides (use verse color_scheme: sales_blue, etc.)
+name: deck-sales-blue
+description: Royal blue sales title split palette
+
+slide_style:
+  color_scheme: sales_blue
+  font_name: Calibri
