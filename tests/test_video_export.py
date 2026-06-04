@@ -583,7 +583,7 @@ def test_overlays_skip_baked_deck_avatar():
     entry = SlideVideoEntry(
         index=0,
         slide_role="content",
-        slide_type="deck_thank_you",
+        slide_type="deck_title_split",
         verse={"avatar_video_path": "examples/heygen-article-50590.mp4"},
         avatar_video_path="examples/heygen-article-50590.mp4",
         avatar_box_px={"x": 960, "y": 0, "width": 960, "height": 1080},
@@ -591,6 +591,29 @@ def test_overlays_skip_baked_deck_avatar():
     )
     overlays = _overlays_for_entry(entry, VideoOptions(), source_file=str(PKG))
     assert overlays == []
+
+
+def test_overlays_play_on_deck_thank_you():
+    from praisonaippt.video_exporter import _overlays_for_entry
+
+    entry = SlideVideoEntry(
+        index=7,
+        slide_role="content",
+        slide_type="deck_thank_you",
+        verse={
+            "avatar_video_path": "examples/heygen-article-50590.mp4",
+            "audio_start_sec": 51.88,
+        },
+        avatar_video_path="examples/heygen-article-50590.mp4",
+        avatar_box_px={"x": 960, "y": 0, "width": 960, "height": 1080},
+        skip_avatar_overlay=False,
+        avatar_shape="h_rect",
+    )
+    with patch("pathlib.Path.is_file", return_value=True):
+        overlays = _overlays_for_entry(entry, VideoOptions(), source_file=str(PKG))
+    assert len(overlays) == 1
+    assert overlays[0].is_video
+    assert overlays[0].shape == "h_rect"
 
 
 def test_overlays_skip_baked_deck_media():

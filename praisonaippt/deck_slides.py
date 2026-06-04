@@ -47,8 +47,8 @@ DECK_RECT_AVATAR_TYPES = frozenset({
 DECK_BAKED_MEDIA_TYPES = frozenset(DECK_SLIDE_TYPES)
 
 # Full-panel avatar still is embedded in the PPTX — skip a second FFmpeg avatar layer.
+# ``deck_thank_you`` needs a live overlay so the avatar keeps playing (still-only looks frozen).
 DECK_BAKED_AVATAR_TYPES = frozenset({
-    "deck_thank_you",
     "deck_title_split",
 })
 
@@ -188,11 +188,13 @@ def deck_avatar_shape(
     """Resolve FFmpeg avatar mask from YAML ``avatar_shape`` or layout-aware ``auto``."""
     from .avatar_layouts import resolve_avatar_shape, shape_for_video_overlay
 
+    if kind in DECK_RECT_AVATAR_TYPES:
+        return shape_for_video_overlay("h_rect")
     shape = resolve_avatar_shape(
         style or {}, layout_kind=kind, box=box, verse=verse,
     )
     if str(shape).lower() == "auto":
-        shape = default if kind not in DECK_RECT_AVATAR_TYPES else "h_rect"
+        shape = default
     return shape_for_video_overlay(shape)
 
 

@@ -449,6 +449,7 @@ def build_video_manifest(
                 entry.media_fit = options.media_fit_default
 
         from .deck_slides import (
+            DECK_RECT_AVATAR_TYPES,
             DECK_SLIDE_TYPES,
             deck_avatar_shape,
             deck_skips_avatar_overlay,
@@ -549,7 +550,7 @@ def build_video_manifest(
             entry.avatar_crop_x_ratio = crop_x
             entry.avatar_crop_y_ratio = crop_y
             entry.avatar_zoom_ratio = zoom
-            if overlays.avatar.shape:
+            if overlays.avatar.shape and slide_type not in DECK_RECT_AVATAR_TYPES:
                 entry.avatar_shape = shape
 
         if entry.media_path and entry.media_box_px:

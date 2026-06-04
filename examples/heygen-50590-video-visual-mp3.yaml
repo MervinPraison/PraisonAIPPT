@@ -45,6 +45,9 @@ slide_style:
       border_color: '#FFFFFF'
       border_width_pt: 2.5
       crop_x_ratio: 0.545
+    deck_thank_you:
+      zoom_ratio: 1.0
+      crop_y_ratio: 0.12
 sections:
 - verses:
   - slide_type: big_number

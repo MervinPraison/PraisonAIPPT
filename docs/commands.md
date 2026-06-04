@@ -6,14 +6,50 @@ description: "Complete command-line interface reference for PraisonAI PPT"
 
 # Complete Command Reference
 
-## 📋 Command Overview
+PraisonAI PPT is invoked as **`praisonaippt`**. Deck input may be **`.yaml`**, **`.yml`**, or **`.json`** (same schema). Run `praisonaippt --help` for the latest flag list.
 
-PraisonAI PPT provides a comprehensive command-line interface for creating presentations and converting them to PDF.
+## Command index
 
-### Main Commands
-- `praisonaippt` - Create PowerPoint presentations
-- `praisonaippt convert-pdf` - Convert existing PPTX to PDF
-- `praisonaippt convert-json` - Extract slide content from PPTX to JSON
+| Command | Purpose |
+|---------|---------|
+| *(default)* | Load deck → build PPTX → optional PDF / MP4 / Drive / slide JPEGs |
+| `convert-pdf` | PPTX → PDF |
+| `convert-video` | PPTX → MP4 (sidecar `deck.yaml` / `deck.json` beside PPTX) |
+| `convert-json` | PPTX or YAML → JSON extract |
+| `convert-yaml` | JSON verses file → YAML |
+| `transcript-to-yaml` | Whisper JSON → thematic / HeyGen variant YAML |
+| `list-slides` | Print slide outline from deck or PPTX |
+| `export-slide-jpegs` | Rasterise PPTX slides to JPEGs |
+| `build-slide-images` | Build PPTX (if needed) + export `slide_images_dir` |
+| `calibrate-avatar` | PiP face framing; `--write` updates deck YAML or JSON |
+| `pip-face-centre` | Measure L/R/T/B margins on PiP probe PNG |
+| `pipeline` | Unified sync → gates → build → MP4 → `report.json` |
+| `sync-variants` | Copy content master → HeyGen media variant YAMLs |
+| `plan-slides` | Draft slide plan from transcript JSON |
+| `approve-plan` | Approve plan draft (clears `plan_approval` gate) |
+| `validate-deck` | Gates only (no PPTX / MP4 build) |
+| `transcribe` | Audio → Whisper JSON (requires `whisper` CLI) |
+| `template` | Show resolved theme template style |
+| `config` | Show or edit `~/.praisonaippt/config.yaml` |
+| `setup-oauth` | Google Drive OAuth setup |
+| `setup-credentials` | Service-account credentials setup |
+| `secure-credentials` | Restrict credential file permissions |
+
+**Architecture:** [Pipeline architecture](architecture-pipeline.md) · **HeyGen workflow:** [Video + transcript workflow](workflow-video-transcript-to-deck.md)
+
+## JSON and YAML decks
+
+```bash
+# Same flags for JSON or YAML
+praisonaippt -i examples/job_sickness.json -o out.pptx
+praisonaippt -i examples/heygen-50590-video-audio-heygen.yaml --convert-video
+praisonaippt validate-deck -i deck.json --validate-pip
+praisonaippt calibrate-avatar deck.json --write --force
+```
+
+`calibrate-avatar --write` preserves the file format (`.json` vs `.yaml`). See [Deck reference](yaml-reference.md).
+
+## Main build command (default)
 
 ## 🚀 Basic Commands
 
@@ -401,22 +437,61 @@ praisonaippt -i /full/path/to/verses.yaml -o /full/path/to/output.pptx
 praisonaippt -i "my verses.yaml" -o "my presentation.pptx"
 ```
 
+## Main build flags (default command)
+
+Used with `praisonaippt -i deck.yaml` (or `.json`):
+
+| Flag | Purpose |
+|------|---------|
+| `-i`, `--input` | Deck file (default `verses.yaml`, falls back to `verses.json`) |
+| `-o`, `--output` | Output `.pptx` path |
+| `-t`, `--title` | Override `presentation_title` |
+| `--template` | Theme template (`sermon-dark`, path, or `extends` chain) |
+| `--list-templates` | List built-in / user templates |
+| `--use-example` / `--list-examples` | Built-in example decks |
+| `--convert-pdf` | Also export PDF |
+| `--convert-video` | Also export MP4 |
+| `--video-output` | MP4 path |
+| `--video-preset` | `draft`, `standard`, `high`, `4k` |
+| `--video-backend` | `compositor`, `auto`, `powerpoint` |
+| `--narration-mode` | `fixed`, `audio_file`, `avatar`, `tts`, `auto` |
+| `--video-options` | JSON merged into `video_export` |
+| `--slide-range` | `START-END` (1-based slides in MP4) |
+| `--export-slide-jpegs` | Export `slide_images_dir` JPEGs after build |
+| `--sync-variants` | Sync from `pipeline.content_master` before build |
+| `--seed-timing` | Update verse timings from `pipeline.transcript_path` |
+| `--validate-deck` | Run validation gates only (no build) |
+| `--validate-pip` | PiP face-centre QA (fails build if strict) |
+| `--strict-pip` | All calibration seeks must pass PiP QA |
+| `--strict-post-render` | Fail if post-render MP4 QC fails |
+| `--force` | Force avatar re-calibration (`avatar_calibration.force`) |
+| `--validation-image` | Save PiP centring diagram PNG |
+| `--golden-slide-dir` | Golden JPEG MD5 compare for CI |
+| `--rights-acknowledged` | Pass rights/licensing gate |
+| `--content-master` | Override `pipeline.content_master` |
+| `--transcript-json` | Override transcript path for timing / A-V gates |
+| `--pipeline-report` | Write pipeline-style report JSON on preflight |
+| `--no-list-slides` | Skip slide outline after build |
+| `--no-upload` | Skip Google Drive upload |
+| `-v` / `--verbose` / `-q` | Logging level |
+
 ## Video, avatar, and HeyGen commands
 
 **Feature overview:** [Recent features](recent-features.md)
 
-Full behaviour: [Video export](video-export.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md)
+Full behaviour: [Video export](video-export.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md) · [Pipeline architecture](architecture-pipeline.md)
 
 ### Video export
 
 ```bash
 # Build deck + MP4
 praisonaippt -i deck.yaml -o deck.pptx --convert-video --video-output deck.mp4
+praisonaippt -i deck.json -o deck.pptx --convert-video   # JSON deck — same schema
 
-# PPTX only (loads deck.yaml sidecar for PiP paths when present)
+# PPTX only (loads deck.yaml / deck.json sidecar beside PPTX for PiP paths)
 praisonaippt convert-video deck.pptx --video-output deck.mp4
 
-# Dependency check
+# Dependency check (also: praisonaippt --check with no command)
 praisonaippt convert-video --check
 
 # Override narration
@@ -425,14 +500,14 @@ praisonaippt -i deck.yaml -o deck.pptx --convert-video --narration-mode avatar
 
 | Flag | Values |
 |------|--------|
-| `--convert-video` | Build and export MP4 |
+| `--convert-video` | On main command: build and export MP4 |
 | `--video-output` | Output path |
 | `--video-preset` | `draft`, `standard`, `high`, `4k` |
 | `--narration-mode` | `fixed`, `audio_file`, `avatar`, `tts`, `auto` |
 | `--video-options` | JSON merged into `video_export` |
 | `--slide-range` | `START-END` (1-based) |
-| `--keep-temp` | Keep temp PNG/segments |
-| `--check` | With `convert-video`: preflight tools |
+| `--keep-temp` | With `convert-video`: keep temp PNG/segments |
+| `--check` | With `convert-video`: preflight ffmpeg/LibreOffice tools |
 
 ### Slide JPEG export
 
@@ -447,7 +522,7 @@ praisonaippt -i deck.yaml -o deck.pptx --export-slide-jpegs
 ```bash
 praisonaippt calibrate-avatar examples/heygen-50590-video-audio-heygen.yaml --force
 praisonaippt calibrate-avatar --avatar-video examples/heygen-article-50590.mp4 --seek 6.0
-praisonaippt calibrate-avatar deck.yaml --write   # persist crop_x into YAML
+praisonaippt calibrate-avatar deck.yaml --write   # persist into deck YAML or JSON
 ```
 
 | Flag | Purpose |
@@ -477,33 +552,93 @@ praisonaippt transcript-to-yaml -i timestamps.json -o examples/heygen-article-50
 
 ### Deck pipeline (sync, validate, build, report)
 
+Unified orchestration — see [Pipeline architecture](architecture-pipeline.md).
+
 ```bash
+# Full HeyGen build (recommended for CI)
 praisonaippt pipeline -i examples/heygen-50590-video-audio-heygen.yaml \
   -o examples/heygen-50590-video-audio-heygen.pptx \
-  --convert-video --validate-pip --export-slide-jpegs \
-  --pipeline-report examples/heygen-50590-video-audio-heygen.pipeline-report.json
+  --convert-video \
+  --video-output examples/heygen-50590-video-audio-heygen.mp4 \
+  --validate-pip \
+  --export-slide-jpegs \
+  --pipeline-report examples/.praisonaippt/heygen-50590-video-audio-heygen.pipeline-report.json
 
+# Validate only (no PPTX / MP4) — JSON or YAML
+praisonaippt validate-deck -i deck.json --validate-pip --transcript-json timestamps.json
+
+# Sync five HeyGen variants from content master
 praisonaippt sync-variants -i examples/heygen-50590-content.yaml
-praisonaippt validate-deck -i deck.yaml --transcript-json timestamps.json --validate-pip
-praisonaippt plan-slides -i timestamps.json -o draft.yaml --content-master content.yaml
-praisonaippt transcribe -i narration.mp3 -o timestamps.json
+
+# Plan → approve → sync → build
+praisonaippt plan-slides -i examples/short-script-50590_timestamps.json \
+  -o examples/heygen-50590-draft.yaml \
+  --content-master examples/heygen-50590-content.yaml
+praisonaippt approve-plan -i examples/heygen-50590-draft.yaml
+
+# Whisper transcript (input to plan-slides / pipeline.transcript_path)
+praisonaippt transcribe -i examples/short-script-50590.mp3 \
+  -o examples/short-script-50590_timestamps.json
+
+# Skip PPTX build (gates + MP4 only)
+praisonaippt pipeline -i deck.yaml --skip-build --convert-video
 ```
 
-| Flag / YAML | Purpose |
-|-------------|---------|
-| `pipeline.auto_sync` | Sync variants from `pipeline.content_master` before build |
-| `pipeline.validate_pip` | Fail build if PiP face centre QA fails |
-| `--strict-pip` | Require every calibration seek to pass PiP QA |
+| Command | Builds PPTX | Builds MP4 | Writes `report.json` |
+|---------|-------------|------------|----------------------|
+| `pipeline` | Yes (unless `--skip-build`) | If `--convert-video` | Yes (default under `.praisonaippt/`) |
+| `validate-deck` | No | No | If `--pipeline-report` |
+| Main `-i` + `--validate-deck` | Yes | Optional | If `--pipeline-report` |
+
+| Flag / YAML (`pipeline:`) | Purpose |
+|---------------------------|---------|
+| `content_master` | Master deck for `sync-variants` |
+| `transcript_path` | Whisper JSON for timing / A-V sync |
+| `auto_sync` | Sync variants before build |
+| `variant_prefix` | HeyGen filename prefix (default `heygen-50590`) |
+| `validate_pip` | Run PiP centring gate |
+| `strict_pip` | CLI or YAML: all seeks must pass |
+| `export_mp4` | YAML-only: export MP4 in `pipeline` without CLI flag |
+| `post_render_qc` / `strict_post_render` | ffprobe QC after MP4 |
+| `golden_slide_dir` | Golden JPEG MD5 folder |
+| `require_rights_ack` / `rights_acknowledged` | Rights gate |
+| `content_approved` / `plan_approved` / `plan_draft` | Plan / content gates |
+| `fail_fast` | Stop on first failed gate (default true) |
 | `--sync-variants` | Force variant sync |
-| `--seed-timing` | Refresh `audio_start_sec` / `duration_sec` from transcript |
-| `--validate-deck` | Pre-build validation only |
-| `--golden-slide-dir` | Compare slide JPEG MD5 to golden folder |
-| `--rights-acknowledged` | Pass rights/licensing CI gate |
-| `approve-plan` | Approve `plan-slides` draft before sync |
-| `report.json` → `exit_code` | `0` pass / `1` fail for CI |
-| `report.json` → `gates` | Per-gate validation summary |
+| `--seed-timing` | Refresh verse timings from transcript |
+| `--rights-acknowledged` | CLI override for rights gate |
+| `--pipeline-report` | Report JSON path |
+| `--skip-build` | Pipeline: validate + MP4 only |
 
 See [Video + transcript workflow](workflow-video-transcript-to-deck.md).
+
+### Other utility commands
+
+```bash
+# Slide outline
+praisonaippt list-slides -i deck.yaml
+praisonaippt list-slides deck.pptx
+
+# Theme template preview
+praisonaippt --list-templates
+praisonaippt template sermon-dark
+
+# Config (~/.praisonaippt/config.yaml)
+praisonaippt config
+praisonaippt --config-show
+
+# Google Drive
+praisonaippt setup-oauth
+praisonaippt setup-credentials
+praisonaippt secure-credentials
+```
+
+### Showcase rebuild (examples)
+
+```bash
+python examples/build_showcase_examples.py --heygen-only
+python examples/sync_heygen_variants.py
+```
 
 ## 📚 Related Documentation
 
@@ -511,8 +646,13 @@ See [Video + transcript workflow](workflow-video-transcript-to-deck.md).
 - [Python API Documentation](python-api.md)
 - [PDF Conversion Guide](pdf-conversion.md)
 - [Examples and Templates](examples.md)
+- [Deck reference (YAML or JSON)](yaml-reference.md)
+- [Pipeline architecture](architecture-pipeline.md)
 - [Video export](video-export.md)
+- [Video + transcript workflow](workflow-video-transcript-to-deck.md)
 - [HeyGen article examples](heygen-examples.md)
+- [Avatar PiP calibration](avatar-calibration.md)
+- [Slide JPEG export](slide-images.md)
 
 ---
 

@@ -43,7 +43,9 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 | [Avatar layouts & PiP](avatar-layouts.md) | HeyGen regions, floating PiP, `avatar_timeline` |
 | [Deck layouts](deck-layouts.md) | Twelve `deck_*` sales templates |
 | [Slide style reference](slide-style-reference.md) | Colours, `typography.*`, `layouts.*` |
-| [YAML deck reference](yaml-reference.md) | Top-level keys and `video_export` |
+| [Deck reference (YAML or JSON)](yaml-reference.md) | Top-level keys, `pipeline`, `video_export` |
+| [Pipeline architecture](architecture-pipeline.md) | Modular QA vs build/export, protocols |
+| [Commands](commands.md) | Full CLI reference (all subcommands) |
 | [Video + transcript workflow](workflow-video-transcript-to-deck.md) | End-to-end steps, YAML artefacts, automation plan |
 | [Video export](video-export.md) | Compositor, narration modes, CLI |
 | [HeyGen article examples](heygen-examples.md) | Five media variants, assets, build workflow |
