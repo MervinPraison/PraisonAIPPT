@@ -1,8 +1,10 @@
-# YAML deck reference
+# Deck reference (YAML or JSON)
 
-Quick reference for top-level deck keys, sections, verses, and video export. For layout-specific fields see [Standard slide layouts](slide-layouts.md), [Avatar layouts](avatar-layouts.md), and [Deck layouts](deck-layouts.md).
+Quick reference for top-level deck keys, sections, verses, and video export. Use `.yaml`, `.yml`, or `.json` with the same schema; `praisonaippt -i deck.json` runs the same validation and pipeline as YAML. HeyGen variant outputs remain `.yaml` after `sync-variants`.
 
-Source: `praisonaippt/schema.py`, `praisonaippt/video_exporter.py`.
+For layout-specific fields see [Standard slide layouts](slide-layouts.md), [Avatar layouts](avatar-layouts.md), and [Deck layouts](deck-layouts.md).
+
+Source: `praisonaippt/schema.py`, `praisonaippt/yaml_validate.py`, `praisonaippt/video_exporter.py`, `praisonaippt/deck_pipeline.py`.
 
 ---
 
@@ -19,6 +21,8 @@ Source: `praisonaippt/schema.py`, `praisonaippt/video_exporter.py`.
 | `extends` | optional | Parent template chain |
 | `auto_upload_gdrive` | optional | Upload after build |
 | `video_export` | optional | MP4 compositor options — see [Video export](video-export.md) |
+| `pipeline` | optional | CI gates, sync, and orchestration — see below |
+| `avatar_calibration` | optional | PiP framing — see below |
 | `slide_timestamps` | optional | Wall-clock start (seconds) per slide for video timing |
 
 Keys starting with `x-` are ignored (YAML anchors). Unknown keys log a warning; invalid enum values (e.g. `narration_mode`, `color_scheme`, `layouts.pip.shape`) raise `SchemaError` at load time via `validate_verses()` / `load_verses_from_file()`.
@@ -124,6 +128,36 @@ video_export:
   narration_mode: avatar
   avatar_timeline: auto
 ```
+
+---
+
+## `pipeline` (QA orchestration)
+
+Optional in **YAML or JSON** (same keys). Drives `praisonaippt pipeline` and `validate-deck` (validate-only: no PPTX/MP4). Build and export are separate stages wired via protocols (`pipeline_protocols.py`); defaults call `create_presentation` and `convert_deck_to_video`.
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `content_master` | string | Master YAML for `sync-variants` / drift checks |
+| `transcript_path` | string | Whisper JSON for timing / A-V sync gates |
+| `auto_sync` | bool | Sync variants from master before build |
+| `variant_prefix` | string | Filename prefix for variant YAMLs (default `heygen-50590`) |
+| `validate_pip` | bool | Run PiP centring QA (multi-seek) |
+| `strict_pip` | bool | All calibration seeks must pass |
+| `golden_slide_dir` | string | Golden JPEG directory for slide hash gate |
+| `require_rights_ack` | bool | Block until `rights_acknowledged` |
+| `rights_acknowledged` | bool | Manual rights checklist clearance |
+| `content_approved` | bool | Content sign-off |
+| `plan_approved` / `plan_draft` | bool / string | Plan-slides workflow |
+| `export_mp4` | bool | Export MP4 in `pipeline` command (or use CLI `--convert-video`) |
+| `export_slide_jpegs` | bool | Export slide JPEGs after PPTX |
+| `post_render_qc` | bool | ffprobe post-render checks (default true) |
+| `strict_post_render` | bool | Fail pipeline when post-render QC fails |
+| `fail_fast` | bool | Stop on first failed gate (default true) |
+| `validate_plan` / `validate_rights` | bool | Toggle plan / rights gates |
+| `seed_timing` | bool | Seed `audio_start_sec` from transcript |
+| `report_path` | string | Override `report.json` path |
+
+CLI flags override YAML where both are set. Full gate matrix: [Video → deck workflow](workflow-video-transcript-to-deck.md).
 
 ---
 

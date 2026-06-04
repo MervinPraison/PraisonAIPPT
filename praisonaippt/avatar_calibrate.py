@@ -32,7 +32,7 @@ class CalibrationConfig:
     method: str = "hybrid"
     crop_x_preferred: float = 0.53
     crop_x_window: Tuple[float, float] = (0.50, 0.56)
-    crop_y_preferred: float = 0.03
+    crop_y_preferred: float = 0.02
     anchor_weight: float = 0.15
     detector: str = "auto"
     min_detection_confidence: float = 0.5
@@ -49,7 +49,7 @@ class CalibrationConfig:
             win = (0.50, 0.56)
         crop_y = raw.get("crop_y_preferred")
         if crop_y is None:
-            crop_y = pip.get("crop_y_ratio", 0.03)
+            crop_y = pip.get("crop_y_ratio", 0.02)
         return cls(
             method=str(raw.get("method", "hybrid")).lower(),
             crop_x_preferred=float(raw.get("crop_x_preferred", 0.53)),
@@ -106,9 +106,27 @@ class AvatarFramingResult:
 
 def pip_probe_size_px(style: dict, slide_w_px: int = 1920) -> Tuple[int, int]:
     """Square PiP probe size matching export width_ratio on a 1920px-wide frame."""
-    ratio = float(layout_in(style, "pip", "width_ratio", 0.14))
-    size = max(64, int(round(slide_w_px * ratio)))
-    return size, size
+    pip = ((style or {}).get("layouts") or {}).get("pip") or {}
+    shape = str(pip.get("shape") or pip.get("pip_shape") or "circle").lower()
+    return pip_probe_dims_for_shape(style, shape, slide_w_px=slide_w_px)
+
+
+def pip_probe_dims_for_shape(
+    style: dict,
+    shape: str,
+    *,
+    slide_w_px: int = 1920,
+) -> Tuple[int, int]:
+    """Probe width×height in px for circle, square, rect, h_rect, v_rect (matches compositor)."""
+    pip = ((style or {}).get("layouts") or {}).get("pip") or {}
+    ratio = float(pip.get("width_ratio") or layout_in(style, "pip", "width_ratio", 0.14))
+    w = max(64, int(round(slide_w_px * ratio)))
+    s = str(shape).lower()
+    if s in ("h_rect", "horizontal", "wide"):
+        return w, max(48, int(round(w * 9 / 16)))
+    if s in ("v_rect", "vertical", "tall"):
+        return max(48, int(round(w * 9 / 16))), w
+    return w, w
 
 
 def collect_avatar_seek_samples(data: dict) -> Dict[str, List[float]]:

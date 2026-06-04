@@ -43,7 +43,7 @@ praisonaippt -i examples/${VARIANT}.yaml -o examples/${VARIANT}.pptx \
   --convert-video --video-output examples/${VARIANT}.mp4
 ```
 
-**Docs:** [HeyGen article examples](heygen-examples.md)
+**Docs:** [HeyGen article examples](heygen-examples.md) · [Video + transcript workflow](workflow-video-transcript-to-deck.md) (full pipeline and automation plan)
 
 ---
 

@@ -11,6 +11,49 @@ from .schema import validate_verses
 from .template_resolver import apply_template_layers
 
 
+def deck_file_format(filepath: str | Path) -> str:
+    """Return ``json`` or ``yaml`` from the file suffix (default yaml)."""
+    ext = Path(filepath).suffix.lower()
+    return "json" if ext == ".json" else "yaml"
+
+
+def load_deck_mapping(filepath: str | Path) -> dict:
+    """
+    Parse a deck file to a dict (no template merge or schema validation).
+
+    Use :func:`load_verses_from_file` for full load + validate.
+    """
+    file_path = Path(filepath)
+    with open(file_path, encoding="utf-8") as f:
+        if file_path.suffix.lower() == ".json":
+            data = json.load(f)
+        elif file_path.suffix.lower() in (".yaml", ".yml"):
+            data = yaml.safe_load(f)
+        else:
+            text = f.read()
+            try:
+                data = json.loads(text)
+            except json.JSONDecodeError:
+                data = yaml.safe_load(text)
+    if not isinstance(data, dict):
+        raise ValueError(f"Top level of '{filepath}' must be a mapping")
+    return data
+
+
+def write_deck_mapping(filepath: str | Path, data: dict) -> None:
+    """Write deck dict using JSON or YAML based on the path suffix."""
+    path = Path(filepath)
+    payload = {k: v for k, v in data.items() if not str(k).startswith("_")}
+    if path.suffix.lower() == ".json":
+        text = json.dumps(payload, indent=2, ensure_ascii=False)
+        path.write_text(text + "\n", encoding="utf-8")
+    else:
+        path.write_text(
+            yaml.dump(payload, allow_unicode=True, sort_keys=False, default_flow_style=False),
+            encoding="utf-8",
+        )
+
+
 def load_verses_from_file(filepath, template=None):
     """
     Load verses data from a JSON or YAML file.
@@ -26,22 +69,14 @@ def load_verses_from_file(filepath, template=None):
         file_path = Path(filepath)
         file_extension = file_path.suffix.lower()
 
-        with open(filepath, 'r', encoding='utf-8') as f:
-            # Detect file format and load accordingly
-            if file_extension in ['.yaml', '.yml']:
-                data = yaml.safe_load(f)
-            elif file_extension == '.json':
-                data = json.load(f)
-            else:
-                # Try to auto-detect format
-                content = f.read()
-                f.seek(0)
-                try:
-                    # Try YAML first (more forgiving)
-                    data = yaml.safe_load(content)
-                except yaml.YAMLError:
-                    # Fall back to JSON
-                    data = json.loads(content)
+        try:
+            data = load_deck_mapping(filepath)
+        except ValueError as e:
+            print(f"Error: Invalid format in '{filepath}': {e}")
+            return None
+        except (json.JSONDecodeError, yaml.YAMLError) as e:
+            print(f"Error: Invalid format in '{filepath}': {e}")
+            return None
 
         if not isinstance(data, dict):
             print(f"Error: Invalid format in '{filepath}': top level must be a mapping")

@@ -7,20 +7,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent))
 
-import yaml
-
-from praisonaippt.transcript_loader import MEDIA_VARIANTS, apply_media_variant, write_deck_yaml
+from praisonaippt.variant_sync import sync_variants_from_master
 
 MASTER = ROOT / "heygen-50590-content.yaml"
 
 
 def main() -> None:
-    base = yaml.safe_load(MASTER.read_text(encoding="utf-8"))
-    for name in MEDIA_VARIANTS:
-        deck = apply_media_variant(base, name)
-        out = ROOT / f"heygen-50590-{name}.yaml"
-        write_deck_yaml(deck, out)
-        print(f"✓ {out.name}")
+    for path in sync_variants_from_master(MASTER, ROOT, prefix="heygen-50590"):
+        print(f"✓ {path.name}")
 
 
 if __name__ == "__main__":

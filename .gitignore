@@ -161,4 +161,5 @@ Thumbs.db
 *timestamps.json
 *.srt
 examples/slide_images
+*.pipeline-report.json
 assets/extracted_images

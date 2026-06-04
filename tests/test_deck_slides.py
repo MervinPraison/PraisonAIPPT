@@ -192,6 +192,15 @@ def test_thank_you_avatar_framing_zoomed_out():
     assert zoom == 1.02
 
 
+def test_circle_pip_has_tighter_headspace_than_full_bleed():
+    from praisonaippt.avatar_layouts import avatar_framing
+
+    _, pip_y, _ = avatar_framing({"layouts": {"pip": {"shape": "circle"}}}, "pip")
+    _, only_y, _ = avatar_framing({}, "avatar_only")
+    assert pip_y < only_y
+    assert pip_y <= 0.02
+
+
 def test_agenda_list_starts_below_title():
     prs = Presentation()
     prs.slide_width = Inches(13.33)

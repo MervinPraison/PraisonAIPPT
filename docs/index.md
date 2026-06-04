@@ -44,6 +44,7 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 | [Deck layouts](deck-layouts.md) | Twelve `deck_*` sales templates |
 | [Slide style reference](slide-style-reference.md) | Colours, `typography.*`, `layouts.*` |
 | [YAML deck reference](yaml-reference.md) | Top-level keys and `video_export` |
+| [Video + transcript workflow](workflow-video-transcript-to-deck.md) | End-to-end steps, YAML artefacts, automation plan |
 | [Video export](video-export.md) | Compositor, narration modes, CLI |
 | [HeyGen article examples](heygen-examples.md) | Five media variants, assets, build workflow |
 | [Avatar PiP calibration](avatar-calibration.md) | Auto `crop_x`, hybrid face detect, CLI |

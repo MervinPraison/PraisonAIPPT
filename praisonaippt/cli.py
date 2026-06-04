@@ -8,10 +8,16 @@ import logging
 import sys
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 from . import __version__
 from .exceptions import SchemaError
-from .loader import load_verses_from_file, get_example_path, list_examples
+from .loader import (
+    load_deck_mapping,
+    load_verses_from_file,
+    write_deck_mapping,
+    get_example_path,
+    list_examples,
+)
 from .template_resolver import list_templates, resolve_template_style
 from .schema import validate_verses
 from .core import create_presentation
@@ -259,6 +265,8 @@ Examples:
             'convert-pdf', 'convert-video', 'convert-json', 'convert-yaml',
             'transcript-to-yaml', 'list-slides', 'export-slide-jpegs', 'build-slide-images',
             'calibrate-avatar', 'pip-face-centre',
+            'pipeline', 'sync-variants', 'plan-slides', 'approve-plan',
+            'validate-deck', 'transcribe',
             'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials',
         ],
         help='Command to execute (e.g., list-slides, convert-pdf, convert-video, export-slide-jpegs, template, config)'
@@ -431,6 +439,78 @@ Examples:
         '--variants',
         metavar='NAMES',
         help='Comma-separated media variants for transcript-to-yaml (or "all")',
+    )
+
+    parser.add_argument(
+        '--content-master',
+        metavar='YAML',
+        help='Content master YAML for sync-variants / pipeline (e.g. heygen-50590-content.yaml)',
+    )
+
+    parser.add_argument(
+        '--sync-variants',
+        action='store_true',
+        help='Sync media variant YAMLs from --content-master before build or pipeline',
+    )
+
+    parser.add_argument(
+        '--transcript-json',
+        metavar='PATH',
+        help='Whisper timestamps JSON for timing drift checks / plan-slides / pipeline',
+    )
+
+    parser.add_argument(
+        '--validate-pip',
+        action='store_true',
+        help='Fail if PiP face centre QA does not pass (build or validate-deck)',
+    )
+
+    parser.add_argument(
+        '--validate-deck',
+        action='store_true',
+        help='Run pre-build validation only (schema, assets, timing, PiP)',
+    )
+
+    parser.add_argument(
+        '--pipeline-report',
+        metavar='PATH',
+        help='Write pipeline report JSON (pipeline command or with --sync-variants)',
+    )
+
+    parser.add_argument(
+        '--seed-timing',
+        action='store_true',
+        help='Refresh verse timings from --transcript-json before build/pipeline',
+    )
+
+    parser.add_argument(
+        '--golden-slide-dir',
+        metavar='DIR',
+        help='Golden slide JPEG directory for pipeline QA comparison',
+    )
+
+    parser.add_argument(
+        '--strict-pip',
+        action='store_true',
+        help='PiP QA must pass on every calibration seek (CI strict gate)',
+    )
+
+    parser.add_argument(
+        '--rights-acknowledged',
+        action='store_true',
+        help='Confirm rights/licensing checklist reviewed (pipeline CI gate)',
+    )
+
+    parser.add_argument(
+        '--skip-build',
+        action='store_true',
+        help='Pipeline: run validation/sync only, do not build PPTX',
+    )
+
+    parser.add_argument(
+        '--whisper-model',
+        default='base',
+        help='Whisper model for transcribe command (default: base)',
     )
 
     return parser.parse_args()
@@ -860,8 +940,11 @@ def handle_calibrate_avatar_command(args) -> int:
     validation_arg = getattr(args, "validation_image", None)
 
     if deck_path and Path(deck_path).is_file():
-        with open(deck_path, encoding="utf-8") as f:
-            data = yaml.safe_load(f) or {}
+        try:
+            data = load_deck_mapping(deck_path)
+        except (ValueError, OSError) as e:
+            print(f"Error: {e}")
+            return 1
         data["_source_file"] = str(Path(deck_path).resolve())
         results = calibrate_deck_avatars(data, force=force, source_file=data["_source_file"])
         print(format_calibration_report(results))
@@ -881,10 +964,7 @@ def handle_calibrate_avatar_command(args) -> int:
                 data["avatar_calibration"] = {"auto": True}
             data.pop("_avatar_calibration", None)
             data.pop("_source_file", None)
-            Path(deck_path).write_text(
-                yaml.dump(data, allow_unicode=True, sort_keys=False, default_flow_style=False),
-                encoding="utf-8",
-            )
+            write_deck_mapping(deck_path, data)
             print(f"✓ Updated {deck_path}")
         if validation_arg is not None and results:
             pip = ((data.get("slide_style") or {}).get("layouts") or {}).get("pip") or {}
@@ -1123,6 +1203,253 @@ def handle_convert_video_command(args, data: Optional[dict] = None):
     except Exception as e:
         print(f"Error: {e}")
         return 1
+
+
+def _resolve_master_path(
+    master: Optional[str],
+    *,
+    source_file: Optional[str],
+) -> Optional[Path]:
+    if not master:
+        return None
+    p = Path(master)
+    if p.is_file():
+        return p.resolve()
+    if source_file:
+        cand = Path(source_file).parent / master
+        if cand.is_file():
+            return cand.resolve()
+    return None
+
+
+def _pipeline_options_from_args(args, deck_path: str, data: Optional[dict] = None) -> "PipelineOptions":
+    from .deck_pipeline import PipelineOptions
+
+    sf = str(Path(deck_path).resolve())
+    pipe = (data or {}).get("pipeline") or {}
+    master = getattr(args, "content_master", None) or pipe.get("content_master")
+    master_p = _resolve_master_path(master, source_file=sf)
+    transcript = (
+        getattr(args, "transcript_json", None)
+        or pipe.get("transcript_path")
+    )
+    if transcript and not Path(transcript).is_file() and data:
+        cand = Path(sf).parent / transcript
+        if cand.is_file():
+            transcript = str(cand)
+    sync = getattr(args, "sync_variants", False) or bool(pipe.get("auto_sync"))
+    validate_pip = getattr(args, "validate_pip", False) or bool(pipe.get("validate_pip"))
+    if getattr(args, "rights_acknowledged", False):
+        pipe = dict(pipe)
+        pipe["rights_acknowledged"] = True
+    ac = (data or {}).get("avatar_calibration") or {}
+    opts = PipelineOptions(
+        deck_yaml=deck_path,
+        content_master=str(master_p) if master_p else None,
+        transcript_json=transcript,
+        output_pptx=getattr(args, "output", None),
+        output_mp4=getattr(args, "video_output", None),
+        report_path=getattr(args, "pipeline_report", None) or pipe.get("report_path"),
+        template=getattr(args, "template", None),
+        sync_variants=sync and master_p is not None,
+        check_variant_drift=master_p is not None,
+        validate_pip=validate_pip,
+        build_pptx=not getattr(args, "skip_build", False),
+        export_mp4=getattr(args, "convert_video", False) or bool(pipe.get("export_mp4")),
+        export_slide_jpegs=getattr(args, "export_slide_jpegs", False),
+        calibrate_force=getattr(args, "force", False) or bool(ac.get("force")),
+        pip_validation_image=getattr(args, "validation_image", None),
+        golden_slide_dir=getattr(args, "golden_slide_dir", None) or pipe.get("golden_slide_dir"),
+        seed_timing=getattr(args, "seed_timing", False) or bool(pipe.get("seed_timing")),
+        variant_prefix=str(pipe.get("variant_prefix") or "heygen-50590"),
+        transcribe_audio=None,
+        strict_pip=getattr(args, "strict_pip", False) or bool(pipe.get("strict_pip")),
+        strict_post_render=getattr(args, "strict_post_render", False) or bool(pipe.get("strict_post_render")),
+        post_render_qc=bool(pipe.get("post_render_qc", True)),
+        fail_fast=bool(pipe.get("fail_fast", True)),
+        validate_plan=bool(pipe.get("validate_plan", True)),
+        validate_rights=bool(pipe.get("validate_rights", True)),
+    )
+    return PipelineOptions.merge_pipeline_yaml(opts, pipe, avatar_calibration=ac)
+
+
+def _print_pipeline_report(report) -> None:
+    for step in report.steps:
+        mark = "✓" if step.ok else "✗"
+        print(f"  {mark} {step.name}: {step.detail}")
+    if report.outputs.get("report_json"):
+        print(f"Report: {report.outputs['report_json']}")
+
+
+def handle_pipeline_command(args) -> int:
+    """Full deck pipeline: sync → validate → build → MP4 → report.json."""
+    deck = args.input_file or args.input
+    if not deck:
+        print("Usage: praisonaippt pipeline -i deck.yaml [-o deck.pptx] [--convert-video]")
+        return 1
+    if not Path(deck).is_file():
+        print(f"Error: File not found: {deck}")
+        return 1
+    from .loader import load_verses_from_file
+    from .deck_pipeline import run_pipeline
+
+    data = load_verses_from_file(deck, template=getattr(args, "template", None))
+    if not data:
+        return 1
+    opts = _pipeline_options_from_args(args, deck, data)
+    report = run_pipeline(opts)
+    _print_pipeline_report(report)
+    return 0 if report.ok else 1
+
+
+def handle_sync_variants_command(args) -> int:
+    from .variant_sync import sync_variants_from_master
+
+    master = args.input_file or args.input or getattr(args, "content_master", None)
+    if not master:
+        print("Usage: praisonaippt sync-variants -i heygen-50590-content.yaml")
+        return 1
+    master_p = Path(master).resolve()
+    if not master_p.is_file():
+        print(f"Error: File not found: {master}")
+        return 1
+    prefix = "heygen-50590"
+    written = sync_variants_from_master(master_p, master_p.parent, prefix=prefix)
+    for p in written:
+        print(f"✓ {p.name}")
+    return 0
+
+
+def handle_plan_slides_command(args) -> int:
+    from .plan_slides import write_plan_yaml
+
+    transcript = args.input_file or args.input
+    if not transcript:
+        print("Usage: praisonaippt plan-slides -i timestamps.json -o draft-content.yaml")
+        return 1
+    out = args.output or "examples/heygen-50590-draft.yaml"
+    master = getattr(args, "content_master", None)
+    write_plan_yaml(
+        transcript,
+        out,
+        presentation_title=getattr(args, "transcript_title", "AI Agents: A Serious Upgrade"),
+        avatar_video_path=getattr(args, "avatar_video", "examples/heygen-article-50590.mp4"),
+        audio_path=getattr(args, "narration_audio", "examples/short-script-50590.mp3"),
+        merge_master=master,
+    )
+    print(f"✓ Planned deck written to {out}")
+    meta = __import__("praisonaippt.plan_slides", fromlist=["plan_meta_path"]).plan_meta_path(out)
+    print(f"✓ Plan checkpoint: {meta} (status=pending)")
+    print("  Edit slide_type and copy, then: praisonaippt approve-plan", out)
+    print("  Merge into content master before: praisonaippt sync-variants / pipeline")
+    return 0
+
+
+def handle_approve_plan_command(args) -> int:
+    from .plan_slides import approve_plan
+
+    draft = args.input_file or args.input
+    if not draft:
+        print("Usage: praisonaippt approve-plan -i draft-content.yaml")
+        return 1
+    try:
+        meta = approve_plan(draft)
+        print(f"✓ Plan approved: {meta}")
+        print("  Safe to run sync-variants / pipeline (plan_draft gate cleared).")
+        return 0
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        return 1
+
+
+def handle_validate_deck_command(args) -> int:
+    """Validate-only path through the unified pipeline (no PPTX / MP4 build)."""
+    from .deck_pipeline import run_pipeline
+
+    deck = args.input_file or args.input
+    if not deck:
+        print("Usage: praisonaippt validate-deck -i deck.yaml|json [--transcript-json PATH] [--validate-pip]")
+        return 1
+    data = load_verses_from_file(deck, template=getattr(args, "template", None))
+    if not data:
+        return 1
+    opts = _pipeline_options_from_args(args, deck, data)
+    opts.build_pptx = False
+    opts.export_mp4 = False
+    opts.sync_variants = False
+    opts.export_slide_jpegs = False
+    if not getattr(args, "validate_pip", False):
+        opts.validate_pip = bool((data.get("pipeline") or {}).get("validate_pip"))
+    report = run_pipeline(opts)
+    _print_pipeline_report(report)
+    return 0 if report.ok else 1
+
+
+def handle_transcribe_command(args) -> int:
+    from .deck_pipeline import run_whisper_transcribe
+
+    audio = args.input_file or args.input
+    if not audio:
+        print("Usage: praisonaippt transcribe -i audio.mp3 -o timestamps.json")
+        return 1
+    out = args.output or str(Path(audio).with_suffix(".json"))
+    step = run_whisper_transcribe(
+        audio,
+        out,
+        model=getattr(args, "whisper_model", "base"),
+    )
+    print(step.detail)
+    return 0 if step.ok else 1
+
+
+def _preflight_before_build(args, data: dict, input_file: str) -> Tuple[dict, Optional[int]]:
+    """Sync variants, seed timing, and optional validation before PPTX build."""
+    sf = str(Path(input_file).resolve())
+    pipe = data.get("pipeline") or {}
+    master = _resolve_master_path(
+        getattr(args, "content_master", None) or pipe.get("content_master"),
+        source_file=sf,
+    )
+    if (getattr(args, "sync_variants", False) or pipe.get("auto_sync")) and master:
+        import yaml
+        from .variant_sync import sync_variants_from_master
+
+        prefix = str(pipe.get("variant_prefix") or "heygen-50590")
+        sync_variants_from_master(master, master.parent, prefix=prefix)
+        print(f"✓ Synced variants from {master.name}")
+        if Path(input_file).resolve() != master.resolve():
+            reloaded = load_verses_from_file(input_file, template=getattr(args, "template", None))
+            if reloaded:
+                data = reloaded
+            else:
+                data["_source_file"] = sf
+
+    if getattr(args, "seed_timing", False):
+        from .plan_slides import seed_timing_from_transcript
+
+        tpath = getattr(args, "transcript_json", None) or pipe.get("transcript_path")
+        if tpath:
+            tp = Path(tpath)
+            if not tp.is_file():
+                tp = Path(sf).parent / tpath
+            if tp.is_file():
+                data = seed_timing_from_transcript(data, tp)
+                print(f"✓ Seeded timings from {tp.name}")
+
+    if getattr(args, "validate_deck", False):
+        args.input = input_file
+        args.input_file = input_file
+        return data, handle_validate_deck_command(args)
+
+    if getattr(args, "validate_pip", False) or pipe.get("validate_pip"):
+        from .deck_pipeline import validate_pip_centring
+
+        step = validate_pip_centring(data, source_file=sf)
+        print(f"{'✓' if step.ok else '✗'} pip_centring: {step.detail}")
+        if not step.ok:
+            return data, 1
+
+    return data, None
 
 
 def handle_convert_pdf_command(args):
@@ -1761,6 +2088,24 @@ def main():
     if args.command == 'calibrate-avatar':
         return handle_calibrate_avatar_command(args)
 
+    if args.command == 'pipeline':
+        return handle_pipeline_command(args)
+
+    if args.command == 'sync-variants':
+        return handle_sync_variants_command(args)
+
+    if args.command == 'plan-slides':
+        return handle_plan_slides_command(args)
+
+    if args.command == 'approve-plan':
+        return handle_approve_plan_command(args)
+
+    if args.command == 'validate-deck':
+        return handle_validate_deck_command(args)
+
+    if args.command == 'transcribe':
+        return handle_transcribe_command(args)
+
     # List templates if requested
     if args.list_templates:
         entries = list_templates()
@@ -1814,6 +2159,10 @@ def main():
     
     if not data:
         return 1
+
+    data, pre_rc = _preflight_before_build(args, data, input_file)
+    if pre_rc is not None:
+        return pre_rc
 
     from .avatar_calibrate import (
         AvatarFramingResult,
@@ -1921,6 +2270,26 @@ def main():
             srt = Path(result).with_suffix(".srt")
             if srt.is_file():
                 print(f"✓ Captions sidecar: {srt}")
+            from .deck_pipeline import (
+                _expected_video_spec,
+                expected_deck_duration,
+                post_render_qc,
+            )
+
+            vex = data.get("video_export") or {}
+            require_audio = vex.get("narration_mode") not in ("fixed",)
+            spec = _expected_video_spec(data)
+            qc = post_render_qc(
+                result,
+                expected_duration_sec=expected_deck_duration(data),
+                require_audio=require_audio,
+                expected_width=spec.get("width"),
+                expected_height=spec.get("height"),
+                expected_fps=float(spec.get("fps", 30)),
+            )
+            print(f"{'✓' if qc.ok else '✗'} post_render: {qc.detail}")
+            if not qc.ok and getattr(args, "strict_post_render", False):
+                return 1
         except Exception as e:
             print(f"Warning: Video conversion failed: {e}")
 

@@ -34,6 +34,7 @@ _TOP_LEVEL_KEYS = {
     "slide_images_dir",
     "avatar_calibration",
     "_avatar_calibration",
+    "pipeline",
 }
 
 _SECTION_KEYS = {"section", "section_subtitle", "verses"}

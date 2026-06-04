@@ -91,7 +91,7 @@ def get_template_path(name: str, base_dir: Optional[Path] = None) -> Optional[st
             path = directory / candidate.name
             if path.is_file():
                 return str(path.resolve())
-        for ext in (".yaml", ".yml"):
+        for ext in (".yaml", ".yml", ".json"):
             path = directory / f"{name}{ext}"
             if path.is_file():
                 return str(path.resolve())
@@ -201,7 +201,11 @@ def list_templates() -> List[Dict[str, str]]:
     for directory in (_user_templates_dir(), _builtin_templates_dir()):
         if not directory.is_dir():
             continue
-        for path in sorted(directory.glob("*.yaml")) + sorted(directory.glob("*.yml")):
+        for path in (
+            sorted(directory.glob("*.yaml"))
+            + sorted(directory.glob("*.yml"))
+            + sorted(directory.glob("*.json"))
+        ):
             if path.name.lower() == "readme.md":
                 continue
             stem = path.stem

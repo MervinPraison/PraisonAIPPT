@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from .loader import load_deck_mapping
 from .schema import validate_verses
 
 
@@ -16,11 +17,10 @@ def load_deck_sidecar(pptx_path: str) -> Optional[Dict[str, Any]]:
         sidecar = stem.with_suffix(ext)
         if not sidecar.is_file():
             continue
-        if ext == ".json":
-            data = json.loads(sidecar.read_text(encoding="utf-8"))
-        else:
-            import yaml
-            data = yaml.safe_load(sidecar.read_text(encoding="utf-8"))
+        try:
+            data = load_deck_mapping(sidecar)
+        except (ValueError, OSError, json.JSONDecodeError):
+            continue
         data = validate_verses(data)
         data["_source_file"] = str(sidecar.resolve())
         return data

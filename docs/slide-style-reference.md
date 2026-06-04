@@ -171,7 +171,7 @@ Content width: `min(9.0, slide_width − margins)` on widescreen (PiP-aware).
 | `margin_in` | 0.38 |
 | `text_gap_in` | 0.35 |
 | `shape` | `circle` |
-| `crop_y_ratio` | 0.06 |
+| `crop_y_ratio` | 0.02 (circle PiP; per `layouts.<slide_type>` for avatar slides) |
 | `zoom_ratio` | 1.45 |
 | `border_color` | `#FFFFFF` |
 | `border_width_pt` | 2.5 |

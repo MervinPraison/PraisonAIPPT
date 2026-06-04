@@ -475,6 +475,36 @@ praisonaippt calibrate-avatar deck.yaml --force --validation-image
 praisonaippt transcript-to-yaml -i timestamps.json -o examples/heygen-article-50590 --variants all
 ```
 
+### Deck pipeline (sync, validate, build, report)
+
+```bash
+praisonaippt pipeline -i examples/heygen-50590-video-audio-heygen.yaml \
+  -o examples/heygen-50590-video-audio-heygen.pptx \
+  --convert-video --validate-pip --export-slide-jpegs \
+  --pipeline-report examples/heygen-50590-video-audio-heygen.pipeline-report.json
+
+praisonaippt sync-variants -i examples/heygen-50590-content.yaml
+praisonaippt validate-deck -i deck.yaml --transcript-json timestamps.json --validate-pip
+praisonaippt plan-slides -i timestamps.json -o draft.yaml --content-master content.yaml
+praisonaippt transcribe -i narration.mp3 -o timestamps.json
+```
+
+| Flag / YAML | Purpose |
+|-------------|---------|
+| `pipeline.auto_sync` | Sync variants from `pipeline.content_master` before build |
+| `pipeline.validate_pip` | Fail build if PiP face centre QA fails |
+| `--strict-pip` | Require every calibration seek to pass PiP QA |
+| `--sync-variants` | Force variant sync |
+| `--seed-timing` | Refresh `audio_start_sec` / `duration_sec` from transcript |
+| `--validate-deck` | Pre-build validation only |
+| `--golden-slide-dir` | Compare slide JPEG MD5 to golden folder |
+| `--rights-acknowledged` | Pass rights/licensing CI gate |
+| `approve-plan` | Approve `plan-slides` draft before sync |
+| `report.json` → `exit_code` | `0` pass / `1` fail for CI |
+| `report.json` → `gates` | Per-gate validation summary |
+
+See [Video + transcript workflow](workflow-video-transcript-to-deck.md).
+
 ## 📚 Related Documentation
 
 - [Installation Guide](installation.md)

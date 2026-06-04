@@ -457,6 +457,17 @@ def _pip_still_pixels(box: RegionBox, dpi: int = 150) -> tuple[int, int]:
     return px, max(96, int(round(box.height_in * dpi)))
 
 
+# Extra vertical crop for circular PiP — lowers empty space above the head (lower crop_y).
+_CIRCLE_HEADSPACE_TRIM = 0.012
+
+
+def _framing_shape(style: dict, layout_kind: str) -> str:
+    kind_shape = layout_in(style, layout_kind, "shape", None)
+    if kind_shape is not None:
+        return str(kind_shape).lower()
+    return _pip_shape_kind(style)
+
+
 def avatar_framing(style: dict, layout_kind: str = "pip") -> Tuple[float, float, float]:
     """Per-layout avatar crop/zoom; falls back to ``layouts.pip`` defaults."""
     crop_x_kind = layout_in(style, layout_kind, "crop_x_ratio", None)
@@ -466,11 +477,14 @@ def avatar_framing(style: dict, layout_kind: str = "pip") -> Tuple[float, float,
         crop_x_kind if crop_x_kind is not None else layout_in(style, "pip", "crop_x_ratio", 0.5)
     )
     crop_y = float(
-        crop_y_kind if crop_y_kind is not None else layout_in(style, "pip", "crop_y_ratio", 0.06)
+        crop_y_kind if crop_y_kind is not None else layout_in(style, "pip", "crop_y_ratio", 0.02)
     )
     zoom = float(
-        zoom_kind if zoom_kind is not None else layout_in(style, "pip", "zoom_ratio", 1.45)
+        zoom_kind if zoom_kind is not None else layout_in(style, "pip", "zoom_ratio", 1.47)
     )
+    shape = _framing_shape(style, layout_kind)
+    if shape in ("circle", "round", "rounded"):
+        crop_y = max(0.0, crop_y - _CIRCLE_HEADSPACE_TRIM)
     return crop_x, crop_y, zoom
 
 

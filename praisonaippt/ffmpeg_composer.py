@@ -131,6 +131,30 @@ def ffprobe_has_audio(path: str) -> bool:
     return len(streams) > 0
 
 
+def ffprobe_video_fps(path: str) -> float:
+    """Return average frame rate of the first video stream (e.g. 30.0)."""
+    proc = _run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=avg_frame_rate",
+            "-of", "json", path,
+        ],
+        timeout=30,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(f"ffprobe fps failed for {path}: {proc.stderr}")
+    streams = json.loads(proc.stdout or "{}").get("streams") or []
+    if not streams:
+        raise RuntimeError(f"No video stream for {path}")
+    rate = streams[0].get("avg_frame_rate") or "0/1"
+    if "/" in str(rate):
+        num, den = str(rate).split("/", 1)
+        den_f = float(den) or 1.0
+        return float(num) / den_f
+    return float(rate)
+
+
 def ffprobe_media_size(path: str) -> Tuple[int, int]:
     proc = _run(
         [

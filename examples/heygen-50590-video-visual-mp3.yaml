@@ -2,6 +2,15 @@ presentation_title: Dreaming, outcomes, and webhooks
 presentation_subtitle: Claude Managed Agents update · May 2026
 slide_size: widescreen
 slide_images_dir: slide_images
+pipeline:
+  content_master: heygen-50590-content.yaml
+  transcript_path: examples/short-script-50590_timestamps.json
+  auto_sync: true
+  validate_pip: true
+  variant_prefix: heygen-50590
+  content_approved: true
+  rights_acknowledged: true
+  require_rights_ack: false
 avatar_calibration:
   auto: true
   method: hybrid
@@ -9,7 +18,7 @@ avatar_calibration:
   crop_x_window:
   - 0.5
   - 0.56
-  crop_y_preferred: 0.03
+  crop_y_preferred: 0.02
   anchor_weight: 0.15
   detector: auto
 slide_style:
@@ -25,10 +34,11 @@ slide_style:
       width_ratio: 0.24
       margin_in: 0.38
       shape: circle
-      crop_y_ratio: 0.03
+      crop_y_ratio: 0.14
       zoom_ratio: 1.45
       border_color: '#FFFFFF'
       border_width_pt: 2.5
+      crop_x_ratio: 0.545
 sections:
 - verses:
   - slide_type: big_number

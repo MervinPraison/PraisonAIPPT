@@ -1,4 +1,4 @@
-"""Validate deck YAML against documented slide_style, layouts, and video_export options."""
+"""Validate deck YAML/JSON against documented slide_style, layouts, and video_export options."""
 
 from __future__ import annotations
 
@@ -15,6 +15,8 @@ __all__ = [
     "validate_slide_style",
     "validate_video_export",
     "validate_slide_size",
+    "validate_pipeline",
+    "validate_avatar_calibration",
     "ALLOWED_LAYOUT_KINDS",
 ]
 
@@ -61,6 +63,20 @@ _VERSE_VIDEO_FLAT_KEYS = frozenset({
 _VIDEO_TTS_KEYS = frozenset({"provider", "voice"})
 _VIDEO_CAPTIONS_KEYS = frozenset({"enabled"})
 _VIDEO_RESOLUTION_KEYS = frozenset({"width", "height"})
+
+_PIPELINE_KEYS = frozenset({
+    "content_master", "transcript_path", "auto_sync", "validate_pip", "strict_pip",
+    "variant_prefix", "golden_slide_dir", "require_rights_ack", "rights_acknowledged",
+    "content_approved", "plan_approved", "plan_draft",
+    "export_mp4", "export_slide_jpegs", "post_render_qc", "strict_post_render",
+    "fail_fast", "validate_plan", "validate_rights", "seed_timing", "report_path",
+})
+_CALIBRATION_METHODS = frozenset({"hybrid", "balance", "mediapipe", "fixed", "yolo"})
+_CALIBRATION_DETECTORS = frozenset({"auto", "mediapipe", "yunet", "yolo"})
+_AVATAR_CALIBRATION_KEYS = frozenset({
+    "auto", "method", "crop_x_preferred", "crop_x_window", "crop_y_preferred",
+    "anchor_weight", "detector", "min_detection_confidence", "crop_x_step", "force",
+})
 
 _SLIDE_STYLE_BASE_KEYS = frozenset({
     "background_image", "background_color", "text_color", "reference_color",
@@ -449,12 +465,61 @@ def _validate_table_rows(verse: dict, path: str) -> None:
         )
 
 
+def validate_pipeline(pipe: Any) -> None:
+    """Validate optional ``pipeline`` block (CI gates and orchestration)."""
+    if pipe is None:
+        return
+    raw = _require_mapping(pipe, "pipeline")
+    _warn_unknown(raw.keys(), _PIPELINE_KEYS, "pipeline")
+    for key in (
+        "auto_sync", "validate_pip", "strict_pip", "require_rights_ack",
+        "rights_acknowledged", "content_approved", "plan_approved",
+        "export_mp4", "export_slide_jpegs", "post_render_qc", "strict_post_render",
+        "fail_fast", "validate_plan", "validate_rights", "seed_timing",
+    ):
+        if key in raw and not isinstance(raw[key], bool):
+            raise SchemaError(f"pipeline.{key} must be a boolean")
+    for key in ("content_master", "transcript_path", "variant_prefix", "golden_slide_dir", "plan_draft", "report_path"):
+        if key in raw and raw[key] is not None and not isinstance(raw[key], str):
+            raise SchemaError(f"pipeline.{key} must be a string")
+
+
+def validate_avatar_calibration(ac: Any) -> None:
+    """Validate optional ``avatar_calibration`` block."""
+    if ac is None:
+        return
+    raw = _require_mapping(ac, "avatar_calibration")
+    _warn_unknown(raw.keys(), _AVATAR_CALIBRATION_KEYS, "avatar_calibration")
+    for key in ("auto", "force"):
+        if key in raw and not isinstance(raw[key], bool):
+            raise SchemaError(f"avatar_calibration.{key} must be a boolean")
+    if "method" in raw:
+        method = str(raw["method"]).lower()
+        if method not in _CALIBRATION_METHODS:
+            opts = ", ".join(sorted(_CALIBRATION_METHODS))
+            raise SchemaError(f"avatar_calibration.method must be one of: {opts}")
+    if "detector" in raw:
+        det = str(raw["detector"]).lower()
+        if det not in _CALIBRATION_DETECTORS:
+            opts = ", ".join(sorted(_CALIBRATION_DETECTORS))
+            raise SchemaError(f"avatar_calibration.detector must be one of: {opts}")
+    window = raw.get("crop_x_window")
+    if window is not None:
+        if not isinstance(window, (list, tuple)) or len(window) < 2:
+            raise SchemaError("avatar_calibration.crop_x_window must be [lo, hi]")
+        lo, hi = float(window[0]), float(window[1])
+        if lo >= hi:
+            raise SchemaError("avatar_calibration.crop_x_window: lo must be < hi")
+
+
 def validate_deck_options(data: dict) -> None:
     """Validate top-level deck options documented in the layout / video guides."""
     validate_slide_size(data.get("slide_size"))
     validate_slide_style(data.get("slide_style"))
     validate_video_export(data.get("video_export"))
     validate_slide_timestamps(data.get("slide_timestamps"))
+    validate_pipeline(data.get("pipeline"))
+    validate_avatar_calibration(data.get("avatar_calibration"))
     _validate_slide_timestamp_count(data)
     if data.get("slide_images_dir") is not None and not isinstance(data.get("slide_images_dir"), str):
         raise SchemaError("slide_images_dir must be a string path")

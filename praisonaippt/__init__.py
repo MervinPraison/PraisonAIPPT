@@ -12,7 +12,12 @@ read from installed package metadata, with a fallback that parses
 from importlib.metadata import PackageNotFoundError, version as _pkg_version
 
 from .core import create_presentation
-from .loader import load_verses_from_file, load_verses_from_dict
+from .loader import (
+    load_deck_mapping,
+    load_verses_from_file,
+    load_verses_from_dict,
+    write_deck_mapping,
+)
 from .template_resolver import list_templates, resolve_template_style, get_template_path
 from .slide_renderers import register_renderer, list_renderers
 from .pdf_converter import convert_pptx_to_pdf, PDFOptions, PDFConverter
@@ -68,8 +73,10 @@ __license__ = "MIT"
 
 __all__ = [
     "create_presentation",
+    "load_deck_mapping",
     "load_verses_from_file",
     "load_verses_from_dict",
+    "write_deck_mapping",
     "list_templates",
     "resolve_template_style",
     "get_template_path",

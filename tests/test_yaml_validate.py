@@ -26,6 +26,19 @@ def test_heygen_content_yaml_passes_validation():
     validate_verses(data)
 
 
+def test_heygen_content_json_equivalent_passes_validation(tmp_path):
+    import json
+
+    data = yaml.safe_load(HEYGEN_CONTENT.read_text(encoding="utf-8"))
+    json_path = tmp_path / "heygen-content.json"
+    json_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    from praisonaippt.loader import load_verses_from_file
+
+    loaded = load_verses_from_file(str(json_path))
+    assert loaded is not None
+    assert loaded.get("pipeline", {}).get("validate_pip") is True
+
+
 def test_avatar_gallery_yaml_passes_validation():
     data = yaml.safe_load(AVATAR_GALLERY.read_text(encoding="utf-8"))
     validate_verses(data)

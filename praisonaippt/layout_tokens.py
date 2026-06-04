@@ -92,19 +92,28 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "ref_gap_in": 0.15,
         "min_font_pt": 11,
     },
-    "avatar_only": {},
+    "avatar_only": {
+        "crop_y_ratio": 0.09,
+        "zoom_ratio": 1.38,
+    },
     "media_only": {},
     "avatar_media_1": {
         "media_width_ratio": 0.50,
         "gap_in": 0,
+        "crop_y_ratio": 0.07,
+        "zoom_ratio": 1.40,
     },
     "avatar_media_2": {
         "media_width_ratio": 0.40,
         "gap_in": 0,
+        "crop_y_ratio": 0.07,
+        "zoom_ratio": 1.40,
     },
     "avatar_media_3": {
         "pip_width_ratio": 0.14,
         "pip_margin_in": 0.45,
+        "crop_y_ratio": 0.025,
+        "zoom_ratio": 1.46,
     },
     "avatar_name_card": {
         "panel_width_ratio": 0.42,
@@ -113,20 +122,31 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "title_pill_height_in": 0.55,
         "pill_gap_in": 0.12,
         "pill_radius_in": 0.08,
+        "crop_y_ratio": 0.09,
+        "zoom_ratio": 1.38,
     },
     "avatar_headline": {
         "panel_margin_in": 0.75,
         "pip_width_ratio": 0.14,
         "pip_margin_in": 0.45,
+        "crop_y_ratio": 0.025,
+        "zoom_ratio": 1.46,
     },
     "avatar_headline_full": {
         "panel_width_ratio": 0.48,
         "panel_height_in": 1.45,
         "panel_margin_in": 0.35,
+        "crop_y_ratio": 0.10,
+        "zoom_ratio": 1.36,
     },
-    "avatar_intro": {},
+    "avatar_intro": {
+        "crop_y_ratio": 0.08,
+        "zoom_ratio": 1.40,
+    },
     "avatar_outro": {
         "diamond_size_in": 1.85,
+        "crop_y_ratio": 0.08,
+        "zoom_ratio": 1.40,
     },
     "avatar_quote": {
         "quote_bg_color": "#1E3A5F",
@@ -134,6 +154,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "pip_margin_in": 0.45,
         "margin_in": 0.75,
         "top_in": 1.4,
+        "crop_y_ratio": 0.025,
+        "zoom_ratio": 1.46,
     },
     "pip": {
         "width_ratio": 0.20,
@@ -141,8 +163,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "text_gap_in": 0.35,
         "shape": "circle",
         "crop_x_ratio": 0.5,
-        "crop_y_ratio": 0.03,
-        "zoom_ratio": 1.45,
+        "crop_y_ratio": 0.02,
+        "zoom_ratio": 1.47,
         "border_color": "#FFFFFF",
         "border_width_pt": 2.5,
     },
@@ -150,6 +172,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "border_inset_in": 0.25,
         "border_width_pt": 8,
         "border_color": "#1E3A5F",
+        "crop_y_ratio": 0.08,
+        "zoom_ratio": 1.40,
     },
     "media_border": {
         "border_inset_in": 0.25,
@@ -163,6 +187,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "border_inset_in": 0.25,
         "border_width_pt": 8,
         "border_color": "#1E3A5F",
+        "crop_y_ratio": 0.07,
+        "zoom_ratio": 1.40,
     },
     "avatar_media_border_2": {
         "media_width_ratio": 0.40,
@@ -171,6 +197,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "border_inset_in": 0.25,
         "border_width_pt": 8,
         "border_color": "#1E3A5F",
+        "crop_y_ratio": 0.07,
+        "zoom_ratio": 1.40,
     },
     "avatar_media_border_3": {
         "pip_width_ratio": 0.18,
@@ -178,6 +206,8 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "border_inset_in": 0.25,
         "border_width_pt": 8,
         "border_color": "#1E3A5F",
+        "crop_y_ratio": 0.025,
+        "zoom_ratio": 1.46,
     },
     "deck_title_split": {
         "margin_in": 0.75,

@@ -1,31 +1,26 @@
-# Claude Managed Agents · May 2026 — key-point deck synced to original narration
-#
-# Assets (original):
-#   video:   examples/heygen-article-50590.mp4
-#   audio:   examples/short-script-50590.mp3
-#   timing:  examples/short-script-50590_timestamps.json
-#
-#   python examples/sync_heygen_variants.py
-#   python -m praisonaippt.cli -i examples/heygen-50590-video-audio-heygen.yaml \
-#     -o examples/heygen-50590-video-audio-heygen.pptx --convert-video \
-#     --video-output examples/heygen-50590-video-audio-heygen.mp4
-# Optional: heygen-50590-video-visual-mp3.yaml uses separate MP3 (narration_mode: audio_file)
-
 presentation_title: Dreaming, outcomes, and webhooks
 presentation_subtitle: Claude Managed Agents update · May 2026
 slide_size: widescreen
 slide_images_dir: slide_images
-
-# Auto-tune layouts.pip crop_x from avatar video (cached under .praisonaippt/avatar-framing/)
+pipeline:
+  content_master: heygen-50590-content.yaml
+  transcript_path: examples/short-script-50590_timestamps.json
+  auto_sync: true
+  validate_pip: true
+  variant_prefix: heygen-50590
+  content_approved: true
+  rights_acknowledged: true
+  require_rights_ack: false
 avatar_calibration:
   auto: true
   method: hybrid
   crop_x_preferred: 0.53
-  crop_x_window: [0.50, 0.56]
-  crop_y_preferred: 0.03
+  crop_x_window:
+  - 0.5
+  - 0.56
+  crop_y_preferred: 0.02
   anchor_weight: 0.15
   detector: auto
-
 slide_style:
   background_color: '#121212'
   text_color: '#FFFFFF'
@@ -39,15 +34,13 @@ slide_style:
       width_ratio: 0.24
       margin_in: 0.38
       shape: circle
-      # crop_x_ratio set by avatar_calibration.auto when building
-      crop_y_ratio: 0.03
+      crop_y_ratio: 0.14
       zoom_ratio: 1.45
       border_color: '#FFFFFF'
       border_width_pt: 2.5
-
+      crop_x_ratio: 0.545
 sections:
 - verses:
-  # Hook · seg 0 · 0:00–4:54
   - slide_type: big_number
     number: '3'
     label: Dreaming · Outcomes · Webhooks
@@ -56,8 +49,6 @@ sections:
     audio_start_sec: 0.0
     notes: AI agents just got a serious upgrade and it comes down to three things.
     avatar_video_path: examples/heygen-article-50590.mp4
-
-  # Dreaming · segs 1–4 · 4:54–18:20
   - slide_type: deck_exec_summary
     color_scheme: exec_grey
     text: Dreaming
@@ -78,8 +69,6 @@ sections:
       without you keeping anything open. Persistent, proactive agents, not just reactive
       ones.
     avatar_video_path: examples/heygen-article-50590.mp4
-
-  # Outcomes · segs 5–6 · 18:20–26:30
   - slide_type: deck_split_performance
     color_scheme: split_blue
     text: Outcomes
@@ -95,8 +84,6 @@ sections:
     notes: Instead of scripting every step, you tell the agent what to achieve. That's
       a fundamentally different way to build. Third, webhooks.
     avatar_video_path: examples/heygen-article-50590.mp4
-
-  # Webhooks · segs 7–9 · 26:30–36:98
   - slide_type: deck_channel_analysis
     color_scheme: channel_violet
     text: Webhooks
@@ -114,25 +101,21 @@ sections:
     notes: When an agent finishes or fails, your system gets notified instantly. No
       polling, no guessing. Real production infrastructure.
     avatar_video_path: examples/heygen-article-50590.mp4
-
-  # Synthesis · segs 10–11 · 36:98–44:54
   - slide_type: avatar_quote
     text: How do you actually run AI agents in the real world?
     reference: All three answer the same question
     video_overlay:
       avatar:
         anchor: bottom_right
-        width_ratio: 0.20
+        width_ratio: 0.2
         margin_in: 0.38
-        zoom_ratio: 1.30
+        zoom_ratio: 1.3
         crop_y_ratio: 0.08
     duration_sec: 7.56
     audio_start_sec: 36.98
     notes: What makes this update interesting isn't any one feature. It's that all
       three together answer the same question.
     avatar_video_path: examples/heygen-article-50590.mp4
-
-  # Foundation · segs 12–13 · 44:54–51:88
   - slide_type: deck_product_columns
     color_scheme: product_lavender
     text: Production foundation
@@ -152,8 +135,6 @@ sections:
     notes: How do you actually run AI agents in the real world? Background processing,
       goal-based evaluation, async notifications.
     avatar_video_path: examples/heygen-article-50590.mp4
-
-  # Close · seg 14 · 51:88–57
   - slide_type: deck_thank_you
     color_scheme: thank_you_blue
     text: THANK
@@ -163,7 +144,6 @@ sections:
     audio_start_sec: 51.88
     notes: That's a foundation, not a demo. Read the full piece online.
     avatar_video_path: examples/heygen-article-50590.mp4
-
 slide_timestamps:
 - 0.0
 - 3.0
@@ -174,7 +154,6 @@ slide_timestamps:
 - 46.54
 - 53.88
 - 58.93
-
 video_export:
   backend: compositor
   preset: standard
@@ -185,7 +164,7 @@ video_export:
   avatar:
     fit: cover
     shape: circle
-    crop_y_ratio: 0.10
+    crop_y_ratio: 0.1
     zoom_ratio: 1.35
   media:
     fit: contain

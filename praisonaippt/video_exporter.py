@@ -39,12 +39,7 @@ from .utils import resolve_asset_path
 
 logger = logging.getLogger(__name__)
 
-_PRESETS = {
-    "draft": {"width": 1280, "height": 720, "fps": 24, "dpi": 120},
-    "standard": {"width": 1920, "height": 1080, "fps": 30, "dpi": 192},
-    "high": {"width": 1920, "height": 1080, "fps": 30, "dpi": 240},
-    "4k": {"width": 3840, "height": 2160, "fps": 30, "dpi": 300},
-}
+from .video_presets import VIDEO_PRESETS as _PRESETS
 
 
 @dataclass

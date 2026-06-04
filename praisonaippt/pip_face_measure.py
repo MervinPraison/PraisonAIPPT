@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple
 
+from .avatar_layouts import shape_uses_circle_mask
 from .ffmpeg_composer import _circle_alpha_filter, _cover_scale_filter, pip_face_balance
 
 
@@ -95,7 +96,7 @@ def centring_advice(metrics: PipFaceMetrics) -> PipCentringAdvice:
 
     parts = []
     if centred:
-        summary = "Head is centred in the PiP circle (L≈R, T≈B)."
+        summary = "Head is centred in the PiP frame (L≈R, T≈B)."
         detail = summary
     else:
         if abs(ox) >= 0.03:
@@ -174,13 +175,34 @@ def _circle_margins_for_bbox(
     return left_m, right_m, top_m, bottom_m
 
 
+def _rect_margins_for_bbox(
+    xmin: float, ymin: float, xmax: float, ymax: float,
+) -> Tuple[float, float, float, float]:
+    """Normalised gaps from face bbox to rectangular frame edges (0–1)."""
+    return xmin, 1.0 - xmax, ymin, 1.0 - ymax
+
+
+def _frame_margins_for_bbox(
+    xmin: float,
+    ymin: float,
+    xmax: float,
+    ymax: float,
+    *,
+    frame_shape: str = "circle",
+) -> Tuple[float, float, float, float]:
+    if shape_uses_circle_mask(frame_shape):
+        return _circle_margins_for_bbox(xmin, ymin, xmax, ymax)
+    return _rect_margins_for_bbox(xmin, ymin, xmax, ymax)
+
+
 def measure_pip_image(
     image_path: str | Path,
     *,
     detector: str = "auto",
     min_confidence: float = 0.5,
+    frame_shape: str = "circle",
 ) -> PipFaceMetrics:
-    """Measure face centre and margins inside an existing PiP PNG (ideally circular)."""
+    """Measure face centre and margins inside a PiP probe (circle or rectangular frame)."""
     from PIL import Image
 
     from .face_detect import detect_face_centre
@@ -209,7 +231,9 @@ def measure_pip_image(
     xmin, xmax = centre.xmin, centre.xmax
     ymin, ymax = centre.ymin, centre.ymax
 
-    left_m, right_m, top_m, bottom_m = _circle_margins_for_bbox(xmin, ymin, xmax, ymax)
+    left_m, right_m, top_m, bottom_m = _frame_margins_for_bbox(
+        xmin, ymin, xmax, ymax, frame_shape=frame_shape,
+    )
 
     return PipFaceMetrics(
         face_fx=fx,
@@ -249,7 +273,7 @@ def render_pip_probe_frame(
     vf = _cover_scale_filter(
         width, height, crop_x_ratio=crop_x, crop_y_ratio=crop_y, zoom_ratio=zoom,
     )
-    if shape in ("circle", "round", "rounded"):
+    if shape_uses_circle_mask(shape):
         vf = f"{vf},{_circle_alpha_filter()}"
     subprocess.run(
         [
@@ -290,7 +314,10 @@ def measure_pip_video(
         tmp_dir=tmp_dir,
     )
     metrics = measure_pip_image(
-        probe, detector=detector, min_confidence=min_confidence,
+        probe,
+        detector=detector,
+        min_confidence=min_confidence,
+        frame_shape=shape,
     )
     return metrics, probe
 
@@ -321,6 +348,8 @@ def save_pip_validation_diagram(
     image_path: str | Path,
     metrics: PipFaceMetrics,
     output_path: str | Path,
+    *,
+    frame_shape: str = "circle",
 ) -> Path:
     """Draw centre crosshair, face bbox, and side margin lines with pixel labels."""
     from PIL import Image, ImageDraw, ImageFont
@@ -336,13 +365,22 @@ def save_pip_validation_diagram(
     draw = ImageDraw.Draw(overlay)
 
     cx, cy = w / 2.0, h / 2.0
+    use_circle = shape_uses_circle_mask(frame_shape)
     r = min(w, h) / 2.0 * 0.98
+    inset = 4
 
-    draw.ellipse(
-        (cx - r, cy - r, cx + r, cy + r),
-        outline=(0, 255, 120, 220),
-        width=3,
-    )
+    if use_circle:
+        draw.ellipse(
+            (cx - r, cy - r, cx + r, cy + r),
+            outline=(0, 255, 120, 220),
+            width=3,
+        )
+    else:
+        draw.rectangle(
+            (inset, inset, w - inset, h - inset),
+            outline=(0, 255, 120, 220),
+            width=3,
+        )
     cross = 14
     draw.line((cx - cross, cy, cx + cross, cy), fill=(0, 255, 120, 255), width=2)
     draw.line((cx, cy - cross, cx, cy + cross), fill=(0, 255, 120, 255), width=2)
@@ -369,22 +407,22 @@ def save_pip_validation_diagram(
 
         if metrics.margin_left is not None:
             mid_y = (y0 + y1) / 2.0
-            x_lo, x_hi = _circle_x_bounds_at_y(cx, cy, r, mid_y)
-            # Left: bbox left → circle edge
+            mid_x = (x0 + x1) / 2.0
+            if use_circle:
+                x_lo, x_hi = _circle_x_bounds_at_y(cx, cy, r, mid_y)
+                y_lo, y_hi = _circle_y_bounds_at_x(cx, cy, r, mid_x)
+            else:
+                x_lo, x_hi = float(inset), float(w - inset)
+                y_lo, y_hi = float(inset), float(h - inset)
             draw.line((x_lo, mid_y, x0, mid_y), fill=(255, 140, 40, 255), width=3)
             px_l = max(0, int(round((x0 - x_lo))))
             _text((x_lo + 2, mid_y - label_h - 2), f"L {px_l}px", (255, 180, 80, 255))
-            # Right
             draw.line((x1, mid_y, x_hi, mid_y), fill=(60, 220, 255, 255), width=3)
             px_r = max(0, int(round((x_hi - x1))))
             _text((x1 + 2, mid_y + 2), f"R {px_r}px", (120, 230, 255, 255))
-            # Top
-            mid_x = (x0 + x1) / 2.0
-            y_lo, y_hi = _circle_y_bounds_at_x(cx, cy, r, mid_x)
             draw.line((mid_x, y_lo, mid_x, y0), fill=(220, 100, 255, 255), width=3)
             px_t = max(0, int(round((y0 - y_lo))))
             _text((mid_x + 4, y_lo + 2), f"T {px_t}px", (230, 150, 255, 255))
-            # Bottom
             draw.line((mid_x, y1, mid_x, y_hi), fill=(255, 100, 180, 255), width=3)
             px_b = max(0, int(round((y_hi - y1))))
             _text((mid_x + 4, y1 - label_h - 2), f"B {px_b}px", (255, 150, 200, 255))
@@ -411,7 +449,8 @@ def save_pip_validation_diagram(
     else:
         line2 = "face not detected — install praisonaippt[avatar-calibrate]"
     det = metrics.detector or "n/a"
-    line3 = f"detector={det}  green=circle centre  yellow=face box  L/R/T/B=gap to circle"
+    frame_label = "circle" if use_circle else frame_shape
+    line3 = f"detector={det}  green={frame_label} centre  yellow=face box  L/R/T/B=gap to frame"
 
     banner.text((8, h + 6), line1, fill=(230, 230, 235), font=font)
     banner.text((8, h + 20), line2, fill=(180, 190, 200), font=font)
@@ -425,11 +464,13 @@ def write_validation_for_probe(
     probe_path: str | Path,
     metrics: PipFaceMetrics,
     output_path: Optional[str | Path] = None,
+    *,
+    frame_shape: str = "circle",
 ) -> Path:
     """Save annotated diagram for an existing probe PNG."""
     probe = Path(probe_path)
     out = Path(output_path) if output_path else default_validation_image_path(probe)
-    return save_pip_validation_diagram(probe, metrics, out)
+    return save_pip_validation_diagram(probe, metrics, out, frame_shape=frame_shape)
 
 
 def format_pip_face_report(metrics: PipFaceMetrics, *, probe_path: Optional[Path] = None) -> str:

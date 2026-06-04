@@ -4,6 +4,8 @@ End-to-end workflow for a HeyGen talking-head video, Whisper transcript timing, 
 
 **Overview of all new video/PiP features:** [Recent features](recent-features.md).
 
+**Full pipeline (video + transcript → YAML → PPTX → MP4), automation gaps, and checklists:** [Video + transcript workflow](workflow-video-transcript-to-deck.md).
+
 Repository paths are under `examples/` in the [PraisonAIPPT](https://github.com/MervinPraison/PraisonAIPPT) repo.
 
 ## Workflow overview

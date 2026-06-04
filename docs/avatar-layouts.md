@@ -64,8 +64,8 @@ Global PiP defaults (inches unless noted). Per-layout blocks (e.g. `layouts.avat
 | `width_ratio` | `0.20` | PiP edge length as fraction of slide width |
 | `margin_in` | `0.38` | Inset from anchor corner |
 | `text_gap_in` | `0.35` | Horizontal reserve so list/verse/table text clears the PiP |
-| `crop_y_ratio` | `0.06` | Vertical crop bias (lower → face higher) |
-| `zoom_ratio` | `1.45` | Scale before centre crop |
+| `crop_y_ratio` | `0.02` | Vertical crop (lower → less headspace above face in circle) |
+| `zoom_ratio` | `1.47` | Scale before centre crop |
 | `border_color` | `#FFFFFF` | PiP ring in PPTX |
 | `border_width_pt` | `2.5` | PiP ring width |
 
@@ -79,19 +79,19 @@ Global PiP defaults (inches unless noted). Per-layout blocks (e.g. `layouts.avat
 
 Overrides merge via `layout_in(style, kind, key)` — layout-specific keys win; shared keys fall back to `layouts.pip`.
 
-| Block | Notable keys (defaults) |
-|-------|-------------------------|
-| `avatar_media_1` | `media_width_ratio` 0.50, `gap_in` 0 |
-| `avatar_media_2` | `media_width_ratio` 0.40, `gap_in` 0 |
-| `avatar_media_3` | `pip_width_ratio` 0.14, `pip_margin_in` 0.45 |
-| `avatar_headline` | `panel_margin_in` 0.75, `pip_width_ratio` 0.14 |
-| `avatar_headline_full` | `panel_width_ratio` 0.48, `panel_height_in` 1.45 |
-| `avatar_name_card` | `panel_width_ratio` 0.42, pill heights, `pill_gap_in` |
-| `avatar_quote` | `quote_bg_color` `#1E3A5F`, `top_in` 1.4 |
-| `avatar_media_border_1` | `media_width_ratio` 0.60, border tokens |
-| `avatar_media_border_2` | `media_width_ratio` 0.40 |
-| `avatar_media_border_3` | `pip_width_ratio` 0.18 |
-| `avatar_border` / `media_border` | `border_inset_in` 0.25, `border_width_pt` 8 |
+| Block | Headspace (`crop_y` / `zoom`) | Notes |
+|-------|-------------------------------|--------|
+| `pip` (circle) | `0.02` / `1.47` (+ circle trim) | Floating PiP on list/verse slides |
+| `avatar_only` | `0.09` / `1.38` | Full-bleed headshot |
+| `avatar_media_1` / `_2` | `0.07` / `1.40` | Split columns |
+| `avatar_media_3` | `0.025` / `1.46` | Corner PiP (circle) |
+| `avatar_headline` / `avatar_quote` | `0.025` / `1.46` | Corner PiP |
+| `avatar_headline_full` | `0.10` / `1.36` | Top panel + avatar |
+| `avatar_name_card` | `0.09` / `1.38` | Name card |
+| `avatar_media_border_*` | `0.07`–`0.025` | Bordered splits / corner PiP |
+| `avatar_border` | `0.08` / `1.40` | Inset frame |
+
+Lower `crop_y_ratio` = less empty space above the head. Circular masks also apply a small extra trim in code.
 
 `pip_position`: `bottom_right` (default), `top_right`, `bottom_left`, `top_left`.
 
