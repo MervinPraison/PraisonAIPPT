@@ -68,6 +68,8 @@ class VideoOptions:
     tts_provider: str = "edge"
     tts_voice: str = "en-GB-RyanNeural"
     captions_enabled: bool = True
+    transition_fade_sec: float = 0.0
+    video_crf: int = 23
     pdf_path: Optional[str] = None
     encoder: Optional[str] = None
     slide_cache: bool = True
@@ -124,6 +126,8 @@ class VideoOptions:
                 opts.width, opts.height, opts.fps, opts.dpi = (
                     p["width"], p["height"], p["fps"], p["dpi"],
                 )
+            if opts.preset in ("high", "4k"):
+                opts.video_crf = 20
         res = raw.get("resolution") or {}
         if isinstance(res, dict):
             if res.get("width"):
@@ -171,6 +175,10 @@ class VideoOptions:
             opts.captions_enabled = bool(caps["enabled"])
         if raw.get("slide_cache") is not None:
             opts.slide_cache = bool(raw["slide_cache"])
+        if raw.get("transition_fade_sec") is not None:
+            opts.transition_fade_sec = max(0.0, float(raw["transition_fade_sec"]))
+        if raw.get("video_crf") is not None:
+            opts.video_crf = int(raw["video_crf"])
         ts = deck.get("slide_timestamps")
         if ts:
             opts._slide_timestamps = list(ts)  # type: ignore[attr-defined]
@@ -1010,6 +1018,8 @@ def compose_video(
             overlays=overlays,
             audio_path=audio if entry.audio_primary != "avatar" else None,
             audio_start_sec=entry.audio_start_sec if entry.audio_primary in ("file", "tts") else 0.0,
+            fade_sec=options.transition_fade_sec,
+            video_crf=options.video_crf,
         )
         if entry.audio_primary == "avatar" and entry.avatar_video_path:
             seg_av = str(temp_dir / f"seg_{entry.index:03d}_av.mp4")

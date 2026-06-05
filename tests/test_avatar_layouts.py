@@ -275,3 +275,37 @@ def test_avatar_layouts_build(tmp_path):
     create_presentation(load_verses_from_dict(data), str(out))
     prs = Presentation(out)
     assert len(prs.slides) == len(AVATAR_SLIDE_TYPES) + 1  # title slide
+
+
+def test_fit_panel_width_to_text_shrinks_wide_panel():
+    from praisonaippt.avatar_layouts import _fit_panel_width_to_text
+
+    style = {"title_size_pt": 44, "subtitle_size_pt": 28}
+    wide = 5.0
+    narrow = _fit_panel_width_to_text(
+        wide, 12.0, "Webhooks",
+        "Production infrastructure — notify instantly, no polling",
+        style,
+    )
+    assert narrow < wide
+
+
+def test_estimate_panel_height_includes_frame_padding():
+    """Panel box must be tall enough for margins — avoids crushed bottom padding."""
+    from praisonaippt.avatar_layouts import _estimate_panel_height
+
+    style = {"title_size_pt": 44, "subtitle_size_pt": 28}
+    webhooks = _estimate_panel_height(
+        "Webhooks",
+        "Production infrastructure — notify instantly, no polling",
+        4.8,
+        style=style,
+    )
+    outcomes = _estimate_panel_height(
+        "Outcomes",
+        "Define success, not every step — rubric grader",
+        4.3,
+        style=style,
+    )
+    assert webhooks >= 1.68
+    assert outcomes >= 1.60

@@ -299,7 +299,29 @@ def _verse_text_panel_cfg(style: dict, verse: Optional[dict], kind: str) -> dict
     }
 
 
-def _estimate_panel_height(headline: str, subheader: str, width_in: float) -> float:
+# Keep in sync with ``_add_text_panel`` text-frame margins and paragraph gaps.
+_PANEL_PAD_TOP_PT = 12
+_PANEL_PAD_BOTTOM_PT = 16
+_PANEL_HEAD_SUB_GAP_PT = 8  # space_after 6 + space_before 2
+_PANEL_LINE_SPACING = 1.2
+
+
+def _panel_font_sizes(style: dict, width_in: float) -> tuple[int, int]:
+    head_pt = int(typography_pt(style, "title_size_pt", 44) * 0.72)
+    sub_pt = int(typography_pt(style, "subtitle_size_pt", 28) * 0.78)
+    if width_in < 3.8:
+        head_pt = max(22, head_pt - 2)
+        sub_pt = max(16, sub_pt - 2)
+    return head_pt, sub_pt
+
+
+def _estimate_panel_height(
+    headline: str,
+    subheader: str,
+    width_in: float,
+    *,
+    style: Optional[dict] = None,
+) -> float:
     """Minimum panel height (inches) so headline + subheader stay inside the navy box."""
     w = max(2.4, float(width_in))
     chars = max(12, int(w * 5.6))
@@ -307,7 +329,92 @@ def _estimate_panel_height(headline: str, subheader: str, width_in: float) -> fl
     sub = (subheader or "").strip()
     head_lines = max(1, (len(head) + chars - 1) // chars)
     sub_lines = max(1, (len(sub) + chars - 1) // chars) if sub else 0
-    return 0.26 + head_lines * 0.40 + sub_lines * 0.30 + 0.24
+    style = style or {}
+    head_pt, sub_pt = _panel_font_sizes(style, w)
+    line_in = _PANEL_LINE_SPACING / 72.0
+    content_in = (head_lines * head_pt + sub_lines * sub_pt) * line_in
+    pad_in = (_PANEL_PAD_TOP_PT + _PANEL_PAD_BOTTOM_PT + _PANEL_HEAD_SUB_GAP_PT) / 72.0
+    return content_in + pad_in + 0.10
+
+
+def _inset_region_box(box: RegionBox, inset_in: float) -> RegionBox:
+    i = max(0.0, float(inset_in))
+    return RegionBox(
+        box.left_in + i,
+        box.top_in + i,
+        max(0.5, box.width_in - 2 * i),
+        max(0.5, box.height_in - 2 * i),
+        rounded=box.rounded,
+        corner_radius_in=box.corner_radius_in,
+    )
+
+
+def _fit_panel_width_to_text(
+    pw: float,
+    cw: float,
+    headline: str,
+    subheader: str,
+    style: dict,
+    *,
+    min_ratio: float = 0.22,
+) -> float:
+    """Shrink panel width when headline/subheader need less horizontal space."""
+    pad_lr_in = (14 * 2) / 72.0
+    head_pt, sub_pt = _panel_font_sizes(style, pw)
+    head_w = len((headline or "").strip()) * (head_pt / 72.0) * 0.52
+    sub = (subheader or "").strip()
+    chunks = [sub] if sub else []
+    if " — " in sub:
+        chunks = [p.strip() for p in sub.split(" — ") if p.strip()]
+    sub_w = max((len(c) * (sub_pt / 72.0) * 0.48 for c in chunks), default=0.0)
+    need = max(head_w, sub_w) + pad_lr_in + 0.18
+    floor_w = cw * min_ratio
+    return max(floor_w, min(pw, need))
+
+
+def _hero_device_frame_boxes(
+    full: RegionBox, style: dict, kind: str,
+) -> Tuple[RegionBox, RegionBox]:
+    inset = float(layout_in(style, kind, "hero_frame_inset_in", 0.06))
+    frame_box = _inset_region_box(full, inset)
+    inner = _inset_region_box(frame_box, 0.04)
+    return frame_box, inner
+
+
+def _draw_hero_device_frame(slide, frame_box: RegionBox, style: dict, kind: str) -> None:
+    """White device plate + soft shadow on hero canvas."""
+    radius = float(layout_in(style, kind, "hero_frame_radius_in", 0.12))
+    shadow = RegionBox(
+        frame_box.left_in + 0.05,
+        frame_box.top_in + 0.06,
+        frame_box.width_in,
+        frame_box.height_in,
+        rounded=True,
+        corner_radius_in=radius,
+    )
+    _draw_filled_rect(slide, shadow, RGBColor(0x0A, 0x0A, 0x0A), rounded=True)
+    plate = RegionBox(
+        frame_box.left_in,
+        frame_box.top_in,
+        frame_box.width_in,
+        frame_box.height_in,
+        rounded=True,
+        corner_radius_in=radius,
+    )
+    left, top, width, height = _box_lengths(plate)
+    shape = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height,
+    )
+    try:
+        short_in = min(plate.width_in, plate.height_in)
+        adj = min(0.5, max(0.02, radius / short_in)) if short_in > 0 else 0.08
+        shape.adjustments[0] = adj
+    except (IndexError, AttributeError):
+        pass
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = _MEDIA_WHITE
+    shape.line.color.rgb = RGBColor(0xD8, 0xD8, 0xD8)
+    shape.line.width = Pt(1.0)
 
 
 def _text_panel_box_anchored(
@@ -324,6 +431,18 @@ def _text_panel_box_anchored(
     pw = cw * float(cfg["width_ratio"])
     if cfg.get("max_width_ratio") is not None:
         pw = min(pw, cw * float(cfg["max_width_ratio"]))
+    tp = (verse or {}).get("text_panel") if isinstance((verse or {}).get("text_panel"), dict) else {}
+    fit_w = tp.get("fit_width")
+    if fit_w is None:
+        fit_w = layout_in(style, kind, "panel_fit_width", False)
+    if fit_w and verse is not None:
+        pw = _fit_panel_width_to_text(
+            pw, cw,
+            str(verse.get("headline") or ""),
+            str(verse.get("subheader") or ""),
+            style,
+            min_ratio=float(layout_in(style, kind, "panel_min_width_ratio", 0.22)),
+        )
     ph = float(cfg["height_in"])
     if verse is not None:
         ph = max(
@@ -332,6 +451,7 @@ def _text_panel_box_anchored(
                 str(verse.get("headline") or ""),
                 str(verse.get("subheader") or ""),
                 pw,
+                style=style,
             ),
         )
     anchor = cfg["anchor"]
@@ -405,7 +525,7 @@ def _add_hero_headline(
     if text_style == "overlay":
         _add_headline_content(slide, box, headline, subheader, style, theme)
     else:
-        _add_text_panel(slide, box, headline, subheader, style, theme)
+        _add_text_panel(slide, box, headline, subheader, style, theme, text_style=text_style)
 
 
 def _media_region_below_panel(
@@ -1106,7 +1226,16 @@ def _draw_centre_diamond(slide, prs, style: dict) -> None:
     shape.line.fill.background()
 
 
-def _add_text_panel(slide, box: RegionBox, headline: str, subheader: str, style: dict, theme: dict) -> None:
+def _add_text_panel(
+    slide,
+    box: RegionBox,
+    headline: str,
+    subheader: str,
+    style: dict,
+    theme: dict,
+    *,
+    text_style: str = "navy_panel",
+) -> None:
     from pptx.enum.shapes import MSO_SHAPE
 
     from .core import _write_body_paragraph
@@ -1124,18 +1253,18 @@ def _add_text_panel(slide, box: RegionBox, headline: str, subheader: str, style:
             pass
     shape.fill.solid()
     shape.fill.fore_color.rgb = _panel_colour(style)
-    shape.line.fill.background()
+    if text_style == "semi_panel":
+        shape.line.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+        shape.line.width = Pt(1.25)
+    else:
+        shape.line.fill.background()
     tf = shape.text_frame
     tf.word_wrap = True
     tf.margin_left = tf.margin_right = Pt(14)
-    tf.margin_top = Pt(12)
-    tf.margin_bottom = Pt(10)
+    tf.margin_top = Pt(_PANEL_PAD_TOP_PT)
+    tf.margin_bottom = Pt(_PANEL_PAD_BOTTOM_PT)
     tf.vertical_anchor = MSO_ANCHOR.TOP
-    head_pt = int(typography_pt(style, "title_size_pt", 44) * 0.72)
-    sub_pt = int(typography_pt(style, "subtitle_size_pt", 28) * 0.78)
-    if box.width_in < 3.8:
-        head_pt = max(22, head_pt - 2)
-        sub_pt = max(16, sub_pt - 2)
+    head_pt, sub_pt = _panel_font_sizes(style, box.width_in)
     panel_theme = dict(theme)
     panel_theme["body"] = RGBColor(0xFF, 0xFF, 0xFF)
     p = tf.paragraphs[0]
@@ -1143,7 +1272,7 @@ def _add_text_panel(slide, box: RegionBox, headline: str, subheader: str, style:
     _write_body_paragraph(p, headline, head_pt, panel_theme, style=style, alignment=PP_ALIGN.LEFT)
     if subheader:
         p2 = tf.add_paragraph()
-        p2.space_before = Pt(2)
+        p2.space_before = Pt(_PANEL_HEAD_SUB_GAP_PT - 6)
         _write_body_paragraph(p2, subheader, sub_pt, panel_theme, style=style, alignment=PP_ALIGN.LEFT)
 
 
@@ -1279,10 +1408,24 @@ def render_avatar_slide(prs, kind: str, verse: dict, style=None, *, source_file:
     if avatar_box and kind in _SPLIT_KINDS and avatar_box.rounded:
         _place_empty_region(slide, avatar_box, "avatar")
 
-    if media_box:
+    hero_framed = (
+        kind == "avatar_media_3"
+        and _hero_layout_mode(style, verse, kind) == "full_bleed"
+        and bool(layout_in(style, kind, "hero_device_frame", False))
+    )
+    media_target = media_box
+    if hero_framed and media_box:
+        cx, cy, cw, ch = _content_area(prs, style, kind)
+        frame_box, inner_box = _hero_device_frame_boxes(
+            RegionBox(cx, cy, cw, ch), style, kind,
+        )
+        _draw_hero_device_frame(slide, frame_box, style, kind)
+        media_target = inner_box
+
+    if media_target:
         _place_media_in_box(
             slide,
-            media_box,
+            media_target,
             verse.get("media_path"),
             fit=media_fit,
             poster_path=verse.get("media_poster_path"),

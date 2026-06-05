@@ -376,6 +376,8 @@ def render_slide_segment(
     overlays: Optional[List[OverlaySpec]] = None,
     audio_path: Optional[str] = None,
     audio_start_sec: float = 0.0,
+    fade_sec: float = 0.0,
+    video_crf: int = 23,
 ) -> None:
     """Render one slide segment MP4 from PNG base + optional overlays + audio."""
     overlays = overlays or []
@@ -441,6 +443,13 @@ def render_slide_segment(
         filters.append(f"[{prev}][{tag}]overlay={ox}:{oy}:format={fmt}[{out}]")
         prev = out
 
+    fade = max(0.0, float(fade_sec))
+    if fade > 0 and dur > fade * 2.5:
+        fade = min(fade, dur / 4.0)
+        fade_out = f"[{prev}]fade=t=in:st=0:d={fade:.3f},fade=t=out:st={max(0.0, dur - fade):.3f}:d={fade:.3f}[vfade]"
+        filters.append(fade_out)
+        prev = "vfade"
+
     filters.append(f"[{prev}]format=yuv420p[vout]")
     cmd += ["-filter_complex", ";".join(filters), "-map", "[vout]"]
 
@@ -450,7 +459,7 @@ def render_slide_segment(
     if encoder == "h264_videotoolbox":
         cmd += ["-c:v", "h264_videotoolbox", "-b:v", "8M"]
     else:
-        cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p"]
+        cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", str(int(video_crf)), "-pix_fmt", "yuv420p"]
 
     cmd += ["-t", f"{dur:.3f}", output]
     proc = _run(cmd, timeout=max(int(dur * 20) + 120, 180))
