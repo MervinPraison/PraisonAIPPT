@@ -1,10 +1,10 @@
-# HeyGen 50590 — professional hero screenshots variant (unified canvas + OCR placement).
+# HeyGen 50590 — images variant, hard cuts only (no slide transitions).
+# Copy of heygen-50590-video-audio-heygen-images.yaml without transition config.
 # Build:
-#   praisonaippt -i examples/heygen-50590-video-audio-heygen-images.yaml \
-#     -o examples/heygen-50590-video-audio-heygen-images.pptx \
-#     --convert-video --video-output examples/heygen-50590-video-audio-heygen-images.mp4
-# OCR showcase: examples/slide_images/heygen-50590-images/ocr-showcase/
-#   praisonaippt validate-deck -i examples/heygen-50590-video-audio-heygen-images.yaml
+#   praisonaippt -i examples/heygen-50590-video-audio-heygen-images-no-transitions.yaml \
+#     -o examples/heygen-50590-video-audio-heygen-images-no-transitions.pptx \
+#     --convert-video --video-output examples/heygen-50590-video-audio-heygen-images-no-transitions.mp4
+#   praisonaippt validate-deck -i examples/heygen-50590-video-audio-heygen-images-no-transitions.yaml
 
 presentation_title: Dreaming, outcomes, and webhooks
 presentation_subtitle: Claude Managed Agents · with product visuals

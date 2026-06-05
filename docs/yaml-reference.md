@@ -179,6 +179,8 @@ Optional in **YAML or JSON** (same keys). Drives `praisonaippt pipeline` and `va
 | `variant_prefix` | string | Filename prefix for variant YAMLs (default `heygen-50590`) |
 | `validate_pip` | bool | Run PiP centring QA (multi-seek) |
 | `strict_pip` | bool | All calibration seeks must pass |
+| `validate_transitions` | bool | Resolve and validate slide transition plan (default true) |
+| `strict_transitions` | bool | Fail gate on transition warnings (e.g. timestamps + blend) |
 | `golden_slide_dir` | string | Golden JPEG directory for slide hash gate |
 | `export_mp4_frames` | bool | Export MP4 seek frames per verse (`audio_start_sec`) |
 | `mp4_frames_dir` | string | Output folder for `mp4-slide-NNN.jpg` (default `mp4-frames`) |

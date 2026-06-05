@@ -275,7 +275,18 @@ layouts. Use this when judging export quality.
 
 **Invariants enforced:** `len(slides) == pdf_pages == png_count` — export fails fast on mismatch.
 
-**Slide transitions:** default is **none** (hard cuts). Per-clip dip-to-black is `segment_fade`; true A→B blends use `crossfade` / wipes via the compositor xfade path. See [slide-transitions.md](slide-transitions.md).
+**Slide transitions:** default is **none** (hard cuts). Per-clip dip-to-black is `segment_fade`; true A→B blends use `crossfade` / wipes via the compositor xfade path. Full guide: [Slide transitions](slide-transitions.md).
+
+```yaml
+slide_transitions:
+  default: none
+  edges:
+    - after_slide: 2
+      type: crossfade
+      duration_sec: 0.35
+```
+
+Showcase: `examples/slide-transitions-showcase.yaml` → `examples/slide-transitions-showcase.mp4`.
 
 **Not in v1:** rounded overlay masks, Windows CreateVideo animations.
 

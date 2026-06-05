@@ -548,6 +548,29 @@ praisonaippt calibrate-avatar deck.yaml --force --validation-image
 
 `--validation-image` saves an annotated PNG: green circle centre, yellow face box, **L/R/T/B** pixel gaps from each side of the head to the circle (see [Avatar calibration](avatar-calibration.md)).
 
+### Slide transitions (plan / preview)
+
+Resolve the edge matrix without building video. See [Slide transitions](slide-transitions.md).
+
+```bash
+# Print all edges (after_slide → type → duration)
+praisonaippt slide-transition-plan -i examples/slide-transitions-showcase.yaml
+
+# Inspect transition leaving slide 3
+praisonaippt slide-transition-preview -i examples/slide-transitions-showcase.yaml --slide 3
+
+# Build showcase MP4 (all types: segment_fade, crossfade, wipes, hard cut)
+praisonaippt -i examples/slide-transitions-showcase.yaml \
+  -o examples/slide-transitions-showcase.pptx --convert-video
+```
+
+| Command | Purpose |
+|---------|---------|
+| `slide-transition-plan` | Resolved edge table (`_slide_transitions` sidecar logic) |
+| `slide-transition-preview` | One edge detail; requires `--slide N` (1 … slide_count−1) |
+
+Gate: `validate-deck` runs `GATE_SLIDE_TRANSITIONS` when `pipeline.validate_transitions: true`.
+
 ### Transcript → YAML (HeyGen variants)
 
 ```bash

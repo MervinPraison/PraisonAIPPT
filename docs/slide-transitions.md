@@ -157,6 +157,17 @@ Short slides: `clamp_transition_duration()` may downgrade an edge to `none` when
 | 6 | `slideright` | Horizontal slide |
 | 7 | `none` | Hard cut before final slide |
 
+**Built artefacts** (repo):
+
+| Artefact | Path |
+|----------|------|
+| MP4 | `examples/slide-transitions-showcase.mp4` |
+| PPTX | `examples/slide-transitions-showcase.pptx` |
+| Slide JPEGs | `examples/slide_images/slide-transitions-showcase/slide-NNN.jpg` |
+| Captions | `examples/slide-transitions-showcase.srt` |
+
+Transitions are visible in the **MP4 only** — JPEGs are static slide stills.
+
 ```bash
 # Validate schema + transition gate
 praisonaippt validate-deck -i examples/slide-transitions-showcase.yaml

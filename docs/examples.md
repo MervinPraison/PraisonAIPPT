@@ -304,6 +304,18 @@ Full guide: **[Slide transitions](slide-transitions.md)**.
 | **All transition types (showcase)** | `examples/slide-transitions-showcase.yaml` |
 | Precedence matrix (minimal) | `examples/slide-transitions-matrix.yaml` |
 
+**Built showcase artefacts** (after `--convert-video`):
+
+| Artefact | Path |
+|----------|------|
+| MP4 (transitions visible here) | `examples/slide-transitions-showcase.mp4` |
+| PPTX | `examples/slide-transitions-showcase.pptx` |
+| Slide JPEGs (static stills only) | `examples/slide_images/slide-transitions-showcase/slide-001.jpg` … `slide-008.jpg` |
+| Captions | `examples/slide-transitions-showcase.srt` |
+
+!!! note "JPEGs vs MP4"
+    Slide JPEGs show layout per slide. **Transitions appear only in the MP4** between slides.
+
 ```bash
 # Schema + transition gate
 praisonaippt validate-deck -i examples/slide-transitions-showcase.yaml
