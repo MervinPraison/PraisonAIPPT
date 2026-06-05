@@ -17,8 +17,34 @@ from praisonaippt.yaml_validate import (
 
 PKG = Path(__file__).resolve().parent.parent
 HEYGEN_CONTENT = PKG / "examples" / "heygen-50590-content.yaml"
+HEYGEN_IMAGES = PKG / "examples" / "heygen-50590-video-audio-heygen-images.yaml"
 AVATAR_GALLERY = PKG / "examples" / "avatar_layouts.yaml"
 DECK_GALLERY = PKG / "examples" / "deck_template_gallery.yaml"
+
+
+def test_heygen_images_yaml_passes_validation():
+    if not HEYGEN_IMAGES.is_file():
+        return
+    data = yaml.safe_load(HEYGEN_IMAGES.read_text(encoding="utf-8"))
+    validate_verses(data)
+    assert data.get("hero_text_placement", {}).get("auto") is True
+
+
+def test_heygen_images_json_equivalent_passes_validation(tmp_path):
+    if not HEYGEN_IMAGES.is_file():
+        return
+    import json
+
+    data = yaml.safe_load(HEYGEN_IMAGES.read_text(encoding="utf-8"))
+    json_path = tmp_path / "heygen-images.json"
+    json_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    from praisonaippt.loader import load_verses_from_file
+
+    loaded = load_verses_from_file(str(json_path))
+    assert loaded is not None
+    assert loaded.get("hero_text_placement", {}).get("auto") is True
+    tp = loaded["sections"][0]["verses"][1]["text_panel"]
+    assert tp.get("anchor") == "auto"
 
 
 def test_heygen_content_yaml_passes_validation():

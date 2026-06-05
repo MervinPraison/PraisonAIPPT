@@ -8,6 +8,7 @@ import yaml
 
 from praisonaippt.deck_pipeline import (
     GATE_AV_SYNC,
+    GATE_HERO_TEXT,
     GATE_PIP_CENTRING,
     GATE_PLAN_APPROVAL,
     GATE_POST_RENDER,
@@ -43,6 +44,14 @@ def test_report_exit_code_and_gates():
     assert d["exit_code"] == 1
     assert GATE_PRE_RENDER in d["gates"]
     assert d["gates"][GATE_PRE_RENDER]["validated"] is True
+
+
+def test_hero_text_gate_in_summary():
+    report = PipelineReport(ok=True, deck_yaml="d.yaml", started_at="t")
+    report.add(StepResult("hero_text", True, "ok"))
+    d = report.to_dict()
+    assert GATE_HERO_TEXT in d["gates"]
+    assert d["gates"][GATE_HERO_TEXT]["validated"] is True
 
 
 def test_rights_gate_blocks_when_required():

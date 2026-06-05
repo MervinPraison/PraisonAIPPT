@@ -47,6 +47,7 @@ GATE_PIP_CENTRING = "pip_centring"
 GATE_SLIDE_JPEG_GOLDEN = "slide_jpeg_golden"
 GATE_SLIDE_QA = "slide_qa"
 GATE_MP4_FRAMES = "mp4_frames"
+GATE_HERO_TEXT = "hero_text_placement"
 GATE_PLAN_APPROVAL = "plan_approval"
 GATE_RIGHTS = "rights_licensing"
 
@@ -86,6 +87,7 @@ class PipelineReport:
             GATE_PRE_RENDER: ("schema", "assets"),
             GATE_AV_SYNC: ("av_sync", "timing_drift"),
             GATE_PIP_CENTRING: ("pip_centring",),
+            GATE_HERO_TEXT: ("hero_text",),
             GATE_SLIDE_JPEG_GOLDEN: ("slide_jpegs",),
             GATE_SLIDE_QA: ("slide_qa",),
             GATE_MP4_FRAMES: ("mp4_frames",),
@@ -362,12 +364,14 @@ def validate_pip_centring(
         maybe_auto_calibrate_deck,
         pip_probe_size_px,
     )
+    from .hero_panel_calibrate import maybe_auto_place_hero_text_deck
     from .pip_face_measure import centring_advice, measure_pip_video
 
     data = maybe_auto_calibrate_deck(
         dict(data),
         source_file=source_file,
     )
+    data = maybe_auto_place_hero_text_deck(data, source_file=source_file)
     pip = ((data.get("slide_style") or {}).get("layouts") or {}).get("pip") or {}
     crop_x = float(pip.get("crop_x_ratio") or 0.5)
     crop_y = float(pip.get("crop_y_ratio") or 0.03)
@@ -648,6 +652,7 @@ class PipelineOptions:
     export_slide_jpegs: bool = False
     calibrate_force: bool = False
     pip_validation_image: Optional[str] = None
+    hero_validation_image: Optional[str] = None
     golden_slide_dir: Optional[str] = None
     export_mp4_frames: bool = False
     mp4_frames_dir: Optional[str] = None
@@ -671,10 +676,12 @@ class PipelineOptions:
         pipe: Optional[dict],
         *,
         avatar_calibration: Optional[dict] = None,
+        hero_text_placement: Optional[dict] = None,
     ) -> "PipelineOptions":
-        """Apply ``pipeline`` / ``avatar_calibration`` defaults (CLI flags already set on *opts* win)."""
+        """Apply ``pipeline`` / calibration defaults (CLI flags already set on *opts* win)."""
         pipe = pipe or {}
         ac = avatar_calibration or {}
+        htp = hero_text_placement or {}
         if pipe.get("variant_prefix") and opts.variant_prefix == "heygen-50590":
             opts.variant_prefix = str(pipe["variant_prefix"])
         if opts.golden_slide_dir is None and pipe.get("golden_slide_dir"):
@@ -702,6 +709,8 @@ class PipelineOptions:
         if pipe.get("export_mp4") and not opts.export_mp4:
             opts.export_mp4 = bool(pipe["export_mp4"])
         if ac.get("force"):
+            opts.calibrate_force = True
+        if htp.get("force"):
             opts.calibrate_force = True
         return opts
 
@@ -785,7 +794,9 @@ def run_pipeline(opts: PipelineOptions) -> PipelineReport:
     sf = data.get("_source_file") or str(deck_path)
     pipe_cfg = data.get("pipeline") or pipe_cfg
     opts = PipelineOptions.merge_pipeline_yaml(
-        opts, pipe_cfg, avatar_calibration=data.get("avatar_calibration"),
+        opts, pipe_cfg,
+        avatar_calibration=data.get("avatar_calibration"),
+        hero_text_placement=data.get("hero_text_placement"),
     )
 
     if opts.seed_timing:
@@ -826,12 +837,52 @@ def run_pipeline(opts: PipelineOptions) -> PipelineReport:
             return report
 
     from .avatar_calibrate import maybe_auto_calibrate_deck
+    from .hero_panel_calibrate import maybe_auto_place_hero_text_deck
 
     if opts.calibrate_force:
         ac = dict(data.get("avatar_calibration") or {})
         ac["force"] = True
         data["avatar_calibration"] = ac
+        htp = dict(data.get("hero_text_placement") or {})
+        htp["force"] = True
+        data["hero_text_placement"] = htp
     data = maybe_auto_calibrate_deck(data, source_file=sf)
+    data = maybe_auto_place_hero_text_deck(data, source_file=sf)
+
+    if (data.get("hero_text_placement") or {}).get("auto"):
+        from .slide_qa import check_hero_text_placement
+
+        report.add(check_hero_text_placement(data, source_file=sf))
+        if opts.hero_validation_image is not None:
+            from .hero_panel_measure import (
+                default_hero_validation_image_path,
+                measure_hero_panel_image,
+                write_validation_for_hero_image,
+            )
+            from .hero_panel_calibrate import HeroTextConfig
+            from .video_exporter import iter_slide_plan
+
+            style = data.get("slide_style") or {}
+            cfg = HeroTextConfig.from_dict(data.get("hero_text_placement"), style=style)
+            for verse in iter_slide_plan(data):
+                if verse.get("slide_type") != "avatar_media_3" or not verse.get("media_path"):
+                    continue
+                resolved = resolve_asset_path(str(verse["media_path"]), source_file=sf) or verse["media_path"]
+                if not Path(resolved).is_file():
+                    continue
+                metrics, result = measure_hero_panel_image(
+                    resolved, style=style, data=data, verse=verse, cfg=cfg,
+                )
+                out_img = opts.hero_validation_image or str(default_hero_validation_image_path(resolved))
+                write_validation_for_hero_image(
+                    resolved, metrics, out_img,
+                    style=style, data=data, verse=verse, cfg=cfg, result=result,
+                )
+                report.outputs["hero_validation_image"] = out_img
+                break
+        if not report.ok and opts.fail_fast:
+            _write_report(report, opts)
+            return report
 
     if opts.validate_pip:
         strict_pip = opts.strict_pip or bool(pipe_cfg.get("strict_pip"))

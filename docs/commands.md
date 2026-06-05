@@ -22,6 +22,8 @@ PraisonAI PPT is invoked as **`praisonaippt`**. Deck input may be **`.yaml`**, *
 | `export-slide-jpegs` | Rasterise PPTX slides to JPEGs |
 | `build-slide-images` | Build PPTX (if needed) + export `slide_images_dir` |
 | `calibrate-avatar` | PiP face framing; `--write` updates deck YAML or JSON |
+| `hero-panel-place` | Calibrate anchors; `--write` updates deck YAML or JSON |
+| `hero-panel-centre` | Measure panel vs UI text; `--validation-image` L/R/T/B diagram |
 | `pip-face-centre` | Measure L/R/T/B margins on PiP probe PNG |
 | `pipeline` | Unified sync → gates → build → MP4 → `report.json` |
 | `sync-variants` | Copy content master → HeyGen media variant YAMLs |

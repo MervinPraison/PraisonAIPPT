@@ -16,6 +16,7 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Inches, Pt
 
 from .layout_tokens import layout_in, typography_pt
+from .text_panel_anchors import HERO_PANEL_ANCHORS, TEXT_PANEL_ANCHORS
 from .utils import resolve_asset_path
 
 AVATAR_SLIDE_TYPES = (
@@ -260,9 +261,7 @@ def _text_panel_box(prs, style: dict, kind: str, position: str) -> RegionBox:
     return RegionBox(cx + margin, cy + ch - ph - margin, pw, ph)
 
 
-_TEXT_ANCHORS = frozenset({
-    "top_left", "top_right", "bottom_left", "bottom_right", "top", "bottom",
-})
+_TEXT_ANCHORS = HERO_PANEL_ANCHORS
 _HERO_LAYOUTS = frozenset({"stacked", "full_bleed"})
 _TEXT_STYLES = frozenset({"navy_panel", "overlay", "semi_panel"})
 
@@ -284,6 +283,9 @@ def _text_style_mode(style: dict, verse: Optional[dict], kind: str) -> str:
 def _verse_text_panel_cfg(style: dict, verse: Optional[dict], kind: str) -> dict:
     tp = (verse or {}).get("text_panel") if isinstance((verse or {}).get("text_panel"), dict) else {}
     anchor = str(tp.get("anchor") or layout_in(style, kind, "text_anchor", "top_left")).lower().strip()
+    if anchor == "auto":
+        resolved = (verse or {}).get("_hero_panel_anchor")
+        anchor = str(resolved).lower().strip() if resolved else "top_left"
     if anchor not in _TEXT_ANCHORS:
         anchor = "top_left"
     return {

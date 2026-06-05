@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "praisonaippt"
-version = "1.4.34"
+version = "1.4.35"
 description = "PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON or YAML format"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -51,6 +51,27 @@ avatar-calibrate = [
 avatar-calibrate-yolo = [
     "ultralytics>=8.3; python_version>='3.8'",
     "mediapipe>=0.10.14; python_version>='3.8'",
+    "opencv-python-headless>=4.8; python_version>='3.8'",
+    "numpy>=1.20",
+    "pillow>=9.0",
+]
+hero-text-detect = [
+    "opencv-python-headless>=4.8; python_version>='3.8'",
+    "numpy>=1.20",
+    "pillow>=9.0",
+]
+hero-text-paddle = [
+    "paddleocr>=3.0; python_version>='3.8'",
+    "opencv-python-headless>=4.8; python_version>='3.8'",
+    "numpy>=1.20",
+    "pillow>=9.0",
+]
+slide-vision = [
+    "openai>=1.40; python_version>='3.8'",
+    "anthropic>=0.40; python_version>='3.8'",
+]
+hero-text-rapidocr = [
+    "rapidocr-onnxruntime>=1.3; python_version>='3.8'",
     "opencv-python-headless>=4.8; python_version>='3.8'",
     "numpy>=1.20",
     "pillow>=9.0",

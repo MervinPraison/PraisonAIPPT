@@ -158,12 +158,14 @@ Each variant gets correct `video_export.narration_mode`, `audio_source`, and per
 | 4.2 | Explicit recalibrate | `calibrate-avatar --force` | Cache under `.praisonaippt/avatar-framing/` |
 | 4.3 | Persist into YAML | `calibrate-avatar --write` | `layouts.pip.crop_x_ratio` in deck YAML |
 | 4.4 | Measure / validate | `pip-face-centre --validation-image` | Console metrics + annotated PNG (L/R/T/B) |
-| 4.5 | Multi-phase helper | `python examples/avatar_calibration_agents.py deck.yaml` | Sample seeks → tune → optional SDK review |
+| 4.5 | Hero text auto placement | `hero_text_placement.auto: true` + `text_panel.anchor: auto` | `_hero_panel_anchor` per hero slide (cache + merge) |
+| 4.6 | Hero measure / validate | `hero-panel-centre --validation-image` | Panel L/R/T/B gaps to nearest UI text |
+| 4.7 | Multi-phase helper | `python examples/avatar_calibration_agents.py deck.yaml` | Sample seeks → tune → optional SDK review |
 
 | # | Per avatar `slide_type` headspace | Config |
 |---|----------------------------------|--------|
-| 4.6 | Default `crop_y` / `zoom` per layout | `layout_tokens.py` → `layouts.<slide_type>` |
-| 4.7 | Extra trim for circle PiP | `avatar_framing()` circle mask |
+| 4.8 | Default `crop_y` / `zoom` per layout | `layout_tokens.py` → `layouts.<slide_type>` |
+| 4.9 | Extra trim for circle PiP | `avatar_framing()` circle mask |
 
 | Automate? | Notes |
 |-----------|--------|
@@ -186,7 +188,8 @@ Internal order:
 
 1. Load and validate YAML  
 2. `maybe_auto_calibrate_deck`  
-3. `create_presentation` (renderers per `slide_type`)  
+3. `maybe_auto_place_hero_text_deck` (when `hero_text_placement.auto: true`)  
+4. `create_presentation` (renderers per `slide_type`)  
 4. Optional: GDrive upload, PDF, slide JPEGs  
 
 | Automate? | Yes |

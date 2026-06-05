@@ -71,7 +71,7 @@ sections:
         media_path: slide_images/HHt8A9BbYAAUfvZ.jpg
         media_fit: cover
         text_panel:
-          anchor: top_right       # top_left | top_right | bottom_left | bottom_right | top | bottom
+          anchor: top_right       # top_left | top_right | … | auto (see hero-text-calibration.md)
           width_ratio: 0.38       # optional override
         avatar_video_path: examples/heygen-article-50590.mp4
         video_overlay: *pip_hero_overlay
@@ -84,7 +84,7 @@ sections:
 
 Text boxes are **shifted** when they would overlap the bottom-right PiP region (`text_pip_gap_in`).
 
-**Reference deck:** `examples/heygen-50590-video-audio-heygen-images.yaml` — full-bleed product screenshots with per-slide anchors. See [HeyGen examples](heygen-examples.md) and [Slide QA](slide-qa.md).
+**Reference deck:** `examples/heygen-50590-video-audio-heygen-images.yaml` — full-bleed product screenshots with `text_panel.anchor: auto` and [Hero text panel calibration](hero-text-calibration.md). See [HeyGen examples](heygen-examples.md) and [Slide QA](slide-qa.md).
 
 ---
 

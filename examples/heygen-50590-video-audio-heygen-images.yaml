@@ -37,6 +37,13 @@ avatar_calibration:
   crop_y_preferred: 0.1
   anchor_weight: 0.15
   detector: auto
+hero_text_placement:
+  auto: true
+  method: hybrid
+  detector: auto
+  preferred_anchor: top_right
+  fallback_anchor: top_left
+  min_confidence: 0.45
 slide_style:
   background_color: '#121212'
   text_color: '#FFFFFF'
@@ -105,7 +112,7 @@ sections:
     media_path: slide_images/HHt8A9BbYAAUfvZ.jpg
     media_fit: contain
     text_panel:
-      anchor: top_right
+      anchor: auto
       width_ratio: 0.36
       height_in: 0.95
     duration_sec: 13.66
@@ -121,7 +128,7 @@ sections:
     media_path: slide_images/HHt8A77aUAAOCdt.jpg
     media_fit: contain
     text_panel:
-      anchor: top_right
+      anchor: auto
       width_ratio: 0.36
       height_in: 0.95
     duration_sec: 8.1
@@ -138,7 +145,7 @@ sections:
     media_path: slide_images/HHpoqNAXcAcHY8h.jpg
     media_fit: contain
     text_panel:
-      anchor: bottom_left
+      anchor: auto
       width_ratio: 0.40
       height_in: 1.12
       margin_in: 0.40
@@ -168,7 +175,7 @@ sections:
     media_path: slide_images/managed-agents-lifecycle-1200x800.png
     media_fit: contain
     text_panel:
-      anchor: bottom_left
+      anchor: auto
       width_ratio: 0.36
       height_in: 1.0
       margin_in: 0.38

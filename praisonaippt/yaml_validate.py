@@ -17,6 +17,7 @@ __all__ = [
     "validate_slide_size",
     "validate_pipeline",
     "validate_avatar_calibration",
+    "validate_hero_text_placement",
     "ALLOWED_LAYOUT_KINDS",
 ]
 
@@ -77,6 +78,13 @@ _CALIBRATION_DETECTORS = frozenset({"auto", "mediapipe", "yunet", "yolo"})
 _AVATAR_CALIBRATION_KEYS = frozenset({
     "auto", "method", "crop_x_preferred", "crop_x_window", "crop_y_preferred",
     "anchor_weight", "detector", "min_detection_confidence", "crop_x_step", "force",
+    "cache_dir",
+})
+_HERO_TEXT_METHODS = frozenset({"hybrid", "heuristic", "east", "paddle", "rapidocr", "mser", "vision"})
+_HERO_TEXT_DETECTORS = frozenset({"auto", "paddle", "rapidocr", "east", "mser", "heuristic"})
+_HERO_TEXT_PLACEMENT_KEYS = frozenset({
+    "auto", "method", "detector", "min_confidence", "fallback_anchor", "preferred_anchor",
+    "pad_hard_px", "pad_soft_px", "vision_fallback", "force", "anchor_weight", "cache_dir",
 })
 
 _SLIDE_STYLE_BASE_KEYS = frozenset({
@@ -404,9 +412,7 @@ def _validate_qa_block(qa: Any, path: str) -> None:
             raise SchemaError(f"{path}.min_hero_coverage_ratio must be between 0 and 1")
 
 
-_TEXT_PANEL_ANCHORS = frozenset({
-    "top_left", "top_right", "bottom_left", "bottom_right", "top", "bottom",
-})
+from .text_panel_anchors import TEXT_PANEL_ANCHORS
 
 
 def _validate_text_panel(tp: Any, path: str) -> None:
@@ -415,8 +421,8 @@ def _validate_text_panel(tp: Any, path: str) -> None:
     if not isinstance(tp, dict):
         raise SchemaError(f"{path} must be a mapping")
     anchor = tp.get("anchor")
-    if anchor is not None and str(anchor).lower().strip() not in _TEXT_PANEL_ANCHORS:
-        raise SchemaError(f"{path}.anchor must be one of: {', '.join(sorted(_TEXT_PANEL_ANCHORS))}")
+    if anchor is not None and str(anchor).lower().strip() not in TEXT_PANEL_ANCHORS:
+        raise SchemaError(f"{path}.anchor must be one of: {', '.join(sorted(TEXT_PANEL_ANCHORS))}")
     for key in ("width_ratio", "height_in", "margin_in", "max_width_ratio"):
         if tp.get(key) is not None:
             _check_positive_number(tp[key], f"{path}.{key}", allow_zero=False)
@@ -567,6 +573,44 @@ def validate_avatar_calibration(ac: Any) -> None:
             raise SchemaError("avatar_calibration.crop_x_window: lo must be < hi")
 
 
+def validate_hero_text_placement(htp: Any) -> None:
+    """Validate optional ``hero_text_placement`` block."""
+    if htp is None:
+        return
+    raw = _require_mapping(htp, "hero_text_placement")
+    _warn_unknown(raw.keys(), _HERO_TEXT_PLACEMENT_KEYS, "hero_text_placement")
+    for key in ("auto", "vision_fallback", "force"):
+        if key in raw and not isinstance(raw[key], bool):
+            raise SchemaError(f"hero_text_placement.{key} must be a boolean")
+    if "method" in raw:
+        method = str(raw["method"]).lower()
+        if method not in _HERO_TEXT_METHODS:
+            opts = ", ".join(sorted(_HERO_TEXT_METHODS))
+            raise SchemaError(f"hero_text_placement.method must be one of: {opts}")
+    if "detector" in raw:
+        det = str(raw["detector"]).lower()
+        if det not in _HERO_TEXT_DETECTORS:
+            opts = ", ".join(sorted(_HERO_TEXT_DETECTORS))
+            raise SchemaError(f"hero_text_placement.detector must be one of: {opts}")
+    for key in ("fallback_anchor", "preferred_anchor"):
+        if key in raw:
+            anchor = str(raw[key]).lower().strip()
+            fixed = {a for a in TEXT_PANEL_ANCHORS if a != "auto"}
+            if anchor not in fixed:
+                raise SchemaError(f"hero_text_placement.{key} must be one of: {', '.join(sorted(fixed))}")
+    if raw.get("min_confidence") is not None:
+        val = float(raw["min_confidence"])
+        if val < 0.0 or val > 1.0:
+            raise SchemaError("hero_text_placement.min_confidence must be between 0 and 1")
+    for key in ("pad_hard_px", "pad_soft_px"):
+        if raw.get(key) is not None:
+            _check_positive_number(raw[key], f"hero_text_placement.{key}", allow_zero=True)
+    if raw.get("anchor_weight") is not None:
+        val = float(raw["anchor_weight"])
+        if val < 0.0 or val > 1.0:
+            raise SchemaError("hero_text_placement.anchor_weight must be between 0 and 1")
+
+
 def validate_deck_options(data: dict) -> None:
     """Validate top-level deck options documented in the layout / video guides."""
     validate_slide_size(data.get("slide_size"))
@@ -575,6 +619,7 @@ def validate_deck_options(data: dict) -> None:
     validate_slide_timestamps(data.get("slide_timestamps"))
     validate_pipeline(data.get("pipeline"))
     validate_avatar_calibration(data.get("avatar_calibration"))
+    validate_hero_text_placement(data.get("hero_text_placement"))
     _validate_slide_timestamp_count(data)
     _validate_qa_block(data.get("slide_qa"), "slide_qa")
     if data.get("slide_images_dir") is not None and not isinstance(data.get("slide_images_dir"), str):

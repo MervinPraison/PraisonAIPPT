@@ -212,7 +212,9 @@ if not advice.is_centred:
 | Command | Purpose |
 |---------|---------|
 | `calibrate-avatar` | Auto-tune `crop_x` / `crop_y`; `--write` updates YAML |
-| `pip-face-centre` | Measure offsets; `--validation-image` saves diagram |
+| `pip-face-centre` | Measure PiP face offsets; `--validation-image` saves L/R/T/B diagram |
+| `hero-panel-place` | Auto-tune hero text anchors; `--write` updates YAML or JSON |
+| `hero-panel-centre` | Measure panel vs UI text; `--validation-image` saves L/R/T/B diagram |
 | `build-slide-images` | PPTX + JPEGs from YAML |
 | `export-slide-jpegs` | JPEGs from existing PPTX |
 | `validate-deck` | All QA gates without build (golden, slide_qa, mp4_frames) |

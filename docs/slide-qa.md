@@ -2,7 +2,7 @@
 
 Automated checks for **layout stills** (PPTX → JPEG) and **composed video** (MP4 seek frames). Used by `praisonaippt pipeline`, `praisonaippt validate-deck`, and CI via `report.json`.
 
-Implementation: `praisonaippt/slide_qa.py`, `praisonaippt/deck_pipeline.py` (`check_slide_jpegs`, `check_slide_qa_manifest`, `check_mp4_plan_frames`).
+Implementation: `praisonaippt/slide_qa.py`, `praisonaippt/deck_pipeline.py` (`check_slide_jpegs`, `check_slide_qa_manifest`, `check_mp4_plan_frames`, `check_hero_text_placement`).
 
 ---
 
@@ -13,6 +13,7 @@ Implementation: `praisonaippt/slide_qa.py`, `praisonaippt/deck_pipeline.py` (`ch
 | **Layout JPEGs** | `slide_images_dir/slide-NNN.jpg` | PPTX raster (text panels, baked media, PiP placeholders) |
 | **Golden regression** | `pipeline.golden_slide_dir` | MD5 match vs committed reference JPEGs |
 | **MP4 frames** | `mp4_frames_dir/mp4-slide-NNN.jpg` | FFmpeg grab at each verse `audio_start_sec` (live PiP, compositor truth) |
+| **Hero text placement** | `hero_text_placement.auto` | Offline anchor confidence gate when auto placement enabled — [Hero text calibration](hero-text-calibration.md) |
 
 !!! tip "JPEG ≠ MP4 for PiP"
     Slides in `_AVATAR_PIP_VIDEO_OVERLAY_ONLY` (`avatar_quote`, `avatar_media_3`) may show **no face** or a **grey PiP placeholder** in JPEGs while the MP4 shows the live HeyGen overlay. Always spot-check **`mp4-slide-*.jpg`** for PiP slides.

@@ -48,6 +48,23 @@ from .avatar_calibrate import (
     calibrate_deck_avatars,
     maybe_auto_calibrate_deck,
 )
+from .hero_panel_calibrate import (
+    HeroPanelResult,
+    HeroTextConfig,
+    calibrate_deck_hero_panels,
+    calibrate_hero_panel,
+    format_hero_panel_report,
+    hero_text_deps_hint,
+    maybe_auto_place_hero_text_deck,
+)
+from .hero_panel_measure import (
+    HeroPanelMetrics,
+    format_hero_panel_measure_report,
+    measure_hero_panel_image,
+    panel_clearance_score,
+    placement_advice,
+    save_hero_panel_validation_diagram,
+)
 
 
 def _read_version() -> str:
@@ -113,4 +130,17 @@ __all__ = [
     "calibrate_avatar_framing",
     "calibrate_deck_avatars",
     "maybe_auto_calibrate_deck",
+    "HeroPanelResult",
+    "HeroTextConfig",
+    "calibrate_deck_hero_panels",
+    "calibrate_hero_panel",
+    "maybe_auto_place_hero_text_deck",
+    "format_hero_panel_report",
+    "hero_text_deps_hint",
+    "HeroPanelMetrics",
+    "format_hero_panel_measure_report",
+    "measure_hero_panel_image",
+    "panel_clearance_score",
+    "placement_advice",
+    "save_hero_panel_validation_diagram",
 ]

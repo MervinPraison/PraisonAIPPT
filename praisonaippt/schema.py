@@ -37,6 +37,8 @@ _TOP_LEVEL_KEYS = {
     "slide_qa",
     "avatar_calibration",
     "_avatar_calibration",
+    "hero_text_placement",
+    "_hero_text_placement",
     "pipeline",
 }
 
@@ -88,6 +90,7 @@ _VERSE_KEYS = {
     "qa",
     "jpeg_show_pip_preview",
     "text_panel",
+    "_hero_panel_anchor",
     "narration_mode",
     "sync_mode",
     "color_scheme",

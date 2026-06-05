@@ -794,6 +794,51 @@ print(primary.crop_x_ratio, primary.crop_y_ratio, primary.method)
 
 Requires `pip install praisonaippt[avatar-calibrate]` for `method: hybrid`. See [Avatar PiP calibration](avatar-calibration.md).
 
+### Auto hero text panel placement
+
+```python
+from praisonaippt import (
+    maybe_auto_place_hero_text_deck,
+    calibrate_deck_hero_panels,
+    format_hero_panel_report,
+)
+
+data = load_verses_from_file("deck.yaml")
+data = maybe_auto_place_hero_text_deck(data, source_file="deck.yaml")
+# verses with text_panel.anchor: auto get _hero_panel_anchor
+
+results = calibrate_deck_hero_panels(data, force=True, source_file="deck.yaml")
+print(format_hero_panel_report(results))
+```
+
+Requires `pip install praisonaippt[hero-text-detect]` (optional `[hero-text-paddle]` or `[hero-text-rapidocr]`). See [Hero text panel calibration](hero-text-calibration.md).
+
+### Hero panel measurement and validation diagram
+
+```python
+from praisonaippt.hero_panel_measure import (
+    measure_hero_panel_image,
+    format_hero_panel_measure_report,
+    save_hero_panel_validation_diagram,
+    panel_clearance_score,
+    placement_advice,
+)
+
+metrics, result = measure_hero_panel_image(
+    "slide_images/hero.jpg",
+    style=data["slide_style"],
+    data=data,
+    verse=verse,
+)
+advice = placement_advice(metrics, alternates=result.alternates)
+save_hero_panel_validation_diagram(
+    "slide_images/hero.jpg", metrics, "hero-validation.png",
+    style=data["slide_style"], data=data, verse=verse, result=result,
+)
+```
+
+CLI parity: `praisonaippt hero-panel-centre -i deck.yaml --slide 3 --validation-image out.png`
+
 ### PiP face measurement and centring advice
 
 ```python

@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from .text_panel_anchors import HERO_PANEL_ANCHORS
 from .utils import resolve_asset_path
 
 _PIP_SLIDE_TYPES = frozenset({
@@ -265,6 +266,41 @@ def check_mp4_plan_frames(
         True,
         f"{len(frames)} MP4 frame(s) in {out}",
         {"dir": str(out), "count": len(frames)},
+    )
+
+
+def check_hero_text_placement(
+    data: dict,
+    *,
+    source_file: Optional[str] = None,
+):
+    """Validate auto hero panel anchors meet minimum confidence."""
+    from .deck_pipeline import StepResult
+    from .hero_panel_calibrate import HeroTextConfig, maybe_auto_place_hero_text_deck
+
+    cfg_raw = data.get("hero_text_placement") or {}
+    if not cfg_raw.get("auto"):
+        return StepResult("hero_text", True, "hero_text_placement.auto disabled (skipped)")
+
+    merged = maybe_auto_place_hero_text_deck(dict(data), source_file=source_file)
+    results = merged.get("_hero_text_placement") or {}
+    cfg = HeroTextConfig.from_dict(cfg_raw, style=merged.get("slide_style") or {})
+    issues: List[str] = []
+    for path, raw in results.items():
+        conf = float(raw.get("confidence") or 0)
+        anchor = raw.get("anchor")
+        if conf < cfg.min_confidence:
+            issues.append(f"{Path(path).name}: confidence {conf:.2f} < {cfg.min_confidence}")
+        if anchor not in HERO_PANEL_ANCHORS:
+            issues.append(f"{Path(path).name}: invalid anchor {anchor!r}")
+
+    if issues:
+        return StepResult("hero_text", False, "; ".join(issues), {"issues": issues})
+    return StepResult(
+        "hero_text",
+        True,
+        f"hero text placement OK ({len(results)} slide(s))",
+        {"count": len(results)},
     )
 
 

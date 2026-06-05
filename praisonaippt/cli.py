@@ -35,6 +35,12 @@ from .ffmpeg_composer import check_video_tools, print_tool_check_report, pick_vi
 from .config import load_config, init_config
 
 
+def _verse_from_plan_entry(entry: dict) -> dict:
+    """Return the content verse from an ``iter_slide_plan`` yield."""
+    nested = entry.get("verse")
+    return nested if isinstance(nested, dict) else entry
+
+
 def _configure_logging(verbose: bool, quiet: bool) -> None:
     """Configure root logger level based on CLI flags. Default: WARNING."""
     if verbose:
@@ -264,7 +270,7 @@ Examples:
         choices=[
             'convert-pdf', 'convert-video', 'convert-json', 'convert-yaml',
             'transcript-to-yaml', 'list-slides', 'export-slide-jpegs', 'build-slide-images',
-            'calibrate-avatar', 'pip-face-centre',
+            'calibrate-avatar', 'pip-face-centre', 'hero-panel-place', 'hero-panel-centre',
             'pipeline', 'sync-variants', 'plan-slides', 'approve-plan',
             'validate-deck', 'transcribe',
             'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials',
@@ -420,11 +426,30 @@ Examples:
     )
 
     parser.add_argument(
+        '--hero-image',
+        metavar='PATH',
+        help='Measure hero text-panel placement on a screenshot PNG/JPG (hero-panel-centre)',
+    )
+
+    parser.add_argument(
+        '--text-detector',
+        choices=['auto', 'paddle', 'rapidocr', 'east', 'mser', 'heuristic'],
+        default='auto',
+        help='Text detector for hero-panel-centre / hero-panel-place (default: auto)',
+    )
+
+    parser.add_argument(
+        '--anchor',
+        metavar='ANCHOR',
+        help='Panel anchor for hero-panel-centre (top_left, top_right, …, or auto)',
+    )
+
+    parser.add_argument(
         '--validation-image',
         nargs='?',
         const='',
         metavar='PATH',
-        help='Save annotated PiP centre/margin diagram (pip-face-centre / calibrate-avatar); '
+        help='Save annotated diagram (pip-face-centre / calibrate-avatar / hero-panel-*); '
         'default path beside probe if PATH omitted',
     )
 
@@ -625,8 +650,10 @@ def handle_build_slide_images_command(args) -> int:
     data["_source_file"] = str(deck.resolve())
 
     from .avatar_calibrate import maybe_auto_calibrate_deck
+    from .hero_panel_calibrate import maybe_auto_place_hero_text_deck
 
     data = maybe_auto_calibrate_deck(data, source_file=data["_source_file"])
+    data = maybe_auto_place_hero_text_deck(data, source_file=data["_source_file"])
 
     out = getattr(args, "output", None)
     pptx_path = out or str(deck.with_suffix(".pptx"))
@@ -1037,6 +1064,261 @@ def handle_calibrate_avatar_command(args) -> int:
     return 0
 
 
+def handle_hero_panel_place_command(args) -> int:
+    """Calibrate hero text-panel anchors for avatar_media_3 slides."""
+    from .hero_panel_calibrate import (
+        HeroTextConfig,
+        calibrate_deck_hero_panels,
+        calibrate_hero_panel,
+        format_hero_panel_report,
+        hero_text_deps_hint,
+        maybe_auto_place_hero_text_deck,
+        write_validation_png,
+    )
+
+    deck_path = getattr(args, "input_file", None) or getattr(args, "input", None)
+    if not deck_path or not Path(deck_path).is_file():
+        print("Usage: praisonaippt hero-panel-place -i deck.yaml [--slide N] [--write] [--force]")
+        print("       [--validation-image out.png]")
+        return 1
+
+    try:
+        data = load_deck_mapping(deck_path)
+    except (ValueError, OSError) as e:
+        print(f"Error: {e}")
+        return 1
+
+    data["_source_file"] = str(Path(deck_path).resolve())
+    force = bool(getattr(args, "force", False))
+    write = bool(getattr(args, "write", False))
+    validation_arg = getattr(args, "validation_image", None)
+    slide_n = getattr(args, "slide", None)
+
+    cfg = HeroTextConfig.from_dict(
+        data.get("hero_text_placement"),
+        style=data.get("slide_style") or {},
+    )
+    text_detector = getattr(args, "text_detector", None)
+    if text_detector:
+        cfg.detector = str(text_detector)
+    if force:
+        raw = dict(data.get("hero_text_placement") or {})
+        raw["force"] = True
+        data["hero_text_placement"] = raw
+
+    if slide_n is not None:
+        from .video_exporter import iter_slide_plan
+
+        verses = list(iter_slide_plan(data))
+        idx = int(slide_n) - 1
+        if idx < 0 or idx >= len(verses):
+            print(f"Error: slide {slide_n} out of range (1–{len(verses)})")
+            return 1
+        entry = verses[idx]
+        verse = _verse_from_plan_entry(entry)
+        if (entry.get("slide_type") or verse.get("slide_type")) != "avatar_media_3":
+            print(f"Error: slide {slide_n} is not avatar_media_3")
+            return 1
+        result = calibrate_hero_panel(
+            verse,
+            style=data.get("slide_style") or {},
+            data=data,
+            source_file=data["_source_file"],
+            cfg=cfg,
+        )
+        results = {str(verse.get("media_path") or ""): result}
+    else:
+        ac = dict(data.get("hero_text_placement") or {})
+        ac["auto"] = True
+        data["hero_text_placement"] = ac
+        results_raw = calibrate_deck_hero_panels(
+            data, force=force or cfg.force, source_file=data["_source_file"],
+        )
+        results = results_raw
+
+    print(format_hero_panel_report(results))
+    hint = hero_text_deps_hint(cfg)
+    if hint:
+        print(hint)
+
+    if write and results:
+        if slide_n is not None:
+            media_key = str(verse.get("media_path") or "")
+            anchor = results.get(media_key)
+            if anchor:
+                sections_out = []
+                for section in data.get("sections") or []:
+                    if not isinstance(section, dict):
+                        sections_out.append(section)
+                        continue
+                    verses_out = []
+                    for v in section.get("verses") or []:
+                        if not isinstance(v, dict):
+                            verses_out.append(v)
+                            continue
+                        row = dict(v)
+                        if str(row.get("media_path") or "") == media_key:
+                            row["_hero_panel_anchor"] = anchor.anchor
+                        verses_out.append(row)
+                    sec = dict(section)
+                    sec["verses"] = verses_out
+                    sections_out.append(sec)
+                data = dict(data)
+                data["sections"] = sections_out
+                htp = dict(data.get("hero_text_placement") or {})
+                htp["auto"] = True
+                data["hero_text_placement"] = htp
+        else:
+            data = maybe_auto_place_hero_text_deck(data, source_file=data["_source_file"])
+        data.pop("_source_file", None)
+        data.pop("_hero_text_placement", None)
+        write_deck_mapping(deck_path, data)
+        print(f"✓ Updated {deck_path} (_hero_panel_anchor resolved at build time)")
+
+    if validation_arg is not None and results:
+        style = data.get("slide_style") or {}
+        first_key = next(iter(results))
+        result = results[first_key]
+        from .video_exporter import iter_slide_plan
+
+        target_verse = None
+        for entry in iter_slide_plan(data):
+            v = _verse_from_plan_entry(entry)
+            if str(v.get("media_path") or "") == first_key:
+                target_verse = v
+                break
+        if target_verse and target_verse.get("media_path"):
+            from .utils import resolve_asset_path
+
+            resolved = resolve_asset_path(
+                str(target_verse["media_path"]), source_file=data.get("_source_file"),
+            ) or str(target_verse["media_path"])
+            default = Path(deck_path).with_name(
+                f"{Path(resolved).stem}_hero_panel_validation.png",
+            )
+            out = _resolve_validation_image_path(validation_arg, default)
+            saved = write_validation_png(
+                resolved, result, style=style, data=data,
+                verse=target_verse, out_path=out, cfg=cfg,
+            )
+            print(f"✓ Validation diagram: {saved.resolve()}")
+
+    return 0
+
+
+def _emit_hero_validation_diagram(
+    image_path: Path,
+    metrics,
+    result,
+    *,
+    style: dict,
+    data: dict,
+    verse: dict,
+    validation_arg: Optional[str],
+) -> None:
+    from .hero_panel_measure import default_hero_validation_image_path, write_validation_for_hero_image
+
+    default = default_hero_validation_image_path(image_path)
+    out = _resolve_validation_image_path(validation_arg, default)
+    saved = write_validation_for_hero_image(
+        image_path, metrics, out,
+        style=style, data=data, verse=verse, result=result,
+    )
+    print(f"✓ Validation diagram: {saved.resolve()}")
+
+
+def handle_hero_panel_centre_command(args) -> int:
+    """Measure hero panel placement vs UI text on a screenshot (parity with pip-face-centre)."""
+    from .hero_panel_measure import format_hero_panel_measure_report, measure_hero_panel_image
+    from .hero_panel_calibrate import HeroTextConfig
+    from .utils import resolve_asset_path
+
+    image_arg = getattr(args, "hero_image", None)
+    validation_arg = getattr(args, "validation_image", None)
+    deck = _deck_yaml_from_args(args)
+    slide_n = getattr(args, "slide", None)
+    anchor_arg = getattr(args, "anchor", None)
+    text_detector = getattr(args, "text_detector", "auto") or "auto"
+
+    default_verse = {
+        "slide_type": "avatar_media_3",
+        "headline": "Preview",
+        "subheader": "",
+        "media_fit": "contain",
+        "text_panel": {"anchor": "auto", "width_ratio": 0.36, "height_in": 0.95},
+    }
+    style = {"layouts": {"avatar_media_3": {"hero_layout": "full_bleed"}, "pip": {"width_ratio": 0.2}}}
+    data = {"slide_size": "widescreen", "slide_style": style}
+
+    if deck:
+        loaded = load_verses_from_file(str(deck), template=getattr(args, "template", None))
+        if not loaded:
+            return 1
+        data = loaded
+        sf = str(deck.resolve())
+        data["_source_file"] = sf
+        style = data.get("slide_style") or style
+        from .video_exporter import iter_slide_plan
+
+        heroes = [
+            _verse_from_plan_entry(e)
+            for e in iter_slide_plan(data)
+            if (e.get("slide_type") or "") == "avatar_media_3"
+            and _verse_from_plan_entry(e).get("media_path")
+        ]
+        if slide_n is not None:
+            plan = list(iter_slide_plan(data))
+            if slide_n < 1 or slide_n > len(plan):
+                print(f"Error: --slide {slide_n} out of range (deck has {len(plan)} slides)")
+                return 1
+            entry = plan[slide_n - 1]
+            verse = _verse_from_plan_entry(entry)
+            if (entry.get("slide_type") or verse.get("slide_type")) != "avatar_media_3":
+                print(f"Error: slide {slide_n} is not avatar_media_3")
+                return 1
+        elif heroes:
+            verse = heroes[0]
+        else:
+            print("Error: deck has no avatar_media_3 slide with media_path")
+            return 1
+        media = verse.get("media_path")
+        resolved = resolve_asset_path(str(media), source_file=sf) or str(media)
+        image_arg = resolved
+    elif not image_arg:
+        print("Usage: praisonaippt hero-panel-centre -i deck.yaml [--slide N]")
+        print("       praisonaippt hero-panel-centre --hero-image screenshot.jpg [--anchor top_right]")
+        print("       Add --validation-image [out.png] for L/R/T/B clearance diagram")
+        return 1
+    else:
+        verse = default_verse
+        data["_source_file"] = str(Path.cwd())
+
+    if not Path(image_arg).is_file():
+        print(f"Error: hero image not found: {image_arg}")
+        return 1
+
+    cfg_raw = dict(data.get("hero_text_placement") or {})
+    cfg_raw["detector"] = text_detector
+    cfg = HeroTextConfig.from_dict(cfg_raw, style=style)
+    if anchor_arg and str(anchor_arg).lower() != "auto":
+        verse = dict(verse)
+        tp = dict(verse.get("text_panel") or {})
+        tp["anchor"] = str(anchor_arg).lower()
+        verse["text_panel"] = tp
+
+    metrics, result = measure_hero_panel_image(
+        image_arg, style=style, data=data, verse=verse, cfg=cfg,
+        anchor=str(anchor_arg).lower() if anchor_arg and anchor_arg != "auto" else None,
+    )
+    print(format_hero_panel_measure_report(metrics, image_path=Path(image_arg), result=result))
+    if validation_arg is not None:
+        _emit_hero_validation_diagram(
+            Path(image_arg), metrics, result,
+            style=style, data=data, verse=verse, validation_arg=validation_arg,
+        )
+    return 0
+
+
 def handle_pip_face_centre_command(args) -> int:
     """Measure face centre vs circular PiP border (MediaPipe / balance)."""
     from .avatar_calibrate import pip_probe_size_px
@@ -1174,6 +1456,9 @@ def handle_convert_video_command(args, data: Optional[dict] = None):
 
             sf = data.get("_source_file") or str(Path(args.input_file).resolve())
             data = maybe_auto_calibrate_deck(data, source_file=sf)
+            from .hero_panel_calibrate import maybe_auto_place_hero_text_deck
+
+            data = maybe_auto_place_hero_text_deck(data, source_file=sf)
             if data.get("_avatar_calibration"):
                 from .avatar_calibrate import AvatarFramingResult
 
@@ -1182,6 +1467,13 @@ def handle_convert_video_command(args, data: Optional[dict] = None):
                     for k, v in data["_avatar_calibration"].items()
                 }
                 print(format_calibration_report(report))
+            if data.get("_hero_text_placement"):
+                from .hero_panel_calibrate import HeroPanelResult, format_hero_panel_report
+
+                hero_report = {
+                    k: HeroPanelResult(**v) for k, v in data["_hero_text_placement"].items()
+                }
+                print(format_hero_panel_report(hero_report))
         opts = parse_video_options(args, data)
         if args.video_output:
             video_path = args.video_output
@@ -1257,8 +1549,13 @@ def _pipeline_options_from_args(args, deck_path: str, data: Optional[dict] = Non
         build_pptx=not getattr(args, "skip_build", False),
         export_mp4=getattr(args, "convert_video", False) or bool(pipe.get("export_mp4")),
         export_slide_jpegs=getattr(args, "export_slide_jpegs", False),
-        calibrate_force=getattr(args, "force", False) or bool(ac.get("force")),
+        calibrate_force=(
+            getattr(args, "force", False)
+            or bool(ac.get("force"))
+            or bool((data.get("hero_text_placement") or {}).get("force"))
+        ),
         pip_validation_image=getattr(args, "validation_image", None),
+        hero_validation_image=getattr(args, "validation_image", None),
         golden_slide_dir=getattr(args, "golden_slide_dir", None) or pipe.get("golden_slide_dir"),
         seed_timing=getattr(args, "seed_timing", False) or bool(pipe.get("seed_timing")),
         variant_prefix=str(pipe.get("variant_prefix") or "heygen-50590"),
@@ -1270,7 +1567,10 @@ def _pipeline_options_from_args(args, deck_path: str, data: Optional[dict] = Non
         validate_plan=bool(pipe.get("validate_plan", True)),
         validate_rights=bool(pipe.get("validate_rights", True)),
     )
-    return PipelineOptions.merge_pipeline_yaml(opts, pipe, avatar_calibration=ac)
+    return PipelineOptions.merge_pipeline_yaml(
+        opts, pipe, avatar_calibration=ac,
+        hero_text_placement=data.get("hero_text_placement"),
+    )
 
 
 def _print_pipeline_report(report) -> None:
@@ -2088,6 +2388,12 @@ def main():
     if args.command == 'calibrate-avatar':
         return handle_calibrate_avatar_command(args)
 
+    if args.command == 'hero-panel-place':
+        return handle_hero_panel_place_command(args)
+
+    if args.command == 'hero-panel-centre':
+        return handle_hero_panel_centre_command(args)
+
     if args.command == 'pipeline':
         return handle_pipeline_command(args)
 
@@ -2173,6 +2479,25 @@ def main():
     )
 
     data = maybe_auto_calibrate_deck(data, source_file=str(Path(input_file).resolve()))
+    from .hero_panel_calibrate import (
+        HeroPanelResult,
+        HeroTextConfig,
+        format_hero_panel_report,
+        hero_text_deps_hint,
+        maybe_auto_place_hero_text_deck,
+    )
+
+    data = maybe_auto_place_hero_text_deck(data, source_file=str(Path(input_file).resolve()))
+    if data.get("_hero_text_placement"):
+        report = {k: HeroPanelResult(**v) for k, v in data["_hero_text_placement"].items()}
+        print(format_hero_panel_report(report))
+        hcfg = HeroTextConfig.from_dict(
+            data.get("hero_text_placement"),
+            style=data.get("slide_style") or {},
+        )
+        hint = hero_text_deps_hint(hcfg)
+        if hint:
+            print(hint)
     if data.get("_avatar_calibration"):
         report = {
             k: AvatarFramingResult(**v) for k, v in data["_avatar_calibration"].items()

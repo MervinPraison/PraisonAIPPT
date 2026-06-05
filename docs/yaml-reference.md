@@ -23,6 +23,7 @@ Source: `praisonaippt/schema.py`, `praisonaippt/yaml_validate.py`, `praisonaippt
 | `video_export` | optional | MP4 compositor options — see [Video export](video-export.md) |
 | `pipeline` | optional | CI gates, sync, and orchestration — see below |
 | `avatar_calibration` | optional | PiP framing — see below |
+| `hero_text_placement` | optional | Hero headline anchor — see below |
 | `slide_timestamps` | optional | Wall-clock start (seconds) per slide for video timing |
 | `slide_images_dir` | optional | Export `slide-NNN.jpg` after build — [Slide JPEG export](slide-images.md) |
 | `skip_title_slide` | optional | Omit auto title slide (`presentation_title` / `presentation_subtitle`) |
@@ -209,6 +210,27 @@ Optional top-level block. When `auto: true`, runs before PPTX/video build and me
 | `force` | bool | Ignore cache |
 
 Cache directory: `.praisonaippt/avatar-framing/` beside the deck (gitignored). See [Avatar PiP calibration](avatar-calibration.md).
+
+---
+
+## `hero_text_placement` (hero headline anchor)
+
+Optional top-level block. When `auto: true`, runs after avatar calibration and sets `_hero_panel_anchor` on verses with `text_panel.anchor: auto`.
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `auto` | bool | Run placement when building (default false) |
+| `method` | string | `hybrid`, `east`, `paddle`, `rapidocr`, `mser`, `heuristic`, `vision` |
+| `detector` | string | `auto`, `paddle`, `rapidocr`, `east`, `mser`, `heuristic` |
+| `min_confidence` | float | Minimum offline score (default `0.55`) |
+| `preferred_anchor` | string | Soft bias for scoring |
+| `fallback_anchor` | string | Used when all anchors rejected |
+| `pad_hard_px` / `pad_soft_px` | float | OCR box padding |
+| `vision_fallback` | bool | Optional LLM anchor suggester |
+| `anchor_weight` | float | Penalty for non-preferred anchors |
+| `force` | bool | Ignore cache |
+
+Cache: `.praisonaippt/hero-text-placement/`. See [Hero text panel calibration](hero-text-calibration.md).
 
 ---
 

@@ -67,6 +67,7 @@ nav:
       - Video export: video-export.md
       - HeyGen article examples: heygen-examples.md
       - Avatar PiP calibration: avatar-calibration.md
+      - Hero text panel calibration: hero-text-calibration.md
       - Slide JPEG export: slide-images.md
       - Slide QA (golden, MP4 frames): slide-qa.md
   - Reference:
