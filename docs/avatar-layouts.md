@@ -14,7 +14,7 @@ Sixteen kinds are registered in `AVATAR_SLIDE_TYPES`. Set `slide_type` on a vers
 | `media_only` | Full-slide media | `media_path` | `media_fit`, `media_poster_path` |
 | `avatar_media_1` | 50/50: media left, avatar right | — | `avatar_video_path`, `media_path`, `media_fit` |
 | `avatar_media_2` | 40/60 split | — | same as `avatar_media_1` |
-| `avatar_media_3` | Full media + corner PiP | — | `avatar_video_path`, `media_path` |
+| `avatar_media_3` | Hero screenshot + corner PiP | `headline`, `media_path` | `text_panel`, `hero_layout`, `text_style`, `media_fit` |
 | `avatar_name_card` | Avatar + name/title pills | `headline` | `subheader`, `avatar_video_path` |
 | `avatar_headline` | Headline + corner PiP | `headline` | `subheader`, `avatar_video_path` |
 | `avatar_headline_full` | Full avatar + top panel | `headline` | `subheader`, `avatar_video_path` |
@@ -33,7 +33,58 @@ Without `avatar_video_path`, avatar regions render as grey placeholders in PPTX;
 
 ### `avatar_quote` and double avatar
 
-For **`avatar_quote`**, the PPTX intentionally **does not** embed a second headshot shape — only the quote layout is drawn. The HeyGen PiP is added in **MP4 export** so you do not get two avatars on screen. Slide JPEG previews may show no face on that slide; compare the MP4. Tune PiP framing with [Avatar PiP calibration](avatar-calibration.md).
+For **`avatar_quote`**, the PPTX intentionally **does not** embed a second headshot shape — only the quote layout is drawn. The HeyGen PiP is added in **MP4 export** so you do not get two avatars on screen. Slide JPEG previews may show no face on that slide unless `jpeg_show_pip_preview: true` (grey placeholder only); compare the MP4 or `mp4-frames/`. Tune PiP framing with [Avatar PiP calibration](avatar-calibration.md).
+
+For **`avatar_media_3`**, media is baked into the slide PNG for MP4 export (`skip_media_overlay`); the live PiP is composited in FFmpeg. JPEGs may show a still/grey ring in the PiP corner — use [Slide QA — MP4 frames](slide-qa.md) for PiP truth.
+
+---
+
+<a id="avatar_media_3-full-bleed-hero"></a>
+
+## `avatar_media_3` — stacked vs full-bleed hero
+
+Two layout modes controlled by `slide_style.layouts.avatar_media_3.hero_layout` (or per-verse `text_panel.hero_layout`):
+
+| Mode | Media region | Text | Default |
+|------|--------------|------|---------|
+| **`stacked`** | Band **below** a fixed top-left navy panel | Opaque panel (`text_style: navy_panel`) | Yes (backward compatible) |
+| **`full_bleed`** | **Full slide** (`cover` / `contain` on entire content area) | Floating panel at a chosen **anchor** | HeyGen images variant |
+
+### `text_panel` (per verse or layout defaults)
+
+```yaml
+slide_style:
+  layouts:
+    avatar_media_3:
+      hero_layout: full_bleed
+      text_style: semi_panel      # navy_panel | semi_panel | overlay
+      panel_width_ratio: 0.38
+      panel_height_in: 0.82
+      panel_margin_in: 0.32
+      text_pip_gap_in: 0.14       # clearance from PiP box
+
+sections:
+  - verses:
+      - slide_type: avatar_media_3
+        headline: Dreaming
+        subheader: Persistent, proactive agents — work between sessions
+        media_path: slide_images/HHt8A9BbYAAUfvZ.jpg
+        media_fit: cover
+        text_panel:
+          anchor: top_right       # top_left | top_right | bottom_left | bottom_right | top | bottom
+          width_ratio: 0.38       # optional override
+        avatar_video_path: examples/heygen-article-50590.mp4
+        video_overlay: *pip_hero_overlay
+```
+
+| `text_style` | Rendering |
+|--------------|-----------|
+| `navy_panel` / `semi_panel` | Opaque navy box + white headline/subheader (`_add_text_panel`) |
+| `overlay` | Text only, no fill (`_add_headline_content`) — use on dark hero regions |
+
+Text boxes are **shifted** when they would overlap the bottom-right PiP region (`text_pip_gap_in`).
+
+**Reference deck:** `examples/heygen-50590-video-audio-heygen-images.yaml` — full-bleed product screenshots with per-slide anchors. See [HeyGen examples](heygen-examples.md) and [Slide QA](slide-qa.md).
 
 ---
 
@@ -84,7 +135,7 @@ Overrides merge via `layout_in(style, kind, key)` — layout-specific keys win; 
 | `pip` (circle) | `0.02` / `1.47` (+ circle trim) | Floating PiP on list/verse slides |
 | `avatar_only` | `0.09` / `1.38` | Full-bleed headshot |
 | `avatar_media_1` / `_2` | `0.07` / `1.40` | Split columns |
-| `avatar_media_3` | `0.025` / `1.46` | Corner PiP (circle) |
+| `avatar_media_3` | `0.025` / `1.46` | Corner PiP; optional `hero_layout`, `text_style`, `text_anchor`, `text_pip_gap_in` |
 | `avatar_headline` / `avatar_quote` | `0.025` / `1.46` | Corner PiP |
 | `avatar_headline_full` | `0.10` / `1.36` | Top panel + avatar |
 | `avatar_name_card` | `0.09` / `1.38` | Name card |
@@ -176,6 +227,7 @@ video_export:
 
 ## Related
 
+- [Slide QA (golden, MP4 frames)](slide-qa.md)
 - [Video export](video-export.md)
 - [Deck layouts](deck-layouts.md)
 - [Slide style reference](slide-style-reference.md)

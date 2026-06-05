@@ -130,7 +130,7 @@ Dedicated `avatar_*` / `deck_*` types handle layout internally.
 | `duration_sec`, `audio_start_sec`, `audio_path` | Slide timing |
 | `narration_mode`, `sync_mode` | Per-slide narration |
 
-Deck-wide: `video_export`, `slide_timestamps`. See [Video export](video-export.md).
+Deck-wide: `video_export`, `slide_timestamps`. See [Video export](video-export.md). For JPEG golden tests and MP4 frame QA, see [Slide QA](slide-qa.md).
 
 ---
 

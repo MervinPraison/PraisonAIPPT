@@ -260,6 +260,152 @@ def _text_panel_box(prs, style: dict, kind: str, position: str) -> RegionBox:
     return RegionBox(cx + margin, cy + ch - ph - margin, pw, ph)
 
 
+_TEXT_ANCHORS = frozenset({
+    "top_left", "top_right", "bottom_left", "bottom_right", "top", "bottom",
+})
+_HERO_LAYOUTS = frozenset({"stacked", "full_bleed"})
+_TEXT_STYLES = frozenset({"navy_panel", "overlay", "semi_panel"})
+
+
+def _hero_layout_mode(style: dict, verse: Optional[dict], kind: str) -> str:
+    tp = (verse or {}).get("text_panel") if isinstance((verse or {}).get("text_panel"), dict) else {}
+    raw = tp.get("hero_layout") or layout_in(style, kind, "hero_layout", "stacked")
+    mode = str(raw).lower().strip()
+    return mode if mode in _HERO_LAYOUTS else "stacked"
+
+
+def _text_style_mode(style: dict, verse: Optional[dict], kind: str) -> str:
+    tp = (verse or {}).get("text_panel") if isinstance((verse or {}).get("text_panel"), dict) else {}
+    raw = tp.get("style") or layout_in(style, kind, "text_style", "navy_panel")
+    mode = str(raw).lower().strip()
+    return mode if mode in _TEXT_STYLES else "navy_panel"
+
+
+def _verse_text_panel_cfg(style: dict, verse: Optional[dict], kind: str) -> dict:
+    tp = (verse or {}).get("text_panel") if isinstance((verse or {}).get("text_panel"), dict) else {}
+    anchor = str(tp.get("anchor") or layout_in(style, kind, "text_anchor", "top_left")).lower().strip()
+    if anchor not in _TEXT_ANCHORS:
+        anchor = "top_left"
+    return {
+        "anchor": anchor,
+        "width_ratio": float(
+            tp.get("width_ratio") or layout_in(style, kind, "panel_width_ratio", 0.42)
+        ),
+        "height_in": float(tp.get("height_in") or layout_in(style, kind, "panel_height_in", 0.9)),
+        "margin_in": float(tp.get("margin_in") or layout_in(style, kind, "panel_margin_in", 0.35)),
+        "max_width_ratio": tp.get("max_width_ratio"),
+    }
+
+
+def _estimate_panel_height(headline: str, subheader: str, width_in: float) -> float:
+    """Minimum panel height (inches) so headline + subheader stay inside the navy box."""
+    w = max(2.4, float(width_in))
+    chars = max(12, int(w * 5.6))
+    head = (headline or "").strip()
+    sub = (subheader or "").strip()
+    head_lines = max(1, (len(head) + chars - 1) // chars)
+    sub_lines = max(1, (len(sub) + chars - 1) // chars) if sub else 0
+    return 0.26 + head_lines * 0.40 + sub_lines * 0.30 + 0.24
+
+
+def _text_panel_box_anchored(
+    prs,
+    style: dict,
+    kind: str,
+    cfg: dict,
+    *,
+    pip: Optional[RegionBox] = None,
+    verse: Optional[dict] = None,
+) -> RegionBox:
+    cx, cy, cw, ch = _content_area(prs, style, kind)
+    margin = float(cfg["margin_in"])
+    pw = cw * float(cfg["width_ratio"])
+    if cfg.get("max_width_ratio") is not None:
+        pw = min(pw, cw * float(cfg["max_width_ratio"]))
+    ph = float(cfg["height_in"])
+    if verse is not None:
+        ph = max(
+            ph,
+            _estimate_panel_height(
+                str(verse.get("headline") or ""),
+                str(verse.get("subheader") or ""),
+                pw,
+            ),
+        )
+    anchor = cfg["anchor"]
+    pip_gap = float(layout_in(style, kind, "text_pip_gap_in", 0.12))
+    pip_left = pip.left_in - pip_gap if pip else cx + cw
+
+    if anchor == "top_left":
+        left, top = cx + margin, cy + margin
+    elif anchor == "top":
+        left, top = cx + (cw - pw) / 2, cy + margin
+    elif anchor == "top_right":
+        left, top = cx + cw - pw - margin, cy + margin
+    elif anchor == "bottom_left":
+        left = cx + margin
+        top = max(cy + margin, cy + ch - ph - margin)
+        if pip and left + pw > pip_left and top + ph > pip.top_in - pip_gap:
+            top = min(top, pip.top_in - ph - pip_gap)
+    elif anchor == "bottom_right":
+        left = cx + cw - pw - margin
+        top = max(cy + margin, cy + ch - ph - margin)
+        if pip and left < pip_left + pip.width_in + pip_gap:
+            left = max(cx + margin, pip_left - pw - pip_gap)
+    else:
+        left, top = cx + margin, cy + ch - ph - margin
+
+    box = RegionBox(
+        left, top, max(1.0, pw), max(0.55, ph),
+        rounded=True, corner_radius_in=0.08,
+    )
+    if pip:
+        gap = pip_gap
+        while (
+            box.left_in + box.width_in > pip.left_in - gap
+            and box.top_in + box.height_in > pip.top_in - gap
+            and box.left_in < pip.left_in + pip.width_in + gap
+            and box.top_in < pip.top_in + pip.height_in + gap
+        ):
+            moved = False
+            new_top = pip.top_in - gap - box.height_in
+            if new_top >= cy + margin:
+                box = RegionBox(box.left_in, new_top, box.width_in, box.height_in)
+                moved = True
+            elif box.left_in + box.width_in > pip.left_in - gap:
+                new_left = pip.left_in - gap - box.width_in
+                if new_left >= cx + margin:
+                    box = RegionBox(new_left, box.top_in, box.width_in, box.height_in)
+                    moved = True
+            if not moved:
+                break
+    if pip and anchor.startswith("top"):
+        max_bottom = pip.top_in - pip_gap
+        if box.top_in + box.height_in > max_bottom:
+            box = RegionBox(box.left_in, box.top_in, box.width_in, max(0.55, max_bottom - box.top_in))
+    if pip and anchor.startswith("bottom"):
+        max_bottom = cy + ch - margin
+        if box.top_in + box.height_in > max_bottom:
+            box = RegionBox(box.left_in, max(cy + margin, max_bottom - box.height_in), box.width_in, box.height_in)
+    return box
+
+
+def _add_hero_headline(
+    slide,
+    box: RegionBox,
+    headline: str,
+    subheader: str,
+    style: dict,
+    theme: dict,
+    *,
+    text_style: str,
+) -> None:
+    if text_style == "overlay":
+        _add_headline_content(slide, box, headline, subheader, style, theme)
+    else:
+        _add_text_panel(slide, box, headline, subheader, style, theme)
+
+
 def _media_region_below_panel(
     cx: float,
     cy: float,
@@ -306,7 +452,9 @@ def _name_card_pill_boxes(
     ), None
 
 
-def _slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional[RegionBox]]:
+def _slide_regions(
+    prs, kind: str, style: dict, verse: Optional[dict] = None,
+) -> Dict[str, Optional[RegionBox]]:
     cx, cy, cw, ch = _content_area(prs, style, kind)
     full = RegionBox(cx, cy, cw, ch)
     regions: Dict[str, Optional[RegionBox]] = {
@@ -339,10 +487,18 @@ def _slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional[RegionBox]
         )
     elif kind in _PIP_KINDS:
         if kind == "avatar_media_3":
-            panel = _text_panel_box(prs, style, kind, "top")
-            regions["text_panel"] = panel
-            regions["media"] = _media_region_below_panel(cx, cy, cw, ch, panel, style, kind)
-            regions["avatar"] = _pip_box(cx, cy, cw, ch, style, kind)
+            pip = _pip_box(cx, cy, cw, ch, style, kind)
+            regions["avatar"] = pip
+            if _hero_layout_mode(style, verse, kind) == "full_bleed":
+                regions["media"] = full
+                cfg = _verse_text_panel_cfg(style, verse, kind)
+                regions["text_panel"] = _text_panel_box_anchored(
+                    prs, style, kind, cfg, pip=pip, verse=verse,
+                )
+            else:
+                panel = _text_panel_box(prs, style, kind, "top")
+                regions["text_panel"] = panel
+                regions["media"] = _media_region_below_panel(cx, cy, cw, ch, panel, style, kind)
         else:
             regions["media"] = full if kind != "avatar_quote" else None
             regions["avatar"] = _pip_box(cx, cy, cw, ch, style, kind)
@@ -372,9 +528,11 @@ def _slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional[RegionBox]
     return regions
 
 
-def export_slide_regions(prs, kind: str, style: dict) -> Dict[str, Optional[RegionBox]]:
+def export_slide_regions(
+    prs, kind: str, style: dict, verse: Optional[dict] = None,
+) -> Dict[str, Optional[RegionBox]]:
     """Public wrapper for layout region geometry (inches on slide)."""
-    return _slide_regions(prs, kind, style)
+    return _slide_regions(prs, kind, style, verse=verse)
 
 
 def region_box_to_pixels(
@@ -473,15 +631,20 @@ def _jpeg_pip_preview_enabled(style: Optional[dict], verse: dict) -> bool:
 def _place_pip_preview_placeholder(slide, box: RegionBox, style: Optional[dict]) -> None:
     """Grey circle for JPEG layout QA; live HeyGen PiP is composited in MP4 export."""
     from pptx.enum.shapes import MSO_SHAPE
-    from pptx.util import Inches, Pt
 
     left, top, width, height = _box_lengths(box)
     shape = slide.shapes.add_shape(MSO_SHAPE.OVAL, left, top, width, height)
     shape.fill.solid()
     shape.fill.fore_color.rgb = _PIP_BACKDROP_GREY
-    border = str(layout_in(style or {}, "pip", "border_color", "#FFFFFF"))
-    shape.line.color.rgb = _hex_rgb(border)
-    shape.line.width = Pt(float(layout_in(style or {}, "pip", "border_width_pt", 2.0)))
+    shape.line.fill.background()
+
+
+def _place_overlay_only_pip(
+    slide, box: RegionBox, style: Optional[dict], verse: dict,
+) -> None:
+    """PiP drawn in FFmpeg only — optional grey placeholder for JPEG QA (no white ring)."""
+    if _jpeg_pip_preview_enabled(style, verse):
+        _place_pip_preview_placeholder(slide, box, style)
 
 
 def _fit_movie_in_box(slide, movie_path: str, poster: io.BytesIO, box: RegionBox, mime: str) -> None:
@@ -787,15 +950,7 @@ def place_floating_avatar_pip(
     if source_file:
         style["_source_file"] = source_file
     box = export_floating_pip_box(prs, style)
-    _place_avatar_in_box(
-        slide,
-        box,
-        path,
-        poster_path=verse.get("avatar_poster_path"),
-        source_file=source_file,
-        style=style,
-        draw_frame=False,
-    )
+    _place_overlay_only_pip(slide, box, style, verse)
 
 
 def _draw_border_frame(slide, prs, style: dict, kind: str) -> None:
@@ -950,24 +1105,43 @@ def _draw_centre_diamond(slide, prs, style: dict) -> None:
 
 
 def _add_text_panel(slide, box: RegionBox, headline: str, subheader: str, style: dict, theme: dict) -> None:
+    from pptx.enum.shapes import MSO_SHAPE
+
     from .core import _write_body_paragraph
 
-    _draw_filled_rect(slide, box, _panel_colour(style))
     left, top, width, height = _box_lengths(box)
-    tb = slide.shapes.add_textbox(left, top, width, height)
-    tf = tb.text_frame
+    shape = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height,
+    )
+    if box.rounded:
+        try:
+            short_in = min(box.width_in, box.height_in)
+            adj = min(0.5, max(0.02, box.corner_radius_in / short_in)) if short_in > 0 else 0.08
+            shape.adjustments[0] = adj
+        except (IndexError, AttributeError):
+            pass
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = _panel_colour(style)
+    shape.line.fill.background()
+    tf = shape.text_frame
     tf.word_wrap = True
-    tf.margin_left = tf.margin_right = Pt(12)
-    tf.margin_top = tf.margin_bottom = Pt(8)
-    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
-    head_pt = int(typography_pt(style, "title_size_pt", 44) * 0.75)
-    sub_pt = int(typography_pt(style, "subtitle_size_pt", 28) * 0.85)
+    tf.margin_left = tf.margin_right = Pt(14)
+    tf.margin_top = Pt(12)
+    tf.margin_bottom = Pt(10)
+    tf.vertical_anchor = MSO_ANCHOR.TOP
+    head_pt = int(typography_pt(style, "title_size_pt", 44) * 0.72)
+    sub_pt = int(typography_pt(style, "subtitle_size_pt", 28) * 0.78)
+    if box.width_in < 3.8:
+        head_pt = max(22, head_pt - 2)
+        sub_pt = max(16, sub_pt - 2)
     panel_theme = dict(theme)
     panel_theme["body"] = RGBColor(0xFF, 0xFF, 0xFF)
     p = tf.paragraphs[0]
+    p.space_after = Pt(6)
     _write_body_paragraph(p, headline, head_pt, panel_theme, style=style, alignment=PP_ALIGN.LEFT)
     if subheader:
         p2 = tf.add_paragraph()
+        p2.space_before = Pt(2)
         _write_body_paragraph(p2, subheader, sub_pt, panel_theme, style=style, alignment=PP_ALIGN.LEFT)
 
 
@@ -1033,7 +1207,7 @@ def render_avatar_slide(prs, kind: str, verse: dict, style=None, *, source_file:
     if kind not in ("avatar_quote", "avatar_intro"):
         _apply_slide_background(slide, style, prs)
     theme = _resolve_theme(style)
-    regions = _slide_regions(prs, kind, style)
+    regions = _slide_regions(prs, kind, style, verse=verse)
 
     media_box = regions.get("media")
     avatar_box = regions.get("avatar")
@@ -1047,17 +1221,7 @@ def render_avatar_slide(prs, kind: str, verse: dict, style=None, *, source_file:
     if kind == "avatar_quote":
         _render_avatar_quote(slide, prs, verse, style, regions, theme)
         if avatar_box:
-            if kind not in _AVATAR_PIP_VIDEO_OVERLAY_ONLY:
-                _place_avatar_in_box(
-                    slide,
-                    avatar_box,
-                    verse.get("avatar_video_path"),
-                    poster_path=verse.get("avatar_poster_path"),
-                    source_file=source_file,
-                    style=style,
-                )
-            elif _jpeg_pip_preview_enabled(style, verse):
-                _place_pip_preview_placeholder(slide, avatar_box, style)
+            _place_overlay_only_pip(slide, avatar_box, style, verse)
         _stamp_slide_type_note(slide, kind, verse)
         return slide
 
@@ -1123,15 +1287,17 @@ def render_avatar_slide(prs, kind: str, verse: dict, style=None, *, source_file:
             source_file=source_file,
         )
     if avatar_box:
-        _place_avatar_in_box(
-            slide,
-            avatar_box,
-            verse.get("avatar_video_path"),
-            poster_path=verse.get("avatar_poster_path"),
-            source_file=source_file,
-            style=style,
-            draw_frame=False if kind in _AVATAR_PIP_VIDEO_OVERLAY_ONLY else None,
-        )
+        if kind in _AVATAR_PIP_VIDEO_OVERLAY_ONLY:
+            _place_overlay_only_pip(slide, avatar_box, style, verse)
+        else:
+            _place_avatar_in_box(
+                slide,
+                avatar_box,
+                verse.get("avatar_video_path"),
+                poster_path=verse.get("avatar_poster_path"),
+                source_file=source_file,
+                style=style,
+            )
 
     if kind == "avatar_name_card":
         cx, cy, cw, ch = _content_area(prs, style, kind)
@@ -1141,13 +1307,15 @@ def render_avatar_slide(prs, kind: str, verse: dict, style=None, *, source_file:
     else:
         panel = regions.get("text_panel")
         if panel:
-            _add_text_panel(
+            tstyle = _text_style_mode(style, verse, kind) if kind == "avatar_media_3" else "navy_panel"
+            _add_hero_headline(
                 slide,
                 panel,
                 str(verse.get("headline", "")),
                 str(verse.get("subheader") or ""),
                 style,
                 theme,
+                text_style=tstyle,
             )
 
     if kind == "avatar_outro":

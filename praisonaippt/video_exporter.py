@@ -481,7 +481,7 @@ def build_video_manifest(
         media_region = None
 
         if slide_type in AVATAR_SLIDE_TYPES:
-            regions = export_slide_regions(prs, slide_type, style)
+            regions = export_slide_regions(prs, slide_type, style, verse=verse)
             av_region = region_from_placement(
                 regions.get("avatar"), overlays.avatar, slide_w_in, slide_h_in, style, framing_kind,
             )

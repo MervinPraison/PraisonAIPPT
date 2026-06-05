@@ -263,9 +263,9 @@ Runs sync + builds avatar gallery, deck gallery, and all five HeyGen variants.
 | Content master | `heygen-50590-content.yaml` |
 | Sync | Five `heygen-50590-{variant}.yaml` |
 | Calibration cache | `.praisonaippt/avatar-framing/*.json` (gitignored) |
-| Build | `*.pptx`, `slide_images/slide-NNN.jpg` |
+| Build | `*.pptx`, `slide_images/.../slide-NNN.jpg`, optional `golden/`, `mp4-frames/` |
 | Export | `*.mp4`, optional `*.srt` |
-| QA | `*_pip_validation.png` |
+| QA | `*_pip_validation.png`, `.praisonaippt/*.pipeline-report.json` |
 
 ---
 
@@ -356,7 +356,9 @@ Each gate is recorded in `report.json` under `gates` with `exit_code` (0 = pass,
 | **Post-render** | `post_render` (duration ± tol, audio, width×height, FPS) | `pipeline --convert-video` |
 | **A/V sync** | `av_sync` + `timing_drift` (Whisper vs `audio_start_sec` / ffprobe media) | `transcript_path` in `pipeline:` |
 | **PiP centring** | `pip_centring` (fails CI when not centred) | `validate_pip: true` or `--validate-pip`; `--strict-pip` = all seeks |
-| **Slide JPEG golden** | `slide_jpegs` (MD5 vs `--golden-slide-dir`) | `pipeline.golden_slide_dir` |
+| **Slide JPEG golden** | `slide_jpegs` (MD5 vs `golden_slide_dir`) | `pipeline.golden_slide_dir` |
+| **Slide QA manifest** | `slide_qa` (expect_pip/media, hero coverage) | `slide_qa` + verse `qa`; `validate_slide_qa` |
+| **MP4 seek frames** | `mp4_frames` (one JPEG per verse at `audio_start_sec`) | `pipeline.export_mp4_frames`, `mp4_frames_dir` |
 | **Plan approval** | `plan_approval` before sync | `plan-slides` → edit → `approve-plan` → `plan_draft` / `content_approved` |
 | **Rights/licensing** | `rights_licensing` | `pipeline.rights_acknowledged` + `require_rights_ack` for CI blocker |
 
@@ -396,7 +398,9 @@ praisonaippt pipeline -i examples/heygen-50590-video-audio-heygen.yaml \
 - [ ] `sync_heygen_variants.py` run after content edits  
 - [ ] `pip-face-centre` shows `centred: yes` or L≈R on validation PNG  
 - [ ] Listened to MP4 — correct audio source variant (HeyGen vs MP3)  
-- [ ] Slide JPEGs look correct (quote slide may omit baked avatar — check MP4)  
+- [ ] Slide JPEGs look correct (quote slide may omit baked avatar — check MP4 or `mp4-frames/`)  
+- [ ] `validate-deck` passes (`slide_jpegs`, `slide_qa`, `mp4_frames` when configured)  
+- [ ] Full-bleed hero slides: headline panel clears PiP and key UI text  
 
 ---
 

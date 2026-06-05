@@ -479,7 +479,7 @@ Used with `praisonaippt -i deck.yaml` (or `.json`):
 
 **Feature overview:** [Recent features](recent-features.md)
 
-Full behaviour: [Video export](video-export.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md) · [Pipeline architecture](architecture-pipeline.md)
+Full behaviour: [Video export](video-export.md) · [HeyGen examples](heygen-examples.md) · [Avatar calibration](avatar-calibration.md) · [Slide JPEGs](slide-images.md) · [Slide QA](slide-qa.md) · [Pipeline architecture](architecture-pipeline.md)
 
 ### Video export
 
@@ -601,6 +601,9 @@ praisonaippt pipeline -i deck.yaml --skip-build --convert-video
 | `export_mp4` | YAML-only: export MP4 in `pipeline` without CLI flag |
 | `post_render_qc` / `strict_post_render` | ffprobe QC after MP4 |
 | `golden_slide_dir` | Golden JPEG MD5 folder |
+| `export_mp4_frames` | Export MP4 seek frames per verse |
+| `mp4_frames_dir` | Output dir for `mp4-slide-NNN.jpg` |
+| `validate_slide_qa` | Run slide QA manifest gate |
 | `require_rights_ack` / `rights_acknowledged` | Rights gate |
 | `content_approved` / `plan_approved` / `plan_draft` | Plan / content gates |
 | `fail_fast` | Stop on first failed gate (default true) |

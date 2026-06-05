@@ -83,7 +83,17 @@ praisonaippt -i examples/heygen-50590-video-audio-heygen.yaml \
   --convert-video --video-output examples/heygen-50590-video-audio-heygen.mp4
 ```
 
-See [HeyGen article examples](heygen-examples.md) and [Video export](video-export.md).
+**Images variant** (full-bleed hero screenshots, same timing):
+
+```bash
+praisonaippt -i examples/heygen-50590-video-audio-heygen-images.yaml \
+  -o examples/heygen-50590-video-audio-heygen-images.pptx \
+  --convert-video --video-output examples/heygen-50590-video-audio-heygen-images.mp4
+
+praisonaippt validate-deck -i examples/heygen-50590-video-audio-heygen-images.yaml
+```
+
+See [HeyGen article examples](heygen-examples.md), [Slide QA](slide-qa.md), and [Video export](video-export.md).
 
 ## ✅ You're Ready!
 

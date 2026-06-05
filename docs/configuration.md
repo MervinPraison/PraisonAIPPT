@@ -330,4 +330,4 @@ Check priority:
 
 - [OAuth Setup](oauth-setup.md)
 - [Google Drive Upload](google-drive-upload.md)
-- [CLI Reference](../README.md#complete-cli-options)
+- [CLI Reference](commands.md)

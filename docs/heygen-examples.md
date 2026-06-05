@@ -55,6 +55,39 @@ With **`narration_mode: auto`**, HeyGen embedded audio wins when the avatar file
 | `heygen-50590-video-only-silent.yaml` | Yes | None | `fixed` | B-roll / timing preview |
 | `heygen-50590-slides-silent.yaml` | No | None | `fixed` | Slide timing demo |
 
+## Images variant (full-bleed product heroes)
+
+Separate from the five media variants — same HeyGen MP4 + Whisper timings as `heygen-50590-video-audio-heygen.yaml`, with **product screenshots** and **floating headline panels**:
+
+| File | Role |
+|------|------|
+| `heygen-50590-video-audio-heygen-images.yaml` | Full-bleed `avatar_media_3`, per-slide `text_panel.anchor` |
+| `heygen-50590-video-audio-heygen-images.pptx` / `.mp4` / `.srt` | Built outputs (~57 s) |
+| `slide_images/heygen-50590-images/` | Layout JPEGs + `golden/` + `mp4-frames/` |
+
+```yaml
+# Key settings (see file for full deck)
+skip_title_slide: true
+slide_style:
+  layouts:
+    avatar_media_3:
+      hero_layout: full_bleed
+      text_style: semi_panel
+pipeline:
+  golden_slide_dir: slide_images/heygen-50590-images/golden
+  export_mp4_frames: true
+```
+
+```bash
+praisonaippt -i examples/heygen-50590-video-audio-heygen-images.yaml \
+  -o examples/heygen-50590-video-audio-heygen-images.pptx \
+  --convert-video --video-output examples/heygen-50590-video-audio-heygen-images.mp4
+
+praisonaippt validate-deck -i examples/heygen-50590-video-audio-heygen-images.yaml
+```
+
+**Docs:** [Avatar layouts — full-bleed hero](avatar-layouts.md#avatar_media_3-full-bleed-hero) · [Slide QA](slide-qa.md)
+
 ## Build one variant
 
 ```bash
@@ -96,7 +129,8 @@ Writes combination decks (same presets as `MEDIA_VARIANTS` in code). For the mai
 |-------|-----|
 | PiP face centre / `crop_x` | [Avatar PiP calibration](avatar-calibration.md) |
 | `avatar_quote` (video-only PiP, no double avatar) | [Avatar layouts](avatar-layouts.md) |
-| Slide JPEG previews | [Slide JPEG export](slide-images.md) |
+| Full-bleed hero screenshots | [Avatar layouts — `avatar_media_3`](avatar-layouts.md#avatar_media_3-full-bleed-hero) |
+| Slide JPEG + golden + MP4 frame QA | [Slide QA](slide-qa.md) · [Slide JPEG export](slide-images.md) |
 | `video_export` keys | [YAML deck reference](yaml-reference.md) |
 | CLI flags | [Commands — video & avatar](commands.md#video-avatar-and-heygen-commands) |
 

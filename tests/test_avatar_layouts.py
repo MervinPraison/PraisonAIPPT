@@ -90,6 +90,44 @@ def test_avatar_media_3_media_below_text_panel():
     assert media.height_in > 3.0
 
 
+def test_avatar_media_3_full_bleed_uses_full_media():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _content_area, _slide_regions
+
+    prs = Presentation()
+    style = {"layouts": {"avatar_media_3": {"hero_layout": "full_bleed"}}}
+    verse = {"text_panel": {"anchor": "top_right"}}
+    regions = _slide_regions(prs, "avatar_media_3", style, verse=verse)
+    cx, cy, cw, ch = _content_area(prs, style, "avatar_media_3")
+    media = regions["media"]
+    assert media is not None
+    assert abs(media.top_in - cy) < 0.02
+    assert abs(media.height_in - ch) < 0.02
+    panel = regions["text_panel"]
+    assert panel.left_in > cx + cw * 0.5
+
+
+def test_avatar_media_3_full_bleed_bottom_left_anchor():
+    from pptx import Presentation
+    from praisonaippt.avatar_layouts import _content_area, _slide_regions
+
+    prs = Presentation()
+    style = {"layouts": {"avatar_media_3": {"hero_layout": "full_bleed"}}}
+    verse = {"text_panel": {"anchor": "bottom_left"}}
+    regions = _slide_regions(prs, "avatar_media_3", style, verse=verse)
+    cx, cy, cw, ch = _content_area(prs, style, "avatar_media_3")
+    panel = regions["text_panel"]
+    pip = regions["avatar"]
+    assert panel.left_in <= cx + cw * 0.45
+    overlaps = (
+        panel.left_in + panel.width_in > pip.left_in - 0.1
+        and panel.top_in + panel.height_in > pip.top_in - 0.1
+        and panel.left_in < pip.left_in + pip.width_in
+        and panel.top_in < pip.top_in + pip.height_in
+    )
+    assert not overlaps
+
+
 def test_avatar_quote_has_no_media_region():
     from pptx import Presentation
     from praisonaippt.avatar_layouts import _slide_regions
@@ -103,6 +141,8 @@ def test_avatar_quote_has_no_media_region():
 def test_avatar_quote_does_not_bake_movie_shape():
     """Quote slides use FFmpeg PiP only — no embedded video shape (avoids double avatar)."""
     from pptx import Presentation
+    from pptx.enum.shapes import MSO_SHAPE_TYPE
+
     from praisonaippt.avatar_layouts import render_avatar_slide
 
     prs = Presentation()
@@ -111,11 +151,32 @@ def test_avatar_quote_does_not_bake_movie_shape():
         "reference": "Subtitle",
         "avatar_video_path": "nonexistent.mp4",
     }
-    from pptx.enum.shapes import MSO_SHAPE_TYPE
-
     slide = render_avatar_slide(prs, "avatar_quote", verse, {})
     movies = [s for s in slide.shapes if s.shape_type == MSO_SHAPE_TYPE.MEDIA]
+    pictures = [s for s in slide.shapes if s.shape_type == MSO_SHAPE_TYPE.PICTURE]
     assert len(movies) == 0
+    assert len(pictures) == 0
+
+
+def test_avatar_media_3_does_not_bake_pip_still():
+    """Media-3 PiP is FFmpeg-only — baked still + overlay caused a double white ring."""
+    from pptx import Presentation
+    from pptx.enum.shapes import MSO_SHAPE_TYPE
+
+    from praisonaippt.avatar_layouts import render_avatar_slide
+
+    prs = Presentation()
+    verse = {
+        "headline": "Dreaming",
+        "subheader": "Agents",
+        "media_path": str(IMG),
+        "avatar_video_path": "nonexistent.mp4",
+    }
+    slide = render_avatar_slide(prs, "avatar_media_3", verse, {})
+    movies = [s for s in slide.shapes if s.shape_type == MSO_SHAPE_TYPE.MEDIA]
+    pictures = [s for s in slide.shapes if s.shape_type == MSO_SHAPE_TYPE.PICTURE]
+    assert len(movies) == 0
+    assert len(pictures) == 1  # hero media only — no baked PiP still
 
 
 def test_avatar_headline_uses_pip_not_full_frame():

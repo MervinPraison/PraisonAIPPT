@@ -435,7 +435,7 @@ def render_slide_segment(
             start = max(0.0, float(ov.video_start_sec))
             chain = f"trim=start={start:.3f}:duration={dur:.3f},setpts=PTS-STARTPTS,{scale}"
         if str(ov.shape).lower() in ("circle", "round", "rounded"):
-            chain = f"{chain},{_circle_alpha_filter(border_px=3)}"
+            chain = f"{chain},{_circle_alpha_filter(border_px=2)}"
         filters.append(f"[{idx}:v]{chain},setsar=1[{tag}]")
         fmt = "auto" if str(ov.shape).lower() in ("circle", "round", "rounded") else "auto"
         filters.append(f"[{prev}][{tag}]overlay={ox}:{oy}:format={fmt}[{out}]")

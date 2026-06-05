@@ -24,6 +24,10 @@ Source: `praisonaippt/schema.py`, `praisonaippt/yaml_validate.py`, `praisonaippt
 | `pipeline` | optional | CI gates, sync, and orchestration — see below |
 | `avatar_calibration` | optional | PiP framing — see below |
 | `slide_timestamps` | optional | Wall-clock start (seconds) per slide for video timing |
+| `slide_images_dir` | optional | Export `slide-NNN.jpg` after build — [Slide JPEG export](slide-images.md) |
+| `skip_title_slide` | optional | Omit auto title slide (`presentation_title` / `presentation_subtitle`) |
+| `jpeg_show_pip_preview` | optional | Grey PiP placeholder on `avatar_quote` in PPTX/JPEG (MP4 still uses live overlay) |
+| `slide_qa` | optional | Deck-wide QA manifest defaults — [Slide QA](slide-qa.md) |
 
 Keys starting with `x-` are ignored (YAML anchors). Unknown keys log a warning; invalid enum values (e.g. `narration_mode`, `color_scheme`, `layouts.pip.shape`) raise `SchemaError` at load time via `validate_verses()` / `load_verses_from_file()`.
 
@@ -61,8 +65,32 @@ Keys starting with `x-` are ignored (YAML anchors). Unknown keys log a warning; 
 | `audio_source` | string | Optional alias: `heygen_video`, `external`, `tts` (used when `narration_mode` omitted) |
 | `sync_mode` | string | `avatar_lead`, `notes_lead`, `longest` |
 | `color_scheme` | string | Deck colour preset name (`deck_*` slides) |
+| `text_panel` | object | Hero text placement (`anchor`, `style`, `hero_layout`, …) — [Avatar layouts](avatar-layouts.md#avatar_media_3-full-bleed-hero) |
+| `qa` | object | Per-slide QA rules merged over `slide_qa` — [Slide QA](slide-qa.md) |
+| `jpeg_show_pip_preview` | bool | Override deck `jpeg_show_pip_preview` for one slide |
 
 Additional keys depend on `slide_type` — see the layout pages above.
+
+### `text_panel` object
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `anchor` | string | `top_left`, `top_right`, `bottom_left`, `bottom_right`, `top`, `bottom` |
+| `style` | string | `navy_panel`, `semi_panel`, `overlay` |
+| `hero_layout` | string | `stacked` or `full_bleed` (overrides layout default) |
+| `width_ratio` | float | Panel width as fraction of content width |
+| `height_in` | float | Panel height in inches |
+| `margin_in` | float | Inset from content edges |
+| `max_width_ratio` | float | Cap on panel width |
+
+### `qa` object (verse or `slide_qa` deck block)
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `expect_pip` | bool | Require PiP-capable slide + `avatar_video_path` |
+| `expect_media` | bool | Require `media_path` file |
+| `min_media_width_ratio` | float | 0–1; legacy left-band heuristic |
+| `min_hero_coverage_ratio` | float | 0–1; full-slide non-background coverage (skipped for `media_fit: contain`) |
 
 ---
 
@@ -144,6 +172,9 @@ Optional in **YAML or JSON** (same keys). Drives `praisonaippt pipeline` and `va
 | `validate_pip` | bool | Run PiP centring QA (multi-seek) |
 | `strict_pip` | bool | All calibration seeks must pass |
 | `golden_slide_dir` | string | Golden JPEG directory for slide hash gate |
+| `export_mp4_frames` | bool | Export MP4 seek frames per verse (`audio_start_sec`) |
+| `mp4_frames_dir` | string | Output folder for `mp4-slide-NNN.jpg` (default `mp4-frames`) |
+| `validate_slide_qa` | bool | Run `slide_qa` manifest gate on JPEGs (default true when `slide_qa` set) |
 | `require_rights_ack` | bool | Block until `rights_acknowledged` |
 | `rights_acknowledged` | bool | Manual rights checklist clearance |
 | `content_approved` | bool | Content sign-off |
@@ -194,4 +225,5 @@ Details: [HeyGen article examples](heygen-examples.md).
 ## Related
 
 - [Layouts overview](layouts-overview.md)
+- [Slide QA](slide-qa.md)
 - [Configuration file](configuration.md) — `~/.praisonaippt/config.yaml` (Drive, PDF defaults)

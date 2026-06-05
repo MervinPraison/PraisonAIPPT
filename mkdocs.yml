@@ -8,6 +8,7 @@ docs_dir: docs
 
 exclude_docs: |
   lazy-loading.md
+  README.md
   snippets/
 
 theme:
@@ -67,6 +68,7 @@ nav:
       - HeyGen article examples: heygen-examples.md
       - Avatar PiP calibration: avatar-calibration.md
       - Slide JPEG export: slide-images.md
+      - Slide QA (golden, MP4 frames): slide-qa.md
   - Reference:
       - Commands: commands.md
       - Python API: python-api.md

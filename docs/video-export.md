@@ -266,7 +266,7 @@ layouts. Use this when judging export quality.
 | `media_only` | Good | Image OK; video not played | Media file overlaid | Video must be overlaid, not embedded |
 | `avatar_media_1` (50/50) | Good split geometry | Placeholders only | Both regions overlaid | Split ratio matches YAML (~50/50) |
 | `avatar_media_2` (40/60) | Good | Placeholders only | Both regions overlaid | Wider media column vs `_1` |
-| `avatar_media_3` (PiP) | Good | Placeholders only | PiP boxes overlaid | PiP position from `_slide_regions` |
+| `avatar_media_3` (PiP) | Good | Placeholders only | PiP boxes overlaid | **stacked:** media band below panel; **full_bleed:** media fills slide; text panel in PNG; PiP from `_slide_regions` + verse `text_panel` |
 | `avatar_name_card` | Good | Avatar placeholder | Avatar in region | Navy text panel may sit above avatar in PPTX; v1 square overlays |
 | `avatar_headline` | Good | Same as name card | Same | Panel text in PNG only |
 | `avatar_quote` | **Moderate** | Navy fill approximate | Avatar overlaid on quote area | LO may shift quote typography; use `raster_mode: native` (future) if drift matters |

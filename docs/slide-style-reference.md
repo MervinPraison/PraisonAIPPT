@@ -209,7 +209,7 @@ Content width: `min(9.0, slide_width − margins)` on widescreen (PiP-aware).
 |-------|------------------|
 | `avatar_media_1` | `media_width_ratio` 0.50 |
 | `avatar_media_2` | `media_width_ratio` 0.40 |
-| `avatar_media_3` | `pip_width_ratio` 0.14, `pip_margin_in` 0.45 |
+| `avatar_media_3` | `pip_width_ratio` 0.14, `pip_margin_in` 0.45; optional `hero_layout`, `text_style`, `text_anchor`, `text_pip_gap_in`, `panel_*` |
 | `avatar_name_card` | `panel_width_ratio` 0.42, pill heights |
 | `avatar_headline` | `panel_margin_in` 0.75 |
 | `avatar_headline_full` | `panel_width_ratio` 0.48, `panel_height_in` 1.45 |

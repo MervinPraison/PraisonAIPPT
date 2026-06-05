@@ -55,6 +55,33 @@ With `narration_mode: auto`, HeyGen embedded audio wins when the avatar file has
 | [heygen-50590-audio-only.yaml](heygen-50590-audio-only.yaml) | No | MP3 file | `audio_file` | Podcast-style — slides + voiceover, no avatar file |
 | [heygen-50590-video-only-silent.yaml](heygen-50590-video-only-silent.yaml) | Yes | None | `fixed` | B-roll / preview — avatar scrubs on slides, silent |
 | [heygen-50590-slides-silent.yaml](heygen-50590-slides-silent.yaml) | No | None | `fixed` | Slide timing demo — no media files required |
+| [heygen-50590-video-audio-heygen-images.yaml](heygen-50590-video-audio-heygen-images.yaml) | Yes | HeyGen MP4 track | `avatar` | **Full-bleed hero screenshots** — same timing/audio as default; `skip_title_slide: true`; [Slide QA](../docs/slide-qa.md) |
+
+## Images variant (full-bleed heroes)
+
+Same HeyGen MP4, Whisper timings, and narration as [`heygen-50590-video-audio-heygen.yaml`](heygen-50590-video-audio-heygen.yaml), with product screenshots as full-slide heroes and floating headline panels (`text_panel.anchor`).
+
+```bash
+VARIANT=heygen-50590-video-audio-heygen-images
+
+python -m praisonaippt.cli \
+  -i examples/${VARIANT}.yaml \
+  -o examples/${VARIANT}.pptx \
+  --convert-video \
+  --video-output examples/${VARIANT}.mp4 \
+  --no-list-slides
+
+praisonaippt validate-deck -i examples/${VARIANT}.yaml
+```
+
+| Output | Path |
+|--------|------|
+| Deck YAML | `examples/heygen-50590-video-audio-heygen-images.yaml` |
+| Layout JPEGs | `examples/slide_images/heygen-50590-images/slide-001.jpg` … `slide-007.jpg` |
+| Golden baselines | `examples/slide_images/heygen-50590-images/golden/` |
+| MP4 seek frames | `examples/slide_images/heygen-50590-images/mp4-frames/` |
+
+Docs: [HeyGen examples](../docs/heygen-examples.md) · [Avatar layouts — full-bleed](../docs/avatar-layouts.md#avatar_media_3-full-bleed-hero) · [Slide QA](../docs/slide-qa.md)
 
 ## Build and export (replace `VARIANT` with yaml stem)
 

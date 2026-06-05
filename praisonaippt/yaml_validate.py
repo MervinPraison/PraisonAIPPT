@@ -112,7 +112,10 @@ _LAYOUT_EXTRA_KEYS: Dict[str, frozenset] = {
     "pip": frozenset({"position", "pip_shape", "avatar_shape"}),
     "avatar_headline": frozenset({"pip_position", "pip_shape"}),
     "avatar_headline_full": frozenset({"pip_shape"}),
-    "avatar_media_3": frozenset({"pip_position", "pip_shape"}),
+    "avatar_media_3": frozenset({
+        "pip_position", "pip_shape", "hero_layout", "text_style", "text_anchor",
+        "text_pip_gap_in",
+    }),
     "avatar_name_card": frozenset({"pip_shape"}),
     "avatar_quote": frozenset({"pip_position", "pip_shape"}),
     "avatar_media_border_3": frozenset({"pip_position", "pip_shape"}),
@@ -392,6 +395,37 @@ def _validate_qa_block(qa: Any, path: str) -> None:
             raise SchemaError(f"{path}.min_media_width_ratio must be a number")
         if ratio < 0.0 or ratio > 1.0:
             raise SchemaError(f"{path}.min_media_width_ratio must be between 0 and 1")
+    if qa.get("min_hero_coverage_ratio") is not None:
+        try:
+            ratio = float(qa["min_hero_coverage_ratio"])
+        except (TypeError, ValueError):
+            raise SchemaError(f"{path}.min_hero_coverage_ratio must be a number")
+        if ratio < 0.0 or ratio > 1.0:
+            raise SchemaError(f"{path}.min_hero_coverage_ratio must be between 0 and 1")
+
+
+_TEXT_PANEL_ANCHORS = frozenset({
+    "top_left", "top_right", "bottom_left", "bottom_right", "top", "bottom",
+})
+
+
+def _validate_text_panel(tp: Any, path: str) -> None:
+    if tp is None:
+        return
+    if not isinstance(tp, dict):
+        raise SchemaError(f"{path} must be a mapping")
+    anchor = tp.get("anchor")
+    if anchor is not None and str(anchor).lower().strip() not in _TEXT_PANEL_ANCHORS:
+        raise SchemaError(f"{path}.anchor must be one of: {', '.join(sorted(_TEXT_PANEL_ANCHORS))}")
+    for key in ("width_ratio", "height_in", "margin_in", "max_width_ratio"):
+        if tp.get(key) is not None:
+            _check_positive_number(tp[key], f"{path}.{key}", allow_zero=False)
+    style = tp.get("style")
+    if style is not None and str(style).lower().strip() not in {"navy_panel", "overlay", "semi_panel"}:
+        raise SchemaError(f"{path}.style must be navy_panel, overlay, or semi_panel")
+    layout = tp.get("hero_layout")
+    if layout is not None and str(layout).lower().strip() not in {"stacked", "full_bleed"}:
+        raise SchemaError(f"{path}.hero_layout must be stacked or full_bleed")
 
 
 def validate_verse_options(verse: dict, path: str) -> None:
@@ -429,6 +463,7 @@ def validate_verse_options(verse: dict, path: str) -> None:
     _check_positive_number(verse.get("audio_start_sec"), f"{path}.audio_start_sec", allow_zero=True)
 
     _validate_qa_block(verse.get("qa"), f"{path}.qa")
+    _validate_text_panel(verse.get("text_panel"), f"{path}.text_panel")
 
     if verse.get("avatar_shape") is not None:
         _check_enum(verse["avatar_shape"], _AVATAR_SHAPES, f"{path}.avatar_shape")

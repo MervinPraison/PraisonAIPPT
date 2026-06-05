@@ -84,7 +84,7 @@ JSON decks use the same keys (see [Commands — JSON decks](commands.md#json-and
 `praisonaippt pipeline` writes `report.json` (default: `.praisonaippt/{deck-stem}.pipeline-report.json`):
 
 - `ok`, `exit_code` (0 / 1)
-- `gates` — `plan_approval`, `rights_licensing`, `pip_centring`, `av_sync`, `post_render`, …
+- `gates` — `plan_approval`, `rights_licensing`, `pip_centring`, `av_sync`, `slide_jpegs`, `slide_qa`, `mp4_frames`, `post_render`, …
 - `steps` — per-step detail
 
 ## HeyGen variant sync

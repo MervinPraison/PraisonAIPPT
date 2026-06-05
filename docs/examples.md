@@ -307,12 +307,16 @@ Full walkthrough: **[HeyGen article examples](heygen-examples.md)**.
 |---------|------|
 | Master content (edit here) | `examples/heygen-50590-content.yaml` |
 | Default export (HeyGen audio) | `examples/heygen-50590-video-audio-heygen.yaml` |
+| **Images variant (full-bleed heroes)** | `examples/heygen-50590-video-audio-heygen-images.yaml` |
 | Video + separate MP3 | `examples/heygen-50590-video-visual-mp3.yaml` |
 | Avatar + deck galleries | `examples/avatar_layouts.yaml`, `examples/deck_template_gallery.yaml` |
 
 ```bash
 python examples/sync_heygen_variants.py
 python examples/build_showcase_examples.py
+
+# QA gates for images variant (golden JPEGs, slide manifest, MP4 frames)
+praisonaippt validate-deck -i examples/heygen-50590-video-audio-heygen-images.yaml
 ```
 
 ## Showcase rebuild

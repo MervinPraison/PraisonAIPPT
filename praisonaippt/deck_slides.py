@@ -1064,11 +1064,9 @@ def _render_thank_you(slide, prs, verse: dict, style: dict, theme: dict, *, sour
         pip = _pip_box_at(
             0, 0, sw, sh, style, "deck_thank_you", _deck_pip_anchor(style, "deck_thank_you"),
         )
-        _place_avatar_in_box(
-            slide, pip, verse.get("avatar_video_path"),
-            poster_path=verse.get("avatar_poster_path"), source_file=source_file, style=style,
-            layout_kind="deck_thank_you", verse=verse, draw_frame=False,
-        )
+        from .avatar_layouts import _place_overlay_only_pip
+
+        _place_overlay_only_pip(slide, pip, style, verse)
         return
 
     ratio = float(layout_in(style, "deck_thank_you", "avatar_width_ratio", 0.5))

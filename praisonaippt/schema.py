@@ -87,6 +87,7 @@ _VERSE_KEYS = {
     "audio_path",
     "qa",
     "jpeg_show_pip_preview",
+    "text_panel",
     "narration_mode",
     "sync_mode",
     "color_scheme",

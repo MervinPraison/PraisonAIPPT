@@ -1,17 +1,20 @@
 # HeyGen 50590 — media-first hero screenshots; same HeyGen MP4 + transcript timings as base variant.
-# Build: praisonaippt -i examples/heygen-50590-video-audio-heygen-images.yaml \
-#          -o examples/heygen-50590-video-audio-heygen-images.pptx \
-#          --convert-video --video-output examples/heygen-50590-video-audio-heygen-images.mp4
+# Build (exports slide JPEGs + MP4 + mp4-frames when pipeline.export_mp4_frames is set):
+#   praisonaippt -i examples/heygen-50590-video-audio-heygen-images.yaml \
+#     -o examples/heygen-50590-video-audio-heygen-images.pptx \
+#     --convert-video --video-output examples/heygen-50590-video-audio-heygen-images.mp4
+# Verify: read examples/slide_images/heygen-50590-images/slide-*.jpg and mp4-frames/mp4-slide-*.jpg
+#   praisonaippt validate-deck -i examples/heygen-50590-video-audio-heygen-images.yaml
 
 presentation_title: Dreaming, outcomes, and webhooks
 presentation_subtitle: Claude Managed Agents · with product visuals
 slide_size: widescreen
 slide_images_dir: slide_images/heygen-50590-images
 skip_title_slide: true
-jpeg_show_pip_preview: true
+jpeg_show_pip_preview: false
 slide_qa:
   expect_pip: true
-  min_media_width_ratio: 0.35
+  min_hero_coverage_ratio: 0.62
 auto_upload_gdrive: false
 pipeline:
   transcript_path: examples/short-script-50590_timestamps.json
@@ -49,9 +52,15 @@ slide_style:
       shape: circle
       avatar_shape: circle
     avatar_media_3:
+      hero_layout: full_bleed
+      text_style: semi_panel
       pip_width_ratio: 0.15
       pip_margin_in: 0.32
       pip_position: bottom_right
+      panel_width_ratio: 0.36
+      panel_height_in: 0.95
+      panel_margin_in: 0.34
+      text_pip_gap_in: 0.14
       crop_y_ratio: 0.1
       zoom_ratio: 1.3
     deck_thank_you:
@@ -94,7 +103,11 @@ sections:
     headline: Dreaming
     subheader: Persistent, proactive agents — work between sessions
     media_path: slide_images/HHt8A9BbYAAUfvZ.jpg
-    media_fit: cover
+    media_fit: contain
+    text_panel:
+      anchor: top_right
+      width_ratio: 0.36
+      height_in: 0.95
     duration_sec: 13.66
     audio_start_sec: 4.54
     notes: First, dreaming. Claude agents can now work in the background between sessions
@@ -106,7 +119,11 @@ sections:
     headline: Outcomes
     subheader: Define success, not every step — rubric grader
     media_path: slide_images/HHt8A77aUAAOCdt.jpg
-    media_fit: cover
+    media_fit: contain
+    text_panel:
+      anchor: top_right
+      width_ratio: 0.36
+      height_in: 0.95
     duration_sec: 8.1
     audio_start_sec: 18.2
     notes: Instead of scripting every step, you tell the agent what to achieve. That's
@@ -120,9 +137,14 @@ sections:
     subheader: Production infrastructure — notify instantly, no polling
     media_path: slide_images/HHpoqNAXcAcHY8h.jpg
     media_fit: contain
+    text_panel:
+      anchor: bottom_left
+      width_ratio: 0.40
+      height_in: 1.12
+      margin_in: 0.40
     qa:
       expect_media: true
-      min_media_width_ratio: 0.28
+      min_hero_coverage_ratio: 0.55
     duration_sec: 10.68
     audio_start_sec: 26.3
     notes: When an agent finishes or fails, your system gets notified instantly. No
@@ -145,6 +167,11 @@ sections:
     subheader: Dreaming · Outcomes · Webhooks
     media_path: slide_images/managed-agents-lifecycle-1200x800.png
     media_fit: contain
+    text_panel:
+      anchor: bottom_left
+      width_ratio: 0.36
+      height_in: 1.0
+      margin_in: 0.38
     duration_sec: 7.34
     audio_start_sec: 44.54
     notes: How do you actually run AI agents in the real world? Background processing,

@@ -40,7 +40,31 @@ def _jpeg_paths(img_dir: Path) -> List[Path]:
     return sorted(img_dir.glob("slide-*.jpg")) + sorted(img_dir.glob("slide-*.jpeg"))
 
 
-def _content_width_ratio(jpeg: Path, *, bg_rgb: Tuple[int, int, int] = (18, 18, 18), tol: int = 40) -> Optional[float]:
+def _hero_coverage_ratio(
+    jpeg: Path, *, bg_rgb: Tuple[int, int, int] = (18, 18, 18), tol: int = 40,
+) -> Optional[float]:
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    im = Image.open(jpeg).convert("RGB")
+    w, h = im.size
+    step = 8
+    non_bg = 0
+    total = 0
+    px = im.load()
+    for y in range(0, h, step):
+        for x in range(0, w, step):
+            total += 1
+            r, g, b = px[x, y]
+            if abs(r - bg_rgb[0]) + abs(g - bg_rgb[1]) + abs(b - bg_rgb[2]) > tol:
+                non_bg += 1
+    return non_bg / total if total else 0.0
+
+
+def _content_width_ratio(
+    jpeg: Path, *, bg_rgb: Tuple[int, int, int] = (18, 18, 18), tol: int = 40,
+) -> Optional[float]:
     try:
         from PIL import Image
     except ImportError:
@@ -111,9 +135,10 @@ def check_slide_qa_manifest(
     source_file: Optional[str] = None,
     jpeg_dir: Optional[str | Path] = None,
 ):
-    from .deck_pipeline import StepResult
     """Validate per-slide ``qa`` rules against exported JPEGs."""
+    from .deck_pipeline import StepResult
     from .video_exporter import iter_slide_plan
+
 
     plan = list(iter_slide_plan(data))
     if not plan:
@@ -171,6 +196,19 @@ def check_slide_qa_manifest(
                 issues.append(
                     f"slide {idx}: media width ratio {ratio:.2f} < {float(min_ratio):.2f}",
                 )
+
+        min_cover = qa.get("min_hero_coverage_ratio")
+        if min_cover is not None and slide_type in _MEDIA_SLIDE_TYPES:
+            if str(verse.get("media_fit") or "").lower() == "contain":
+                pass
+            else:
+                cover = _hero_coverage_ratio(jpg)
+                if cover is None:
+                    issues.append(f"slide {idx}: Pillow required for min_hero_coverage_ratio")
+                elif cover < float(min_cover):
+                    issues.append(
+                        f"slide {idx}: hero coverage {cover:.2f} < {float(min_cover):.2f}",
+                    )
 
     if issues:
         return StepResult("slide_qa", False, "; ".join(issues), {"issues": issues})

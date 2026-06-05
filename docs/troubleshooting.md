@@ -344,7 +344,11 @@ praisonaippt -i test.json --convert-pdf
 | Export sounds wrong vs HeyGen MP4 | Use `heygen-50590-video-audio-heygen.yaml` (`narration_mode: avatar`), not the MP3 variant — [HeyGen examples](heygen-examples.md) |
 | Face off-centre in PiP | `praisonaippt calibrate-avatar deck.yaml --force` — [Avatar calibration](avatar-calibration.md) |
 | `ImportError: mediapipe` | `pip install praisonaippt[avatar-calibrate]` or `avatar_calibration.method: balance` |
-| Two avatars on quote slide | Expected fix: `avatar_quote` uses video-only PiP — rebuild MP4; JPEG may omit face — [Avatar layouts](avatar-layouts.md) |
+| Two avatars on quote slide | Expected: `avatar_quote` uses video-only PiP — rebuild MP4; use `jpeg_show_pip_preview: true` for JPEG layout hint — [Avatar layouts](avatar-layouts.md) |
+| Golden JPEG gate fails | Rebaseline: `cp slide-*.jpg golden/` after intentional layout change — [Slide QA](slide-qa.md) |
+| `slide_qa` hero coverage fails | Lower `min_hero_coverage_ratio` or use `media_fit: contain` (coverage check skipped) |
+| Extra title slide at t=0 | Set `skip_title_slide: true` when hook should open the video |
+| Full-bleed text overlaps PiP | Adjust `text_panel.anchor` or `text_pip_gap_in` — [Avatar layouts](avatar-layouts.md#avatar_media_3-full-bleed-hero) |
 | Slide plan vs PPTX count mismatch | Rebuild PPTX from the same YAML |
 
 ```bash

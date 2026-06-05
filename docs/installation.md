@@ -215,6 +215,22 @@ pip install praisonaippt[pdf-all]
 - `psutil>=5.9.0` - System utilities (for LibreOffice)
 - `tqdm>=4.64.0` - Progress bars
 
+### Optional video and QA dependencies
+
+| Extra | Purpose |
+|-------|---------|
+| `praisonaippt[avatar-calibrate]` | Hybrid face detect for PiP `crop_x` — [Avatar PiP calibration](avatar-calibration.md) |
+| System: `ffmpeg`, LibreOffice | MP4 export — [Video export](video-export.md) |
+| System: `poppler` (`pdftoppm`) | Slide JPEG export from PPTX |
+
+No extra pip package is required for [Slide QA](slide-qa.md) gates (`validate-deck`, golden JPEGs, MP4 seek frames).
+
+```bash
+brew install ffmpeg poppler
+brew install --cask libreoffice
+pip install praisonaippt[avatar-calibrate]
+```
+
 ### Development Dependencies
 - `pytest` - Testing framework
 - `black` - Code formatting

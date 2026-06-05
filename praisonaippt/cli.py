@@ -2290,6 +2290,20 @@ def main():
             print(f"{'✓' if qc.ok else '✗'} post_render: {qc.detail}")
             if not qc.ok and getattr(args, "strict_post_render", False):
                 return 1
+            pipe = data.get("pipeline") or {}
+            if pipe.get("export_mp4_frames"):
+                from .slide_qa import check_mp4_plan_frames
+
+                sf = str(Path(args.input).resolve())
+                fr = check_mp4_plan_frames(
+                    data,
+                    result,
+                    source_file=sf,
+                    frames_dir=pipe.get("mp4_frames_dir"),
+                )
+                print(f"{'✓' if fr.ok else '✗'} mp4_frames: {fr.detail}")
+                if not fr.ok and getattr(args, "strict_post_render", False):
+                    return 1
         except Exception as e:
             print(f"Warning: Video conversion failed: {e}")
 

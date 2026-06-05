@@ -25,7 +25,8 @@ Open [http://127.0.0.1:8000](http://127.0.0.1:8000). Configuration: `mkdocs.yml`
 | [heygen-examples.md](heygen-examples.md) | HeyGen 50590 — five media variants |
 | [avatar-calibration.md](avatar-calibration.md) | Auto PiP `crop_x`, face detect |
 | [slide-images.md](slide-images.md) | `slide_images_dir`, JPEG export |
-| [recent-features.md](recent-features.md) | **New:** audio sources, validation diagram, calibration SDK |
+| [slide-qa.md](slide-qa.md) | Golden MD5, manifest QA, MP4 frames |
+| [recent-features.md](recent-features.md) | **New:** full-bleed hero, slide QA, validation diagram, calibration SDK |
 
 ## Jekyll site (ppt.praison.ai)
 

@@ -330,7 +330,7 @@ Speaking-head **avatar video** in fixed regions; **media** (image or video) in t
 | `media_only` | Full-slide media | `media_path`, optional `media_fit`, `media_poster_path` |
 | `avatar_media_1` | 50/50 split (media left) | optional paths + `media_fit` |
 | `avatar_media_2` | 40/60 split (media left) | optional paths + `media_fit` |
-| `avatar_media_3` | Full media + PiP avatar | optional paths + `media_fit` |
+| `avatar_media_3` | Hero media + PiP; `stacked` or `full_bleed` + `text_panel` | `headline`, `media_path`, optional `text_panel.anchor`, `media_fit` |
 | `avatar_name_card` | Full avatar + bottom-left panel | `headline`, optional `subheader`, optional avatar paths |
 | `avatar_headline` | Full avatar + top-left panel | `headline`, optional `subheader`, optional avatar paths |
 | `avatar_quote` | Navy quote + PiP avatar | `text`, optional `reference` (author), optional avatar paths |

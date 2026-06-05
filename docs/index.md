@@ -28,7 +28,8 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 - 🎬 **Video export** — PPTX → MP4 with avatar PiP and HeyGen timing
 - 🎙️ **Flexible narration** — HeyGen MP4 audio (default), external MP3, or TTS
 - 🎯 **PiP calibration** — hybrid face detect + validation diagram (`pip-face-centre`)
-- 🖼️ **Slide JPEG export** — `slide_images_dir` and `build-slide-images`
+- 🖼️ **Slide JPEG export** — `slide_images_dir`, golden regression, MP4 frame QA
+- 📐 **Full-bleed hero layouts** — `avatar_media_3` with floating `text_panel.anchor`
 - 📐 **Layout reference** — standard, avatar, and `deck_*` slide types with full `slide_style` tokens
 
 !!! tip "New in recent releases"
@@ -51,6 +52,7 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 | [HeyGen article examples](heygen-examples.md) | Five media variants, assets, build workflow |
 | [Avatar PiP calibration](avatar-calibration.md) | Auto `crop_x`, hybrid face detect, CLI |
 | [Slide JPEG export](slide-images.md) | `slide_images_dir`, `build-slide-images` |
+| [Slide QA](slide-qa.md) | Golden MD5, manifest rules, MP4 seek frames |
 
 Preview all docs locally:
 

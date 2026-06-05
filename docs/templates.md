@@ -115,7 +115,7 @@ slide_style:
 
 Omitted keys use built-in defaults (unchanged decks).
 
-Full token tables: [slide_style_table.md](snippets/slide_style_table.md).
+Full token tables: [Slide style reference](slide-style-reference.md).
 
 ### Example override block
 
@@ -191,4 +191,4 @@ list_renderers()
 | **Content** (verses, sections) | `examples/template.yaml`, `--use-example` | `--list-examples` |
 | **Style** (theme) | `templates/*.yaml`, `~/.praisonaippt/templates/` | `--list-templates` |
 
-Copy content from [examples/template.yaml](../examples/template.yaml); apply style with `template: sermon-dark`.
+Copy content from [`examples/template.yaml`](https://github.com/MervinPraison/PraisonAIPPT/blob/main/examples/template.yaml); apply style with `template: sermon-dark`.

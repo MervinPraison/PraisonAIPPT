@@ -841,6 +841,21 @@ export_pptx_slide_jpegs(
 
 See [Slide JPEG export](slide-images.md) and [Recent features](recent-features.md).
 
+### Slide QA
+
+```python
+from praisonaippt.slide_qa import (
+    check_slide_qa_manifest,
+    check_mp4_plan_frames,
+    export_mp4_plan_frames,
+)
+
+step = check_slide_qa_manifest(deck_data, source_file="deck.yaml", jpeg_dir="slide_images/out")
+frames = export_mp4_plan_frames("deck.mp4", deck_data, "slide_images/mp4-frames")
+```
+
+See [Slide QA](slide-qa.md).
+
 ---
 
 **Need help?** [Open an issue on GitHub](https://github.com/MervinPraison/PraisonAIPPT/issues)

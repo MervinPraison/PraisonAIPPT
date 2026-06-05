@@ -104,20 +104,58 @@ CLI hints come from `centring_advice()` (e.g. *increase crop_x* when L ≫ R).
 
 ---
 
-## Slide JPEG export
+## Slide JPEG export and QA
 
 Export per-slide JPEG previews while building (for thumbnails, vision checks, or social).
 
 ```yaml
-slide_images_dir: slide_images
+slide_images_dir: slide_images/heygen-50590-images
+skip_title_slide: true
+jpeg_show_pip_preview: true
+
+slide_qa:
+  expect_pip: true
+  min_hero_coverage_ratio: 0.62
+
+pipeline:
+  golden_slide_dir: slide_images/heygen-50590-images/golden
+  export_mp4_frames: true
+  mp4_frames_dir: slide_images/heygen-50590-images/mp4-frames
+  validate_slide_qa: true
 ```
 
 ```bash
 praisonaippt build-slide-images -i deck.yaml -o deck.pptx
 praisonaippt export-slide-jpegs deck.pptx --slide-images-dir slide_images
+praisonaippt validate-deck -i deck.yaml   # golden + slide_qa + mp4_frames gates
 ```
 
-**Docs:** [Slide JPEG export](slide-images.md)
+**Docs:** [Slide JPEG export](slide-images.md) · [Slide QA](slide-qa.md)
+
+---
+
+## Full-bleed hero layouts (`avatar_media_3`)
+
+Product screenshot slides can use **full-screen media** with a **floating headline panel** at a per-slide anchor (instead of a fixed top band).
+
+```yaml
+slide_style:
+  layouts:
+    avatar_media_3:
+      hero_layout: full_bleed
+      text_style: semi_panel
+
+- slide_type: avatar_media_3
+  headline: Dreaming
+  media_path: slide_images/HHt8A9BbYAAUfvZ.jpg
+  media_fit: cover
+  text_panel:
+    anchor: top_right
+```
+
+Reference deck: `examples/heygen-50590-video-audio-heygen-images.yaml`.
+
+**Docs:** [Avatar layouts — full-bleed hero](avatar-layouts.md#avatar_media_3-full-bleed-hero) · [HeyGen examples](heygen-examples.md)
 
 ---
 
@@ -125,7 +163,10 @@ praisonaippt export-slide-jpegs deck.pptx --slide-images-dir slide_images
 
 | Feature | Detail |
 |---------|--------|
-| **`avatar_quote`** | No baked headshot in PPTX — PiP only in MP4 (avoids double avatar) |
+| **`avatar_quote`** | No baked headshot in PPTX — PiP only in MP4; optional `jpeg_show_pip_preview` for JPEG layout QA |
+| **`avatar_media_3` full_bleed** | Full-screen hero + floating `text_panel.anchor`; stacked mode remains default |
+| **Slide QA gates** | `slide_qa`, golden JPEG MD5, MP4 seek frames — `validate-deck` |
+| **`skip_title_slide`** | Hook opens at t=0 (HeyGen images variant) |
 | **Deck + avatar galleries** | `python examples/build_showcase_examples.py` rebuilds all showcase PPTX/MP4 |
 | **Transcript → YAML** | `praisonaippt transcript-to-yaml` with `--variants all` |
 | **Local cache dirs** | `.praisonaippt/` and `.praisonaippt-calibrate/` under the deck (see `.gitignore`) |
@@ -174,6 +215,7 @@ if not advice.is_centred:
 | `pip-face-centre` | Measure offsets; `--validation-image` saves diagram |
 | `build-slide-images` | PPTX + JPEGs from YAML |
 | `export-slide-jpegs` | JPEGs from existing PPTX |
+| `validate-deck` | All QA gates without build (golden, slide_qa, mp4_frames) |
 | `convert-video` | PPTX → MP4 (sidecar YAML for PiP) |
 | `transcript-to-yaml` | Whisper JSON → deck + variants |
 

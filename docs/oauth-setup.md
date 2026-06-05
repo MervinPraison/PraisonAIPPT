@@ -232,4 +232,4 @@ A new browser window will open for re-authentication.
 
 - [Configuration Guide](configuration.md)
 - [Google Drive Upload](google-drive-upload.md)
-- [CLI Reference](../README.md#complete-cli-options)
+- [CLI Reference](commands.md)

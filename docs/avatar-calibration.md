@@ -30,7 +30,9 @@ python -m praisonaippt.cli build-slide-images -i examples/heygen-50590-video-vis
   -o examples/heygen-50590-video-visual-mp3.pptx
 ```
 
-Same as `praisonaippt -i deck.yaml -o deck.pptx` with `slide_images_dir` set in YAML (exports to `examples/slide_images/`).
+Same as `praisonaippt -i deck.yaml -o deck.pptx` with `slide_images_dir` set in YAML (exports to `examples/slide_images/` or a variant subfolder).
+
+After export, run `praisonaippt validate-deck -i deck.yaml` for golden MD5, slide QA manifest, and MP4 frame gates — [Slide QA](slide-qa.md).
 
 ### Face centre measurement
 
