@@ -57,6 +57,13 @@ from .hero_panel_calibrate import (
     hero_text_deps_hint,
     maybe_auto_place_hero_text_deck,
 )
+from .slide_transition import (
+    SlideTransitionConfig,
+    format_transition_report,
+    maybe_apply_slide_transitions_deck,
+)
+from .transition_backends import list_transition_backends
+from .video_protocol import TransitionDefaults, resolve_edge_transitions
 from .hero_panel_measure import (
     HeroPanelMetrics,
     format_hero_panel_measure_report,
@@ -143,4 +150,10 @@ __all__ = [
     "panel_clearance_score",
     "placement_advice",
     "save_hero_panel_validation_diagram",
+    "SlideTransitionConfig",
+    "format_transition_report",
+    "maybe_apply_slide_transitions_deck",
+    "list_transition_backends",
+    "TransitionDefaults",
+    "resolve_edge_transitions",
 ]

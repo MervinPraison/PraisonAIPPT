@@ -271,6 +271,7 @@ Examples:
             'convert-pdf', 'convert-video', 'convert-json', 'convert-yaml',
             'transcript-to-yaml', 'list-slides', 'export-slide-jpegs', 'build-slide-images',
             'calibrate-avatar', 'pip-face-centre', 'hero-panel-place', 'hero-panel-centre',
+            'slide-transition-plan', 'slide-transition-preview',
             'pipeline', 'sync-variants', 'plan-slides', 'approve-plan',
             'validate-deck', 'transcribe',
             'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials',
@@ -1316,6 +1317,80 @@ def handle_hero_panel_centre_command(args) -> int:
             Path(image_arg), metrics, result,
             style=style, data=data, verse=verse, validation_arg=validation_arg,
         )
+    return 0
+
+
+def handle_slide_transition_plan_command(args) -> int:
+    """Print resolved slide transition edge matrix for a deck."""
+    from .slide_transition import format_transition_report, maybe_apply_slide_transitions_deck
+    from .video_exporter import iter_slide_plan
+
+    deck_path = getattr(args, "input_file", None) or getattr(args, "input", None)
+    if not deck_path or not Path(deck_path).is_file():
+        print("Usage: praisonaippt slide-transition-plan -i deck.yaml [--force]")
+        return 1
+    try:
+        data = load_deck_mapping(deck_path)
+    except (ValueError, OSError) as e:
+        print(f"Error: {e}")
+        return 1
+    data["_source_file"] = str(Path(deck_path).resolve())
+    if getattr(args, "force", False):
+        st = dict(data.get("slide_transitions") or {})
+        if isinstance(st, dict):
+            st["enabled"] = True
+            data["slide_transitions"] = st
+    plan = list(iter_slide_plan(data))
+    merged = maybe_apply_slide_transitions_deck(data, plan, source_file=data["_source_file"])
+    sidecar = merged.get("_slide_transitions") or {}
+    from .video_protocol import ResolvedEdgeTransition
+
+    edges = [
+        ResolvedEdgeTransition(
+            after_slide=int(e["after_slide"]),
+            type=str(e["type"]),
+            duration_sec=float(e.get("duration_sec") or 0),
+            source=str(e.get("source") or ""),
+        )
+        for e in (sidecar.get("edges") or [])
+    ]
+    print(format_transition_report(edges, slide_count=len(plan)))
+    return 0
+
+
+def handle_slide_transition_preview_command(args) -> int:
+    """Show resolved transition leaving slide N (and optional validation note)."""
+    from .slide_transition import maybe_apply_slide_transitions_deck
+    from .video_exporter import iter_slide_plan
+
+    deck_path = getattr(args, "input_file", None) or getattr(args, "input", None)
+    slide_n = getattr(args, "slide", None)
+    if not deck_path or not Path(deck_path).is_file() or slide_n is None:
+        print("Usage: praisonaippt slide-transition-preview -i deck.yaml --slide N")
+        return 1
+    try:
+        data = load_deck_mapping(deck_path)
+    except (ValueError, OSError) as e:
+        print(f"Error: {e}")
+        return 1
+    data["_source_file"] = str(Path(deck_path).resolve())
+    plan = list(iter_slide_plan(data))
+    n = int(slide_n)
+    if n < 1 or n >= len(plan):
+        print(f"Error: --slide {n} must be between 1 and {len(plan) - 1} (transition after slide N)")
+        return 1
+    merged = maybe_apply_slide_transitions_deck(data, plan, source_file=data["_source_file"])
+    edges = (merged.get("_slide_transitions") or {}).get("edges") or []
+    edge = next((e for e in edges if int(e.get("after_slide", 0)) == n), None)
+    if not edge:
+        print(f"No edge after slide {n}")
+        return 1
+    print(f"Transition after slide {n} → slide {n + 1}:")
+    print(f"  type: {edge.get('type')}")
+    print(f"  duration_sec: {edge.get('duration_sec')}")
+    print(f"  source: {edge.get('source')}")
+    if getattr(args, "validation_image", None):
+        print(f"  (validation image path reserved: {args.validation_image})")
     return 0
 
 
@@ -2393,6 +2468,12 @@ def main():
 
     if args.command == 'hero-panel-centre':
         return handle_hero_panel_centre_command(args)
+
+    if args.command == 'slide-transition-plan':
+        return handle_slide_transition_plan_command(args)
+
+    if args.command == 'slide-transition-preview':
+        return handle_slide_transition_preview_command(args)
 
     if args.command == 'pipeline':
         return handle_pipeline_command(args)

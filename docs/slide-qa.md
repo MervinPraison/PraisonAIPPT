@@ -14,6 +14,7 @@ Implementation: `praisonaippt/slide_qa.py`, `praisonaippt/deck_pipeline.py` (`ch
 | **Golden regression** | `pipeline.golden_slide_dir` | MD5 match vs committed reference JPEGs |
 | **MP4 frames** | `mp4_frames_dir/mp4-slide-NNN.jpg` | FFmpeg grab at each verse `audio_start_sec` (live PiP, compositor truth) |
 | **Hero text placement** | `hero_text_placement.auto` | Offline anchor confidence gate when auto placement enabled — [Hero text calibration](hero-text-calibration.md) |
+| **Slide transitions** | `slide_transitions` / `pipeline.validate_transitions` | Resolved edge plan valid; unknown types fail when strict — [Slide transitions](slide-transitions.md) |
 
 !!! tip "JPEG ≠ MP4 for PiP"
     Slides in `_AVATAR_PIP_VIDEO_OVERLAY_ONLY` (`avatar_quote`, `avatar_media_3`) may show **no face** or a **grey PiP placeholder** in JPEGs while the MP4 shows the live HeyGen overlay. Always spot-check **`mp4-slide-*.jpg`** for PiP slides.
@@ -33,6 +34,7 @@ slide_qa:                       # deck-wide defaults (merged with verse qa)
 
 pipeline:
   validate_slide_qa: true
+  validate_transitions: true
   golden_slide_dir: slide_images/heygen-50590-images/golden
   export_mp4_frames: true
   mp4_frames_dir: slide_images/heygen-50590-images/mp4-frames
@@ -67,6 +69,8 @@ Requires **Pillow** for ratio checks (`pip install praisonaippt[avatar-calibrate
 
 | Gate key | Step name | Pass criteria |
 |----------|-----------|---------------|
+| `hero_text` | `hero_text` | Auto hero panel anchors meet `min_confidence` |
+| `slide_transitions` | `slide_transitions` | Resolved transition plan; optional strict mode |
 | `slide_jpeg_golden` | `slide_jpegs` | JPEGs exist, min size, optional golden MD5 |
 | `slide_qa` | `slide_qa` | Manifest rules (`expect_*`, coverage ratios) |
 | `mp4_frames` | `mp4_frames` | One frame per verse at `audio_start_sec + 0.35s` |

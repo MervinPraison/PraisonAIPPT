@@ -631,3 +631,33 @@ def test_overlays_skip_baked_deck_media():
     overlays = _overlays_for_entry(entry, VideoOptions(), source_file=str(PKG))
     assert overlays == []
 
+
+def test_video_options_transitions_default_none():
+    opts = VideoOptions.from_dict({"preset": "standard"}, {})
+    assert opts.transition_defaults.default == "none"
+
+
+def test_build_compose_plan_default_none_edges():
+    from praisonaippt.video_exporter import build_compose_plan
+
+    entries = [
+        SlideVideoEntry(0, "title", "title", None, duration_sec=3.0),
+        SlideVideoEntry(1, "content", "verse", {}, duration_sec=5.0),
+    ]
+    _, edges = build_compose_plan(entries, {}, VideoOptions())
+    assert all(e.type == "none" for e in edges)
+
+
+def test_write_srt_with_xfade_timeline(tmp_path):
+    entries = [
+        SlideVideoEntry(0, "content", "verse", {}, duration_sec=10.0, caption_text="A"),
+        SlideVideoEntry(1, "content", "verse", {}, duration_sec=10.0, caption_text="B"),
+    ]
+    from praisonaippt.video_protocol import ResolvedEdgeTransition
+
+    edges = [ResolvedEdgeTransition(1, "crossfade", 2.0, "test")]
+    out = tmp_path / "cap.srt"
+    write_srt(entries, str(out), edges=edges)
+    text = out.read_text(encoding="utf-8")
+    assert "00:00:00,000 --> 00:00:10,000" in text
+    assert "00:00:08,000 --> 00:00:18,000" in text

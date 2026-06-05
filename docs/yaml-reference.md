@@ -24,6 +24,7 @@ Source: `praisonaippt/schema.py`, `praisonaippt/yaml_validate.py`, `praisonaippt
 | `pipeline` | optional | CI gates, sync, and orchestration — see below |
 | `avatar_calibration` | optional | PiP framing — see below |
 | `hero_text_placement` | optional | Hero headline anchor — see below |
+| `slide_transitions` | optional | MP4 slide transitions — [Slide transitions](slide-transitions.md) |
 | `slide_timestamps` | optional | Wall-clock start (seconds) per slide for video timing |
 | `slide_images_dir` | optional | Export `slide-NNN.jpg` after build — [Slide JPEG export](slide-images.md) |
 | `skip_title_slide` | optional | Omit auto title slide (`presentation_title` / `presentation_subtitle`) |
@@ -120,7 +121,13 @@ video_export:
   captions:
     enabled: true
   slide_cache: true
+  transitions:
+    default: none
+    duration_sec: 0.30
+  video_crf: 23
 ```
+
+Per-edge and verse overrides: see [Slide transitions](slide-transitions.md).
 
 CLI overrides: `--video-output`, `--video-preset`, `--narration-mode`, `--video-options` (JSON), `--slide-range`, `--keep-temp`. See [Video export](video-export.md).
 
@@ -231,6 +238,46 @@ Optional top-level block. When `auto: true`, runs after avatar calibration and s
 | `force` | bool | Ignore cache |
 
 Cache: `.praisonaippt/hero-text-placement/`. See [Hero text panel calibration](hero-text-calibration.md).
+
+---
+
+## `slide_transitions` (MP4 slide joins)
+
+Optional top-level block. Default is **`none`** (hard cut). Resolved before video export into `_slide_transitions` sidecar.
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `enabled` | bool | When `false`, all edges resolve to `none` |
+| `default` | string | Global fallback: `none`, `segment_fade`, `crossfade`, `wipeleft`, `wiperight`, `slideleft`, `slideright` |
+| `duration_sec` | float | Default blend/fade duration |
+| `min_slide_sec` | float | Skip transition when slide shorter |
+| `max_fade_ratio` | float | Cap duration vs slide length (0–1) |
+| `edges` | list | Per-edge overrides — see below |
+
+Per-edge entry:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `after_slide` | int | Transition leaving slide N → N+1 (1-based) |
+| `type` | string | Transition type |
+| `duration_sec` | float | Optional override |
+
+Verse-level: `transition_out`, `transition_duration_sec` on the outgoing slide.
+
+Nested under `video_export`:
+
+```yaml
+video_export:
+  transitions:
+    default: none
+    duration_sec: 0.30
+  transition_fade_sec: 0.28   # deprecated → segment_fade
+  video_crf: 23
+```
+
+Showcase: `examples/slide-transitions-showcase.yaml` (GitHub: [showcase YAML](https://github.com/MervinPraison/PraisonAIPPT/blob/main/examples/slide-transitions-showcase.yaml)). Full guide: [Slide transitions](slide-transitions.md).
+
+Pipeline: `pipeline.validate_transitions` (default true), `pipeline.strict_transitions`.
 
 ---
 

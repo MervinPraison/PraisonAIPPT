@@ -49,6 +49,7 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 | [Commands](commands.md) | Full CLI reference (all subcommands) |
 | [Video + transcript workflow](workflow-video-transcript-to-deck.md) | End-to-end steps, YAML artefacts, automation plan |
 | [Video export](video-export.md) | Compositor, narration modes, CLI |
+| [Slide transitions](slide-transitions.md) | segment_fade, crossfade, wipes; showcase deck |
 | [HeyGen article examples](heygen-examples.md) | Five media variants, assets, build workflow |
 | [Avatar PiP calibration](avatar-calibration.md) | Auto `crop_x`, hybrid face detect, CLI |
 | [Slide JPEG export](slide-images.md) | `slide_images_dir`, `build-slide-images` |

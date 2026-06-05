@@ -25,6 +25,7 @@ from .ffmpeg_composer import (
     OverlaySpec,
     check_video_tools,
     concat_segments,
+    concat_segments_with_transitions,
     ffprobe_duration,
     ffprobe_has_audio,
     is_image_path,
@@ -69,6 +70,7 @@ class VideoOptions:
     tts_voice: str = "en-GB-RyanNeural"
     captions_enabled: bool = True
     transition_fade_sec: float = 0.0
+    transition_defaults: Optional[Any] = None
     video_crf: int = 23
     pdf_path: Optional[str] = None
     encoder: Optional[str] = None
@@ -179,6 +181,11 @@ class VideoOptions:
             opts.transition_fade_sec = max(0.0, float(raw["transition_fade_sec"]))
         if raw.get("video_crf") is not None:
             opts.video_crf = int(raw["video_crf"])
+        from .video_protocol import parse_transition_defaults
+
+        opts.transition_defaults = parse_transition_defaults(deck, raw)
+        if opts.transition_defaults.legacy_fade_sec > 0:
+            opts.transition_fade_sec = opts.transition_defaults.legacy_fade_sec
         ts = deck.get("slide_timestamps")
         if ts:
             opts._slide_timestamps = list(ts)  # type: ignore[attr-defined]
@@ -746,22 +753,33 @@ def synthesise_tts(text: str, voice: str, output: str, *, provider: str = "edge"
     asyncio.run(_run())
 
 
-def write_srt(entries: List[SlideVideoEntry], path: str) -> None:
+def write_srt(
+    entries: List[SlideVideoEntry],
+    path: str,
+    *,
+    edges: Optional[List[Any]] = None,
+) -> None:
+    from .video_protocol import any_blend_edges, effective_timeline_sec
+
     lines: List[str] = []
-    t = 0.0
-    idx = 1
-    for entry in entries:
-        if not entry.caption_text.strip():
+    if edges and any_blend_edges(edges):
+        starts = effective_timeline_sec(entries, edges)
+    else:
+        starts = []
+        t = 0.0
+        for entry in entries:
+            starts.append(t)
             t += entry.duration_sec
+    idx = 1
+    for entry, start in zip(entries, starts):
+        if not entry.caption_text.strip():
             continue
-        start = _srt_time(t)
-        end = _srt_time(t + entry.duration_sec)
+        end = start + entry.duration_sec
         lines.append(str(idx))
         idx += 1
-        lines.append(f"{start} --> {end}")
+        lines.append(f"{_srt_time(start)} --> {_srt_time(end)}")
         lines.append(entry.caption_text.strip())
         lines.append("")
-        t += entry.duration_sec
     Path(path).write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -969,6 +987,51 @@ def _apply_avatar_overlay_timing(
     return avatar_offset
 
 
+def build_compose_plan(
+    entries: List[SlideVideoEntry],
+    data: Optional[dict],
+    options: VideoOptions,
+) -> Tuple[List[SlideVideoEntry], List[Any]]:
+    """Resolve slide list and edge transitions after durations are known."""
+    from .video_protocol import (
+        ResolvedEdgeTransition,
+        any_blend_edges,
+        parse_transition_defaults,
+        resolve_edge_transitions,
+    )
+
+    data = data or {}
+    vex = data.get("video_export") or {}
+    defs = options.transition_defaults or parse_transition_defaults(data, vex)
+    plan_entries: List[Any] = []
+    for entry in entries:
+        plan_entries.append({
+            "duration_sec": entry.duration_sec,
+            "verse": entry.verse,
+        })
+    edges = resolve_edge_transitions(
+        plan_entries, vex, data.get("slide_transitions"), defaults=defs,
+    )
+    sidecar = data.get("_slide_transitions") or {}
+    if sidecar.get("edges"):
+        edges = [
+            ResolvedEdgeTransition(
+                after_slide=int(e["after_slide"]),
+                type=str(e["type"]),
+                duration_sec=float(e.get("duration_sec") or 0),
+                source=str(e.get("source") or "sidecar"),
+            )
+            for e in sidecar["edges"]
+        ]
+    timeline = options.avatar_timeline
+    if timeline == "continuous" and any_blend_edges(edges):
+        logger.warning(
+            "avatar_timeline=continuous with blend transitions may drift; "
+            "use per_slide or segment_fade only for lip-sync decks"
+        )
+    return entries, edges
+
+
 def compose_video(
     entries: List[SlideVideoEntry],
     png_paths: List[str],
@@ -977,6 +1040,7 @@ def compose_video(
     temp_dir: Path,
     *,
     source_file: Optional[str] = None,
+    data: Optional[dict] = None,
 ) -> str:
     encoder = options.encoder or pick_video_encoder()
     segments: List[str] = []
@@ -985,9 +1049,22 @@ def compose_video(
     if sr:
         lo, hi = sr
         pairs = [(e, p) for e, p in pairs if lo <= e.index + 1 <= hi]
+    filtered_entries = [e for e, _ in pairs]
+    _, edges = build_compose_plan(filtered_entries, data, options)
+    if sr:
+        from .video_protocol import resolve_edge_transitions, parse_transition_defaults
+
+        vex = (data or {}).get("video_export") or {}
+        defs = options.transition_defaults or parse_transition_defaults(data or {}, vex)
+        plan = [{"duration_sec": e.duration_sec, "verse": e.verse} for e in filtered_entries]
+        edges = resolve_edge_transitions(plan, vex, (data or {}).get("slide_transitions"), defaults=defs)
+
+    from .video_protocol import any_blend_edges, segment_fade_sec_for_slide
+
     avatar_offset = 0.0
-    timeline = _resolve_avatar_timeline(options, [e for e, _ in pairs])
-    for entry, png in pairs:
+    timeline = _resolve_avatar_timeline(options, filtered_entries)
+    seg_durations: List[float] = []
+    for slide_i, (entry, png) in enumerate(pairs):
         seg = str(temp_dir / f"seg_{entry.index:03d}.mp4")
         overlays = _overlays_for_entry(entry, options, source_file=source_file)
         avatar_offset = _apply_avatar_overlay_timing(
@@ -1007,6 +1084,7 @@ def compose_video(
                     if ov.is_video and ov.path == entry.avatar_video_path:
                         avatar_start = ov.video_start_sec
                         break
+        fade_sec = segment_fade_sec_for_slide(slide_i, edges)
         render_slide_segment(
             png,
             entry.duration_sec,
@@ -1018,7 +1096,7 @@ def compose_video(
             overlays=overlays,
             audio_path=audio if entry.audio_primary != "avatar" else None,
             audio_start_sec=entry.audio_start_sec if entry.audio_primary in ("file", "tts") else 0.0,
-            fade_sec=options.transition_fade_sec,
+            fade_sec=fade_sec,
             video_crf=options.video_crf,
         )
         if entry.audio_primary == "avatar" and entry.avatar_video_path:
@@ -1029,8 +1107,15 @@ def compose_video(
             )
             seg = seg_av
         segments.append(seg)
+        seg_durations.append(entry.duration_sec)
 
-    concat_segments(segments, output)
+    if any_blend_edges(edges):
+        concat_segments_with_transitions(
+            segments, seg_durations, edges, output,
+            video_crf=options.video_crf, encoder=encoder,
+        )
+    else:
+        concat_segments(segments, output)
     return output
 
 
@@ -1105,14 +1190,19 @@ def convert_pptx_to_video(
             data, prs, opts, source_file=source_file, custom_title=custom_title,
         )
         resolve_slide_durations(entries, opts, source_file=source_file, temp_dir=temp_dir)
+        from .slide_transition import maybe_apply_slide_transitions_deck
+
+        if data:
+            maybe_apply_slide_transitions_deck(data, entries, source_file=source_file)
         pngs = rasterise_slides(pptx_path, temp_dir, opts, pdf_path=opts.pdf_path or pdf_path)
-        compose_video(entries, pngs, out, opts, temp_dir, source_file=source_file)
+        compose_video(entries, pngs, out, opts, temp_dir, source_file=source_file, data=data)
         srt_entries = entries
         if opts.slide_range:
             lo, hi = opts.slide_range
             srt_entries = [e for e in entries if lo <= e.index + 1 <= hi]
+        _, srt_edges = build_compose_plan(srt_entries, data, opts)
         if opts.captions_enabled and any(e.caption_text for e in srt_entries):
-            write_srt(srt_entries, str(Path(out).with_suffix(".srt")))
+            write_srt(srt_entries, str(Path(out).with_suffix(".srt")), edges=srt_edges)
         if opts.keep_temp:
             manifest_path = temp_dir / "manifest.json"
             manifest_path.write_text(

@@ -1,0 +1,114 @@
+# Slide transitions showcase
+#
+# Dedicated example demonstrating every supported transition type on its own edge.
+# Build: praisonaippt -i examples/slide-transitions-showcase.yaml -o examples/slide-transitions-showcase.pptx --convert-video
+# Plan:  praisonaippt slide-transition-plan -i examples/slide-transitions-showcase.yaml
+#
+# Slide map (skip_title_slide — 8 slides, 7 edges):
+#   1 → segment_fade    2 → crossfade     3 → wipeleft
+#   4 → wiperight       5 → slideleft     6 → slideright
+#   7 → none (hard cut) 8 (end)
+#
+# Slide 3 also sets verse transition_out (crossfade) — edge wipeleft wins (precedence demo).
+
+presentation_title: Slide transitions showcase
+presentation_subtitle: All FFmpeg transition types in one deck
+
+skip_title_slide: true
+
+slide_images_dir: slide_images/slide-transitions-showcase
+
+slide_style:
+  background_color: "#121212"
+  text_color: "#E8E8E8"
+  title_color: "#FFFFFF"
+  reference_color: "#94A3B8"
+  font_name: Calibri
+  alignment: center
+
+slide_transitions:
+  enabled: true
+  default: none
+  duration_sec: 0.35
+  min_slide_sec: 2.0
+  max_fade_ratio: 0.25
+  edges:
+    - after_slide: 1
+      type: segment_fade
+      duration_sec: 0.30
+    - after_slide: 2
+      type: crossfade
+      duration_sec: 0.35
+    - after_slide: 3
+      type: wipeleft
+      duration_sec: 0.35
+    - after_slide: 4
+      type: wiperight
+      duration_sec: 0.35
+    - after_slide: 5
+      type: slideleft
+      duration_sec: 0.35
+    - after_slide: 6
+      type: slideright
+      duration_sec: 0.35
+    - after_slide: 7
+      type: none
+
+video_export:
+  backend: compositor
+  preset: draft
+  narration_mode: fixed
+  slide_duration_sec: 4.0
+  transitions:
+    default: none
+    duration_sec: 0.30
+  captions:
+    enabled: true
+
+pipeline:
+  validate_transitions: true
+  export_mp4: false
+
+sections:
+  - verses:
+      - reference: "1 · segment_fade out"
+        text: "Leaving this slide uses segment_fade — dip to black in/out on the clip."
+        duration_sec: 4.0
+        notes: "Segment fade demonstration."
+
+      - reference: "2 · crossfade out"
+        text: "Next edge is crossfade — true A-to-B blend via FFmpeg xfade."
+        duration_sec: 4.0
+        notes: "Crossfade demonstration."
+
+      - reference: "3 · wipeleft out"
+        text: "Verse says crossfade but edge wipeleft wins (precedence demo)."
+        duration_sec: 4.0
+        transition_out: crossfade
+        transition_duration_sec: 0.40
+        notes: "Edge list overrides verse transition_out."
+
+      - reference: "4 · wiperight out"
+        text: "Wiperight directional blend at concat time."
+        duration_sec: 4.0
+        notes: "Wiperight demonstration."
+
+      - reference: "5 · slideleft out"
+        text: "Slideleft — horizontal slide blend."
+        duration_sec: 4.0
+        notes: "Slideleft demonstration."
+
+      - reference: "6 · slideright out"
+        text: "Slideright — opposite horizontal slide."
+        duration_sec: 4.0
+        notes: "Slideright demonstration."
+
+      - reference: "7 · none out"
+        text: "Hard cut to the final slide — default none."
+        duration_sec: 4.0
+        notes: "Hard cut demonstration."
+
+      - reference: "8 · end"
+        text: "Last slide. No outgoing edge."
+        duration_sec: 4.0
+        notes: "Final slide."

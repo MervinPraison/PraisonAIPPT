@@ -275,7 +275,9 @@ layouts. Use this when judging export quality.
 
 **Invariants enforced:** `len(slides) == pdf_pages == png_count` — export fails fast on mismatch.
 
-**Not in v1:** slide transitions, rounded overlay masks, Windows CreateVideo animations.
+**Slide transitions:** default is **none** (hard cuts). Per-clip dip-to-black is `segment_fade`; true A→B blends use `crossfade` / wipes via the compositor xfade path. See [slide-transitions.md](slide-transitions.md).
+
+**Not in v1:** rounded overlay masks, Windows CreateVideo animations.
 
 ## Python API
 

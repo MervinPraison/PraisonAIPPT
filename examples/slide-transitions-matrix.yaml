@@ -1,0 +1,30 @@
+presentation_title: Transitions matrix
+skip_title_slide: true
+
+slide_transitions:
+  default: segment_fade
+  duration_sec: 0.25
+  edges:
+    - after_slide: 2
+      type: wipeleft
+      duration_sec: 0.4
+
+video_export:
+  transitions:
+    default: none
+    duration_sec: 0.30
+
+sections:
+  - section: Demo
+    verses:
+      - slide_type: deck_title_split
+        headline: One
+        duration_sec: 4.0
+        transition_out: crossfade
+        transition_duration_sec: 0.35
+      - slide_type: deck_title_split
+        headline: Two
+        duration_sec: 4.0
+      - slide_type: deck_title_split
+        headline: Three
+        duration_sec: 4.0

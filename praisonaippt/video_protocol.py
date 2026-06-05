@@ -1,16 +1,40 @@
 """
-Protocol-driven video overlay configuration.
+Protocol-driven video overlay and slide-transition configuration.
 
-Precedence (later wins): deck ``video_export`` → ``slide_style.layouts`` → verse
-flat keys → ``verse.video_overlay`` / ``video_export.overlay``.
+Overlay precedence (later wins): deck ``video_export`` → ``slide_style.layouts`` →
+verse flat keys → ``verse.video_overlay`` / ``video_export.overlay``.
 
-See ``docs/video-export.md`` for the YAML schema.
+Transition precedence (later wins): per-edge ``slide_transitions`` list → verse
+``transition_out`` → ``slide_transitions`` defaults → ``video_export.transitions`` →
+legacy ``transition_fade_sec`` → ``none``.
+
+See ``docs/video-export.md`` and ``docs/slide-transitions.md``.
 """
 
 from __future__ import annotations
 
+import logging
+import warnings
 from dataclasses import dataclass, field
-from typing import Any, Dict, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple, Union
+
+logger = logging.getLogger(__name__)
+
+TRANSITION_TYPES = frozenset({
+    "none", "segment_fade", "crossfade",
+    "wipeleft", "wiperight", "slideleft", "slideright",
+})
+BLEND_TRANSITION_TYPES = frozenset({
+    "crossfade", "wipeleft", "wiperight", "slideleft", "slideright",
+})
+TRANSITION_ALIASES = {"fade": "segment_fade"}
+
+TRANSITION_BLOCK_KEYS = frozenset({
+    "enabled", "default", "duration_sec", "min_slide_sec", "max_fade_ratio", "edges",
+})
+EDGE_TRANSITION_KEYS = frozenset({"after_slide", "type", "duration_sec"})
+VERSE_TRANSITION_KEYS = frozenset({"transition_out", "transition_duration_sec"})
+VIDEO_EXPORT_TRANSITION_KEYS = frozenset({"default", "duration_sec"})
 
 from .avatar_layouts import RegionBox, _pip_box_at
 
@@ -354,3 +378,394 @@ def validate_video_overlay_block(raw: Any, path: str) -> None:
         validate_overlay_placement(block["media"], f"{path}.media")
     if block.get("offset_px") is not None:
         validate_overlay_placement({"offset_px": block["offset_px"]}, path)
+
+
+# ---------------------------------------------------------------------------
+# Slide transitions (protocol)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class TransitionDefaults:
+    """Global transition defaults from YAML."""
+
+    enabled: bool = True
+    default: str = "none"
+    duration_sec: float = 0.30
+    min_slide_sec: float = 0.5
+    max_fade_ratio: float = 0.25
+    legacy_fade_sec: float = 0.0
+
+    def is_active(self) -> bool:
+        return self.enabled and (
+            self.default != "none"
+            or self.legacy_fade_sec > 0
+        )
+
+
+@dataclass
+class ResolvedEdgeTransition:
+    """One transition leaving slide *after_slide* (1-based) → next slide."""
+
+    after_slide: int
+    type: str = "none"
+    duration_sec: float = 0.0
+    source: str = "default"
+
+    def is_blend(self) -> bool:
+        return self.type in BLEND_TRANSITION_TYPES
+
+    def is_segment_fade(self) -> bool:
+        return self.type == "segment_fade"
+
+
+@dataclass
+class VideoComposePlan:
+    """Resolved slide list plus *n-1* edge transitions."""
+
+    entries: list
+    edges: List[ResolvedEdgeTransition] = field(default_factory=list)
+
+
+def normalise_transition_type(value: Any, *, path: str = "") -> str:
+    """Map YAML type strings to canonical names; warn on deprecated aliases."""
+    if value is None:
+        return "none"
+    raw = str(value).lower().strip().replace("-", "_")
+    if raw in TRANSITION_ALIASES:
+        canonical = TRANSITION_ALIASES[raw]
+        if raw == "fade":
+            warnings.warn(
+                f"{path or 'transition'} type 'fade' is deprecated; use 'segment_fade'",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        return canonical
+    return raw
+
+
+def _float_or(value: Any, default: float) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def parse_transition_defaults(
+    data: Optional[dict],
+    video_export: Optional[dict] = None,
+) -> TransitionDefaults:
+    """Merge ``slide_transitions`` block and ``video_export.transitions``."""
+    data = data or {}
+    vex = video_export or data.get("video_export") or {}
+    out = TransitionDefaults()
+    ve_tr = vex.get("transitions") if isinstance(vex.get("transitions"), dict) else {}
+    st_raw = data.get("slide_transitions")
+    st_cfg: dict = {}
+    if isinstance(st_raw, dict):
+        st_cfg = st_raw
+    if ve_tr:
+        if ve_tr.get("default") is not None:
+            out.default = normalise_transition_type(ve_tr["default"], path="video_export.transitions")
+        if ve_tr.get("duration_sec") is not None:
+            out.duration_sec = max(0.0, _float_or(ve_tr["duration_sec"], out.duration_sec))
+    if st_cfg:
+        if st_cfg.get("enabled") is not None:
+            out.enabled = bool(st_cfg["enabled"])
+        if st_cfg.get("default") is not None:
+            out.default = normalise_transition_type(st_cfg["default"], path="slide_transitions")
+        if st_cfg.get("duration_sec") is not None:
+            out.duration_sec = max(0.0, _float_or(st_cfg["duration_sec"], out.duration_sec))
+        if st_cfg.get("min_slide_sec") is not None:
+            out.min_slide_sec = max(0.1, _float_or(st_cfg["min_slide_sec"], out.min_slide_sec))
+        if st_cfg.get("max_fade_ratio") is not None:
+            out.max_fade_ratio = max(0.01, min(1.0, _float_or(st_cfg["max_fade_ratio"], out.max_fade_ratio)))
+    if vex.get("transition_fade_sec") is not None:
+        legacy = max(0.0, _float_or(vex["transition_fade_sec"], 0.0))
+        if legacy > 0:
+            out.legacy_fade_sec = legacy
+            if out.default == "none" and not st_cfg.get("default") and not ve_tr.get("default"):
+                out.default = "segment_fade"
+                out.duration_sec = legacy
+                warnings.warn(
+                    "video_export.transition_fade_sec is deprecated; use "
+                    "video_export.transitions or slide_transitions",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+    return out
+
+
+def parse_edge_transition_list(raw: Any) -> List[dict]:
+    """Extract per-edge overrides from list or ``slide_transitions.edges``."""
+    if raw is None:
+        return []
+    if isinstance(raw, list):
+        return [e for e in raw if isinstance(e, dict) and e.get("after_slide") is not None]
+    if isinstance(raw, dict):
+        edges = raw.get("edges")
+        if isinstance(edges, list):
+            return [e for e in edges if isinstance(e, dict) and e.get("after_slide") is not None]
+    return []
+
+
+def clamp_transition_duration(
+    duration_sec: float,
+    slide_duration_sec: float,
+    defaults: TransitionDefaults,
+) -> float:
+    """Single clamp policy shared by segment fade and xfade (matches render_slide_segment)."""
+    dur = max(0.0, float(duration_sec))
+    slide_dur = max(0.1, float(slide_duration_sec))
+    if dur <= 0 or slide_dur < defaults.min_slide_sec:
+        return 0.0
+    max_by_ratio = slide_dur * defaults.max_fade_ratio
+    capped = min(dur, max_by_ratio)
+    if slide_dur > capped * 2.5:
+        capped = min(capped, slide_dur / 4.0)
+    else:
+        return 0.0
+    return max(0.0, capped)
+
+
+def _verse_for_plan_entry(entry: Any) -> Optional[dict]:
+    if entry is None:
+        return None
+    if isinstance(entry, dict):
+        return entry.get("verse") if "verse" in entry else entry
+    return getattr(entry, "verse", None)
+
+
+def _slide_duration_for_edge(entries: Sequence[Any], after_slide: int) -> float:
+    idx = after_slide - 1
+    if idx < 0 or idx >= len(entries):
+        return 5.0
+    entry = entries[idx]
+    if isinstance(entry, dict):
+        return float(entry.get("duration_sec") or 5.0)
+    return float(getattr(entry, "duration_sec", None) or 5.0)
+
+
+def resolve_edge_transitions(
+    entries: Sequence[Any],
+    video_export: Optional[dict] = None,
+    slide_transitions: Any = None,
+    *,
+    defaults: Optional[TransitionDefaults] = None,
+) -> List[ResolvedEdgeTransition]:
+    """Resolve *n-1* edges for *n* slides. Precedence: edge list > verse > global > legacy."""
+    n = len(entries)
+    if n <= 1:
+        return []
+    vex = video_export or {}
+    defs = defaults or parse_transition_defaults({"slide_transitions": slide_transitions}, vex)
+    edge_overrides: Dict[int, dict] = {}
+    for item in parse_edge_transition_list(slide_transitions):
+        try:
+            after = int(item["after_slide"])
+        except (TypeError, ValueError):
+            continue
+        if 1 <= after < n:
+            edge_overrides[after] = item
+
+    edges: List[ResolvedEdgeTransition] = []
+    for i in range(1, n):
+        verse = _verse_for_plan_entry(entries[i - 1])
+        slide_dur = _slide_duration_for_edge(entries, i)
+        resolved = ResolvedEdgeTransition(after_slide=i, source="default")
+
+        if not defs.enabled:
+            resolved.type = "none"
+            resolved.duration_sec = 0.0
+        elif i in edge_overrides:
+            ov = edge_overrides[i]
+            resolved.type = normalise_transition_type(
+                ov.get("type", defs.default), path=f"slide_transitions[{i}]",
+            )
+            resolved.duration_sec = _float_or(
+                ov.get("duration_sec", defs.duration_sec), defs.duration_sec,
+            )
+            resolved.source = "edge"
+        elif verse and verse.get("transition_out") is not None:
+            resolved.type = normalise_transition_type(
+                verse["transition_out"], path=f"verse[{i}].transition_out",
+            )
+            resolved.duration_sec = _float_or(
+                verse.get("transition_duration_sec", defs.duration_sec), defs.duration_sec,
+            )
+            resolved.source = "verse"
+        elif defs.default != "none":
+            resolved.type = defs.default
+            resolved.duration_sec = defs.duration_sec
+            resolved.source = "global"
+        elif defs.legacy_fade_sec > 0:
+            resolved.type = "segment_fade"
+            resolved.duration_sec = defs.legacy_fade_sec
+            resolved.source = "legacy"
+        else:
+            resolved.type = "none"
+            resolved.duration_sec = 0.0
+
+        if resolved.type == "none":
+            resolved.duration_sec = 0.0
+        else:
+            clamped = clamp_transition_duration(resolved.duration_sec, slide_dur, defs)
+            if clamped <= 0:
+                resolved.type = "none"
+                resolved.duration_sec = 0.0
+                resolved.source = f"{resolved.source}:clamped"
+            else:
+                resolved.duration_sec = clamped
+
+        edges.append(resolved)
+    return edges
+
+
+def segment_fade_sec_for_slide(
+    slide_index: int,
+    edges: Sequence[ResolvedEdgeTransition],
+) -> float:
+    """Symmetric segment fade duration for slide *slide_index* (0-based)."""
+    if slide_index < len(edges) and edges[slide_index].is_blend():
+        return 0.0
+    fade = 0.0
+    if slide_index < len(edges) and edges[slide_index].is_segment_fade():
+        fade = max(fade, edges[slide_index].duration_sec)
+    if slide_index > 0 and slide_index - 1 < len(edges):
+        prev = edges[slide_index - 1]
+        if prev.is_segment_fade():
+            fade = max(fade, prev.duration_sec)
+    return fade
+
+
+def effective_timeline_sec(
+    entries: Sequence[Any],
+    edges: Sequence[ResolvedEdgeTransition],
+) -> List[float]:
+    """Start time (seconds) for each slide; accounts for xfade overlap."""
+    times: List[float] = []
+    t = 0.0
+    for i, entry in enumerate(entries):
+        times.append(t)
+        if isinstance(entry, dict):
+            dur = float(entry.get("duration_sec") or 5.0)
+        else:
+            dur = float(getattr(entry, "duration_sec", None) or 5.0)
+        if i < len(edges) and edges[i].is_blend():
+            t += dur - edges[i].duration_sec
+        else:
+            t += dur
+    return times
+
+
+def total_output_duration_sec(
+    entries: Sequence[Any],
+    edges: Sequence[ResolvedEdgeTransition],
+) -> float:
+    """Total MP4 length after transitions."""
+    starts = effective_timeline_sec(entries, edges)
+    if not entries:
+        return 0.0
+    last = len(entries) - 1
+    if isinstance(entries[last], dict):
+        last_dur = float(entries[last].get("duration_sec") or 5.0)
+    else:
+        last_dur = float(getattr(entries[last], "duration_sec", None) or 5.0)
+    return starts[last] + last_dur
+
+
+def any_blend_edges(edges: Sequence[ResolvedEdgeTransition]) -> bool:
+    return any(e.is_blend() for e in edges)
+
+
+def validate_transition_type(value: Any, path: str) -> None:
+    from .exceptions import SchemaError
+    from .transition_backends import known_transition_types
+
+    if value is None:
+        return
+    norm = normalise_transition_type(value, path=path)
+    allowed = known_transition_types()
+    if norm not in allowed:
+        opts = ", ".join(sorted(allowed))
+        raise SchemaError(f"{path} must be one of: {opts} (got {value!r})")
+
+
+def validate_transition_defaults(raw: Any, path: str = "slide_transitions") -> None:
+    from .exceptions import SchemaError
+    from .yaml_validate import _check_bool, _check_positive_number, _warn_unknown
+
+    if raw is None:
+        return
+    if isinstance(raw, list):
+        for i, item in enumerate(raw):
+            validate_edge_transition_entry(item, f"{path}[{i}]")
+        return
+    block = raw if isinstance(raw, dict) else None
+    if block is None:
+        raise SchemaError(f"{path} must be a mapping or list of edge overrides")
+    _warn_unknown(block.keys(), TRANSITION_BLOCK_KEYS, path)
+    if block.get("enabled") is not None:
+        _check_bool(block["enabled"], f"{path}.enabled")
+    validate_transition_type(block.get("default"), f"{path}.default")
+    if block.get("duration_sec") is not None:
+        _check_positive_number(block["duration_sec"], f"{path}.duration_sec", allow_zero=True)
+    if block.get("min_slide_sec") is not None:
+        _check_positive_number(block["min_slide_sec"], f"{path}.min_slide_sec")
+    if block.get("max_fade_ratio") is not None:
+        val = float(block["max_fade_ratio"])
+        if val <= 0 or val > 1:
+            raise SchemaError(f"{path}.max_fade_ratio must be between 0 and 1")
+    edges = block.get("edges")
+    if edges is not None:
+        if not isinstance(edges, list):
+            raise SchemaError(f"{path}.edges must be a list")
+        for i, item in enumerate(edges):
+            validate_edge_transition_entry(item, f"{path}.edges[{i}]")
+
+
+def validate_edge_transition_entry(raw: Any, path: str) -> None:
+    from .exceptions import SchemaError
+    from .yaml_validate import _check_positive_number, _warn_unknown
+
+    if raw is None:
+        return
+    if not isinstance(raw, dict):
+        raise SchemaError(f"{path} must be a mapping")
+    _warn_unknown(raw.keys(), EDGE_TRANSITION_KEYS, path)
+    if raw.get("after_slide") is None:
+        raise SchemaError(f"{path}.after_slide is required")
+    try:
+        after = int(raw["after_slide"])
+    except (TypeError, ValueError):
+        raise SchemaError(f"{path}.after_slide must be an integer")
+    if after < 1:
+        raise SchemaError(f"{path}.after_slide must be >= 1")
+    validate_transition_type(raw.get("type"), f"{path}.type")
+    if raw.get("duration_sec") is not None:
+        _check_positive_number(raw["duration_sec"], f"{path}.duration_sec", allow_zero=True)
+
+
+def validate_verse_transition_keys(verse: dict, path: str) -> None:
+    from .yaml_validate import _check_positive_number
+
+    if verse.get("transition_out") is not None:
+        validate_transition_type(verse["transition_out"], f"{path}.transition_out")
+    if verse.get("transition_duration_sec") is not None:
+        _check_positive_number(
+            verse["transition_duration_sec"], f"{path}.transition_duration_sec", allow_zero=True,
+        )
+
+
+def validate_video_export_transitions(raw: Any, path: str = "video_export.transitions") -> None:
+    from .exceptions import SchemaError
+    from .yaml_validate import _check_positive_number, _warn_unknown
+
+    if raw is None:
+        return
+    if not isinstance(raw, dict):
+        raise SchemaError(f"{path} must be a mapping")
+    _warn_unknown(raw.keys(), VIDEO_EXPORT_TRANSITION_KEYS, path)
+    validate_transition_type(raw.get("default"), f"{path}.default")
+    if raw.get("duration_sec") is not None:
+        _check_positive_number(raw["duration_sec"], f"{path}.duration_sec", allow_zero=True)

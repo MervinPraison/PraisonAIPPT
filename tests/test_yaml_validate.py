@@ -165,3 +165,63 @@ def test_dark_table_slide_style_passes():
             }],
         }],
     })
+
+
+def test_video_export_transitions_block():
+    validate_video_export({
+        "preset": "standard",
+        "transitions": {"default": "none", "duration_sec": 0.3},
+        "transition_fade_sec": 0.0,
+        "video_crf": 23,
+    })
+
+
+def test_slide_transitions_edge_list():
+    validate_deck_options({
+        "slide_transitions": [
+            {"after_slide": 1, "type": "crossfade", "duration_sec": 0.3},
+        ],
+        "sections": [],
+    })
+
+
+def test_slide_transitions_unknown_type_raises():
+    with pytest.raises(SchemaError):
+        validate_deck_options({
+            "slide_transitions": {"default": "invalid_type_xyz"},
+            "sections": [],
+        })
+
+
+def test_slide_transitions_showcase_fixture():
+    showcase = PKG / "examples" / "slide-transitions-showcase.yaml"
+    if not showcase.is_file():
+        return
+    data = yaml.safe_load(showcase.read_text(encoding="utf-8"))
+    validate_verses(data)
+
+
+def test_showcase_resolves_all_transition_types():
+    from praisonaippt.video_exporter import iter_slide_plan
+    from praisonaippt.video_protocol import resolve_edge_transitions
+
+    showcase = PKG / "examples" / "slide-transitions-showcase.yaml"
+    if not showcase.is_file():
+        return
+    data = yaml.safe_load(showcase.read_text(encoding="utf-8"))
+    plan = list(iter_slide_plan(data))
+    entries = []
+    for item in plan:
+        verse = item.get("verse") or {}
+        entries.append({
+            "duration_sec": float(verse.get("duration_sec") or 4.0),
+            "verse": verse,
+        })
+    edges = resolve_edge_transitions(entries, data.get("video_export"), data.get("slide_transitions"))
+    types = [e.type for e in edges]
+    assert types == [
+        "segment_fade", "crossfade", "wipeleft", "wiperight",
+        "slideleft", "slideright", "none",
+    ]
+    assert edges[2].source == "edge"  # wipeleft beats verse crossfade on slide 3
+

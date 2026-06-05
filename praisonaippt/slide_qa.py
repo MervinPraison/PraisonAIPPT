@@ -304,6 +304,56 @@ def check_hero_text_placement(
     )
 
 
+def check_slide_transitions(
+    data: dict,
+    *,
+    source_file: Optional[str] = None,
+    strict: bool = False,
+):
+    """Validate resolved slide transition plan."""
+    from .deck_pipeline import StepResult
+    from .slide_transition import maybe_apply_slide_transitions_deck
+    from .transition_backends import known_transition_types
+    from .video_exporter import iter_slide_plan
+
+    st_raw = data.get("slide_transitions")
+    if isinstance(st_raw, dict) and st_raw.get("enabled") is False:
+        return StepResult("slide_transitions", True, "slide_transitions disabled (skipped)")
+
+    plan = list(iter_slide_plan(data))
+    merged = maybe_apply_slide_transitions_deck(dict(data), plan, source_file=source_file)
+    sidecar = merged.get("_slide_transitions") or {}
+    edges = sidecar.get("edges") or []
+    allowed = known_transition_types()
+    issues: List[str] = []
+    for edge in edges:
+        t = edge.get("type", "none")
+        if t not in allowed:
+            issues.append(f"after_slide {edge.get('after_slide')}: unknown type {t!r}")
+        if strict and t != "none" and float(edge.get("duration_sec") or 0) <= 0:
+            issues.append(f"after_slide {edge.get('after_slide')}: zero duration")
+
+    ts = data.get("slide_timestamps")
+    if ts and any(e.get("type") in ("crossfade", "wipeleft", "wiperight", "slideleft", "slideright") for e in edges):
+        issues.append("slide_timestamps with blend transitions may drift (warning)")
+
+    if issues and strict:
+        return StepResult("slide_transitions", False, "; ".join(issues), {"issues": issues})
+    if issues:
+        return StepResult(
+            "slide_transitions",
+            True,
+            f"slide transitions OK with warnings: {'; '.join(issues)}",
+            {"edges": edges, "warnings": issues},
+        )
+    return StepResult(
+        "slide_transitions",
+        True,
+        f"slide transitions OK ({len(edges)} edge(s))",
+        {"edges": edges},
+    )
+
+
 def resolve_mp4_output(data: dict, deck_yaml: str | Path) -> Path:
     """Default MP4 path next to deck stem."""
     deck = Path(deck_yaml).resolve()

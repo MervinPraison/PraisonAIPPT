@@ -224,7 +224,12 @@ slide_timestamps:
 video_export:
   backend: compositor
   preset: high
-  transition_fade_sec: 0.28
+  # transitions default: none — see docs/slide-transitions.md
+  # slide_transitions:
+  #   edges:
+  #     - after_slide: 2
+  #       type: crossfade
+  #       duration_sec: 0.35
   narration_mode: avatar
   audio_source: heygen_video
   avatar_timeline: continuous

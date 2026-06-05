@@ -839,6 +839,31 @@ save_hero_panel_validation_diagram(
 
 CLI parity: `praisonaippt hero-panel-centre -i deck.yaml --slide 3 --validation-image out.png`
 
+### Slide transition plan
+
+```python
+from praisonaippt import (
+    maybe_apply_slide_transitions_deck,
+    resolve_edge_transitions,
+    format_transition_report,
+    list_transition_backends,
+    TransitionDefaults,
+)
+from praisonaippt.video_exporter import iter_slide_plan, build_compose_plan, VideoOptions
+
+data = load_verses_from_file("examples/slide-transitions-showcase.yaml")
+plan = list(iter_slide_plan(data))
+data = maybe_apply_slide_transitions_deck(data, plan, source_file="deck.yaml")
+print(data["_slide_transitions"]["report"])
+
+entries = [{"duration_sec": 4.0, "verse": e} for e in plan]
+edges = resolve_edge_transitions(entries, data.get("video_export"), data.get("slide_transitions"))
+print(format_transition_report(edges, slide_count=len(plan)))
+print(list_transition_backends())  # segment_fade, crossfade, wipeleft, ...
+```
+
+See [Slide transitions](slide-transitions.md).
+
 ### PiP face measurement and centring advice
 
 ```python

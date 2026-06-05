@@ -295,6 +295,29 @@ presentations/
     └── spanish/
 ```
 
+## Slide transitions showcase
+
+Full guide: **[Slide transitions](slide-transitions.md)**.
+
+| Example | Path |
+|---------|------|
+| **All transition types (showcase)** | `examples/slide-transitions-showcase.yaml` |
+| Precedence matrix (minimal) | `examples/slide-transitions-matrix.yaml` |
+
+```bash
+# Schema + transition gate
+praisonaippt validate-deck -i examples/slide-transitions-showcase.yaml
+
+# Resolved edge matrix (one type per edge)
+praisonaippt slide-transition-plan -i examples/slide-transitions-showcase.yaml
+
+# Build PPTX + MP4
+praisonaippt -i examples/slide-transitions-showcase.yaml \
+  -o examples/slide-transitions-showcase.pptx --convert-video
+```
+
+---
+
 ## Recent video and HeyGen features
 
 Overview of all new capabilities: **[Recent features](recent-features.md)** (narration sources, PiP calibration, validation diagrams, slide JPEGs).

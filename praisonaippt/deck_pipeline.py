@@ -48,6 +48,7 @@ GATE_SLIDE_JPEG_GOLDEN = "slide_jpeg_golden"
 GATE_SLIDE_QA = "slide_qa"
 GATE_MP4_FRAMES = "mp4_frames"
 GATE_HERO_TEXT = "hero_text_placement"
+GATE_SLIDE_TRANSITIONS = "slide_transitions"
 GATE_PLAN_APPROVAL = "plan_approval"
 GATE_RIGHTS = "rights_licensing"
 
@@ -88,6 +89,7 @@ class PipelineReport:
             GATE_AV_SYNC: ("av_sync", "timing_drift"),
             GATE_PIP_CENTRING: ("pip_centring",),
             GATE_HERO_TEXT: ("hero_text",),
+            GATE_SLIDE_TRANSITIONS: ("slide_transitions",),
             GATE_SLIDE_JPEG_GOLDEN: ("slide_jpegs",),
             GATE_SLIDE_QA: ("slide_qa",),
             GATE_MP4_FRAMES: ("mp4_frames",),
@@ -462,6 +464,17 @@ def validate_pip_centring(
     )
 
 
+def validate_slide_transitions_step(
+    data: dict,
+    *,
+    source_file: Optional[str] = None,
+    strict: bool = False,
+) -> StepResult:
+    from .slide_qa import check_slide_transitions
+
+    return check_slide_transitions(data, source_file=source_file, strict=strict)
+
+
 def post_render_qc(
     mp4_path: str | Path,
     *,
@@ -646,6 +659,7 @@ class PipelineOptions:
     validate_assets: bool = True
     validate_timing: bool = True
     validate_pip: bool = True
+    validate_transitions: bool = True
     validate_schema: bool = True
     build_pptx: bool = True
     export_mp4: bool = False
@@ -664,6 +678,7 @@ class PipelineOptions:
     variant_prefix: str = "heygen-50590"
     fail_fast: bool = True
     strict_pip: bool = False
+    strict_transitions: bool = False
     validate_rights: bool = True
     validate_plan: bool = True
     build_fn: Optional[BuildFn] = None
@@ -692,6 +707,10 @@ class PipelineOptions:
             opts.mp4_frames_dir = str(pipe["mp4_frames_dir"])
         if "validate_slide_qa" in pipe:
             opts.validate_slide_qa = bool(pipe["validate_slide_qa"])
+        if "validate_transitions" in pipe:
+            opts.validate_transitions = bool(pipe["validate_transitions"])
+        if "strict_transitions" in pipe:
+            opts.strict_transitions = bool(pipe["strict_transitions"])
         if "validate_plan" in pipe:
             opts.validate_plan = bool(pipe["validate_plan"])
         if "validate_rights" in pipe:
@@ -848,6 +867,11 @@ def run_pipeline(opts: PipelineOptions) -> PipelineReport:
         data["hero_text_placement"] = htp
     data = maybe_auto_calibrate_deck(data, source_file=sf)
     data = maybe_auto_place_hero_text_deck(data, source_file=sf)
+    from .slide_transition import maybe_apply_slide_transitions_deck
+    from .video_exporter import iter_slide_plan
+
+    plan = list(iter_slide_plan(data))
+    maybe_apply_slide_transitions_deck(data, plan, source_file=sf)
 
     if (data.get("hero_text_placement") or {}).get("auto"):
         from .slide_qa import check_hero_text_placement
@@ -883,6 +907,18 @@ def run_pipeline(opts: PipelineOptions) -> PipelineReport:
         if not report.ok and opts.fail_fast:
             _write_report(report, opts)
             return report
+
+    if opts.validate_transitions:
+        st_cfg = data.get("slide_transitions") or {}
+        enabled = st_cfg.get("enabled", True) if isinstance(st_cfg, dict) else bool(st_cfg)
+        if enabled or data.get("_slide_transitions"):
+            step = validate_slide_transitions_step(
+                data, source_file=sf, strict=opts.strict_transitions,
+            )
+            report.add(step)
+            if not report.ok and opts.fail_fast:
+                _write_report(report, opts)
+                return report
 
     if opts.validate_pip:
         strict_pip = opts.strict_pip or bool(pipe_cfg.get("strict_pip"))

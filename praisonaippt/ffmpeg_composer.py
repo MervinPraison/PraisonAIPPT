@@ -9,7 +9,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -503,3 +503,136 @@ def concat_segments(segment_paths: List[str], output: str) -> None:
     list_file.unlink(missing_ok=True)
     if proc.returncode != 0:
         raise RuntimeError(f"ffmpeg concat failed: {proc.stderr}")
+
+
+def build_xfade_filter_chain(
+    durations: List[float],
+    edges: List[Any],
+    *,
+    fps: int = 30,
+) -> Tuple[str, str]:
+    """Build filter_complex for chained xfade. Returns (filter_string, final_video_label)."""
+    n = len(durations)
+    if n <= 1:
+        return "", "0:v"
+    if n - 1 != len(edges):
+        raise ValueError(f"Expected {n - 1} edges for {n} segments")
+
+    from .transition_backends import ffmpeg_xfade_transition
+
+    pre: List[str] = []
+    norm: List[str] = []
+    for i in range(n):
+        tag = f"vn{i}"
+        pre.append(f"[{i}:v]fps={fps},settb=AVTB,format=yuv420p[{tag}]")
+        norm.append(tag)
+
+    filters: List[str] = list(pre)
+    running = float(durations[0])
+    prev_label = norm[0]
+    out_idx = 0
+    for i in range(n - 1):
+        edge = edges[i]
+        edge_type = getattr(edge, "type", edge.get("type") if isinstance(edge, dict) else "none")
+        dur = float(getattr(edge, "duration_sec", 0) if not isinstance(edge, dict) else edge.get("duration_sec", 0))
+        is_blend = edge_type in (
+            "crossfade", "wipeleft", "wiperight", "slideleft", "slideright",
+        )
+        next_in = norm[i + 1]
+        out_label = f"vx{out_idx}"
+        if is_blend and dur > 0:
+            xf = ffmpeg_xfade_transition(str(edge_type))
+            offset = max(0.0, running - dur)
+            filters.append(
+                f"[{prev_label}][{next_in}]xfade=transition={xf}:duration={dur:.3f}:"
+                f"offset={offset:.3f},format=yuv420p[{out_label}]"
+            )
+            running = running + float(durations[i + 1]) - dur
+        else:
+            filters.append(f"[{prev_label}][{next_in}]concat=n=2:v=1:a=0,format=yuv420p[{out_label}]")
+            running += float(durations[i + 1])
+        prev_label = out_label
+        out_idx += 1
+    return ";".join(filters), prev_label
+
+
+def build_acrossfade_filter_chain(
+    durations: List[float],
+    edges: List[Any],
+) -> Tuple[str, str]:
+    """Build audio acrossfade chain mirroring video edges."""
+    n = len(durations)
+    if n <= 1:
+        return "", "0:a"
+    pre: List[str] = []
+    norm: List[str] = []
+    for i in range(n):
+        tag = f"an{i}"
+        pre.append(f"[{i}:a]aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo[{tag}]")
+        norm.append(tag)
+
+    filters: List[str] = list(pre)
+    running = float(durations[0])
+    prev_label = norm[0]
+    out_idx = 0
+    for i in range(n - 1):
+        edge = edges[i]
+        edge_type = getattr(edge, "type", edge.get("type") if isinstance(edge, dict) else "none")
+        dur = float(getattr(edge, "duration_sec", 0) if not isinstance(edge, dict) else edge.get("duration_sec", 0))
+        is_blend = edge_type in (
+            "crossfade", "wipeleft", "wiperight", "slideleft", "slideright",
+        )
+        next_in = norm[i + 1]
+        out_label = f"ax{out_idx}"
+        if is_blend and dur > 0:
+            filters.append(
+                f"[{prev_label}][{next_in}]acrossfade=d={dur:.3f}[{out_label}]"
+            )
+            running = running + float(durations[i + 1]) - dur
+        else:
+            filters.append(f"[{prev_label}][{next_in}]concat=n=2:v=0:a=1[{out_label}]")
+            running += float(durations[i + 1])
+        prev_label = out_label
+        out_idx += 1
+    return ";".join(filters), prev_label
+
+
+def concat_segments_with_transitions(
+    segment_paths: List[str],
+    durations: List[float],
+    edges: List[Any],
+    output: str,
+    *,
+    video_crf: int = 23,
+    encoder: Optional[str] = None,
+) -> None:
+    """Concat segments with xfade/acrossfade on blend edges; hard join on none/segment_fade."""
+    if not segment_paths:
+        raise RuntimeError("No segments to concat")
+    if len(segment_paths) == 1:
+        shutil.copyfile(segment_paths[0], output)
+        return
+    if len(durations) != len(segment_paths):
+        durations = [max(0.1, ffprobe_duration(p)) for p in segment_paths]
+
+    encoder = encoder or pick_video_encoder()
+    cmd: List[str] = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
+    for p in segment_paths:
+        cmd += ["-i", p]
+
+    v_filter, v_out = build_xfade_filter_chain(durations, edges)
+    a_filter, a_out = build_acrossfade_filter_chain(durations, edges)
+    filters = v_filter
+    if a_filter:
+        filters = f"{v_filter};{a_filter}" if v_filter else a_filter
+
+    cmd += ["-filter_complex", filters, "-map", f"[{v_out}]", "-map", f"[{a_out}]"]
+    if encoder == "h264_videotoolbox":
+        cmd += ["-c:v", "h264_videotoolbox", "-b:v", "8M"]
+    else:
+        cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", str(int(video_crf)), "-pix_fmt", "yuv420p"]
+    cmd += ["-c:a", "aac", "-b:a", "192k", output]
+
+    proc = _run(cmd, timeout=900)
+    if proc.returncode != 0:
+        raise RuntimeError(f"ffmpeg transition concat failed: {proc.stderr}")

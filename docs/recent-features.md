@@ -1,6 +1,12 @@
 # Recent features (video, HeyGen, PiP calibration)
 
-Summary of capabilities added for **HeyGen talking-head decks**, **MP4 export**, **PiP framing**, and **visual validation**. Each item links to the full guide.
+Summary of capabilities added for **HeyGen talking-head decks**, **MP4 export**, **PiP framing**, **slide transitions**, and **visual validation**. Each item links to the full guide.
+
+---
+
+## Slide transitions (YAML parity)
+
+Configure per-edge, per-verse, or global transitions for MP4 export. Default is **none** (hard cut). Types include `segment_fade`, `crossfade`, and directional wipes. Showcase deck: `examples/slide-transitions-showcase.yaml`. See [slide-transitions.md](slide-transitions.md).
 
 ---
 

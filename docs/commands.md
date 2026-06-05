@@ -24,6 +24,8 @@ PraisonAI PPT is invoked as **`praisonaippt`**. Deck input may be **`.yaml`**, *
 | `calibrate-avatar` | PiP face framing; `--write` updates deck YAML or JSON |
 | `hero-panel-place` | Calibrate anchors; `--write` updates deck YAML or JSON |
 | `hero-panel-centre` | Measure panel vs UI text; `--validation-image` L/R/T/B diagram |
+| `slide-transition-plan` | Print resolved slide transition edge matrix (`-i deck.yaml`) |
+| `slide-transition-preview` | Show transition after slide N (`-i deck.yaml --slide N`) |
 | `pip-face-centre` | Measure L/R/T/B margins on PiP probe PNG |
 | `pipeline` | Unified sync → gates → build → MP4 → `report.json` |
 | `sync-variants` | Copy content master → HeyGen media variant YAMLs |

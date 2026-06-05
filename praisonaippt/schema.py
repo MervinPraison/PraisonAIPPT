@@ -39,6 +39,8 @@ _TOP_LEVEL_KEYS = {
     "_avatar_calibration",
     "hero_text_placement",
     "_hero_text_placement",
+    "slide_transitions",
+    "_slide_transitions",
     "pipeline",
 }
 
@@ -113,6 +115,8 @@ _VERSE_KEYS = {
     "avatar_fit",
     "media_crop_y_ratio",
     "media_zoom_ratio",
+    "transition_out",
+    "transition_duration_sec",
 }
 
 

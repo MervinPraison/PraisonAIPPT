@@ -15,6 +15,7 @@ from praisonaippt.deck_pipeline import (
     GATE_PRE_RENDER,
     GATE_RIGHTS,
     GATE_SLIDE_JPEG_GOLDEN,
+    GATE_SLIDE_TRANSITIONS,
     GATE_UNIFIED_PIPELINE,
     PipelineReport,
     StepResult,
@@ -52,6 +53,14 @@ def test_hero_text_gate_in_summary():
     d = report.to_dict()
     assert GATE_HERO_TEXT in d["gates"]
     assert d["gates"][GATE_HERO_TEXT]["validated"] is True
+
+
+def test_slide_transitions_gate_in_summary():
+    report = PipelineReport(ok=True, deck_yaml="d.yaml", started_at="t")
+    report.add(StepResult("slide_transitions", True, "ok"))
+    d = report.to_dict()
+    assert GATE_SLIDE_TRANSITIONS in d["gates"]
+    assert d["gates"][GATE_SLIDE_TRANSITIONS]["validated"] is True
 
 
 def test_rights_gate_blocks_when_required():

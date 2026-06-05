@@ -18,6 +18,7 @@ __all__ = [
     "validate_pipeline",
     "validate_avatar_calibration",
     "validate_hero_text_placement",
+    "validate_slide_transitions",
     "ALLOWED_LAYOUT_KINDS",
 ]
 
@@ -48,6 +49,7 @@ _VIDEO_EXPORT_KEYS = frozenset({
     "backend", "narration_mode", "audio_source", "output_path", "preset", "resolution",
     "fps", "dpi", "slide_duration_sec", "avatar_timeline", "avatar",
     "media", "overlay", "tts", "captions", "slide_cache",
+    "transitions", "transition_fade_sec", "video_crf",
 })
 _VIDEO_AVATAR_KEYS = frozenset({
     "fit", "shape", "crop_x_ratio", "crop_y_ratio", "zoom_ratio", "loop_if_shorter",
@@ -67,6 +69,7 @@ _VIDEO_RESOLUTION_KEYS = frozenset({"width", "height"})
 
 _PIPELINE_KEYS = frozenset({
     "content_master", "transcript_path", "auto_sync", "validate_pip", "strict_pip",
+    "validate_transitions", "strict_transitions",
     "variant_prefix", "golden_slide_dir", "export_mp4_frames", "mp4_frames_dir",
     "validate_slide_qa", "require_rights_ack", "rights_acknowledged",
     "content_approved", "plan_approved", "plan_draft",
@@ -365,6 +368,21 @@ def validate_video_export(video_export: Any, path: str = "video_export") -> None
     if raw.get("slide_cache") is not None:
         _check_bool(raw["slide_cache"], f"{path}.slide_cache")
 
+    from .video_protocol import validate_video_export_transitions
+
+    transitions = raw.get("transitions")
+    if transitions is not None:
+        validate_video_export_transitions(transitions, f"{path}.transitions")
+    if raw.get("transition_fade_sec") is not None:
+        _check_positive_number(raw["transition_fade_sec"], f"{path}.transition_fade_sec", allow_zero=True)
+    if raw.get("video_crf") is not None:
+        try:
+            crf = int(raw["video_crf"])
+        except (TypeError, ValueError):
+            raise SchemaError(f"{path}.video_crf must be an integer")
+        if crf < 0 or crf > 51:
+            raise SchemaError(f"{path}.video_crf must be between 0 and 51")
+
 
 def validate_slide_timestamps(timestamps: Any, path: str = "slide_timestamps") -> None:
     if timestamps is None:
@@ -474,7 +492,13 @@ def validate_verse_options(verse: dict, path: str) -> None:
     if verse.get("avatar_shape") is not None:
         _check_enum(verse["avatar_shape"], _AVATAR_SHAPES, f"{path}.avatar_shape")
 
-    from .video_protocol import validate_overlay_placement, validate_video_overlay_block
+    from .video_protocol import (
+        validate_overlay_placement,
+        validate_video_overlay_block,
+        validate_verse_transition_keys,
+    )
+
+    validate_verse_transition_keys(verse, path)
 
     for flat_key in ("avatar_crop_x_ratio",):
         if verse.get(flat_key) is not None:
@@ -611,6 +635,12 @@ def validate_hero_text_placement(htp: Any) -> None:
             raise SchemaError("hero_text_placement.anchor_weight must be between 0 and 1")
 
 
+def validate_slide_transitions(st: Any) -> None:
+    from .video_protocol import validate_transition_defaults
+
+    validate_transition_defaults(st, "slide_transitions")
+
+
 def validate_deck_options(data: dict) -> None:
     """Validate top-level deck options documented in the layout / video guides."""
     validate_slide_size(data.get("slide_size"))
@@ -620,6 +650,7 @@ def validate_deck_options(data: dict) -> None:
     validate_pipeline(data.get("pipeline"))
     validate_avatar_calibration(data.get("avatar_calibration"))
     validate_hero_text_placement(data.get("hero_text_placement"))
+    validate_slide_transitions(data.get("slide_transitions"))
     _validate_slide_timestamp_count(data)
     _validate_qa_block(data.get("slide_qa"), "slide_qa")
     if data.get("slide_images_dir") is not None and not isinstance(data.get("slide_images_dir"), str):

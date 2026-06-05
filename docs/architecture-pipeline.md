@@ -43,7 +43,7 @@ flowchart TB
 |--------|------|
 | `loader.py` | `load_deck_mapping` (parse only), `load_verses_from_file` (templates + validate), `write_deck_mapping` (JSON or YAML write) |
 | `yaml_validate.py` | `validate_pipeline`, `validate_avatar_calibration`, `validate_video_export`, … |
-| `video_protocol.py` | Overlay precedence: `video_export` → `layouts.*` → verse → `video_overlay` |
+| `video_protocol.py` | Overlay precedence; **transition** parse/resolve/validate/timeline |
 | `deck_pipeline.py` | Gates, `PipelineOptions`, `report.json`; optional `build_fn` / `export_fn` hooks |
 | `pipeline_protocols.py` | Default adapters to `create_presentation` and `convert_deck_to_video` |
 | `video_presets.py` | Shared `VIDEO_PRESETS` for compositor and post-render QC |
@@ -84,7 +84,7 @@ JSON decks use the same keys (see [Commands — JSON decks](commands.md#json-and
 `praisonaippt pipeline` writes `report.json` (default: `.praisonaippt/{deck-stem}.pipeline-report.json`):
 
 - `ok`, `exit_code` (0 / 1)
-- `gates` — `plan_approval`, `rights_licensing`, `pip_centring`, `av_sync`, `slide_jpegs`, `slide_qa`, `mp4_frames`, `post_render`, …
+- `gates` — `plan_approval`, `rights_licensing`, `pip_centring`, `hero_text`, **`slide_transitions`**, `av_sync`, `slide_jpegs`, `slide_qa`, `mp4_frames`, `post_render`, …
 - `steps` — per-step detail
 
 ## HeyGen variant sync
@@ -101,3 +101,4 @@ python examples/sync_heygen_variants.py   # same operation
 - [Commands](commands.md) — full CLI list
 - [Video + transcript workflow](workflow-video-transcript-to-deck.md) — HeyGen 50590 end-to-end
 - [Deck reference](yaml-reference.md) — schema and `pipeline` keys
+- [Slide transitions](slide-transitions.md) — YAML matrix, showcase deck, FFmpeg paths
