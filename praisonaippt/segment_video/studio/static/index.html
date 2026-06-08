@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Segment Video Studio</title>
+  <link rel="stylesheet" href="/static/studio.css">
+</head>
+<body>
+  <header id="header">
+    <h1>Segment Video Studio</h1>
+    <p id="project-meta"></p>
+    <div class="merge-controls">
+      <label>Transition
+        <select id="transition-type">
+          <option value="crossfade">crossfade</option>
+          <option value="none">none (hard cut)</option>
+        </select>
+      </label>
+      <label>Duration (s)
+        <input id="transition-dur" type="number" min="0" max="2" step="0.05" value="0.30">
+      </label>
+      <button id="btn-save-transitions">Save transitions</button>
+      <button id="btn-remerge">Re-merge</button>
+      <button id="btn-publish">Publish to mer.vin</button>
+    </div>
+  </header>
+
+  <section id="final-panel">
+    <h2>Final merge</h2>
+    <video id="final-video" controls></video>
+    <span id="final-dur"></span>
+    <input id="final-scrubber" type="range" min="0" max="100" step="0.05" value="0" class="hidden">
+    <p id="final-at" class="word-track hidden"></p>
+  </section>
+
+  <section id="segments-grid"></section>
+
+  <section id="inspector" class="hidden">
+    <h2>Segment inspector <span id="inspector-title"></span></h2>
+    <div class="inspector-layout">
+      <div class="inspector-preview">
+        <img id="inspector-frame" alt="active frame">
+        <p id="inspector-caption"></p>
+        <p id="inspector-word" class="word-track"></p>
+      </div>
+      <video id="inspector-video" controls></video>
+    </div>
+    <input id="inspector-scrubber" type="range" min="0" max="100" step="0.05" value="0">
+    <div id="inspector-slides" class="slide-strip"></div>
+    <p id="inspector-sync" class="sync-badge"></p>
+  </section>
+
+  <section id="job-log">
+    <h2>Job log</h2>
+    <pre id="log-output">Ready.</pre>
+  </section>
+
+  <script src="/static/studio.js"></script>
+</body>
+</html>

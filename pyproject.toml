@@ -97,10 +97,20 @@ Homepage = "https://github.com/MervinPraison/PraisonAIPPT"
 
 [project.scripts]
 praisonaippt = "praisonaippt.cli:main"
+segment-video = "praisonaippt.segment_video.cli:main"
 
 [tool.setuptools]
-packages = ["praisonaippt", "praisonaippt.workers", "examples", "templates"]
+packages = [
+    "praisonaippt",
+    "praisonaippt.workers",
+    "praisonaippt.segment_video",
+    "praisonaippt.segment_video.stages",
+    "praisonaippt.segment_video.studio",
+    "examples",
+    "templates",
+]
 
 [tool.setuptools.package-data]
 examples = ["*.json", "*.yaml", "*.yml"]
 templates = ["*.yaml", "*.yml", "README.md"]
+"praisonaippt.segment_video.studio" = ["static/*"]

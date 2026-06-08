@@ -105,6 +105,16 @@ def load_whisper_json(path: str | Path) -> TranscriptData:
         )
         for w in raw.get("words") or []
     ]
+    if not words:
+        for s in raw.get("segments") or []:
+            for w in s.get("words") or []:
+                words.append(
+                    WhisperWord(
+                        word=normalise_text(str(w.get("word", ""))),
+                        start=float(w["start"]),
+                        end=float(w["end"]),
+                    )
+                )
     return TranscriptData(
         duration=float(raw.get("duration") or (segments[-1].end if segments else 0)),
         text=normalise_text(str(raw.get("text", ""))),

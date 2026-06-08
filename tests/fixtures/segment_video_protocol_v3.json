@@ -1,0 +1,22 @@
+{
+  "schema_version": 3,
+  "name": "segment-video-pipeline",
+  "stages": [
+    {"id": "scripts", "scope": "segment", "outputs": ["segments/{dir}/script.md"]},
+    {"id": "catalogue-media", "scope": "project", "outputs": ["asset_catalog.json"]},
+    {"id": "sync-media", "scope": "project", "depends_on": ["catalogue-media"], "outputs": ["media_assets.json"]},
+    {"id": "validate-media", "scope": "project", "depends_on": ["sync-media"], "outputs": ["media_validation.json"]},
+    {"id": "media", "scope": "segment", "depends_on": ["scripts"], "outputs": ["timestamps.json"], "skip_existing": true},
+    {"id": "align-cues", "scope": "segment", "depends_on": ["media", "sync-media"], "outputs": ["cue_timings.json"]},
+    {"id": "yaml", "scope": "segment", "depends_on": ["align-cues"], "outputs": ["segment.yaml"]},
+    {"id": "build", "scope": "segment", "depends_on": ["yaml"], "outputs": ["segment.mp4"], "skip_existing": true},
+    {"id": "validate-sync", "scope": "segment", "depends_on": ["build"], "outputs": []},
+    {"id": "validate-visual", "scope": "segment", "depends_on": ["validate-sync"], "outputs": ["timeline.json"]},
+    {"id": "fix-jpegs", "scope": "project", "depends_on": ["build"], "outputs": []},
+    {"id": "seed-golden", "scope": "project", "depends_on": ["build"], "outputs": []},
+    {"id": "build-timeline", "scope": "project", "depends_on": ["validate-visual"], "outputs": ["merge/timeline.json"]},
+    {"id": "merge", "scope": "project", "depends_on": ["validate-visual"], "outputs": ["merge/final-roundup.mp4"]},
+    {"id": "publish", "scope": "project", "depends_on": ["merge"], "outputs": []}
+  ],
+  "merge_transitions": {"default": "crossfade", "duration_sec": 0.30}
+}
