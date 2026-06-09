@@ -112,6 +112,8 @@ examples/<slug>-roundup/
     concat-video.txt
     final-roundup.mp4
     final-roundup.srt
+  loudness_report.json    # normalize-audio before/after LUFS metrics
+  validation_report.json
   scripts/
     pipeline.py
     config/protocol.json
@@ -185,6 +187,8 @@ Hook montage uses `montage_weighted`; first cue often starts after **"roundup:"*
 | `hook:duration_drift` | hook lead-in + rebuild | **Fix here** |
 | `image_audit` | sync-media + rebuild | **Fix here** |
 | `caption↔slide` | verses SRT + timeline | **Fix here** |
+| `volume_inconsistency` | normalize-audio + merge | **Fix here** |
+| `not_hd` / wrong resolution | `video_export.preset: high` + rebuild | **Fix here** |
 
 ---
 
@@ -194,12 +198,66 @@ Hook montage uses `montage_weighted`; first cue often starts after **"roundup:"*
 |----|----------|-------|
 | `hook_montage` | yes | 15 montage cues; duration vs HeyGen |
 | `segment_sync` | yes | cue_timings = yaml verses = media cues |
+| `audio_loudness` | yes | Per-segment LUFS; spread ≤ max_spread_lufs |
 | `display_sync` | yes | Per-segment caption/slide/speech |
 | `image_audit` | yes | Alignment + recommend_swap |
 | `required_assets` | yes | Often fails on handoff — ignore if display passes |
 | `merge_output` | yes | Final MP4 exists |
 
-Reports live in project root: `validation_report.json`, `asset_gaps_report.json`, `image_audit_report.json`, `display_validation_report.json`, `hook_validation_report.json`.
+Reports live in project root: `validation_report.json`, `loudness_report.json`, `asset_gaps_report.json`, `image_audit_report.json`, `display_validation_report.json`, `hook_validation_report.json`.
+
+### audio_loudness config (`protocol.json`)
+
+```json
+"audio_loudness": {
+  "target_lufs": -16.0,
+  "true_peak_db": -1.5,
+  "lra": 11,
+  "max_spread_lufs": 2.0,
+  "tolerance_lufs": 1.0,
+  "skip_if_within_lufs": 0.5,
+  "normalize_before_merge": true
+}
+```
+
+Stage **`normalize-audio`** runs after `build`, before `merge`. Uses ffmpeg two-pass EBU R128 `loudnorm` on each `segments/*/segment.mp4` (video copy, AAC re-encode). Writes `loudness_report.json` with before/after metrics.
+
+Crossfade overlap dips ~3–6 dB momentarily — gate on **pre-merge** segment levels, not merge overlap windows.
+
+Measure only: `zsh .cursor/skills/segment-video-roundup/scripts/gap-audit.sh examples/<project>` (loudness + HD sections).
+
+---
+
+## Video resolution (HD)
+
+Deliverable standard: **Full HD 1920×1080 @ 30 fps, 16:9, H.264 + AAC**.
+
+| Layer | Resolution | Set in |
+|-------|------------|--------|
+| HeyGen avatar (`heygen.mp4`) | 1280×720 @ 60fps | `run_segment_media.py` → `"dimension": {"width": 1280, "height": 720}` |
+| Compositor output (`segment.mp4`) | **1920×1080 @ 30fps** | Deck `video_export.preset: high` (via `base_style.yaml` / `build_segment_yaml.py`) |
+| Final merge (`final-roundup.mp4`) | Same as segments | `merge` — crossfade only, **no scale filter** |
+
+Presets (`praisonaippt/video_presets.py`): `draft` = 720p, `standard`/`high` = 1080p, `4k` = 2160p.
+
+### Verify HD
+
+```bash
+ffprobe -v error -select_streams v:0 \
+  -show_entries stream=width,height,r_frame_rate,codec_name \
+  -of csv=p=0 merge/final-roundup.mp4
+# Expected: h264,1920,1080,30/1
+```
+
+Or use gap-audit (checks all segments + final).
+
+### Fix non-HD output
+
+1. Ensure `video_export.preset: high` (or explicit `resolution: {width: 1920, height: 1080}`) in base style / segment YAML.
+2. Rebuild: `build_segment_yaml.py` → `build --force` → `normalize-audio` → `merge`.
+3. **Merge alone cannot upscale** — segments must already be 1080p.
+
+For **native 1080p HeyGen** (sharper avatar, not upscaled 720p): change HeyGen dimensions in `run_segment_media.py`, regenerate all `heygen.mp4` (`media` stage), then full align → yaml → build chain.
 
 ---
 
@@ -219,6 +277,7 @@ From `examples/heygen-50590-video-audio-heygen-images.yaml`:
 | `video_export.backend` | compositor |
 | `video_export.audio_source` | heygen_video |
 | `video_export.narration_mode` | avatar |
+| `video_export.preset` | high (1920×1080 @ 30fps) |
 | `video_export.captions.enabled` | true |
 | `transitions.default` | none |
 
@@ -269,6 +328,8 @@ dimension: 1280×720, background #008000
 | Caption↔slide FAIL after multi-cue | Ensure SRT from verses when counts differ (`write_verses_srt`) |
 | `timing_drift` multi-cue | Regenerate via align-cues → yaml → build |
 | Wrong image on slide | `CUE_IMAGE_OVERRIDES` + sync-media + rebuild |
+| Uneven volume across segments | `normalize-audio --force` → `merge`; check `loudness_report.json` |
+| Final video 720p not 1080p | `video_export.preset: high` → yaml → `build --force` → `normalize-audio` → `merge` |
 | Corrupt `wp:video` JSON on update | Use HEREDOC/file; verify `{"id":N}` intact |
 | HeyGen vertical | Keep `MER_HEYGEN_VERTICAL` unset |
 
@@ -305,10 +366,10 @@ segment-video studio
 
 | `change` | Stages |
 |----------|--------|
-| `script` / `audio` | media → yaml → build → merge |
-| `hero` | sync-media → yaml → build → merge |
-| `deck` | build → merge |
-| `full_segment` | media → yaml → build → fix-jpegs → seed-golden → merge |
+| `script` / `audio` | media → yaml → build → normalize-audio → merge |
+| `hero` | sync-media → yaml → build → normalize-audio → merge |
+| `deck` | build → normalize-audio → merge |
+| `full_segment` | media → yaml → build → fix-jpegs → seed-golden → normalize-audio → merge |
 | `transitions` / `merge_only` | merge |
 | `publish` | publish (upload + wp:video URL swap + manifest update) |
 

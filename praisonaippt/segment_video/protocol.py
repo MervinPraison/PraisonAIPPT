@@ -7,21 +7,21 @@ STAGE_ALIASES: dict[str, str] = {"script": "scripts"}
 
 
 REGENERATE_CHAINS: dict[str, list[str]] = {
-    "script": ["media", "align-cues", "yaml", "build", "validate-sync", "validate-visual", "merge"],
+    "script": ["media", "align-cues", "yaml", "build", "normalize-audio", "validate-sync", "validate-visual", "merge"],
     "hero": [
         "catalogue-media", "crawl-missing-assets", "sync-media", "validate-assets",
-        "validate-media", "align-cues", "yaml", "build", "validate-sync", "validate-visual", "merge",
+        "validate-media", "align-cues", "yaml", "build", "normalize-audio", "validate-sync", "validate-visual", "merge",
     ],
-    "deck": ["build", "validate-sync", "validate-visual", "merge"],
+    "deck": ["build", "normalize-audio", "validate-sync", "validate-visual", "merge"],
     "merge_only": ["merge", "build-timeline"],
     "transitions": ["merge", "build-timeline"],
     "publish": ["publish"],
     "full_segment": [
         "catalogue-media", "crawl-missing-assets", "sync-media", "validate-assets", "validate-media", "media", "align-cues", "yaml", "build",
-        "fix-jpegs", "seed-golden", "validate-sync", "validate-visual", "merge", "build-timeline",
+        "normalize-audio", "fix-jpegs", "seed-golden", "validate-sync", "validate-visual", "merge", "build-timeline",
     ],
-    "audio": ["media", "align-cues", "yaml", "build", "validate-sync", "validate-visual", "merge"],
-    "timing": ["align-cues", "yaml", "build", "validate-sync", "validate-visual", "merge"],
+    "audio": ["media", "align-cues", "yaml", "build", "normalize-audio", "validate-sync", "validate-visual", "merge"],
+    "timing": ["align-cues", "yaml", "build", "normalize-audio", "validate-sync", "validate-visual", "merge"],
     "validate_only": ["validate-all"],
     "validate_hook": ["validate-hook"],
     "validate_display": ["validate-display"],

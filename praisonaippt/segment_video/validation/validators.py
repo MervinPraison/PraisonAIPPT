@@ -450,7 +450,7 @@ def validate_protocol_stages(project: SegmentVideoProject, protocol: dict) -> Va
         "scripts", "catalogue-media", "crawl-missing-assets", "sync-media", "validate-assets",
         "validate-media", "audit-images",
         "media", "align-cues", "yaml", "build", "validate-sync", "validate-visual",
-        "fix-jpegs", "seed-golden", "build-timeline", "merge", "publish", "validate-all", "validate-hook", "validate-display",
+        "fix-jpegs", "seed-golden", "build-timeline", "normalize-audio", "merge", "publish", "validate-all", "validate-hook", "validate-display",
     }
     for st in protocol.get("stages", []):
         sid = st.get("id")
@@ -560,3 +560,81 @@ def validate_display_sync(project: SegmentVideoProject, protocol: dict) -> Valid
             ))
 
     return _report("display_sync", True, checks)
+
+
+@register("audio_loudness")
+def validate_audio_loudness(project: SegmentVideoProject, protocol: dict) -> ValidatorReport:
+    """Cross-segment loudness consistency on segment.mp4 (post-normalize)."""
+    from ..audio_loudness import (
+        audit_segments,
+        loudness_config,
+        measure_loudness,
+        validate_loudness_audit,
+    )
+
+    cfg = loudness_config(protocol)
+    manifest = load_manifest(project.root)
+    audit = audit_segments(project.root, manifest)
+    ok, issues = validate_loudness_audit(audit, cfg)
+
+    checks: list[CheckResult] = []
+    summary = audit.get("summary") or {}
+    checks.append(CheckResult(
+        id="loudness:spread",
+        ok=summary.get("spread_lufs", 999) <= float(cfg.get("max_spread_lufs", 2.0)) if summary.get("spread_lufs") is not None else False,
+        severity="error",
+        message=(
+            f"spread {summary.get('spread_lufs')} LUFS (max {cfg.get('max_spread_lufs')})"
+            if summary.get("spread_lufs") is not None
+            else "no loudness measurements"
+        ),
+        details=summary,
+    ))
+
+    tgt = float(cfg["target_lufs"])
+    tol = float(cfg.get("tolerance_lufs", 1.0))
+    for row in audit.get("segments") or []:
+        d = row.get("dir") or ""
+        m = row.get("metrics") or {}
+        lufs = m.get("integrated_lufs")
+        if lufs is None:
+            checks.append(CheckResult(
+                id=f"loudness:{d}",
+                ok=False,
+                severity="error",
+                message=f"{d}: no LUFS measurement",
+            ))
+            continue
+        seg_ok = abs(lufs - tgt) <= tol
+        checks.append(CheckResult(
+            id=f"loudness:{d}",
+            ok=seg_ok,
+            severity="error",
+            message=f"{d}: {lufs:.1f} LUFS (target {tgt})",
+            details=m,
+        ))
+
+    final_mp4 = project.root / "merge" / "final-roundup.mp4"
+    if final_mp4.is_file():
+        try:
+            fm = measure_loudness(final_mp4)
+            checks.append(CheckResult(
+                id="loudness:final-roundup",
+                ok=True,
+                severity="info",
+                message=f"final: {fm.integrated_lufs:.1f} LUFS" if fm.integrated_lufs else "final: measured",
+                details=fm.as_dict(),
+            ))
+        except (OSError, RuntimeError):
+            pass
+
+    if issues:
+        checks.append(CheckResult(
+            id="loudness:issues",
+            ok=ok,
+            severity="error",
+            message=f"{'ok' if ok else 'FAIL'}: {len(issues)} issue(s)",
+            details={"issues": issues[:10]},
+        ))
+
+    return _report("audio_loudness", True, checks)

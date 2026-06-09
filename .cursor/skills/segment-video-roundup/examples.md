@@ -8,7 +8,7 @@
 | Research | `/Users/praison/create-news/research/june-2026-ai-engineering-roundup/` |
 | Post | [51661](https://mer.vin/?p=51661) |
 | Segments | 17 (hook + 15 topics + outro) |
-| Final video | `merge/final-roundup.mp4` (~350 s) |
+| Final video | `merge/final-roundup.mp4` (~353 s, 1920×1080) |
 | Template deck | `examples/heygen-50590-video-audio-heygen-images.yaml` |
 
 ### Verify final video
@@ -17,6 +17,10 @@
 open examples/june-2026-ai-roundup/merge/final-roundup.mp4
 ffprobe -v error -show_entries format=duration -of csv=p=0 \
   examples/june-2026-ai-roundup/merge/final-roundup.mp4
+ffprobe -v error -select_streams v:0 \
+  -show_entries stream=width,height,r_frame_rate -of csv=p=0 \
+  examples/june-2026-ai-roundup/merge/final-roundup.mp4
+# Expected: 1920,1080,30/1
 ```
 
 ### Downstream rebuild (no TTS/HeyGen)
@@ -32,6 +36,7 @@ m=json.load(open('../manifest.json'))
 print(' '.join(s['dir'] for s in m['segments'] if s.get('slide_type') in ('avatar_media_3','big_number')))
 ")
 python3 pipeline.py run build --force
+python3 pipeline.py run normalize-audio --force
 python3 pipeline.py run merge --force
 python3 pipeline.py validate-all
 ```
@@ -43,6 +48,7 @@ SEGS="05-aws-bedrock-gpt-5-5-codex-ga"
 python3 pipeline.py run align-cues --force $SEGS
 python3 build_segment_yaml.py $SEGS
 python3 pipeline.py run build --force $SEGS
+python3 pipeline.py run normalize-audio --force $SEGS
 python3 pipeline.py run merge --force
 ```
 

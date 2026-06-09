@@ -179,7 +179,7 @@ class PipelineEngine:
                     scope = segs if stage_id not in (
                         "merge", "sync-media", "validate-media", "publish",
                         "fix-jpegs", "seed-golden", "catalogue-media",
-                        "build-timeline",
+                        "build-timeline", "normalize-audio",
                     ) else None
                     rc = self.run(
                         stage_id,

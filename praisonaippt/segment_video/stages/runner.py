@@ -21,6 +21,7 @@ from .validate_display import run_validate_display
 from .validate_hook import run_validate_hook
 from .crawl_missing_assets import run_crawl_missing_assets
 from .validate_assets import run_validate_assets
+from .normalize_audio import run_normalize_audio
 
 SCRIPT_STAGES: dict[str, str] = {
     "sync-media": "sync_media_assets.py",
@@ -79,9 +80,12 @@ def run_stage(
         "validate-assets": run_validate_assets,
         "crawl-missing-assets": run_crawl_missing_assets,
         "build-timeline": run_build_timeline,
+        "normalize-audio": run_normalize_audio,
     }
     if stage_id in SDK_STAGES:
         fn = SDK_STAGES[stage_id]
+        if stage_id == "normalize-audio":
+            return fn(project, segments=segments, force=force, log=emit)
         if stage_id in ("align-cues", "validate-sync", "validate-visual", "build-timeline", "validate-all", "validate-hook", "validate-display", "crawl-missing-assets"):
             return fn(project, segments=segments, log=emit)
         if stage_id == "validate-assets":

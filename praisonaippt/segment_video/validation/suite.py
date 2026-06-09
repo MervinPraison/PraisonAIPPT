@@ -19,6 +19,7 @@ def default_validator_ids() -> list[dict]:
         {"id": "script_policy", "required": True},
         {"id": "image_audit", "required": True, "run_fresh": True},
         {"id": "segment_sync", "required": True},
+        {"id": "audio_loudness", "required": True},
         {"id": "merge_output", "required": True},
         {"id": "coverage", "required": False},
         {"id": "manual_assets", "required": False},

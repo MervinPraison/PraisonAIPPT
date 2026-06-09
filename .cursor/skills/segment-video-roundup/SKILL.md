@@ -1,6 +1,6 @@
 ---
 name: segment-video-roundup
-description: Builds per-segment HeyGen + ElevenLabs roundup videos from research handoff, PraisonAIPPT avatar_media_3 decks (50590 pattern), align-cues/yaml/build/merge, validate-all, and mer.vin publish. Use for megapost video walkthroughs, segment video pipeline, roundup handoff, sync-media, align-cues, gap remediation, hook montage, image audit fixes, manifest.json segments, or re-running after handoff updates.
+description: Builds per-segment HeyGen + ElevenLabs roundup videos from research handoff, PraisonAIPPT avatar_media_3 decks (50590 pattern), align-cues/yaml/build/normalize-audio/merge, validate-all (audio_loudness), HD 1080p compositor output, and mer.vin publish. Use for megapost video walkthroughs, segment video pipeline, roundup handoff, sync-media, align-cues, gap remediation, hook montage, loudness normalisation, image audit fixes, manifest.json segments, or re-running after handoff updates.
 ---
 
 # Segment video roundup pipeline
@@ -24,6 +24,8 @@ Per-segment production (hook + N topics + outro) → compositor MP4 per segment 
 | Handoff assets updated (create-news) | Phase 4 only — **do not** re-run media unless user asks |
 | Media exists; rebuild decks | Phases 5–7 with correct **align → yaml → build** order |
 | Image pick / sync / caption gaps | Gap audit → downstream fixes → rebuild affected segments |
+| Uneven volume / loudness check | `normalize-audio` → `merge`; gap-audit loudness section |
+| Verify HD output | ffprobe final + segments (expect 1920×1080); see Phase 7 |
 | Replace final video on mer.vin | Phase 8 only |
 
 **Do not regenerate ElevenLabs/HeyGen** when `narration.mp3` and `heygen.mp4` exist unless the user explicitly asks.
@@ -67,8 +69,9 @@ PROJECT=../  # project root
 | **`align-cues`** | segment | **`cue_timings.json`** from Whisper + media cues |
 | **`yaml`** | segment | **`segment.yaml`** verses from cue_timings |
 | `build` | segment | `segment.mp4`, `segment.srt`, slide JPEGs |
+| **`normalize-audio`** | project | EBU R128 loudnorm each `segment.mp4` → `loudness_report.json` |
 | `merge` | project | `merge/final-roundup.mp4` |
-| `validate-all` | project | Full validator suite |
+| `validate-all` | project | Full validator suite (includes `audio_loudness`) |
 
 ---
 
@@ -136,6 +139,7 @@ SEGS="01-nvidia-nemotron-3-ultra 05-aws-bedrock-gpt-5-5-codex-ga"  # space-separ
 python3 pipeline.py run align-cues --force $SEGS
 python3 build_segment_yaml.py $SEGS          # NOT optional after align
 python3 pipeline.py run build --force $SEGS
+python3 pipeline.py run normalize-audio --force $SEGS
 python3 pipeline.py run merge --force
 ```
 
@@ -144,7 +148,7 @@ python3 pipeline.py run merge --force
 - Montage starts after **"roundup:"** (~2.44 s); compositor needs a **lead-in verse** or MP4 truncates ~2.7 s vs HeyGen
 - `build_segment_yaml.py` prepends intro slide when first cue `audio_start_sec > 0`
 - When `len(verses) != len(cue_timings)`: SRT from verses (`write_verses_srt`), not cue_timings alone
-- Rebuild hook: `align-cues` → `yaml` → `build --force 00-hook` → `merge`
+- Rebuild hook: `align-cues` → `yaml` → `build --force 00-hook` → `normalize-audio` → `merge`
 
 ### Multi-cue topic segments
 
@@ -165,15 +169,19 @@ Post-build: `fix-jpegs`, `seed-golden` if validate-deck golden fails.
 ## Phase 6 — Merge
 
 ```bash
+python3 pipeline.py run normalize-audio          # loudnorm segments before merge
+python3 pipeline.py run normalize-audio --force  # re-normalise even if near target
 python3 pipeline.py run merge
 # Hard cut: segment-video run merge --no-transitions
 ```
 
 Outputs:
 
-- `merge/final-roundup.mp4` — verify with user before publish
+- `merge/final-roundup.mp4` — **1920×1080 @ 30fps** (Full HD); verify with user before publish
 - `merge/final-roundup.srt`
 - `merge/timeline.json`
+
+**Resolution chain:** HeyGen `1280×720` → compositor build → `segment.mp4` `1920×1080` → merge (no rescale). Merge alone cannot fix resolution — rebuild segments if not 1080p. See [reference.md](reference.md#video-resolution-hd).
 
 ---
 
@@ -198,13 +206,31 @@ zsh .cursor/skills/segment-video-roundup/scripts/gap-audit.sh examples/<project>
 |-----------|------------|
 | `hook_montage` | 15/15 montage cues; HeyGen vs segment.mp4 drift ≤ ~1 s |
 | `segment_sync` | `cue_timings` = yaml verses = media cue count |
+| `audio_loudness` | All `segment.mp4` within ±1 LUFS of target (-16); spread ≤ 2 LUFS |
 | `display_sync` | Per-segment caption↔slide↔speech (catalogue may fail on handoff) |
 | `image_audit` | Script↔image alignment; fix via sync-media overrides + rebuild |
 | `merge_output` | Final MP4 + SRT exist |
 
+### HD verification (ffprobe)
+
+Expected deliverable: **1920×1080, 30 fps, H.264 + AAC** on every `segment.mp4` and `merge/final-roundup.mp4`.
+
+```bash
+ffprobe -v error -select_streams v:0 \
+  -show_entries stream=width,height,r_frame_rate \
+  -of csv=p=0 merge/final-roundup.mp4
+# Expected: 1920,1080,30/1
+
+for f in segments/*/segment.mp4; do
+  echo "$f: $(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$f")"
+done
+```
+
+If output is 720p: set `video_export.preset: high` in deck/base style → `build_segment_yaml.py` → `build --force` → `normalize-audio` → `merge`. Native 1080p HeyGen (not upscaled 720p) requires changing `run_segment_media.py` dimensions and regenerating all `heygen.mp4`.
+
 Ignore for downstream-only work: `handoff_uncrawled`, `insufficient_pool`, `manual_asset_gaps` (handoff agent).
 
-Reports: `validation_report.json`, `image_audit_report.json`, `display_validation_report.json`, `hook_validation_report.json`.
+Reports: `validation_report.json`, `loudness_report.json`, `image_audit_report.json`, `display_validation_report.json`, `hook_validation_report.json`.
 
 ---
 
@@ -215,11 +241,13 @@ When user asks to verify or find gaps, launch **parallel explore agents** (not h
 1. **Validation report** — read `validation_report.json`; list downstream failures only
 2. **Segment sync** — compare `cue_timings.json` vs yaml verses vs `slide_jpegs/` vs heygen/segment duration drift
 3. **Hook + image audit** — `hook_validation_report.json`, `image_audit_report.json` swap recommendations
+4. **Loudness** — read `loudness_report.json` or gap-audit loudness section; spread should be ≤ 2 LUFS post-normalise
+5. **HD resolution** — ffprobe final + sample segments; expect 1920×1080 @ 30fps on all `segment.mp4`
 
 Fix order:
 
 ```text
-sync-media (if picks wrong) → align-cues → build_segment_yaml.py → build --force → merge → validate-all
+sync-media (if picks wrong) → align-cues → build_segment_yaml.py → build --force → normalize-audio → merge → validate-all
 ```
 
 Do **not** block on handoff catalogue failures if per-segment display_sync passes.
@@ -243,11 +271,13 @@ Insert `wp:video` block before **At a glance**. Update `manifest.json` → `fina
 
 | Change | Commands |
 |--------|----------|
-| New handoff heroes only | `sync-media` → `align-cues` → `build_segment_yaml.py` → `build --force SEGS` → `merge` |
+| New handoff heroes only | `sync-media` → `align-cues` → `build_segment_yaml.py` → `build --force SEGS` → `normalize-audio` → `merge` |
 | Script edit | `regenerate --change script --segment DIR` |
 | Deck/visual only | `regenerate --change deck --segment DIR` |
 | Wrong image pick | Edit `CUE_IMAGE_OVERRIDES` or handoff top_picks → `sync-media` → rebuild chain |
-| Hook duration drift | `align-cues 00-hook` → `yaml` → `build --force 00-hook` → `merge` |
+| Hook duration drift | `align-cues 00-hook` → `yaml` → `build --force 00-hook` → `normalize-audio` → `merge` |
+| Uneven volume across segments | `normalize-audio --force` → `merge` → check `loudness_report.json` |
+| Output not 1080p | `video_export.preset: high` → yaml → `build --force` → `normalize-audio` → `merge` |
 
 Full downstream rebuild (no TTS/HeyGen):
 
@@ -257,6 +287,7 @@ python3 pipeline.py run sync-media
 python3 pipeline.py run align-cues --force
 python3 build_segment_yaml.py $(python3 -c "import json; m=json.load(open('../manifest.json')); print(' '.join(s['dir'] for s in m['segments'] if s.get('slide_type') in ('avatar_media_3','big_number')))")
 python3 pipeline.py run build --force
+python3 pipeline.py run normalize-audio --force
 python3 pipeline.py run merge --force
 python3 pipeline.py validate-all
 ```
