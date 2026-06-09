@@ -1,16 +1,17 @@
 ---
 name: segment-video-roundup
-description: Builds per-segment HeyGen + ElevenLabs roundup videos from research handoff (video-handoff.json, review-data.json), PraisonAIPPT avatar_media_3 decks (50590 pattern), ffmpeg merge, and mer.vin publish. Use for megapost video walkthroughs, segment video pipeline, roundup handoff, ElevenLabs TTS, HeyGen lip-sync, manifest.json segments, or re-running with new handoff data.
+description: Builds per-segment HeyGen + ElevenLabs roundup videos from research handoff, PraisonAIPPT avatar_media_3 decks (50590 pattern), align-cues/yaml/build/merge, validate-all, and mer.vin publish. Use for megapost video walkthroughs, segment video pipeline, roundup handoff, sync-media, align-cues, gap remediation, hook montage, image audit fixes, manifest.json segments, or re-running after handoff updates.
 ---
 
 # Segment video roundup pipeline
 
 Per-segment production (hook + N topics + outro) → compositor MP4 per segment → ffmpeg concat → **Short video walkthrough** on mer.vin.
 
-**Reference implementation:** `examples/june-2026-ai-roundup/`  
+**Reference:** `examples/june-2026-ai-roundup/`  
 **Deck template:** `examples/heygen-50590-video-audio-heygen-images.yaml`  
 **Publish:** `.cursor/skills/mer-vin-article-video-upload/SKILL.md`  
-**YAML QA:** `.cursor/skills/ppt-yaml-deck-workflow/SKILL.md`
+**YAML QA:** `.cursor/skills/ppt-yaml-deck-workflow/SKILL.md`  
+**SDK:** `praisonaippt/segment_video/`
 
 ---
 
@@ -19,337 +20,263 @@ Per-segment production (hook + N topics + outro) → compositor MP4 per segment 
 | Scenario | Action |
 |----------|--------|
 | New handoff (research dir + post ID) | Phase 0 → full pipeline |
-| Scripts only refresh | Phase 2 → stop for review before TTS spend |
-| Media exists; rebuild decks | Phases 4–6 with `--skip-existing` / `--force` |
+| Scripts only refresh | Phase 2 → stop before TTS |
+| Handoff assets updated (create-news) | Phase 4 only — **do not** re-run media unless user asks |
+| Media exists; rebuild decks | Phases 5–7 with correct **align → yaml → build** order |
+| Image pick / sync / caption gaps | Gap audit → downstream fixes → rebuild affected segments |
 | Replace final video on mer.vin | Phase 8 only |
 
-**Do not regenerate ElevenLabs/HeyGen** when `narration.mp3` and `heygen.mp4` already exist unless the user explicitly asks.
+**Do not regenerate ElevenLabs/HeyGen** when `narration.mp3` and `heygen.mp4` exist unless the user explicitly asks.
+
+**Handoff crawl / review-data enrichment** is owned by the create-news agent. This skill fixes **downstream** pipeline gaps only unless the user asks you to touch handoff files.
 
 ---
 
 ## Prerequisites
 
 ```text
-- [ ] Mac with ffprobe, ffmpeg, praisonaippt (conda env: test or windsurf)
-- [ ] praisonaiwp configured: praisonaiwp doctor --server default
-- [ ] Repo .env (gitignored): ELEVEN_API_KEY, HEYGEN_API_KEY, ELEVEN_VOICE_ID, AVATAR_ID
-- [ ] MER_HEYGEN_VERTICAL unset → landscape 1280×720 HeyGen, 1920×1080 compositor
-- [ ] Research handoff dir with review-data.json + review-assets/ (+ video-handoff.json optional)
+- [ ] Mac: ffprobe, ffmpeg, praisonaippt (conda: test or windsurf)
+- [ ] praisonaiwp: praisonaiwp doctor --server default
+- [ ] Repo .env: ELEVEN_API_KEY, HEYGEN_API_KEY, ELEVEN_VOICE_ID, AVATAR_ID
+- [ ] MER_HEYGEN_VERTICAL unset → landscape HeyGen 1280×720, compositor 1920×1080
+- [ ] research_dir with review-data.json + review-assets/
 ```
 
-Copy `.env.example` → `.env` at repo root. See [reference.md](reference.md) for env defaults.
+See [reference.md](reference.md) for env defaults and manifest schema.
 
 ---
 
-## Phase 0 — Bootstrap project from handoff
+## Protocol stages (order matters)
 
-Run when starting a **new** roundup (not June 2026):
+Defined in `scripts/config/protocol.json`. **Critical rule:** after `sync-media` adds or changes cue count, always run **align-cues before yaml**. Running `yaml` alone leaves stale single-verse decks.
+
+```bash
+cd examples/<project>/scripts
+PROJECT=../  # project root
+```
+
+| Stage | Scope | Purpose |
+|-------|-------|---------|
+| `catalogue-media` | project | Index handoff images |
+| `crawl-missing-assets` | project | Handoff gap fill (create-news; skip if another agent owns it) |
+| `sync-media` | project | `media_assets.json` + `slide_images/*` |
+| `validate-assets` | project | `asset_gaps_report.json` |
+| `validate-media` | project | Script alignment gate |
+| `audit-images` | project | `image_audit_report.json` |
+| `media` | segment | ElevenLabs + HeyGen + timestamps |
+| **`align-cues`** | segment | **`cue_timings.json`** from Whisper + media cues |
+| **`yaml`** | segment | **`segment.yaml`** verses from cue_timings |
+| `build` | segment | `segment.mp4`, `segment.srt`, slide JPEGs |
+| `merge` | project | `merge/final-roundup.mp4` |
+| `validate-all` | project | Full validator suite |
+
+---
+
+## Phase 0 — Bootstrap
 
 ```bash
 zsh .cursor/skills/segment-video-roundup/scripts/bootstrap-project.sh \
-  "my-roundup-slug" \
-  "/path/to/research/my-roundup" \
-  POST_ID
+  "my-roundup-slug" "/path/to/research/my-roundup" POST_ID
 ```
 
-Or manually:
-
-1. Copy `examples/june-2026-ai-roundup/` → `examples/<slug>-roundup/`
-2. Edit `manifest.json`: `megapost_slug`, `post_id`, `research_dir`, `review_assets_dir`, `segments[]`
-3. Reset `segments/*/`, `merge/`, `media_assets.json`; keep `scripts/`, `scripts/config/`, `scripts/sdk/`
-4. Derive segment list from `video-handoff.json` + editorial hero picks (see [reference.md](reference.md))
-
-**Segment count:** typically `hook` + one segment per topic + `outro` (e.g. 17 for 15 topics).
+Or copy `examples/june-2026-ai-roundup/` → `examples/<slug>-roundup/`, edit `manifest.json`, reset `segments/*/`, `merge/`, `media_assets.json`.
 
 ---
 
-## Phase 1 — Manifest
-
-```text
-Task Progress:
-- [ ] manifest.json lists every segment (index, dir, slug, slide_type, headline, subheader, target_words, target_sec, hero_image)
-- [ ] hook → slide_type big_number; topics → avatar_media_3; outro → deck_thank_you
-- [ ] research_dir and review_assets_dir are absolute paths on Mac
-```
-
-Validate segment dirs exist: `segments/00-hook/` … `segments/NN-outro/`.
-
----
-
-## Phase 2 — Segment scripts
-
-Write tight narration (~1,350–1,450 words total, under 10 min):
+## Phase 2 — Scripts
 
 | Segment | Target |
 |---------|--------|
-| hook | ~55–65 words, 20–25 s |
-| each topic | ~80–95 words, 33–38 s |
-| outro | ~40–50 words, 15–20 s |
-
-Template per topic:
-
-```text
-{Product} — {concrete fact with number/name}.
-{Why engineers care — deploy path or benchmark}.
-{Try it via HF / Bedrock / Foundry / CLI / watch}.
-```
+| hook | ~55–65 words, roll-call after "roundup:" |
+| each topic | ~80–95 words, 3 sentences when multi-cue |
+| outro | ~40–50 words |
 
 ```bash
-cd examples/<project>/scripts
-# Edit segment_scripts.json or write segments/{dir}/script.md directly
 python3 write_scripts.py
 ```
 
-**Gate:** User review scripts before Phase 3 (TTS costs money).
+**Gate:** User review before Phase 3 (TTS cost).
 
 ---
 
-## Phase 3 — ElevenLabs + HeyGen (per segment)
-
-Replicates mer.vin mu-plugins (`mer-short-audio-elevenlabs`, `mer-short-heygen-after-audio`):
+## Phase 3 — ElevenLabs + HeyGen
 
 ```bash
-cd examples/<project>/scripts
 python3 run_segment_media.py --skip-existing
-# One segment only:
-python3 run_segment_media.py --skip-existing 01-nvidia-nemotron-3-ultra
+python3 run_segment_media.py --skip-existing 01-nvidia-nemotron-3-ultra  # one segment
 ```
 
-Outputs per segment:
-
-| File | Source |
-|------|--------|
-| `narration.mp3` | ElevenLabs `eleven_multilingual_v2` |
-| `heygen.mp4` | HeyGen 1280×720, avatar + audio lip-sync, green `#008000` background |
-| `timestamps.json` | `praisonaippt transcribe` or ffprobe fallback |
-
-Log `narration_duration_sec` in manifest after each segment.
+Outputs: `narration.mp3`, `heygen.mp4`, `timestamps.json`.
 
 ---
 
-## Phase 4 — Image selection (validated)
-
-Hero images come from **review-data.json**, not arbitrary picks.
+## Phase 4 — Media sync (image selection)
 
 ```bash
-python3 pipeline.py sync-media      # → media_assets.json + slide_images/*
-python3 pipeline.py validate-media  # script_alignment gate (≥ 0.35)
+python3 pipeline.py run sync-media
+python3 pipeline.py run validate-media --strict
+python3 pipeline.py run validate-assets    # handoff pool report
+python3 pipeline.py run audit-images
 ```
 
-Protocol:
+- Heroes from `review-data.json` via `praisonaippt.segment_video.image_selection`
+- Multi-cue: one sentence → one image when pool allows (`max_cues_per_segment: 4`)
+- Audit-driven overrides live in `scripts/sync_media_assets.py` → `CUE_IMAGE_OVERRIDES`
+- Sparse pools: `fill_missing_sentence_cues` reuses hero (downstream only; not a handoff fix)
 
-1. Score `topics[].images[]` against `script.md` (`vision_description`, `topic_relevance_score`)
-2. Copy best image(s) to `slide_images/` (WebP → PNG via ffmpeg)
-3. **Multi-image:** ≥2 sentences + ≥2 relevant images → 2 `media_cues` → 2 verses, one `heygen.mp4`, `avatar_timeline: continuous` (50590 pattern)
-
-See [reference.md](reference.md) for thresholds in `scripts/config/protocol.json`.
+**After sync-media changes cue count → Phase 5 align-cues is mandatory.**
 
 ---
 
-## Phase 5 — Segment YAML (50590 parity)
+## Phase 5 — Align, YAML, build (mandatory order)
 
 ```bash
-python3 pipeline.py yaml
+SEGS="01-nvidia-nemotron-3-ultra 05-aws-bedrock-gpt-5-5-codex-ga"  # space-separated dirs
+
+python3 pipeline.py run align-cues --force $SEGS
+python3 build_segment_yaml.py $SEGS          # NOT optional after align
+python3 pipeline.py run build --force $SEGS
+python3 pipeline.py run merge --force
 ```
 
-Each `segments/{dir}/segment.yaml` must include:
+### Hook montage (`00-hook`)
 
-- `slide_qa.expect_pip`, `min_hero_coverage_ratio: 0.58`
-- `pipeline.validate_pip`, `validate_slide_qa`, `transcript_path: timestamps.json`
-- `hero_text_placement.auto`, `avatar_calibration` (hybrid)
-- `avatar_media_3` + `text_panel.anchor: auto` + `../../slide_images/{hero}`
-- `video_export`: compositor, `audio_source: heygen_video`, captions on
-- Single cue → `avatar_timeline: per_slide`; multi-cue → `continuous` + `slide_timestamps`
+- Montage starts after **"roundup:"** (~2.44 s); compositor needs a **lead-in verse** or MP4 truncates ~2.7 s vs HeyGen
+- `build_segment_yaml.py` prepends intro slide when first cue `audio_start_sec > 0`
+- When `len(verses) != len(cue_timings)`: SRT from verses (`write_verses_srt`), not cue_timings alone
+- Rebuild hook: `align-cues` → `yaml` → `build --force 00-hook` → `merge`
 
-Paths are **relative to segment.yaml** (`heygen.mp4`, `slide_jpegs/`, `../../slide_images/`).
+### Multi-cue topic segments
 
----
+- `media_assets.json` cues must match `cue_timings.json` count and `segment.yaml` verse count
+- `avatar_timeline: continuous` + `slide_timestamps` for 2+ cues (50590 pattern within segment)
 
-## Phase 6 — Build segment MP4s
-
-```bash
-python3 pipeline.py build                    # skip existing segment.mp4
-python3 pipeline.py build --force 01-...     # rebuild one segment
-zsh build_segment_mp4.sh --force 01-...      # direct
-```
-
-Per segment:
+### Per-segment build internals
 
 ```bash
 praisonaippt hero-panel-place -i segment.yaml --force
 praisonaippt -i segment.yaml -o segment.pptx --convert-video --video-output segment.mp4
-praisonaippt validate-deck -i segment.yaml
 ```
 
-Post-build QA helpers:
-
-```bash
-python3 pipeline.py fix-jpegs    # relocate mis-placed slide JPEGs
-python3 pipeline.py seed-golden  # golden MD5 for validate-deck slide_jpegs
-```
-
-**Per-segment gates:**
-
-- [ ] `ffprobe` duration ±3 s of target
-- [ ] `validate-deck` passes (timing, PiP, assets)
-- [ ] `segment.srt` matches script
-
-Set `auto_upload_gdrive: false` in generated YAML (project default in `base_style.yaml`).
+Post-build: `fix-jpegs`, `seed-golden` if validate-deck golden fails.
 
 ---
 
-## Phase 7 — Merge (crossfade between topics)
+## Phase 6 — Merge
 
 ```bash
-python3 pipeline.py merge
-# or: segment-video -p . run merge
+python3 pipeline.py run merge
+# Hard cut: segment-video run merge --no-transitions
 ```
 
-Produces:
+Outputs:
 
-- `merge/final-roundup.mp4` — must be **< 600 s** (~357 s with 17 segments + 0.30 s crossfade)
-- `merge/final-roundup.srt` — offset-merged captions (`effective_timeline_sec`)
-- `merge/concat-video.txt`
-
-**Transitions** (`scripts/config/protocol.json`):
-
-```json
-"merge_transitions": {"default": "crossfade", "duration_sec": 0.30}
-```
-
-Hard cut: `segment-video run merge --no-transitions` or Studio → transition **none**.
+- `merge/final-roundup.mp4` — verify with user before publish
+- `merge/final-roundup.srt`
+- `merge/timeline.json`
 
 ---
 
-## Interactive Studio
-
-Local dashboard for segment status, script edit, preview, and regenerate:
+## Phase 7 — Validation (run after every rebuild)
 
 ```bash
-cd examples/<project>
-segment-video studio
-# → http://127.0.0.1:8765 (127.0.0.1 only — do not expose publicly)
+python3 pipeline.py status
+python3 pipeline.py validate-all
+python3 pipeline.py run validate-display
+python3 pipeline.py run validate-hook
 ```
 
-| Studio action | API / SDK chain |
-|---------------|-----------------|
-| Save script | `PATCH /api/segments/{dir}/script` |
-| Regenerate audio | `change: audio` → media → yaml → build → merge |
-| Rebuild deck | `change: deck` → build → merge |
-| Regenerate segment | `change: full_segment` |
-| Re-merge | `POST /api/run` stage `merge` |
-| Publish | stage `publish` |
+Or use the gap audit script:
 
-SDK package: `praisonaippt/segment_video/` (`PipelineEngine`, `REGENERATE_CHAINS`).
+```bash
+zsh .cursor/skills/segment-video-roundup/scripts/gap-audit.sh examples/<project>
+```
+
+### validate-all gates (downstream focus)
+
+| Validator | Pass means |
+|-----------|------------|
+| `hook_montage` | 15/15 montage cues; HeyGen vs segment.mp4 drift ≤ ~1 s |
+| `segment_sync` | `cue_timings` = yaml verses = media cue count |
+| `display_sync` | Per-segment caption↔slide↔speech (catalogue may fail on handoff) |
+| `image_audit` | Script↔image alignment; fix via sync-media overrides + rebuild |
+| `merge_output` | Final MP4 + SRT exist |
+
+Ignore for downstream-only work: `handoff_uncrawled`, `insufficient_pool`, `manual_asset_gaps` (handoff agent).
+
+Reports: `validation_report.json`, `image_audit_report.json`, `display_validation_report.json`, `hook_validation_report.json`.
 
 ---
 
-## Phase 8 — Publish to mer.vin
+## Multi-agent gap audit (recommended)
 
-Read and follow **mer-vin-article-video-upload** skill.
+When user asks to verify or find gaps, launch **parallel explore agents** (not handoff crawl):
+
+1. **Validation report** — read `validation_report.json`; list downstream failures only
+2. **Segment sync** — compare `cue_timings.json` vs yaml verses vs `slide_jpegs/` vs heygen/segment duration drift
+3. **Hook + image audit** — `hook_validation_report.json`, `image_audit_report.json` swap recommendations
+
+Fix order:
+
+```text
+sync-media (if picks wrong) → align-cues → build_segment_yaml.py → build --force → merge → validate-all
+```
+
+Do **not** block on handoff catalogue failures if per-segment display_sync passes.
+
+---
+
+## Phase 8 — Publish
+
+Follow **mer-vin-article-video-upload** skill.
 
 ```bash
 praisonaiwp media upload examples/<project>/merge/final-roundup.mp4 \
   --post-id=POST_ID --server default
-praisonaiwp media url ATTACHMENT_ID --server default
 ```
 
-Insert **before** `At a glance`:
-
-```html
-<!-- wp:heading -->
-<h2 class="wp-block-heading">Short video walkthrough</h2>
-<!-- /wp:heading -->
-
-<!-- wp:paragraph -->
-<p>One-line intro matching video length.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:video {"id":ATTACHMENT_ID} -->
-<figure class="wp-block-video"><video controls src="ATTACHMENT_URL"></video></figure>
-<!-- /wp:video -->
-```
-
-```bash
-praisonaiwp update POST_ID --no-block-conversion --server default \
-  --post-content "$(cat article-with-video.html)"
-```
-
-**Verify:**
-
-```bash
-curl -sI "ATTACHMENT_URL" | head -1    # HTTP 200
-ffprobe merge/final-roundup.mp4        # duration < 600
-```
-
-Update `manifest.json` → `final_video.wordpress_attachment_id` and URL.
+Insert `wp:video` block before **At a glance**. Update `manifest.json` → `final_video`.
 
 ---
 
-## Phase 9 — Full validation
+## Re-run cheat sheet
+
+| Change | Commands |
+|--------|----------|
+| New handoff heroes only | `sync-media` → `align-cues` → `build_segment_yaml.py` → `build --force SEGS` → `merge` |
+| Script edit | `regenerate --change script --segment DIR` |
+| Deck/visual only | `regenerate --change deck --segment DIR` |
+| Wrong image pick | Edit `CUE_IMAGE_OVERRIDES` or handoff top_picks → `sync-media` → rebuild chain |
+| Hook duration drift | `align-cues 00-hook` → `yaml` → `build --force 00-hook` → `merge` |
+
+Full downstream rebuild (no TTS/HeyGen):
 
 ```bash
 cd examples/<project>/scripts
-python3 pipeline.py status
-python3 pipeline.py validate
-praisonaiwp doctor --server default
-praisonaippt validate-deck -i ../../heygen-50590-video-audio-heygen-images.yaml
-praisonaiwp validate-deck -i ../segments/01-.../segment.yaml
+python3 pipeline.py run sync-media
+python3 pipeline.py run align-cues --force
+python3 build_segment_yaml.py $(python3 -c "import json; m=json.load(open('../manifest.json')); print(' '.join(s['dir'] for s in m['segments'] if s.get('slide_type') in ('avatar_media_3','big_number')))")
+python3 pipeline.py run build --force
+python3 pipeline.py run merge --force
+python3 pipeline.py validate-all
 ```
 
-Cross-skills:
-
-| Skill | Gate |
-|-------|------|
-| ppt-yaml-deck-workflow | validate-deck per segment |
-| mer-vin-article-video-upload | wp:video + HTTP 200 |
-| gpt-image | N/A unless generating new hero art |
-
 ---
 
-## Re-run with new handoff
-
-1. **New research dir / topics:** Phase 0 → update manifest segments → Phase 2 scripts  
-2. **Keep media, new heroes:** Phase 4 sync-media → Phase 5 yaml → Phase 6 build `--force` affected → Phase 7 merge → Phase 8  
-3. **Optional polish:** Single continuous HeyGen + 17-slide master YAML (`avatar_timeline: continuous` on one file) — only if per-segment joins look jarring; requires new full-script TTS/HeyGen  
-
-Copy `scripts/`, `scripts/sdk/`, `scripts/config/` unchanged; only replace project-specific `manifest.json`, `segment_scripts.json`, and `segments/`.
-
----
-
-## CLI quick reference
+## Studio & CLI
 
 ```bash
 cd examples/<project>
-segment-video -p . status
-segment-video -p . run sync-media
-segment-video -p . run validate-media
-segment-video -p . run yaml
-segment-video -p . run build --force 01-nvidia-nemotron-3-ultra
-segment-video -p . run merge
-segment-video -p . regenerate --change script --segment 01-nvidia-nemotron-3-ultra
 segment-video -p . studio
-segment-video -p . validate
-
-# Legacy shim (same engine):
-cd scripts && python3 pipeline.py status && python3 pipeline.py merge
-python3 run_segment_media.py --skip-existing
+segment-video -p . regenerate --change deck --segment 01-nvidia-nemotron-3-ultra
+cd scripts && python3 pipeline.py status
 ```
-
-### Per-part modification
-
-| What you change | Command |
-|-----------------|---------|
-| Script | `regenerate --change script --segment DIR` |
-| Hero | `regenerate --change hero --segment DIR` |
-| Deck | `regenerate --change deck --segment DIR` |
-| Transitions only | `run merge` (edit `merge_transitions` first) |
-| Publish | `run publish` |
 
 ---
 
 ## Additional resources
 
-- Handoff inputs, manifest schema, env: [reference.md](reference.md)
-- June 2026 worked example: [examples.md](examples.md)
+- Handoff schema, thresholds, failures: [reference.md](reference.md)
+- June 2026 worked commands: [examples.md](examples.md)
+- Gap audit script: [scripts/gap-audit.sh](scripts/gap-audit.sh)
 - In-repo protocol: `examples/june-2026-ai-roundup/PROTOCOL.md`

@@ -24,6 +24,7 @@ def test_validator_registry():
     expected = {
         "tools", "artifacts", "hook_montage", "script_policy",
         "image_audit", "segment_sync", "merge_output", "coverage", "protocol_stages",
+        "manual_assets", "hook_speech_sync", "display_sync",
     }
     assert expected <= set(REGISTRY.keys())
 

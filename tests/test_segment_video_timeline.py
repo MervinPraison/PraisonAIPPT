@@ -73,6 +73,48 @@ def test_align_cues_produces_timings(tmp_path: Path):
     assert timings[1]["audio_start_sec"] >= 9.0
 
 
+def test_align_cues_segment_split_when_more_cues_than_segments(tmp_path: Path):
+    ts = tmp_path / "timestamps.json"
+    ts.write_text(json.dumps({
+        "duration": 20.43,
+        "segments": [
+            {"start": 0.0, "end": 10.21, "text": "First sentence about hf CLI agents and tokens."},
+            {"start": 10.21, "end": 20.43, "text": "Run hf skills add for Codex. Default Hub tool at scale."},
+        ],
+        "words": [],
+    }))
+    cues = [
+        {"script_fragment": "First sentence about hf CLI agents and tokens.", "file": "a.png"},
+        {"script_fragment": "Run hf skills add for Codex.", "file": "b.png"},
+        {"script_fragment": "Default Hub tool at scale.", "file": "c.png"},
+    ]
+    timings = align_cues_to_transcript(cues, ts, total_duration=20.43)
+    assert len(timings) == 3
+    assert timings[0]["audio_start_sec"] == 0.0
+    assert timings[1]["audio_start_sec"] >= 10.0
+    assert timings[1]["match_method"] == "segment_split"
+
+
+def test_hook_montage_starts_after_roundup_intro(tmp_path: Path):
+    ts = tmp_path / "timestamps.json"
+    text = (
+        "Fifteen stories in this roundup: Nemotron 3 Ultra, Gemma 4 twelve billion. "
+        "Now we are going to walk through every one in detail. Let's get started."
+    )
+    ts.write_text(json.dumps({
+        "duration": 40.0,
+        "segments": [{"start": 0.0, "end": 40.0, "text": text}],
+        "words": [],
+    }))
+    cues = [
+        {"script_fragment": "Nemotron 3 Ultra", "file": "a.png"},
+        {"script_fragment": "Gemma 4 twelve billion", "file": "b.png"},
+    ]
+    timings = align_cues_to_transcript(cues, ts, total_duration=40.0)
+    assert timings[0]["audio_start_sec"] > 1.0
+    assert timings[0]["match_method"] == "montage_weighted"
+
+
 def test_resolve_at_time():
     tl = {
         "cues": [

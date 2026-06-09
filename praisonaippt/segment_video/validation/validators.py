@@ -447,9 +447,10 @@ def validate_protocol_stages(project: SegmentVideoProject, protocol: dict) -> Va
     checks: list[CheckResult] = []
     stage_ids = {s.get("id") for s in protocol.get("stages", [])}
     known = {
-        "scripts", "catalogue-media", "sync-media", "validate-media", "audit-images",
+        "scripts", "catalogue-media", "crawl-missing-assets", "sync-media", "validate-assets",
+        "validate-media", "audit-images",
         "media", "align-cues", "yaml", "build", "validate-sync", "validate-visual",
-        "fix-jpegs", "seed-golden", "build-timeline", "merge", "publish", "validate-all",
+        "fix-jpegs", "seed-golden", "build-timeline", "merge", "publish", "validate-all", "validate-hook", "validate-display",
     }
     for st in protocol.get("stages", []):
         sid = st.get("id")
@@ -476,3 +477,86 @@ def validate_protocol_stages(project: SegmentVideoProject, protocol: dict) -> Va
         details={"stages": sorted(stage_ids)},
     ))
     return _report("protocol_stages", False, checks)
+
+
+@register("required_assets")
+def validate_required_assets(project: SegmentVideoProject, protocol: dict) -> ValidatorReport:
+    from .required_assets import audit_required_assets
+
+    cfg = _cfg(protocol).get("required_assets") or {}
+    fetch = bool(cfg.get("fetch_canonical", True))
+    report = audit_required_assets(project.root, protocol, fetch_canonical=fetch)
+    (project.root / "asset_gaps_report.json").write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8",
+    )
+
+    checks: list[CheckResult] = []
+    summ = report.get("summary") or {}
+    checks.append(CheckResult(
+        id="assets:catalogue",
+        ok=bool(report.get("ok")),
+        severity="error",
+        message=f"required assets {summ.get('total', 0) - summ.get('failed', 0)}/{summ.get('total', 0)} topics ok",
+        details={
+            "failed_dirs": [t["dir"] for t in (report.get("topics") or []) if not t.get("ok")],
+            "needs_crawl": summ.get("needs_crawl", 0),
+        },
+    ))
+    for row in report.get("topics") or []:
+        if row.get("ok"):
+            continue
+        for gap in row.get("gaps") or []:
+            if gap.get("type") == "manual_exempt":
+                continue
+            checks.append(CheckResult(
+                id=f"assets:{row['dir']}:{gap['type']}",
+                ok=False,
+                severity="warn" if gap["type"] == "handoff_uncrawled" else "error",
+                message=f"{row['dir']}: {gap['detail']}",
+            ))
+    return _report("required_assets", True, checks)
+
+
+@register("display_sync")
+def validate_display_sync(project: SegmentVideoProject, protocol: dict) -> ValidatorReport:
+    """Deep audit: catalogue completeness, caption↔slide, speech↔image."""
+    from .display_sync import validate_project_display
+
+    cfg = _cfg(protocol).get("display_sync") or {}
+    fetch = bool(cfg.get("fetch_canonical", True))
+    report = validate_project_display(project.root, protocol, fetch_canonical=fetch)
+    (project.root / "display_validation_report.json").write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8",
+    )
+
+    checks: list[CheckResult] = []
+    cat = report.get("catalogue") or {}
+    checks.append(CheckResult(
+        id="display:catalogue",
+        ok=bool(cat.get("ok")),
+        severity="error",
+        message=f"handoff catalogue {cat.get('summary', {}).get('total', 0) - cat.get('summary', {}).get('failed', 0)}/{cat.get('summary', {}).get('total', 0)} topics ok",
+        details={"failed_dirs": [t["dir"] for t in (cat.get("topics") or []) if not t.get("ok")]},
+    ))
+
+    for seg in report.get("segments") or []:
+        d = seg.get("dir") or ""
+        cap_ok = (seg.get("caption_slides") or {}).get("ok", True)
+        speech_ok = (seg.get("speech_overlap") or {}).get("ok", True)
+        checks.append(CheckResult(
+            id=f"display:caption:{d}",
+            ok=cap_ok,
+            severity="error",
+            message=f"{d}: caption↔slide {'ok' if cap_ok else 'FAIL'}",
+            details={"issues": (seg.get("caption_slides") or {}).get("issues", [])[:5]},
+        ))
+        if not (seg.get("speech_overlap") or {}).get("skipped"):
+            checks.append(CheckResult(
+                id=f"display:speech:{d}",
+                ok=speech_ok,
+                severity="warn" if d == "00-hook" else "error",
+                message=f"{d}: speech↔image {'ok' if speech_ok else 'FAIL'}",
+                details={"issues": (seg.get("speech_overlap") or {}).get("issues", [])[:5]},
+            ))
+
+    return _report("display_sync", True, checks)

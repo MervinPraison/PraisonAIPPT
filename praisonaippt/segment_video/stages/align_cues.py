@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable
 
 from ..align import align_cues_to_transcript, save_cue_timings
+from ..timeline import build_segment_timeline, write_cue_timings_srt
 from ..manifest import load_manifest
 from ..media import ffprobe_duration
 from ..project import SegmentVideoProject
@@ -42,6 +43,8 @@ def run_align_cues(
         dur = ffprobe_duration(heygen) if heygen.is_file() else None
         timings = align_cues_to_transcript(cues, ts, total_duration=dur)
         save_cue_timings(seg_dir, timings)
+        write_cue_timings_srt(seg_dir, timings)
+        build_segment_timeline(seg_dir, root)
         emit(f"align-cues {d}: {len(timings)} cues")
         yaml_data = load_segment_yaml(seg_dir)
         n_verses = len(verses_from_yaml(yaml_data)) if yaml_data else 0

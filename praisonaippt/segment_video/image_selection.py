@@ -48,8 +48,28 @@ def filter_relevant(images: list[dict], rules: dict) -> list[dict]:
     return images[:3]
 
 
+CHART_SPEECH = re.compile(
+    r"\b(throughput|benchmark|inference|five times|5x|cost|performance|accuracy|mmlu|chart|efficiency)\b",
+    re.I,
+)
+
+
+def asset_type_boost(sentence: str, image: dict) -> float:
+    """Prefer charts when speech mentions benchmarks; penalise mismatched types."""
+    at = str(image.get("asset_type") or "")
+    if CHART_SPEECH.search(sentence):
+        if at == "benchmark_chart":
+            return 0.18
+        if at in ("architecture_diagram", "og_hero") and re.search(r"throughput|5x|five times|benchmark", sentence, re.I):
+            return -0.10
+    return 0.0
+
+
 def rank_images(images: list[dict], sentence: str, rules: dict) -> list[tuple[float, dict]]:
-    scored = [(script_alignment(sentence, img), img) for img in images]
+    scored = [
+        (script_alignment(sentence, img) + asset_type_boost(sentence, img), img)
+        for img in images
+    ]
     scored.sort(
         key=lambda x: (
             -x[0],
@@ -120,6 +140,29 @@ def build_cue_plan(
             pick["narrative_order"] = len(cues) + 1
             pick["relevance_rank"] = len(cues) + 1
             cues.append(pick)
+
+    # Second pass: assign best remaining image to uncovered sentences (lower bar)
+    relaxed = float(rules.get("min_script_alignment_uncovered", 0.28))
+    for i, sentence in enumerate(sentences[:max_cues]):
+        if any(c.get("sentence_index") == i for c in cues):
+            continue
+        best_score, best_img = -1.0, None
+        for score, img in rank_images(relevant_pool, sentence, rules):
+            if img["filename"] in used:
+                continue
+            if score >= relaxed and score > best_score:
+                best_score, best_img = score, img
+        if best_img:
+            used.add(best_img["filename"])
+            cues.append({
+                **best_img,
+                "script_alignment": round(best_score, 3),
+                "script_fragment": sentence,
+                "sentence_index": i,
+                "narrative_order": len(cues) + 1,
+                "relevance_rank": len(cues) + 1,
+                "alignment_method": "uncovered_fallback",
+            })
 
     if not cues and relevant_pool:
         if rules.get("no_fallback_to_marginal"):

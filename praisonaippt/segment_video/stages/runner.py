@@ -17,6 +17,10 @@ from .catalogue_media import run_catalogue_media
 from .merge import run_merge
 from .validate_visual_stage import run_validate_sync, run_validate_visual
 from .validate_all import run_validate_all
+from .validate_display import run_validate_display
+from .validate_hook import run_validate_hook
+from .crawl_missing_assets import run_crawl_missing_assets
+from .validate_assets import run_validate_assets
 
 SCRIPT_STAGES: dict[str, str] = {
     "sync-media": "sync_media_assets.py",
@@ -70,12 +74,18 @@ def run_stage(
         "validate-sync": run_validate_sync,
         "validate-visual": run_validate_visual,
         "validate-all": run_validate_all,
+        "validate-hook": run_validate_hook,
+        "validate-display": run_validate_display,
+        "validate-assets": run_validate_assets,
+        "crawl-missing-assets": run_crawl_missing_assets,
         "build-timeline": run_build_timeline,
     }
     if stage_id in SDK_STAGES:
         fn = SDK_STAGES[stage_id]
-        if stage_id in ("align-cues", "validate-sync", "validate-visual", "build-timeline", "validate-all"):
+        if stage_id in ("align-cues", "validate-sync", "validate-visual", "build-timeline", "validate-all", "validate-hook", "validate-display", "crawl-missing-assets"):
             return fn(project, segments=segments, log=emit)
+        if stage_id == "validate-assets":
+            return fn(project, log=emit)
         return fn(project, log=emit)
 
     if stage_id == "merge":

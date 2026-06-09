@@ -136,10 +136,70 @@ examples/<slug>-roundup/
 |-----|---------|---------|
 | `min_topic_relevance` | 0.7 | Minimum `topic_relevance_score` |
 | `min_script_alignment` | 0.35 | Script vs vision text overlap score |
-| `max_cues_per_segment` | 2 | Max hero images per segment |
-| `multi_cue_requires_sentences` | 2 | Min script sentences for 2-image mode |
+| `max_cues_per_segment` | 4 | Max hero images per segment |
+| `multi_cue_requires_sentences` | 1 | Min script sentences to attempt multi-cue |
 
-**Multi-image timing:** Split `heygen.mp4` duration evenly across cues; write matching `timestamps.json` segments; YAML uses `avatar_timeline: continuous`.
+**Multi-image timing:** `align-cues` matches each cue fragment to Whisper → `cue_timings.json` → `build_segment_yaml.py` → verses with `audio_start_sec` / `duration_sec`. Use `avatar_timeline: continuous` when 2+ cues.
+
+### Audit overrides (`sync_media_assets.py`)
+
+`CUE_IMAGE_OVERRIDES` maps `topic_slug` → `{sentence_index: source_filename}` for picks already in handoff but mis-ranked by vision scores. After editing, run `sync-media` → rebuild chain.
+
+`fill_missing_sentence_cues` reuses hero for uncovered sentences (downstream stopgap; not a handoff fix).
+
+---
+
+## cue_timings.json
+
+Written by `align-cues` stage (`praisonaippt/segment_video/stages/align_cues.py`):
+
+```json
+{
+  "schema_version": 1,
+  "transcript_path": "timestamps.json",
+  "cues": [
+    {
+      "cue_index": 0,
+      "audio_start_sec": 0.0,
+      "duration_sec": 7.27,
+      "script_fragment": "...",
+      "file": "bedrock.png",
+      "match_method": "whisper"
+    }
+  ]
+}
+```
+
+Hook montage uses `montage_weighted`; first cue often starts after **"roundup:"** (~2.44 s).
+
+---
+
+## Gap taxonomy
+
+| Type | Owner | This skill |
+|------|-------|------------|
+| `handoff_uncrawled` | create-news crawl | Skip unless user asks |
+| `insufficient_pool` | handoff + editorial | Hero reuse or wait for handoff |
+| `selection_gap` | sync-media / overrides | Fix in `sync_media_assets.py` |
+| `segment_sync` | align → yaml → build | **Fix here** |
+| `hook:duration_drift` | hook lead-in + rebuild | **Fix here** |
+| `image_audit` | sync-media + rebuild | **Fix here** |
+| `caption↔slide` | verses SRT + timeline | **Fix here** |
+
+---
+
+## validate-all validators
+
+| ID | Required | Notes |
+|----|----------|-------|
+| `hook_montage` | yes | 15 montage cues; duration vs HeyGen |
+| `segment_sync` | yes | cue_timings = yaml verses = media cues |
+| `display_sync` | yes | Per-segment caption/slide/speech |
+| `image_audit` | yes | Alignment + recommend_swap |
+| `required_assets` | yes | Often fails on handoff — ignore if display passes |
+| `merge_output` | yes | Final MP4 exists |
+
+Reports live in project root: `validation_report.json`, `asset_gaps_report.json`, `image_audit_report.json`, `display_validation_report.json`, `hook_validation_report.json`.
 
 ---
 
@@ -204,7 +264,11 @@ dimension: 1280×720, background #008000
 | WebP in PPTX build | `sync_media_assets.py` normalises to PNG |
 | JPEGs in wrong nested path | `pipeline.py fix-jpegs` |
 | `slide_jpegs` golden fail | `pipeline.py seed-golden` after build |
-| `timing_drift` multi-cue | Regenerate `timestamps.json` via `pipeline.py yaml` |
+| `cue_timings count != media cues` | `align-cues --force SEG` → `build_segment_yaml.py SEG` → `build --force` |
+| Hook HeyGen longer than segment.mp4 | Rebuild hook with lead-in verse; `align-cues` → `yaml` → `build --force 00-hook` |
+| Caption↔slide FAIL after multi-cue | Ensure SRT from verses when counts differ (`write_verses_srt`) |
+| `timing_drift` multi-cue | Regenerate via align-cues → yaml → build |
+| Wrong image on slide | `CUE_IMAGE_OVERRIDES` + sync-media + rebuild |
 | Corrupt `wp:video` JSON on update | Use HEREDOC/file; verify `{"id":N}` intact |
 | HeyGen vertical | Keep `MER_HEYGEN_VERTICAL` unset |
 

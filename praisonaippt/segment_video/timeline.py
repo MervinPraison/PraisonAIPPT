@@ -38,6 +38,52 @@ def _srt_ts(ts: str) -> float:
     return int(h) * 3600 + int(m) * 60 + int(s) + int(ms) / 1000.0
 
 
+def _format_srt_time(seconds: float) -> str:
+    ms = int(round(seconds * 1000))
+    h, rem = divmod(ms, 3600000)
+    m, rem = divmod(rem, 60000)
+    s, ms = divmod(rem, 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+
+def write_cue_timings_srt(seg_dir: Path, cues: list[dict]) -> Path:
+    """Write segment.srt from aligned cue timings (absolute audio_start_sec)."""
+    lines: list[str] = []
+    for i, cue in enumerate(cues, start=1):
+        start = float(cue.get("audio_start_sec") or 0)
+        end = start + float(cue.get("duration_sec") or 0)
+        text = str(cue.get("script_fragment") or cue.get("notes") or "").strip()
+        if not text:
+            continue
+        lines.append(str(i))
+        lines.append(f"{_format_srt_time(start)} --> {_format_srt_time(end)}")
+        lines.append(text)
+        lines.append("")
+    out = seg_dir / "segment.srt"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    return out
+
+
+def write_verses_srt(seg_dir: Path, verses: list[dict]) -> Path:
+    """Write segment.srt from yaml verses (hook lead-in + montage)."""
+    lines: list[str] = []
+    idx = 1
+    for v in verses:
+        start = float(v.get("audio_start_sec") or 0)
+        end = start + float(v.get("duration_sec") or 0)
+        text = str(v.get("notes") or "").strip()
+        if not text:
+            continue
+        lines.append(str(idx))
+        lines.append(f"{_format_srt_time(start)} --> {_format_srt_time(end)}")
+        lines.append(text)
+        lines.append("")
+        idx += 1
+    out = seg_dir / "segment.srt"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    return out
+
+
 def load_segment_yaml(seg_dir: Path) -> dict:
     path = seg_dir / "segment.yaml"
     if not path.is_file():
