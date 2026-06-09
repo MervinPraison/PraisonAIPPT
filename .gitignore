@@ -166,4 +166,4 @@ Thumbs.db
 examples/slide_images
 *.pipeline-report.json
 assets/extracted_images
-examples/june-2026-ai-roundup
+examples/videos/*/

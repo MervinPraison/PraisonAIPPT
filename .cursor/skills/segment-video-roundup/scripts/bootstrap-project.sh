@@ -9,8 +9,8 @@ RESEARCH="${2:?research dir required}"
 POST_ID="${3:?wordpress post id required}"
 
 REPO="$(cd "$(dirname "$0")/../../../.." && pwd)"
-TEMPLATE="$REPO/examples/june-2026-ai-roundup"
-DEST="$REPO/examples/${SLUG}"
+TEMPLATE="$REPO/examples/videos/june-2026-ai-roundup"
+DEST="$REPO/examples/videos/${SLUG}"
 
 if [[ -d "$DEST" ]]; then
   echo "ERROR: $DEST already exists" >&2

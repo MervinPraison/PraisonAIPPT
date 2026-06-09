@@ -10,7 +10,7 @@ from praisonaippt.segment_video.validation.suite import run_validation_suite
 from praisonaippt.segment_video.validation.validators import REGISTRY, validate_hook_montage, validate_script_policy
 
 
-PROJECT = Path("examples/june-2026-ai-roundup")
+PROJECT = Path("examples/videos/june-2026-ai-roundup")
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def test_validator_registry():
     expected = {
         "tools", "artifacts", "hook_montage", "script_policy",
         "image_audit", "segment_sync", "audio_loudness", "merge_output", "coverage", "protocol_stages",
-        "manual_assets", "hook_speech_sync", "display_sync",
+        "manual_assets", "hook_speech_sync", "display_sync", "required_assets",
     }
     assert expected <= set(REGISTRY.keys())
 

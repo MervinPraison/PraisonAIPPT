@@ -27,6 +27,8 @@ def audit_handoff_catalogue(
     topics: dict[str, dict],
     *,
     fetch_canonical: bool = True,
+    allow_synced_cue_fill: bool = True,
+    manual_slugs: set[str] | None = None,
 ) -> dict[str, Any]:
     """Per topic: relevant pool size, cues used, canonical URL gaps."""
     assets = (_load_json(project_root / "media_assets.json") if (project_root / "media_assets.json").is_file() else {}).get("segments", {})
@@ -60,7 +62,10 @@ def audit_handoff_catalogue(
         issues: list[str] = []
         if n_cues < n_sentences:
             issues.append(f"{n_cues} cue(s) for {n_sentences} sentence(s)")
-        if n_relevant < 2 and n_sentences >= 2:
+        thin_pool = n_relevant < 2 and n_sentences >= 2
+        synced_ok = allow_synced_cue_fill and n_cues >= n_sentences and n_relevant >= 1
+        manual_ok = slug in (manual_slugs or set())
+        if thin_pool and not synced_ok and not manual_ok:
             issues.append(f"only {n_relevant} relevant image(s) in handoff")
         if missing_on_page[:3]:
             issues.append(f"canonical page may have uncrawled assets (e.g. {missing_on_page[0][:40]})")
@@ -232,11 +237,19 @@ def validate_project_display(
     review_path = Path(manifest["research_dir"]) / "review-data.json"
     topics = {t["topic_slug"]: t for t in _load_json(review_path)["topics"]}
 
+    manual_slugs = {
+        g.get("topic_slug") for g in protocol.get("manual_asset_gaps") or [] if g.get("topic_slug")
+    }
+    cfg = (protocol.get("validation_suite") or {}).get("display_sync") or {}
     catalogue = audit_handoff_catalogue(
-        project_root, manifest, topics, fetch_canonical=fetch_canonical,
+        project_root,
+        manifest,
+        topics,
+        fetch_canonical=fetch_canonical,
+        allow_synced_cue_fill=bool(cfg.get("allow_synced_cue_fill", True)),
+        manual_slugs=manual_slugs,
     )
 
-    cfg = (protocol.get("validation_suite") or {}).get("display_sync") or {}
     min_overlap = float(cfg.get("min_speech_overlap", 0.35))
     time_tol = float(cfg.get("caption_time_tol_sec", 0.06))
 

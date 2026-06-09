@@ -189,6 +189,12 @@ def audit_segment_images(
     if uncovered and len(images) >= 2 and seg.get("slide_type") == "avatar_media_3":
         issues.append(f"{uncovered} script sentence(s) without a dedicated image cue")
 
+    n_relevant = sum(1 for img in images if is_relevant_image(img, rules))
+    sources = [c.get("source_filename") or c.get("file") or "" for c in entry_cues]
+    duplicate_source = (
+        n_relevant >= 2 and len(sources) >= 2 and len(set(sources)) == 1
+    )
+
     return {
         "dir": seg["dir"],
         "slug": seg.get("slug"),
@@ -197,6 +203,7 @@ def audit_segment_images(
         "cue_count": len(entry_cues),
         "handoff_relevant_count": sum(1 for img in images if is_relevant_image(img, rules)),
         "handoff_image_count": len(images),
+        "duplicate_source_warning": duplicate_source,
         "cues": cues_report,
         "ok": len(issues) == 0,
         "issues": issues,

@@ -14,7 +14,7 @@ from praisonaippt.segment_video.validation.display_sync import (
 from praisonaippt.segment_video.validation.validators import REGISTRY
 
 
-PROJECT = Path("examples/june-2026-ai-roundup")
+PROJECT = Path("examples/videos/june-2026-ai-roundup")
 
 
 @pytest.fixture

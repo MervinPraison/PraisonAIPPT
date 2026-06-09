@@ -48,6 +48,7 @@ def audit_topic_gaps(
     *,
     manual_slugs: set[str],
     fetch_canonical: bool = True,
+    synced_cues: int | None = None,
 ) -> dict[str, Any]:
     slug = topic.get("topic_slug") or seg.get("slug") or ""
     sentences = sentence_groups(script)
@@ -86,7 +87,8 @@ def audit_topic_gaps(
         })
 
     need = min(n_sent, int(rules.get("max_cues_per_segment", 4)))
-    if n_relevant < need and slug not in manual_slugs:
+    synced_ok = synced_cues is not None and synced_cues >= need and n_relevant >= 1
+    if n_relevant < need and slug not in manual_slugs and not synced_ok:
         gaps.append({
             "type": "insufficient_pool",
             "detail": f"{n_relevant} relevant image(s) for {n_sent} sentence(s)",
@@ -97,6 +99,10 @@ def audit_topic_gaps(
             "type": "cue_shortfall",
             "detail": f"{n_planned} planned cue(s) for {n_sent} sentence(s)",
         })
+
+    effective_cues = synced_cues if synced_cues is not None else n_planned
+    if effective_cues >= need:
+        gaps = [g for g in gaps if g["type"] != "cue_shortfall"]
 
     if chart_sentences and "benchmark_chart" not in planned_types and n_charts > 0:
         gaps.append({
@@ -118,6 +124,7 @@ def audit_topic_gaps(
         "slug": slug,
         "sentences": n_sent,
         "planned_cues": n_planned,
+        "synced_cues": synced_cues,
         "handoff_relevant": n_relevant,
         "handoff_charts": n_charts,
         "canonical_missing_hints": missing_hints[:5],
@@ -141,6 +148,8 @@ def audit_required_assets(
     topics = {t["topic_slug"]: t for t in _load_json(review_path)["topics"]}
     rules = protocol.get("image_selection") or {}
     manual = _manual_slugs(protocol)
+    assets_path = project_root / "media_assets.json"
+    synced = (_load_json(assets_path).get("segments") or {}) if assets_path.is_file() else {}
 
     rows: list[dict] = []
     for seg in manifest.get("segments", []):
@@ -152,10 +161,13 @@ def audit_required_assets(
             continue
         script_path = project_root / "segments" / seg["dir"] / "script.md"
         script = script_path.read_text(encoding="utf-8").strip() if script_path.is_file() else ""
+        seg_assets = synced.get(seg["dir"]) or {}
+        n_synced = len(seg_assets.get("cues") or [])
         rows.append(audit_topic_gaps(
             seg, topic, script, rules,
             manual_slugs=manual,
             fetch_canonical=fetch_canonical,
+            synced_cues=n_synced or None,
         ))
 
     failed = [r for r in rows if not r["ok"]]

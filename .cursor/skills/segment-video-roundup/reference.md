@@ -88,7 +88,7 @@ Never commit `.env`. Template: `.env.example`.
 ## Project directory layout
 
 ```
-examples/<slug>-roundup/
+examples/videos/<slug>-roundup/
   manifest.json
   media_assets.json
   media_validation.json
@@ -145,9 +145,54 @@ examples/<slug>-roundup/
 
 ### Audit overrides (`sync_media_assets.py`)
 
-`CUE_IMAGE_OVERRIDES` maps `topic_slug` → `{sentence_index: source_filename}` for picks already in handoff but mis-ranked by vision scores. After editing, run `sync-media` → rebuild chain.
+| Mechanism | Purpose |
+|-----------|---------|
+| `CUE_IMAGE_OVERRIDES` | `topic_slug` → `{sentence_index: source_filename}` — editorial pick when handoff rank is wrong |
+| `VISION_ENRICHMENTS` | `filename` → `{vision_description, asset_type, …}` — keyword overlap for `script_alignment` when handoff has stub vision text |
+| `HERO_REUSE_ENRICHMENTS` | `topic_slug` → `{sentence_index: {vision_description}}` — thin pools (1 image / 3 sentences) |
 
-`fill_missing_sentence_cues` reuses hero for uncovered sentences (downstream stopgap; not a handoff fix).
+**Override order (footgun):** `apply_cue_overrides` runs **twice** — before and after `fill_missing_sentence_cues`. Sentences filled by hero-reuse after the first pass would otherwise ignore overrides. Overrides must **recalculate** `script_alignment(fragment, img)` — stale scores fail `image_audit` even when the image is correct.
+
+**Hook montage:** prepend each cue's `script_fragment` to `vision_description` before alignment (montage phrases are short; stub handoff text scores 0.324).
+
+**Hero reuse:** `fill_missing_sentence_cues` must set `script_alignment` (not `None`) and merge enrichments.
+
+**Zoom slides:** `build_segment_yaml.py` hardcodes `media_fit: contain`. For benchmark readability, edit `segment.yaml` **after yaml, before build** (e.g. SWE-Bench / Mellum hero: `media_fit: cover`, `text_panel.width_ratio: 0.28`). Do **not** re-run yaml after that edit.
+
+After any sync change → `sync-media` → rebuild chain.
+
+---
+
+## Handoff vs downstream gaps
+
+**Owner:** create-news crawl + `review-data.json` enrichment. **This skill** fixes pipeline/sync/build only unless the user asks to edit handoff files.
+
+### Solvable in handoff (create-news)
+
+Fix these **before** or **instead of** downstream `VISION_ENRICHMENTS` / overrides:
+
+| Gap | Handoff fix | June 2026 example |
+|-----|-------------|-------------------|
+| Stub `vision_description` | Real vision caption + `asset_type` (`benchmark_chart`, `architecture_diagram`, …) per image | Holo OSWorld, MAI Build slide, EVA scenarios — all scored 0.324 until enriched |
+| Uncrawled canonical assets | Crawl hero/diagram URLs from `canonical_url` into `review-assets/` | Gemma hero, MAI collage, Mellum SVG, NVIDIA nemotron thumb |
+| Thin image pool | ≥3 **relevant** images per 3-sentence topic; set `top_picks[]` | Mellum, defending-code, Meta Muse (1 relevant / 3 sentences) |
+| Wrong hero rank | Fix `top_picks`, `editorial_rank`, `topic_relevance_label` | Bedrock theme card, MITRE ATT&CK diagram, Meta MUSE SPARK text card |
+| `needs_manual_asset` | Crawl/promote until `relevant_count ≥ sentence_count`; clear flag | Bedrock, MITRE, Meta |
+| Benchmark speech, no chart | Label one image `asset_type: benchmark_chart` with OSWorld/SWE-Bench/etc. in vision text | Holo, MiniMax SWE-Bench Pro |
+| `required_assets` / `display_sync` catalogue | Complete `images[]` + files for 15/15 topics | Still 9/15 after downstream pass — catalogue debt |
+| Distinct multi-cue art | One relevant image per script sentence where possible | MITRE (3 sentences), Contain (Sanity diagrams) |
+
+### Downstream only (this skill / praisonaippt)
+
+| Gap | Fix location |
+|-----|--------------|
+| Cue count ≠ yaml verses | `align-cues` → `build_segment_yaml.py` → `build` |
+| Hook lead-in / duration drift | Lead-in verse when first cue > 0 s; hook rebuild chain |
+| Hook 16 verses vs 15 montage cues | Expected — `hook_montage` passes; lead-in verse is compositor-only |
+| Wrong image already in handoff | `CUE_IMAGE_OVERRIDES` + `VISION_ENRICHMENTS` in `sync_media_assets.py` |
+| Uneven segment loudness | `normalize-audio --force` on **all** segments (never pass segment filter — empty report footgun) |
+| 720p segment output | `video_export.preset: high` → rebuild |
+| Slide zoom / readability | Post-yaml `segment.yaml` `media_fit: cover` |
 
 ---
 
@@ -224,7 +269,7 @@ Stage **`normalize-audio`** runs after `build`, before `merge`. Uses ffmpeg two-
 
 Crossfade overlap dips ~3–6 dB momentarily — gate on **pre-merge** segment levels, not merge overlap windows.
 
-Measure only: `zsh .cursor/skills/segment-video-roundup/scripts/gap-audit.sh examples/<project>` (loudness + HD sections).
+Measure only: `zsh .cursor/skills/segment-video-roundup/scripts/gap-audit.sh examples/videos/<project>` (loudness + HD sections).
 
 ---
 
@@ -328,7 +373,10 @@ dimension: 1280×720, background #008000
 | Caption↔slide FAIL after multi-cue | Ensure SRT from verses when counts differ (`write_verses_srt`) |
 | `timing_drift` multi-cue | Regenerate via align-cues → yaml → build |
 | Wrong image on slide | `CUE_IMAGE_OVERRIDES` + sync-media + rebuild |
-| Uneven volume across segments | `normalize-audio --force` → `merge`; check `loudness_report.json` |
+| Uneven volume across segments | `normalize-audio --force` (no segment filter) → `merge`; check `loudness_report.json` |
+| `normalize-audio` 0 normalized / empty report | Re-run without `$SEGS` — partial scope skips all segments |
+| `image_audit` 0.324 on all cues | Handoff stub vision **or** add `VISION_ENRICHMENTS` / fix handoff captions |
+| Override ignored on sentence 2+ | Run overrides after `fill_missing_sentence_cues` (both passes) |
 | Final video 720p not 1080p | `video_export.preset: high` → yaml → `build --force` → `normalize-audio` → `merge` |
 | Corrupt `wp:video` JSON on update | Use HEREDOC/file; verify `{"id":N}` intact |
 | HeyGen vertical | Keep `MER_HEYGEN_VERTICAL` unset |
@@ -340,7 +388,7 @@ dimension: 1280×720, background #008000
 Local-only dashboard (`127.0.0.1` — never expose publicly).
 
 ```bash
-cd examples/<project>
+cd examples/videos/<project>
 segment-video studio
 # or: python -m praisonaippt.segment_video.studio --project .
 ```

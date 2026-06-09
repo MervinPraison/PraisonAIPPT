@@ -34,7 +34,7 @@ def test_regenerate_chains_defined():
 def test_protocol_v2_deps():
     protocol_path = Path("tests/fixtures/segment_video_protocol_v3.json")
     if not protocol_path.is_file():
-        protocol_path = Path("examples/june-2026-ai-roundup/scripts/config/protocol.json")
+        protocol_path = Path("examples/videos/june-2026-ai-roundup/scripts/config/protocol.json")
     protocol = json.loads(protocol_path.read_text())
     assert protocol["schema_version"] >= 2
     assert not validate_deps(protocol, "merge")

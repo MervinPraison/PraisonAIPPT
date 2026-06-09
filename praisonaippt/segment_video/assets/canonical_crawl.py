@@ -67,6 +67,27 @@ def _normalise_key(url: str) -> str:
     return stem
 
 
+def _responsive_stem(key: str) -> str:
+    """Strip responsive size suffixes (e.g. 5x-inference-1-179x81.png → 5x-inference-1)."""
+    stem = _normalise_key(key)
+    return re.sub(r"-\d{2,4}x\d{2,4}(?:\.\w+)?$", "", stem, flags=re.I)
+
+
+def _handoff_covers_page_key(page_key: str, handoff_keys: set[str]) -> bool:
+    page_norm = _normalise_key(page_key)
+    page_base = _responsive_stem(page_key)
+    for hk in handoff_keys:
+        hk_norm = _normalise_key(hk)
+        hk_base = _responsive_stem(hk)
+        if page_norm == hk_norm or page_base == hk_base:
+            return True
+        if len(page_base) >= 10 and (page_base in hk_base or hk_base in page_base):
+            return True
+        if page_norm in hk_norm or hk_norm in page_norm:
+            return True
+    return False
+
+
 def handoff_image_keys(topic: dict) -> set[str]:
     keys: set[str] = set()
     for img in topic.get("images") or []:
@@ -76,6 +97,7 @@ def handoff_image_keys(topic: dict) -> set[str]:
         if src:
             keys.add(src)
             keys.add(_normalise_key(src))
+            keys.add(_responsive_stem(src))
     return keys
 
 
@@ -144,7 +166,7 @@ def missing_page_keys(page_urls: list[str], handoff_keys: set[str]) -> list[str]
         dim = re.search(r"(\d+)x(\d+)", key)
         if dim and int(dim.group(1)) < 400 and int(dim.group(2)) < 400:
             continue
-        if any(key in hk or hk in key for hk in handoff_keys):
+        if _handoff_covers_page_key(key, handoff_keys):
             continue
         if any(h in key for h in CONTENT_HINTS):
             missing.append(key[:80])

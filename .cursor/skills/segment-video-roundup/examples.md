@@ -4,7 +4,7 @@
 
 | Item | Value |
 |------|-------|
-| Project dir | `examples/june-2026-ai-roundup/` |
+| Project dir | `examples/videos/june-2026-ai-roundup/` |
 | Research | `/Users/praison/create-news/research/june-2026-ai-engineering-roundup/` |
 | Post | [51661](https://mer.vin/?p=51661) |
 | Segments | 17 (hook + 15 topics + outro) |
@@ -14,19 +14,19 @@
 ### Verify final video
 
 ```bash
-open examples/june-2026-ai-roundup/merge/final-roundup.mp4
+open examples/videos/june-2026-ai-roundup/merge/final-roundup.mp4
 ffprobe -v error -show_entries format=duration -of csv=p=0 \
-  examples/june-2026-ai-roundup/merge/final-roundup.mp4
+  examples/videos/june-2026-ai-roundup/merge/final-roundup.mp4
 ffprobe -v error -select_streams v:0 \
   -show_entries stream=width,height,r_frame_rate -of csv=p=0 \
-  examples/june-2026-ai-roundup/merge/final-roundup.mp4
+  examples/videos/june-2026-ai-roundup/merge/final-roundup.mp4
 # Expected: 1920,1080,30/1
 ```
 
 ### Downstream rebuild (no TTS/HeyGen)
 
 ```bash
-cd examples/june-2026-ai-roundup/scripts
+cd examples/videos/june-2026-ai-roundup/scripts
 
 python3 pipeline.py run sync-media
 python3 pipeline.py run align-cues --force
@@ -48,14 +48,28 @@ SEGS="05-aws-bedrock-gpt-5-5-codex-ga"
 python3 pipeline.py run align-cues --force $SEGS
 python3 build_segment_yaml.py $SEGS
 python3 pipeline.py run build --force $SEGS
-python3 pipeline.py run normalize-audio --force $SEGS
+python3 pipeline.py run normalize-audio --force   # project-wide, not $SEGS
 python3 pipeline.py run merge --force
 ```
+
+### June 2026 gap lessons (handoff-first)
+
+Most `image_audit` failures were **stub `vision_description`** in handoff (score 0.324). Prefer real captions + `asset_type` in create-news; downstream `VISION_ENRICHMENTS` is a stopgap.
+
+| Topic | Handoff would have fixed | Downstream workaround used |
+|-------|--------------------------|----------------------------|
+| Holo | OSWorld benchmark chart vision + `benchmark_chart` | `VISION_ENRICHMENTS` on `f0113828e257.png` |
+| MAI / MiniMax / EVA | Per-image vision matching spoken lines | Overrides + enrichments |
+| Bedrock / MITRE / Meta | Crawl canonical/Sanity heroes; clear `needs_manual_asset` | Partial crawl + overrides |
+| Mellum / defending-code / Meta | 3 relevant images per topic | `HERO_REUSE_ENRICHMENTS` |
+| Hook montage | Rich vision on each topic hero | Prepend roll-call phrase to vision text |
+
+`validate-all` still fails `required_assets` + `display_sync` (9/15 catalogue) until handoff crawl completes — safe to ship when `image_audit`, `segment_sync`, `audio_loudness` pass.
 
 ### Gap audit
 
 ```bash
-zsh .cursor/skills/segment-video-roundup/scripts/gap-audit.sh examples/june-2026-ai-roundup
+zsh .cursor/skills/segment-video-roundup/scripts/gap-audit.sh examples/videos/june-2026-ai-roundup
 ```
 
 ### First-time media (costs money)
@@ -101,7 +115,7 @@ Then edit `manifest.json` segments and run phases from [SKILL.md](SKILL.md).
 ```bash
 cd /Users/praison/praisonaippt
 praisonaippt validate-deck -i examples/heygen-50590-video-audio-heygen-images.yaml
-praisonaippt validate-deck -i examples/june-2026-ai-roundup/segments/01-nvidia-nemotron-3-ultra/segment.yaml
+praisonaippt validate-deck -i examples/videos/june-2026-ai-roundup/segments/01-nvidia-nemotron-3-ultra/segment.yaml
 ```
 
 Expect: plan_approval, schema, timing_drift, pip_centring, slide_qa; golden `slide_jpegs` when seeded.

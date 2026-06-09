@@ -72,11 +72,16 @@ def validate_segment_sync(seg_dir: Path, *, min_overlap: float = 0.45, max_drift
 
     cue_path = seg_dir / "cue_timings.json"
     media_path = seg_dir.parent.parent / "media_assets.json"
-    if cue_path.is_file() and media_path.is_file():
+    if cue_path.is_file():
         cues = json.loads(cue_path.read_text()).get("cues", [])
-        assets = json.loads(media_path.read_text()).get("segments", {}).get(seg_dir.name, {})
-        n_media = len(assets.get("cues") or [])
-        if len(cues) != n_media and n_media > 1:
-            issues.append(f"cue_timings count {len(cues)} != media cues {n_media}")
+        n_cues = len(cues)
+        n_verses = len(verses)
+        if n_verses != n_cues:
+            issues.append(f"yaml verses {n_verses} != cue_timings {n_cues}")
+        if media_path.is_file():
+            assets = json.loads(media_path.read_text()).get("segments", {}).get(seg_dir.name, {})
+            n_media = len(assets.get("cues") or [])
+            if n_cues != n_media and n_media > 0:
+                issues.append(f"cue_timings count {n_cues} != media cues {n_media}")
 
     return (len(issues) == 0, issues)

@@ -23,6 +23,7 @@ def default_validator_ids() -> list[dict]:
         {"id": "merge_output", "required": True},
         {"id": "coverage", "required": False},
         {"id": "manual_assets", "required": False},
+        {"id": "required_assets", "required": True, "fetch_canonical": True},
         {"id": "hook_speech_sync", "required": False},
         {"id": "display_sync", "required": True, "fetch_canonical": True},
     ]

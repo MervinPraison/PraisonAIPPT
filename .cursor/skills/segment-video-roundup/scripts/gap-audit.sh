@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
 # Downstream gap audit for segment-video roundup projects.
 # Usage: gap-audit.sh [project_root]
-# Example: gap-audit.sh examples/june-2026-ai-roundup
+# Example: gap-audit.sh examples/videos/june-2026-ai-roundup
 set -euo pipefail
 
-ROOT="${1:-examples/june-2026-ai-roundup}"
+ROOT="${1:-examples/videos/june-2026-ai-roundup}"
 SCRIPTS="$ROOT/scripts"
 
 if [[ ! -f "$ROOT/manifest.json" ]]; then
