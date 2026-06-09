@@ -7,7 +7,7 @@ description: Builds per-segment HeyGen + ElevenLabs roundup videos from research
 
 Per-segment production (hook + N topics + outro) → compositor MP4 per segment → ffmpeg concat → **Short video walkthrough** on mer.vin.
 
-**Reference:** `examples/videos/june-2026-ai-roundup/`  
+**Reference:** `examples/videos/june-2026-ai-roundup/` · layout index: `examples/videos/README.md`  
 **Deck template:** `examples/heygen-50590-video-audio-heygen-images.yaml`  
 **Publish:** `.cursor/skills/mer-vin-article-video-upload/SKILL.md`  
 **YAML QA:** `.cursor/skills/ppt-yaml-deck-workflow/SKILL.md`  
@@ -145,7 +145,7 @@ See [reference.md — Handoff vs downstream gaps](reference.md#handoff-vs-downst
 SEGS="01-nvidia-nemotron-3-ultra 05-aws-bedrock-gpt-5-5-codex-ga"  # space-separated dirs
 
 python3 pipeline.py run align-cues --force $SEGS
-python3 build_segment_yaml.py $SEGS          # NOT optional after align
+python3 pipeline.py run yaml --force $SEGS          # or: build_segment_yaml.py $SEGS
 python3 pipeline.py run build --force $SEGS
 python3 pipeline.py run normalize-audio --force   # always project-wide, not $SEGS
 python3 pipeline.py run merge --force

@@ -179,14 +179,14 @@ Fix these **before** or **instead of** downstream `VISION_ENRICHMENTS` / overrid
 | Wrong hero rank | Fix `top_picks`, `editorial_rank`, `topic_relevance_label` | Bedrock theme card, MITRE ATT&CK diagram, Meta MUSE SPARK text card |
 | `needs_manual_asset` | Crawl/promote until `relevant_count ≥ sentence_count`; clear flag | Bedrock, MITRE, Meta |
 | Benchmark speech, no chart | Label one image `asset_type: benchmark_chart` with OSWorld/SWE-Bench/etc. in vision text | Holo, MiniMax SWE-Bench Pro |
-| `required_assets` / `display_sync` catalogue | Complete `images[]` + files for 15/15 topics | Still 9/15 after downstream pass — catalogue debt |
+| `required_assets` / `display_sync` catalogue | Complete `images[]` + files for 15/15 topics | June 2026 baseline: **10/15** `required_assets`, **11/15** display catalogue (4 uncrawled + MAI chart); synced-cue fill lets render pass while catalogue lags |
 | Distinct multi-cue art | One relevant image per script sentence where possible | MITRE (3 sentences), Contain (Sanity diagrams) |
 
 ### Downstream only (this skill / praisonaippt)
 
 | Gap | Fix location |
 |-----|--------------|
-| Cue count ≠ yaml verses | `align-cues` → `build_segment_yaml.py` → `build` |
+| Cue count ≠ yaml verses | `align-cues` → `yaml` / `build_segment_yaml.py` → `build`; `segment_sync` fails if yaml verses ≠ cue_timings ≠ media_assets cues |
 | Hook lead-in / duration drift | Lead-in verse when first cue > 0 s; hook rebuild chain |
 | Hook 16 verses vs 15 montage cues | Expected — `hook_montage` passes; lead-in verse is compositor-only |
 | Wrong image already in handoff | `CUE_IMAGE_OVERRIDES` + `VISION_ENRICHMENTS` in `sync_media_assets.py` |
@@ -246,8 +246,20 @@ Hook montage uses `montage_weighted`; first cue often starts after **"roundup:"*
 | `audio_loudness` | yes | Per-segment LUFS; spread ≤ max_spread_lufs |
 | `display_sync` | yes | Per-segment caption/slide/speech |
 | `image_audit` | yes | Alignment + recommend_swap |
-| `required_assets` | yes | Often fails on handoff — ignore if display passes |
+| `required_assets` | yes | Handoff pool + synced cues; catalogue score separate from per-segment display pass |
 | `merge_output` | yes | Final MP4 exists |
+
+June 2026 reference: **11/13** validators pass; catalogue **10/15** (`required_assets`) and **11/15** (`display_sync`); `image_audit` **17/17**.
+
+### Protocol flags (`validation_suite` in `protocol.json`)
+
+| Key | Purpose |
+|-----|---------|
+| `required_assets.allow_synced_cue_fill` | When true, do not fail `cue_shortfall` / thin pool if post-sync cue count satisfies sentences |
+| `display_sync.allow_synced_cue_fill` | Catalogue pass when synced cues cover sentences (hero-reuse OK) |
+| `manual_asset_gaps[]` | Watch-tier topics (Meta, Bedrock logo-only) — catalogue warnings only |
+
+`required_assets` reads **synced** cue counts from `media_assets.json`, not pre-sync `build_cue_plan` alone. Canonical srcset thumb variants are deduped in crawl matching (fewer false `handoff_uncrawled`).
 
 Reports live in project root: `validation_report.json`, `loudness_report.json`, `asset_gaps_report.json`, `image_audit_report.json`, `display_validation_report.json`, `hook_validation_report.json`.
 

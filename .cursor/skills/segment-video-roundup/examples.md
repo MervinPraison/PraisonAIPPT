@@ -11,6 +11,20 @@
 | Final video | `merge/final-roundup.mp4` (~353 s, 1920×1080) |
 | Template deck | `examples/heygen-50590-video-audio-heygen-images.yaml` |
 
+### Live validation baseline (2026-06-09)
+
+| Gate | Result |
+|------|--------|
+| `validate-all` | **11/13** validators pass |
+| `image_audit` | **17/17** segments |
+| `segment_sync` | pass (expected warn: hook yaml **16** vs cue_timings **15**) |
+| `audio_loudness` / `merge_output` / `hook_montage` | pass |
+| `required_assets` catalogue | **10/15** — fail: 01 nemotron, 02 gemma, 03 mai (speech chart), 09 mellum, 11 contain |
+| `display_sync` catalogue | **11/15** — fail: 01, 02, 09, 11 (mai passes catalogue; chart debt is `required_assets` only) |
+| `manual_assets` | 3 warns: bedrock, mitre, meta |
+
+`validate-all` may still fail catalogue gates until create-news crawl completes — safe to ship when `image_audit`, `segment_sync`, `audio_loudness`, and per-segment caption↔slide pass.
+
 ### Verify final video
 
 ```bash
@@ -30,11 +44,8 @@ cd examples/videos/june-2026-ai-roundup/scripts
 
 python3 pipeline.py run sync-media
 python3 pipeline.py run align-cues --force
-python3 build_segment_yaml.py $(python3 -c "
-import json
-m=json.load(open('../manifest.json'))
-print(' '.join(s['dir'] for s in m['segments'] if s.get('slide_type') in ('avatar_media_3','big_number')))
-")
+python3 pipeline.py run yaml --force
+# or: build_segment_yaml.py $(python3 -c "import json; m=json.load(open('../manifest.json')); print(' '.join(s['dir'] for s in m['segments'] if s.get('slide_type') in ('avatar_media_3','big_number')))")
 python3 pipeline.py run build --force
 python3 pipeline.py run normalize-audio --force
 python3 pipeline.py run merge --force
@@ -46,7 +57,7 @@ python3 pipeline.py validate-all
 ```bash
 SEGS="05-aws-bedrock-gpt-5-5-codex-ga"
 python3 pipeline.py run align-cues --force $SEGS
-python3 build_segment_yaml.py $SEGS
+python3 pipeline.py run yaml --force $SEGS   # or: build_segment_yaml.py $SEGS
 python3 pipeline.py run build --force $SEGS
 python3 pipeline.py run normalize-audio --force   # project-wide, not $SEGS
 python3 pipeline.py run merge --force
@@ -63,8 +74,6 @@ Most `image_audit` failures were **stub `vision_description`** in handoff (score
 | Bedrock / MITRE / Meta | Crawl canonical/Sanity heroes; clear `needs_manual_asset` | Partial crawl + overrides |
 | Mellum / defending-code / Meta | 3 relevant images per topic | `HERO_REUSE_ENRICHMENTS` |
 | Hook montage | Rich vision on each topic hero | Prepend roll-call phrase to vision text |
-
-`validate-all` still fails `required_assets` + `display_sync` (9/15 catalogue) until handoff crawl completes — safe to ship when `image_audit`, `segment_sync`, `audio_loudness` pass.
 
 ### Gap audit
 

@@ -5,6 +5,7 @@
 set -euo pipefail
 
 ROOT="${1:-examples/videos/june-2026-ai-roundup}"
+ROOT="$(cd "$ROOT" && pwd)"
 SCRIPTS="$ROOT/scripts"
 
 if [[ ! -f "$ROOT/manifest.json" ]]; then
