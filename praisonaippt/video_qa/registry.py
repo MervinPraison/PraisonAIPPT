@@ -17,6 +17,8 @@ from praisonaippt.video_qa.stages.s07_framing import run_s07_framing
 from praisonaippt.video_qa.stages.s08_av_sync import run_s08_av_sync
 from praisonaippt.video_qa.stages.s09_on_screen_text import run_s09_on_screen_text
 from praisonaippt.video_qa.stages.s10_final_composite import run_s10_final_composite
+from praisonaippt.video_qa.stages.s11_canonical_capture import run_s11_canonical_capture
+from praisonaippt.video_qa.stages.s12_hook_attention import run_s12_hook_attention
 
 StageFn = Callable[..., StageReport]
 
@@ -32,6 +34,8 @@ STAGE_RUNNERS: dict[str, StageFn] = {
     "s08-av-sync": run_s08_av_sync,
     "s09-on-screen-text": run_s09_on_screen_text,
     "s10-final-composite": run_s10_final_composite,
+    "s11-canonical-capture": run_s11_canonical_capture,
+    "s12-hook-attention": run_s12_hook_attention,
 }
 
 
@@ -83,5 +87,7 @@ def run_registered_stage(
         kwargs["min_overlap"] = ctx.min_transcript_overlap()
     elif stage_id == "s10-final-composite":
         kwargs["sync_runs"] = int(stage_cfg.get("sync_runs", 3))
+    elif stage_id == "s12-hook-attention":
+        kwargs["seconds"] = int(stage_cfg.get("seconds", 5))
 
     return fn(project, **kwargs)

@@ -25,29 +25,45 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "vision_description": "anthropic launch clip june shipped builders official b-roll",
         "topics": ("launch", "june", "shipped", "walkthrough", "b-roll", "builders"),
     },
+    "canonical-scroll.mp4": {
+        "vision_description": "anthropic news blog claude fable mythos announcement scroll launch page",
+        "topics": ("anthropic", "fable", "mythos", "launch", "announcement", "blog", "claude", "news", "dropped", "changes"),
+    },
     "bio-aav-chart.png": {
         "vision_description": "biology chemistry AAV viral shell assembly evaluation chart",
         "topics": ("biology", "chemistry", "aav", "virus", "gene", "therapy", "classifier"),
     },
+    "beat1-views-overlay.png": {
+        "vision_description": "anthropic june launch views everyone claude fable five strongest models",
+        "topics": ("anthropic", "june", "launch", "everyone", "fable", "five", "strongest", "models", "teams", "claude"),
+    },
     "beat2-tier-diagram.png": {
-        "vision_description": "fable mythos glasswing tier api claude-fable-5 messages enterprise",
-        "topics": ("fable", "mythos", "glasswing", "engine", "surfaces", "api", "integrate"),
+        "vision_description": "fable mythos glasswing tier api claude-fable-5 messages enterprise what teams get",
+        "topics": ("fable", "mythos", "glasswing", "engine", "surfaces", "api", "integrate", "teams", "get", "most", "actually"),
     },
     "beat3-stripe-card.png": {
         "vision_description": "stripe fifty million lines migration one day manual months",
         "topics": ("stripe", "million", "lines", "migration", "manual", "ruby"),
     },
     "carousel-factorio.mp4": {
-        "vision_description": "factorio factory automation agentic loops",
-        "topics": ("factorio", "factory", "automation", "agentic", "loops", "migrations"),
+        "vision_description": "factorio factory automation agentic loops coding tasks migrations community apps browser",
+        "topics": ("factorio", "factory", "automation", "agentic", "loops", "migrations", "coding", "tasks", "projects", "browser", "game", "match", "board", "windows", "community", "demos"),
     },
     "carousel-vibecad.mp4": {
         "vision_description": "cad vibecad engineering workflows",
-        "topics": ("cad", "workflows", "refactors", "automation", "clips"),
+        "topics": ("cad", "workflows", "refactors", "automation", "clips", "design", "tools"),
+    },
+    "carousel-solar.mp4": {
+        "vision_description": "solar system eclipse simulation community demo browser game city builder",
+        "topics": ("solar", "system", "eclipse", "simulation", "browser", "game", "city", "world", "prompt", "demo", "builders", "linkedin", "community"),
+    },
+    "carousel-fluid.mp4": {
+        "vision_description": "fluid simulation engineering demo b-roll clip",
+        "topics": ("fluid", "simulation", "engineering", "demo", "clip", "vision"),
     },
     "beat4-stat-overlay.png": {
-        "vision_description": "swe-bench verified ninety-five terminal-bench eighties fable mythos",
-        "topics": ("swe-bench", "ninety-five", "terminal", "eighties", "fable", "mythos", "benchmark"),
+        "vision_description": "swe-bench verified ninety-five terminal-bench eighties fable mythos longer jobs advantage",
+        "topics": ("swe-bench", "ninety-five", "terminal", "eighties", "fable", "mythos", "benchmark", "longer", "jobs", "advantage"),
     },
     "benchmark-table.png": {
         "vision_description": "benchmark scorecard frontier leaderboard engineering knowledge vision",
@@ -62,20 +78,24 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "topics": ("spire", "memory", "three", "final-act", "opus", "stat", "gameplay"),
     },
     "gpt-image-safeguard-fallback.png": {
-        "vision_description": "safeguard fallback diagram classifier backup not blocked",
-        "topics": ("fallback", "diagram", "safeguard", "classifier", "sessions", "refusing"),
+        "vision_description": "safeguard fallback diagram classifier backup not blocked safety dead ends",
+        "topics": ("fallback", "diagram", "safeguard", "classifier", "sessions", "refusing", "safety", "dead", "ends", "blocking"),
+    },
+    "distillation-safeguard.png": {
+        "vision_description": "copy protection distillation safeguard biology chemistry checks training partner cyber testing",
+        "topics": ("distillation", "copy", "protection", "safeguard", "biology", "chemistry", "training", "steal", "abilities", "partner", "testing", "cyber", "harmful", "tricks", "bypass"),
     },
     "cyber-classifier.png": {
-        "vision_description": "cyber classifier exploitation offensive agentic hacking",
-        "topics": ("cyber", "classifier", "exploitation", "hacking", "offensive"),
+        "vision_description": "cyber classifier exploitation offensive agentic hacking sessions backup ninety-five percent",
+        "topics": ("cyber", "classifier", "exploitation", "hacking", "offensive", "ninety", "five", "percent", "sessions", "backup", "need"),
     },
     "jailbreak-resistance.png": {
-        "vision_description": "jailbreak resistance bounty harmful cyber completions",
-        "topics": ("jailbreak", "bounty", "harmful", "cyber", "completions", "techniques"),
+        "vision_description": "jailbreak resistance bounty harmful cyber completions thirty days bypass safety",
+        "topics": ("jailbreak", "bounty", "harmful", "cyber", "completions", "techniques", "thirty", "days", "bypass", "safety", "training", "stored"),
     },
     "beat7-api-table.png": {
-        "vision_description": "api messages web app block fallback claude.ai enterprise consumption",
-        "topics": ("api", "web", "app", "block", "fallback", "messages", "claude.ai", "enterprise", "opt"),
+        "vision_description": "api messages web app block fallback claude.ai enterprise consumption website developer mistake",
+        "topics": ("api", "web", "app", "block", "fallback", "messages", "claude.ai", "enterprise", "opt", "website", "developer", "mistake", "versus"),
     },
     "beat8-glasswing.png": {
         "vision_description": "project glasswing cyber defenders mythos preview tiers",
@@ -94,8 +114,8 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "topics": ("retention", "thirty", "jailbreak", "prompts", "training", "distillation", "eval", "classifiers"),
     },
     "alignment-chart.png": {
-        "vision_description": "misaligned behaviour alignment eval chart mythos opus scores",
-        "topics": ("misaligned", "alignment", "behaviour", "chart"),
+        "vision_description": "misaligned behaviour alignment eval chart mythos opus scores safeguards tighten launch",
+        "topics": ("misaligned", "alignment", "behaviour", "chart", "safeguards", "tighten", "launch", "settings", "copying", "model", "production"),
     },
 }
 
@@ -237,6 +257,32 @@ def _windows_for_beat(
 
     if beat_num == 5 and clips:
         stat = generated[0] if generated else None
+        poke = next((c for c in clips if "pokemon" in c.get("filename", "")), None)
+        solar = next((c for c in clips if "solar" in c.get("filename", "")), None)
+        if stat and poke and solar:
+            poke_dur = dur * 0.36
+            solar_dur = dur * 0.30
+            wins.append(VisualWindow(
+                t0, t0 + poke_dur, f"beat-{beat_num:02d}", "Pokémon clip", Path(poke["path"]).name,
+            ))
+            wins.append(VisualWindow(
+                t0 + poke_dur, t0 + poke_dur + solar_dur, f"beat-{beat_num:02d}",
+                "community demo clip", Path(solar["path"]).name,
+            ))
+            wins.append(VisualWindow(
+                t0 + poke_dur + solar_dur, t0 + dur, f"beat-{beat_num:02d}",
+                "Spire stat", Path(stat["path"]).name,
+            ))
+            return wins
+        if stat and poke:
+            poke_dur = dur * 0.48
+            wins.append(VisualWindow(
+                t0, t0 + poke_dur, f"beat-{beat_num:02d}", "Pokémon clip", Path(poke["path"]).name,
+            ))
+            wins.append(VisualWindow(
+                t0 + poke_dur, t0 + dur, f"beat-{beat_num:02d}", "Spire stat", Path(stat["path"]).name,
+            ))
+            return wins
         stat_share = 0.32 if stat else 0.0
         clip_total = max(1.0, dur * (1.0 - stat_share))
         poke = next((c for c in clips if "pokemon" in c.get("filename", "")), None)
@@ -356,7 +402,7 @@ def build_visual_timeline(project: DailySingleProject) -> list[VisualWindow]:
             plan = build_hook_montage_plan(project)
             montage_cues = [c for c in plan.get("cues") or [] if c.get("ok")]
             if montage_cues and script:
-                for w in hook_visual_windows(start, dur, script, montage_cues):
+                for w in hook_visual_windows(start, dur, script, montage_cues, project=project):
                     out.append(VisualWindow(
                         w["start"], w["end"], w["beat"], w["visual"], w["file"],
                         w.get("section", ""), w.get("script_fragment", ""),

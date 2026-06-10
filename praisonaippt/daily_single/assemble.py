@@ -11,11 +11,12 @@ from praisonaippt.daily_single.env import load_env, require_keys
 from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.daily_single.protocol import SEGMENT_ORDER
 from praisonaippt.daily_single.hook_montage import (
-    attention_hero,
+    attention_visual,
     build_hook_montage_plan,
-    hook_sentence_durations,
+    hook_attention_durations,
     montage_cue_durations,
 )
+from praisonaippt.daily_single.canonical_scroll import scroll_video_path
 from praisonaippt.daily_single.vo import synthesise_segments
 from praisonaippt.segment_video.media import ffprobe_duration
 
@@ -105,14 +106,20 @@ def _hook_montage(
         _hook_with_launch(heygen, launch, dest, dur)
         return
 
-    att, overview, bridge = hook_sentence_durations(dur, script)
+    att, overview, bridge = hook_attention_durations(
+        dur, script, motion_clip=bool(scroll_video_path(project)),
+    )
     parts_dir = dest.parent / "hook-parts"
     parts_dir.mkdir(parents=True, exist_ok=True)
 
-    hero = attention_hero(cues)
-    hero_path = Path(hero["path"])
+    hero = attention_visual(project, cues, script=script)
     intro = parts_dir / "intro.mp4"
-    _video_from_image(hero_path, intro, att)
+    scroll_path = Path(hero["path"]) if hero.get("file") == "canonical-scroll.mp4" and hero.get("path") else None
+    if scroll_path and scroll_path.is_file():
+        _extend_or_trim(scroll_path, intro, min(att, ffprobe_duration(scroll_path)))
+    else:
+        hero_path = Path(hero["path"]) if hero.get("path") else Path(cues[0]["path"])
+        _video_from_image(hero_path, intro, att)
 
     montage_clips: list[Path] = []
     for i, (cue, cdur) in enumerate(zip(cues, montage_cue_durations(overview, cues))):
@@ -125,7 +132,8 @@ def _hook_montage(
     hg_part = parts_dir / "avatar.mp4"
     _heygen_bookend_segment(heygen, hg_part, bridge)
     bg_tail = parts_dir / "bg-tail.mp4"
-    _video_from_image(hero_path, bg_tail, bridge)
+    tail_hero = Path(cues[0]["path"])
+    _video_from_image(tail_hero, bg_tail, bridge)
     tail_v = parts_dir / "tail.mp4"
     _run([
         "ffmpeg", "-y", "-i", str(bg_tail), "-i", str(hg_part),
@@ -464,7 +472,7 @@ def assemble(project: DailySingleProject) -> Path:
             hook_v = project.beats_dir / "00-hook.mp4"
             heygen_hook = project.segments_dir / "00-hook" / "heygen.mp4"
             launch = project.assets_dir / "videos" / "claudeai-launch.mp4"
-            if heygen_hook.is_file() and launch.is_file():
+            if heygen_hook.is_file():
                 _hook_montage(project, heygen_hook, launch, hook_v, dur)
             elif heygen_hook.is_file():
                 _heygen_bookend_segment(heygen_hook, hook_v, dur)

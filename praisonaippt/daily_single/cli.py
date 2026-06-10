@@ -42,7 +42,23 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("assemble-beats", help="VO-driven ffmpeg assembly → merge/final.mp4")
     sub.add_parser("build-captions", help="Script-aligned SRT (not raw Whisper text)")
     sub.add_parser("build-timeline", help="Write merge/timeline.json")
+    scroll_p = sub.add_parser(
+        "record-canonical-scroll",
+        help="Record scrolling capture of canonical news page for hook attention",
+    )
+    scroll_p.add_argument("--url", help="Override canonical URL from handoff")
+    scroll_p.add_argument("--duration", type=float, default=5.0, help="Clip length (seconds)")
+    scroll_p.add_argument(
+        "--mode",
+        choices=("auto", "scroll", "zoom"),
+        default="auto",
+        help="Scroll down tall pages; zoom in when short (default auto)",
+    )
     sub.add_parser("validate-display", help="Map SRT cues to visuals; write display_sync_report.json")
+    sub.add_parser(
+        "validate-spoken-visual",
+        help="Check narration matches slides/images on screen → spoken_visual_sync_report.json",
+    )
     sync_p = sub.add_parser(
         "validate-sync",
         help="Robust sync test: script lock + hook + image mapping (default 3 idempotent runs)",
@@ -56,6 +72,15 @@ def main(argv: list[str] | None = None) -> int:
     audit_p.add_argument("--force", action="store_true", help="Re-export frames even if report exists")
     audit_p.add_argument("--no-vision", action="store_true", help="Skip optional vision LLM descriptions")
     sub.add_parser("validate-visual-audit", help="Gate on merge/visual_audit_report.json")
+    hook_att_p = sub.add_parser(
+        "validate-hook-attention",
+        help="Per-second frames for hook attention (first 5s vs canonical-scroll)",
+    )
+    hook_att_p.add_argument("--seconds", type=int, default=5)
+    sub.add_parser(
+        "validate-canonical-scroll",
+        help="Gate canonical-scroll.mp4 — reject browser error pages before assemble",
+    )
     sub.add_parser("validate-all", help="Full validation gate (tools, output, sync, display, visual audit)")
     sync_assets_p = sub.add_parser(
         "sync-assets",
@@ -96,6 +121,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "build-timeline":
         build_timeline(project)
         return 0
+    if args.cmd == "record-canonical-scroll":
+        from praisonaippt.daily_single.canonical_scroll import record_canonical_scroll
+
+        record_canonical_scroll(
+            project,
+            url=getattr(args, "url", None),
+            duration=float(getattr(args, "duration", 5.0)),
+            mode=str(getattr(args, "mode", "auto")),
+        )
+        return 0
     if args.cmd == "validate-display":
         report = validate_display_sync(project)
         if report["ok"]:
@@ -106,6 +141,19 @@ def main(argv: list[str] | None = None) -> int:
             if not row["ok"]:
                 print(f"  cue {row['cue']} [{row['start_sec']:.1f}s] score={row['alignment']}: {row['spoken'][:60]}… → {row['file']}")
         return 1
+    if args.cmd == "validate-spoken-visual":
+        from praisonaippt.daily_single.spoken_visual_sync import validate_spoken_visual_sync
+
+        report = validate_spoken_visual_sync(project)
+        print(
+            f"{'PASS' if report['ok'] else 'FAIL'}: "
+            f"montage {report['montage_fragments_pass']}/{report['montage_fragments_total']}, "
+            f"windows {report['windows_pass']}/{report['windows_total']}"
+        )
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
     if args.cmd == "validate-sync":
         report = run_sync_suite(project, runs=max(1, args.runs))
         s = report.get("summary") or {}
@@ -114,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
             f"lock={s.get('caption_script_lock')} hook={s.get('hook_structure')} "
             f"image={s.get('image_mapping')} youtube={s.get('youtube_quality')} "
             f"montage={s.get('hook_montage')} visual={s.get('visual_audit')} "
-            f"borderline={s.get('borderline_count')}"
+            f"spoken={s.get('spoken_visual')} borderline={s.get('borderline_count')}"
         )
         if report["ok"]:
             print(f"PASS: {s.get('cues_total')} cues, {report['runs']} identical runs")
@@ -151,6 +199,35 @@ def main(argv: list[str] | None = None) -> int:
         for issue in (report.get("issues") or [])[:10]:
             print(f"  {issue}")
         return 1
+    if args.cmd == "validate-hook-attention":
+        from praisonaippt.daily_single.hook_attention_audit import run_hook_attention_audit
+
+        report = run_hook_attention_audit(project, seconds=int(getattr(args, "seconds", 5)))
+        ok = bool(report.get("ok"))
+        print(
+            f"{'PASS' if ok else 'FAIL'}: {report.get('samples_pass', 0)}/"
+            f"{report.get('samples_total', 0)} second-frames, motion={report.get('motion_ok')} → "
+            f"{report.get('frames_dir')}"
+        )
+        if not ok:
+            for s in report.get("samples") or []:
+                if not s.get("ok"):
+                    print(f"  t={s['t_sec']:.0f}s pixel={s.get('pixel_sim')} {s.get('issues')}")
+        return 0 if ok else 1
+    if args.cmd == "validate-canonical-scroll":
+        from praisonaippt.daily_single.canonical_scroll import scroll_video_path
+        from praisonaippt.daily_single.page_capture_quality import validate_scroll_asset
+
+        scroll = scroll_video_path(project)
+        if not scroll:
+            print(f"FAIL: missing assets/videos/canonical-scroll.mp4 — run record-canonical-scroll")
+            return 1
+        ok, details = validate_scroll_asset(project, scroll)
+        print(f"{'PASS' if ok else 'FAIL'}: {scroll.name} ({details.get('duration_sec')}s)")
+        if not ok:
+            for issue in details.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if ok else 1
     if args.cmd == "sync-assets":
         report = run_sync_assets(project, force_hd=not args.skip_hd, crawl=not args.no_crawl)
         inv = report.get("inventory") or {}

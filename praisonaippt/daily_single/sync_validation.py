@@ -10,6 +10,7 @@ from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.daily_single.protocol import SEGMENT_ORDER
 from praisonaippt.daily_single.hook_validation import validate_hook_montage
 from praisonaippt.daily_single.visual_audit import validate_visual_audit
+from praisonaippt.daily_single.spoken_visual_sync import validate_spoken_visual_sync
 from praisonaippt.daily_single.youtube_quality import validate_youtube_quality
 
 BORDERLINE_MAX = 0.45
@@ -85,7 +86,10 @@ def run_sync_suite(project: DailySingleProject, *, runs: int = 3) -> dict[str, A
     last_yt_checks: dict[str, Any] = {}
 
     last_montage_report: dict[str, Any] = {}
+    last_spoken_visual: dict[str, Any] = {}
     visual_ok, visual_report = validate_visual_audit(project)
+    spoken_visual = validate_spoken_visual_sync(project)
+    last_spoken_visual = spoken_visual
 
     for n in range(1, runs + 1):
         display = validate_display_sync(project)
@@ -104,7 +108,9 @@ def run_sync_suite(project: DailySingleProject, *, runs: int = 3) -> dict[str, A
         last_montage_report = montage_report
         montage_issues = montage_report.get("issues") or []
         visual_issues = visual_report.get("issues") or []
-        ok = lock_ok and hook_ok and image_ok and yt_ok and montage_ok and visual_ok
+        spoken_ok = spoken_visual.get("ok", False)
+        spoken_issues = spoken_visual.get("issues") or []
+        ok = lock_ok and hook_ok and image_ok and yt_ok and montage_ok and visual_ok and spoken_ok
 
         sig = _cue_map_signature(display["cue_map"])
         signatures.append(sig)
@@ -121,7 +127,8 @@ def run_sync_suite(project: DailySingleProject, *, runs: int = 3) -> dict[str, A
             "youtube_quality": yt_ok,
             "hook_montage": montage_ok,
             "visual_audit": visual_ok,
-            "issues": lock_issues + hook_issues + yt_issues + montage_issues + visual_issues + (
+            "spoken_visual": spoken_ok,
+            "issues": lock_issues + hook_issues + yt_issues + montage_issues + visual_issues + spoken_issues + (
                 [] if image_ok else [f"{display['cues_fail']} cues below {MIN_ALIGNMENT}"]
             ),
         })
@@ -138,6 +145,14 @@ def run_sync_suite(project: DailySingleProject, *, runs: int = 3) -> dict[str, A
         "borderline_max": BORDERLINE_MAX,
         "youtube_quality": last_yt_checks,
         "hook_montage": last_montage_report,
+        "spoken_visual_sync": {
+            "ok": spoken_visual.get("ok"),
+            "montage_pass": spoken_visual.get("montage_fragments_pass"),
+            "montage_total": spoken_visual.get("montage_fragments_total"),
+            "windows_pass": spoken_visual.get("windows_pass"),
+            "windows_total": spoken_visual.get("windows_total"),
+            "issues": (spoken_visual.get("issues") or [])[:10],
+        },
         "visual_audit": {
             "ok": visual_ok,
             "samples_total": visual_report.get("samples_total"),
@@ -160,6 +175,7 @@ def run_sync_suite(project: DailySingleProject, *, runs: int = 3) -> dict[str, A
             "youtube_quality": final.get("youtube_quality"),
             "hook_montage": final.get("hook_montage"),
             "visual_audit": final.get("visual_audit"),
+            "spoken_visual": final.get("spoken_visual"),
         },
     }
     out = project.merge_dir / "sync_validation_report.json"

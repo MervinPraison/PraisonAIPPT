@@ -32,12 +32,15 @@ Copy and tick as you go:
 - [ ] 4. synthesise-vo
 - [ ] 5. QA post_vo    → validate-qa --when post_vo
 - [ ] 6. bookend-media (00-hook, 99-outro)
-- [ ] 7. QA pre_assemble → validate-qa --when pre_assemble
-- [ ] 8. assemble-beats  (writes merge/timeline.json)
-- [ ] 9. build-captions  (merge/final.srt)
-- [ ]10. QA post_build  → validate-qa --when post_build
-- [ ]11. Legacy confirm → validate-all && validate-sync --runs 3
-- [ ]12. Publish gate   → mer-vin upload skill (optional)
+- [ ] 7. record-canonical-scroll --duration 5  (inspect merge/qa/canonical_capture/page.png)
+- [ ] 8. validate-canonical-scroll  → must PASS before assemble
+- [ ] 9. QA pre_assemble → validate-qa --when pre_assemble  (includes s11-canonical-capture)
+- [ ]10. assemble-beats  (writes merge/timeline.json)
+- [ ]11. build-captions  (merge/final.srt)
+- [ ]12. validate-hook-attention --seconds 5  (reject error pages in first 5s)
+- [ ]13. QA post_build  → validate-qa --when post_build  (includes s12-hook-attention)
+- [ ]14. Legacy confirm → validate-all && validate-sync --runs 3
+- [ ]15. Publish gate   → mer-vin upload skill (optional)
 ```
 
 ## Step-by-step commands
@@ -72,6 +75,8 @@ Reports: `$PROJECT/merge/qa/summary.json` and `$PROJECT/merge/qa/s*_report.json`
 
 ```bash
 pytest tests/test_video_qa.py \
+       tests/test_page_capture_quality.py \
+       tests/test_canonical_scroll.py \
        tests/test_daily_single_sync_validation.py \
        tests/test_daily_single_display_sync_unit.py \
        tests/test_daily_single_hook_montage.py \
@@ -96,6 +101,8 @@ Common fixes:
 | build-captions crash | Proportional captions OK — s05 marks `degraded: whisper` |
 | s08 section_boundaries | Re-run `assemble-beats` or `build-timeline`; compare `beats/*.mp4` to timeline |
 | s10 visual audit | Fix beat B-roll; re-run `assemble-beats` → post_build QA |
+| s11 / validate-canonical-scroll | Browser error in hook — re-run `record-canonical-scroll`; open `merge/qa/canonical_capture/page.png` |
+| s12 / validate-hook-attention | Error page in first 5s of final — fix scroll capture then `assemble-beats` |
 
 ## Multi-agent orchestration
 

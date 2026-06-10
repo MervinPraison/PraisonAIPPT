@@ -1,0 +1,24 @@
+# Daily single — plain language (general audience)
+
+When writing or editing `segments/*/script.md` for daily_single videos:
+
+## Audience
+
+Assume a **general YouTube viewer** — not a developer. Explain product names on first use.
+
+## Rules
+
+1. **No unexplained tier names before beat 02** — do not say "Mythos" in hook or cold-open. Use "everyday version", "what most teams get", or "partner-only version".
+2. **Define Mythos once in 02-mythos-tier** — e.g. "Mythos five — the research and partner-only version".
+3. **Replace dev jargon** — "backup model" → "simpler model" (same sentence); "jailbreak" → "tricks to bypass safety rules"; "API" → "developer connection" or "paid billing connection"; "hard no" → "blank refusal".
+4. **Hook overview** — comma-separated plain phrases, not internal codenames.
+5. **One sentence = one SRT cue** — short, spoken sentences.
+
+## Validation
+
+```bash
+pytest tests/test_audience_language.py tests/test_daily_single_youtube_quality.py -q
+daily-single -p $PROJECT validate-sync --runs 3   # includes plain_language check
+```
+
+Automated: `praisonaippt.daily_single.audience_language.validate_audience_language`

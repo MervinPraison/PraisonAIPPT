@@ -10,10 +10,13 @@ from praisonaippt.daily_single.captions import split_caption_cues
 from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.segment_video.align import _hook_roll_window
 
+SCROLL_ATTENTION_FILE = "canonical-scroll.mp4"
+ATTENTION_MOTION_SEC = 5.0
+
 # Order matches comma clauses in overview cue (June roll-call pattern).
 DEFAULT_MONTAGE_SPECS: list[dict[str, Any]] = [
     {
-        "fragment": "Fable versus Mythos",
+        "fragment": "what most teams actually get",
         "filename": "beat2-tier-diagram.png",
         "beat": 2,
         "visual": "tier diagram",
@@ -32,13 +35,13 @@ DEFAULT_MONTAGE_SPECS: list[dict[str, Any]] = [
     },
     {
         "fragment": "safety without dead ends",
-        "filename": "cyber-classifier.png",
+        "filename": "gpt-image-safeguard-fallback.png",
         "beat": 6,
         "visual": "safeguard slide",
-        "fallback": "gpt-image-safeguard-fallback.png",
+        "fallback": "cyber-classifier.png",
     },
     {
-        "fragment": "app-versus-API mistake",
+        "fragment": "website-versus-developer mistake",
         "filename": "beat7-api-table.png",
         "beat": 7,
         "visual": "API table",
@@ -145,6 +148,24 @@ def hook_sentence_durations(hook_dur: float, script: str) -> tuple[float, float,
     return durs[0], durs[1], durs[2]
 
 
+def hook_attention_durations(
+    hook_dur: float,
+    script: str,
+    *,
+    motion_clip: bool = False,
+) -> tuple[float, float, float]:
+    """When a scroll/zoom clip is used, lock attention to ATTENTION_MOTION_SEC."""
+    att, overview, bridge = hook_sentence_durations(hook_dur, script)
+    if not motion_clip:
+        return att, overview, bridge
+    att = min(ATTENTION_MOTION_SEC, max(2.0, hook_dur - 4.0))
+    rest = max(1.0, hook_dur - att)
+    share = overview / max(0.1, overview + bridge)
+    overview = rest * share
+    bridge = rest - overview
+    return att, overview, bridge
+
+
 def montage_cue_durations(overview_dur: float, montage_cues: list[dict]) -> list[float]:
     """Word-weight duration per montage hero within overview window."""
     weights = _word_weights([c.get("script_fragment", "") for c in montage_cues])
@@ -161,20 +182,42 @@ def attention_hero(montage_cues: list[dict]) -> dict[str, Any]:
     return montage_cues[0] if montage_cues else {}
 
 
+def attention_visual(
+    project: DailySingleProject,
+    montage_cues: list[dict],
+    *,
+    script: str = "",
+) -> dict[str, Any]:
+    """Prefer canonical page scroll video for hook attention when present."""
+    scroll = project.assets_dir / "videos" / SCROLL_ATTENTION_FILE
+    if scroll.is_file():
+        sentences = split_caption_cues(script) if script else []
+        return {
+            "file": SCROLL_ATTENTION_FILE,
+            "path": str(scroll),
+            "visual": "canonical blog scroll",
+            "script_fragment": sentences[0] if sentences else "",
+            "ok": True,
+        }
+    return attention_hero(montage_cues)
+
+
 def hook_visual_windows(
     hook_start: float,
     hook_dur: float,
     script: str,
     montage_cues: list[dict],
     *,
+    project: DailySingleProject | None = None,
     launch_file: str = "claudeai-launch.mp4",
     bridge_file: str = "heygen.mp4",
 ) -> list[dict[str, Any]]:
     """Timeline windows for display_sync: attention → N heroes → bridge."""
-    att, overview, bridge = hook_sentence_durations(hook_dur, script)
+    motion = bool(project and scroll_video_path(project)) if project else False
+    att, overview, bridge = hook_attention_durations(hook_dur, script, motion_clip=motion)
     windows: list[dict[str, Any]] = []
     t = hook_start
-    hero = attention_hero(montage_cues)
+    hero = attention_visual(project, montage_cues, script=script) if project else attention_hero(montage_cues)
     windows.append({
         "start": t,
         "end": t + att,

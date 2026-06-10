@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from praisonaippt.daily_single.display_sync import MIN_ALIGNMENT, validate_display_sync
+from praisonaippt.daily_single.spoken_visual_sync import validate_spoken_visual_sync
 from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.video_qa.base import CheckResult, StageReport
 from praisonaippt.video_qa.context import SuiteContext
@@ -44,6 +45,21 @@ def run_s03_image_speech(
             severity="error" if required else "warn",
             message=f"{fail_count} cue(s) below alignment threshold",
         ))
+
+    spoken = validate_spoken_visual_sync(project)
+    spoken_ok = bool(spoken.get("ok"))
+    checks.append(CheckResult(
+        id="spoken_visual_sync",
+        ok=spoken_ok,
+        severity="error" if required else "warn",
+        message=(
+            f"montage {spoken.get('montage_fragments_pass', 0)}/"
+            f"{spoken.get('montage_fragments_total', 0)}, "
+            f"windows {spoken.get('windows_pass', 0)}/{spoken.get('windows_total', 0)} inline"
+        ),
+        details={"issues": (spoken.get("issues") or [])[:5]},
+    ))
+    ok = ok and spoken_ok
 
     return StageReport(
         id="s03-image-speech",

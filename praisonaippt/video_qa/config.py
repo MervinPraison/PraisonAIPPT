@@ -13,6 +13,7 @@ DEFAULT_QA_STAGES: list[dict[str, Any]] = [
     {"id": "s02-source-vlm", "when": "pre_build", "required": False, "offline_ok": False, "interval_sec": 5.0},
     {"id": "s06-coverage", "when": "pre_build", "required": False, "offline_ok": True, "phase": "post_sync"},
     {"id": "s00-bookends", "when": "pre_assemble", "required": True, "offline_ok": True},
+    {"id": "s11-canonical-capture", "when": "pre_assemble", "required": True, "offline_ok": True},
     {"id": "s05-transcript", "when": "post_vo", "required": True, "offline_ok": True, "phase": "post_vo"},
     {"id": "s05-transcript", "when": "post_build", "required": True, "offline_ok": True, "phase": "post_captions"},
     {"id": "s03-image-speech", "when": "post_build", "required": True, "offline_ok": True, "phase": "post_render"},
@@ -20,6 +21,7 @@ DEFAULT_QA_STAGES: list[dict[str, Any]] = [
     {"id": "s07-framing", "when": "post_build", "required": False, "offline_ok": True},
     {"id": "s09-on-screen-text", "when": "post_build", "required": False, "offline_ok": True},
     {"id": "s10-final-composite", "when": "post_build", "required": True, "offline_ok": False, "sync_runs": 3},
+    {"id": "s12-hook-attention", "when": "post_build", "required": True, "offline_ok": True, "seconds": 5},
 ]
 
 DEFAULT_DEGRADATION: dict[str, Any] = {

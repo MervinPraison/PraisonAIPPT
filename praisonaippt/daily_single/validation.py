@@ -92,6 +92,9 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
     report["validators"]["sync_validation"] = False
     report["validators"]["display_sync"] = False
     report["validators"]["visual_audit"] = False
+    report["validators"]["spoken_visual"] = False
+    report["validators"]["canonical_capture"] = False
+    report["validators"]["hook_attention"] = False
     sv_path = project.merge_dir / "sync_validation_report.json"
     va_path = project.merge_dir / "visual_audit_report.json"
     if sv_path.is_file():
@@ -118,6 +121,44 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
             )
     else:
         issues.append("visual_audit: missing merge/visual_audit_report.json — run audit-visual")
+    sv_path = project.merge_dir / "spoken_visual_sync_report.json"
+    if sv_path.is_file():
+        sv = json.loads(sv_path.read_text(encoding="utf-8"))
+        report["validators"]["spoken_visual"] = sv.get("ok", False)
+        if not sv.get("ok"):
+            issues.append(
+                f"spoken_visual: {sv.get('windows_fail', '?')} window(s), "
+                f"{sv.get('montage_fragments_fail', '?')} montage fragment(s) — run validate-spoken-visual"
+            )
+    else:
+        issues.append(
+            "spoken_visual: missing merge/spoken_visual_sync_report.json — run validate-spoken-visual"
+        )
+    from praisonaippt.daily_single.canonical_scroll import scroll_video_path
+    from praisonaippt.daily_single.page_capture_quality import validate_scroll_asset
+
+    scroll = scroll_video_path(project)
+    if scroll:
+        cap_ok, cap_details = validate_scroll_asset(project, scroll)
+        report["validators"]["canonical_capture"] = cap_ok
+        if not cap_ok:
+            issues.append(
+                "canonical_capture: scroll clip shows error page — run record-canonical-scroll"
+            )
+    cap_path = project.merge_dir / "qa" / "canonical_capture" / "capture_report.json"
+    if cap_path.is_file():
+        cap = json.loads(cap_path.read_text(encoding="utf-8"))
+        if not cap.get("ok"):
+            report["validators"]["canonical_capture"] = False
+            issues.append("canonical_capture: capture_report ok=false")
+    ha_path = project.merge_dir / "qa" / "hook_attention_audit.json"
+    if ha_path.is_file():
+        ha = json.loads(ha_path.read_text(encoding="utf-8"))
+        report["validators"]["hook_attention"] = ha.get("ok", False)
+        if not ha.get("ok"):
+            issues.append("hook_attention: failed — run validate-hook-attention after assemble")
+    elif scroll:
+        issues.append("hook_attention: missing hook_attention_audit.json — run validate-hook-attention")
     report["passed"] = len(issues) == 0
     report["issues"] = issues
     (project.root / "validation_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")

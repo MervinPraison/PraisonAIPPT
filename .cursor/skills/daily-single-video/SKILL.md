@@ -46,19 +46,23 @@ Now we are going to walk through every one in detail. Let's get started.
 **Single-topic example** (`anthropic-claude-fable-5-mythos-5/segments/00-hook/script.md`):
 
 ```text
-Hook: Anthropic just dropped Claude Fable five — if AI is part of your job, this launch changes everything.
+Hook: Anthropic just released Claude Fable five — if AI is part of your work, this launch matters.
 
-In the next five minutes: Fable versus Mythos, Stripe's fifty-million-line proof, benchmark scores that matter, safety without dead ends, and the app-versus-API mistake teams keep making.
+In the next five minutes: what most teams actually get, Stripe's fifty-million-line proof, benchmark scores that matter, safety without dead ends, and the website-versus-developer mistake teams keep making.
 
 Let's get started.
 ```
+
+**Plain language:** `.cursor/rules/daily-single-plain-language.mdc` — no Mythos before beat 02; automated `pytest tests/test_audience_language.py`.
+
+**Hook attention (first 5s):** `record-canonical-scroll` → blog scroll video; `validate-hook-attention` exports one JPEG per second.
 
 **Hook montage (required):** each comma clause in the overview maps to a hero asset during cue 2 (~2s per slide). Assembly: `hook_montage.py` → `assemble.py` `_hook_montage()`. Validators: `hook_montage` in `validate-sync --runs 3` (≥5 distinct heroes, no launch-only overview).
 
 ### `01-cold-open` … `10-*` — beats
 
 - Start **after** Let's get started — first beat is real content, not another intro.
-- Plain language for a general YouTube audience; explain jargon when unavoidable.
+- Plain language for a general YouTube audience; explain jargon when unavoidable (see `.cursor/rules/daily-single-plain-language.mdc`).
 - ~2–4 sentences per beat; one sentence = one SRT cue (see `video-script-captions` skill).
 
 ### `99-outro` — June CTA (no spoken mer.vin)

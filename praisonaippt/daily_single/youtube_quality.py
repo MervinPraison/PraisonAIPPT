@@ -5,6 +5,7 @@ import json
 import re
 from typing import Any
 
+from praisonaippt.daily_single.audience_language import validate_audience_language
 from praisonaippt.daily_single.captions import split_caption_cues
 from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.daily_single.protocol import SEGMENT_ORDER
@@ -52,6 +53,8 @@ def validate_plain_language(project: DailySingleProject) -> tuple[bool, list[str
     for pat in JARGON_PATTERNS:
         if re.search(pat, text, re.I):
             issues.append(f"jargon: matched /{pat}/")
+    audience_ok, audience_issues = validate_audience_language(project)
+    issues.extend(audience_issues)
     return len(issues) == 0, issues
 
 

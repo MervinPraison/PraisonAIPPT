@@ -93,12 +93,14 @@ def pixel_similarity(frame_a: Path, frame_b: Path) -> float:
     return round(max(0.0, 1.0 - mse / 65025.0), 3)
 
 
-def reference_frame_for_asset(asset_path: Path, cache_dir: Path) -> Path | None:
-    """Build a reference JPEG for PNG or first frame of MP4."""
+def reference_frame_for_asset(asset_path: Path, cache_dir: Path, *, at_sec: float | None = None) -> Path | None:
+    """Build a reference JPEG for PNG or frame from MP4 (optional time offset)."""
     if not asset_path.is_file():
         return None
     cache_dir.mkdir(parents=True, exist_ok=True)
     key = asset_path.name.replace(".", "_")
+    if at_sec is not None:
+        key = f"{key}-t{at_sec:.2f}"
     dest = cache_dir / f"ref-{key}.jpg"
     if dest.is_file() and dest.stat().st_mtime >= asset_path.stat().st_mtime:
         return dest
@@ -107,7 +109,7 @@ def reference_frame_for_asset(asset_path: Path, cache_dir: Path) -> Path | None:
         _run_ffmpeg(["ffmpeg", "-y", "-i", str(asset_path.resolve()), "-frames:v", "1", "-q:v", "2", "-update", "1", str(dest)])
         return dest
     if suffix in (".mp4", ".mov", ".webm"):
-        mid = max(0.5, ffprobe_duration(asset_path) * 0.35)
+        mid = at_sec if at_sec is not None else max(0.5, ffprobe_duration(asset_path) * 0.35)
         export_frame(asset_path, mid, dest)
         return dest
     return None
@@ -176,12 +178,24 @@ def audit_sample(
     ref_cache: Path,
     *,
     use_vision: bool,
+    window_start: float | None = None,
+    window_end: float | None = None,
 ) -> dict[str, Any]:
     frame_path = frames_dir / f"frame-{t_sec:07.2f}.jpg"
     export_frame(mp4, t_sec, frame_path)
 
     asset_path = _resolve_asset_path(project, planned_file)
-    ref_path = reference_frame_for_asset(asset_path, ref_cache) if asset_path else None
+    ref_at: float | None = None
+    if (
+        planned_file == "canonical-scroll.mp4"
+        and asset_path
+        and window_start is not None
+        and window_end is not None
+    ):
+        win_dur = max(0.1, window_end - window_start)
+        frac = max(0.0, min(1.0, (t_sec - window_start) / win_dur))
+        ref_at = frac * ffprobe_duration(asset_path)
+    ref_path = reference_frame_for_asset(asset_path, ref_cache, at_sec=ref_at) if asset_path else None
     pixel_sim = pixel_similarity(frame_path, ref_path) if ref_path else 0.0
     threshold = _pixel_threshold(planned_file, section)
 
@@ -283,6 +297,8 @@ def run_visual_audit(
         samples.append(audit_sample(
             project, mp4, t, spoken, planned, section,
             frames_dir, ref_cache, use_vision=use_vision,
+            window_start=win.start_sec if win else None,
+            window_end=win.end_sec if win else None,
         ))
         if use_vision and i % 15 == 0:
             print(f"  audit-visual: {i}/{len(times)} frames (model={vision_model()})")
