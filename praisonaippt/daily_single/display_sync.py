@@ -239,15 +239,28 @@ def _windows_for_beat(
         stat = generated[0] if generated else None
         stat_share = 0.32 if stat else 0.0
         clip_total = max(1.0, dur * (1.0 - stat_share))
-        order = {"carousel-solar.mp4": 0, "pokemon-timelapse.mp4": 1, "carousel-fluid.mp4": 2}
-        ordered = sorted(clips, key=lambda c: order.get(Path(c["path"]).name, 99))
-        per = clip_total / max(1, len(ordered))
+        poke = next((c for c in clips if "pokemon" in c.get("filename", "")), None)
+        others = sorted(
+            [c for c in clips if c is not poke],
+            key=lambda c: {"carousel-solar.mp4": 0, "carousel-fluid.mp4": 1}.get(Path(c["path"]).name, 99),
+        )
         off = t0
-        for c in ordered:
+        if poke:
+            poke_dur = clip_total * 0.55
             wins.append(VisualWindow(
-                off, off + per, f"beat-{beat_num:02d}", "vision clip", Path(c["path"]).name,
+                off, off + poke_dur, f"beat-{beat_num:02d}", "Pokémon clip", Path(poke["path"]).name,
             ))
-            off += per
+            off += poke_dur
+            rest = clip_total - poke_dur
+        else:
+            rest = clip_total
+        if others and rest > 0:
+            per = rest / len(others)
+            for c in others:
+                wins.append(VisualWindow(
+                    off, off + per, f"beat-{beat_num:02d}", "vision clip", Path(c["path"]).name,
+                ))
+                off += per
         if stat:
             wins.append(VisualWindow(
                 off, t0 + dur, f"beat-{beat_num:02d}", "Spire stat", Path(stat["path"]).name,

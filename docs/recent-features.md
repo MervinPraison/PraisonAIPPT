@@ -1,6 +1,28 @@
 # Recent features (video, HeyGen, PiP calibration)
 
-Summary of capabilities added for **HeyGen talking-head decks**, **MP4 export**, **PiP framing**, **slide transitions**, and **visual validation**. Each item links to the full guide.
+Summary of capabilities added for **HeyGen talking-head decks**, **MP4 export**, **PiP framing**, **slide transitions**, **daily single video pipeline**, and **visual validation**. Each item links to the full guide.
+
+---
+
+## Daily single pipeline + modular Video QA
+
+YouTube-style walkthroughs from create-news handoff (`examples/videos/anthropic-claude-fable-5-mythos-5/`):
+
+| Feature | What it does |
+|---------|--------------|
+| **Hook montage** | Comma-separated overview → ≥5 hero slides (~2s each); attention uses first hero, not launch B-roll |
+| **sync-assets** | Canonical page crawl + HD YouTube (≥720p) + beat-map patch |
+| **validate-qa** | Eleven modular stages (s00–s10) with gates at pre_build, post_vo, pre_assemble, post_build |
+| **visual audit** | Sample `final.mp4` every 5s; pixel match + optional VLM generic-B-roll block |
+| **validate-sync ×3** | Idempotent caption lock, hook structure, montage, display, YouTube quality |
+
+```bash
+PROJECT=examples/videos/anthropic-claude-fable-5-mythos-5
+daily-single -p $PROJECT validate-qa --when post_build
+pytest tests/test_video_qa.py -q
+```
+
+**Docs:** [Pipeline overview](pipeline-overview.md) · [Daily single pipeline](daily-single-video.md) · [Video QA](video-qa.md) · [Daily single testing](daily-single-testing.md)
 
 ---
 

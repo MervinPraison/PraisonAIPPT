@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from praisonaippt.video_qa.config import DEFAULT_VIDEO_QA_PROTOCOL
+
 DEFAULT_PROTOCOL: dict[str, Any] = {
     "schema_version": 3,
     "name": "daily-single-pipeline",
@@ -89,6 +91,9 @@ DEFAULT_PROTOCOL: dict[str, Any] = {
     "exclude_megapost": [
         "required_assets", "segment_sync",
     ],
+    "video_qa": {
+        **DEFAULT_VIDEO_QA_PROTOCOL,
+    },
 }
 
 # Segment order for VO + assembly (extend by editing manifest segment_map later).

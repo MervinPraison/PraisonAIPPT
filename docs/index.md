@@ -45,6 +45,10 @@ description: "Create beautiful PowerPoint presentations from Bible verses with i
 | [Deck layouts](deck-layouts.md) | Twelve `deck_*` sales templates |
 | [Slide style reference](slide-style-reference.md) | Colours, `typography.*`, `layouts.*` |
 | [Deck reference (YAML or JSON)](yaml-reference.md) | Top-level keys, `pipeline`, `video_export` |
+| [Pipeline overview](pipeline-overview.md) | Deck vs daily single pipelines, quick paths |
+| [Daily single video](daily-single-video.md) | create-news walkthrough build + validation |
+| [Video QA](video-qa.md) | Modular validate-qa stages s00–s10 |
+| [Daily single testing](daily-single-testing.md) | pytest, gates, idempotency checklist |
 | [Pipeline architecture](architecture-pipeline.md) | Modular QA vs build/export, protocols |
 | [Commands](commands.md) | Full CLI reference (all subcommands) |
 | [Video + transcript workflow](workflow-video-transcript-to-deck.md) | End-to-end steps, YAML artefacts, automation plan |

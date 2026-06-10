@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "praisonaippt"
-version = "1.4.38"
+version = "1.4.39"
 description = "PraisonAI PPT - Create beautiful PowerPoint presentations from Bible verses in JSON or YAML format"
 readme = "README.md"
 requires-python = ">=3.7"
@@ -99,6 +99,7 @@ Homepage = "https://github.com/MervinPraison/PraisonAIPPT"
 praisonaippt = "praisonaippt.cli:main"
 segment-video = "praisonaippt.segment_video.cli:main"
 daily-single = "praisonaippt.daily_single.cli:main"
+video-qa = "praisonaippt.video_qa.__main__:main"
 
 [tool.setuptools]
 packages = [
@@ -106,6 +107,7 @@ packages = [
     "praisonaippt.workers",
     "praisonaippt.segment_video",
     "praisonaippt.daily_single",
+    "praisonaippt.video_qa",
     "praisonaippt.segment_video.stages",
     "praisonaippt.segment_video.studio",
     "examples",

@@ -55,19 +55,18 @@ def _transcribe_with_module(mp3: Path, ts: Path) -> None:
 def _ensure_transcript(mp3: Path, ts: Path, *, force: bool = False) -> None:
     if ts.is_file() and not force and ts.stat().st_mtime >= mp3.stat().st_mtime:
         return
-    try:
-        _transcribe_with_module(mp3, ts)
-        return
-    except ImportError:
-        pass
     env = os.environ.copy()
     env.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-    subprocess.run(
-        ["praisonaippt", "transcribe", "-i", str(mp3), "-o", str(ts)],
-        check=True,
-        capture_output=True,
-        env=env,
-    )
+    try:
+        subprocess.run(
+            ["praisonaippt", "transcribe", "-i", str(mp3), "-o", str(ts)],
+            check=True,
+            capture_output=True,
+            env=env,
+            timeout=600,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError, subprocess.TimeoutExpired):
+        pass
 
 
 def _proportional_cues(sentences: list[str], total_dur: float) -> list[dict]:
@@ -124,6 +123,7 @@ def build_segment_captions(seg_dir: Path) -> Path:
     if not script.is_file() or not mp3.is_file():
         raise FileNotFoundError(f"Need script.md + narration.mp3 in {seg_dir}")
     ts = seg_dir / "timestamps.json"
+    _ensure_transcript(mp3, ts)
     sentences = split_caption_cues(script.read_text(encoding="utf-8"))
     if not sentences:
         raise RuntimeError(f"No caption cues in {script}")

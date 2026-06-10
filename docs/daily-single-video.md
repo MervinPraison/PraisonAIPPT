@@ -34,7 +34,9 @@ python -m praisonaippt.daily_single --project $PROJECT <command>
 
 ## Standard pipeline order
 
-Run in this order for every rebuild (repeat after script or handoff changes):
+Run in this order for every rebuild (repeat after script or handoff changes).
+
+### Build-only (legacy)
 
 ```bash
 PROJECT=examples/videos/anthropic-claude-fable-5-mythos-5
@@ -48,6 +50,29 @@ python -m praisonaippt.daily_single --project $PROJECT audit-visual --interval 5
 python -m praisonaippt.daily_single --project $PROJECT validate-sync --runs 3
 python -m praisonaippt.daily_single --project $PROJECT validate-all
 ```
+
+### QA-gated pipeline (recommended)
+
+Insert [modular QA gates](video-qa.md) between phases so failures surface early:
+
+```bash
+PROJECT=examples/videos/anthropic-claude-fable-5-mythos-5
+
+daily-single -p $PROJECT write-scripts                    # if segments missing
+daily-single -p $PROJECT validate-qa --when pre_build
+daily-single -p $PROJECT sync-assets
+daily-single -p $PROJECT synthesise-vo
+daily-single -p $PROJECT validate-qa --when post_vo
+daily-single -p $PROJECT bookend-media 00-hook 99-outro
+daily-single -p $PROJECT validate-qa --when pre_assemble
+daily-single -p $PROJECT assemble-beats
+daily-single -p $PROJECT build-captions
+daily-single -p $PROJECT validate-qa --when post_build    # includes visual audit + sync×3
+daily-single -p $PROJECT validate-all                     # optional confirm
+```
+
+Full testing breakdown: [Daily single testing](daily-single-testing.md).  
+Step-by-step agent skill: `.cursor/skills/daily-single-video-pipeline/SKILL.md`.
 
 | Flag | When |
 |------|------|
@@ -77,6 +102,7 @@ python -m praisonaippt.daily_single --project $PROJECT validate-all
 | `validate-visual-audit` | Gate on `visual_audit_report.json` |
 | `validate-sync` | Full text/visual suite (default 3 idempotent runs) |
 | `validate-all` | Tools, output, media, sync, display, visual audit |
+| `validate-qa` | Modular QA stages → `merge/qa/` (see [Video QA](video-qa.md)) |
 | `emit-protocol` | Write default `protocol.json` template |
 
 Console alias: `daily-single` (see `pyproject.toml`).
@@ -102,6 +128,9 @@ examples/videos/<slug>/
     visual_audit_report.json
     asset_sync_report.json
     visual_audit_frames/
+    qa/                        # modular validate-qa reports
+      summary.json
+      s*_report.json
   scripts/config/protocol.json
 ```
 
@@ -223,6 +252,24 @@ VO duration drives clip lengths in `assemble.py`:
 
 ## Validation layers
 
+See **[Daily single testing](daily-single-testing.md)** for a plain-language guide to every test type, pytest commands, and the recommended checklist.
+
+### Modular QA (`validate-qa`)
+
+Eleven stages (s00–s10) run at pipeline phases. Reports: `merge/qa/summary.json`.  
+Full reference: [Video QA](video-qa.md).
+
+| Phase | Command | Validates |
+|-------|---------|-----------|
+| pre_build | `validate-qa --when pre_build` | Knowledge, coverage, assets, optional source VLM |
+| post_vo | `validate-qa --when post_vo` | Narration ready per segment |
+| pre_assemble | `validate-qa --when pre_assemble` | Hook/outro HeyGen gate |
+| post_build | `validate-qa --when post_build` | Captions, display sync, AV sync, visual audit |
+
+### Legacy gates (still used at publish)
+
+These run inside **s10-final-composite** but can be invoked standalone:
+
 ### 1. `validate-sync --runs 3`
 
 Idempotent suite; fails if three consecutive reports differ.
@@ -279,6 +326,7 @@ Output: `validation_report.json` at project root.
 | `sync_validation.py` | Combined validation suite |
 | `youtube_quality.py` | YouTube style gates |
 | `vo.py` / `tts.py` / `bookends.py` | ElevenLabs + HeyGen |
+| `../video_qa/` | Modular QA stages (validate-qa) |
 
 ---
 
@@ -314,16 +362,25 @@ Same `script.md` contract. Phase 1.5 `hook_montage.json` feeds `sync-media`. See
 
 ## Tests
 
+**Full guide:** [Daily single testing](daily-single-testing.md)
+
 ```bash
-pytest tests/test_daily_single_display_sync_unit.py \
+# Unit tests (after code changes)
+pytest tests/test_video_qa.py \
        tests/test_daily_single_sync_validation.py \
+       tests/test_daily_single_display_sync_unit.py \
        tests/test_daily_single_hook_montage.py \
        tests/test_daily_single_media_sync.py \
        tests/test_daily_single_visual_audit.py \
-       tests/test_daily_single_youtube_quality.py -q
+       tests/test_daily_single_youtube_quality.py \
+       tests/test_daily_single_captions.py -q
+
+# Project gates (after rebuild)
+daily-single -p $PROJECT validate-qa --when post_build
+daily-single -p $PROJECT validate-sync --runs 3
 ```
 
-Run **×3** after pipeline changes for idempotency confidence.
+Run **×3 sync** after pipeline changes for idempotency confidence.
 
 ---
 
@@ -332,7 +389,7 @@ Run **×3** after pipeline changes for idempotency confidence.
 | Issue | Mitigation |
 |-------|------------|
 | HeyGen `MOVIO_PAYMENT_INSUFFICIENT_CREDIT` | Reuse existing `heygen.mp4`; lip-sync may be stale vs new hook VO |
-| Whisper OMP segfault | Captions fall back to proportional timing |
+| Whisper OMP segfault | Captions use subprocess transcribe only; proportional timing fallback (no in-process Whisper) |
 | Borderline cues (0.35–0.45 alignment) | Pass gate but worth human spot-check |
 | Hash-named crawl images in handoff | Ignored by inventory validator; use named core images |
 
@@ -353,6 +410,9 @@ Bootstrap: `scripts/bootstrap-daily-single.sh`
 
 ## Related documentation
 
+- [Pipeline overview](pipeline-overview.md)
+- [Video QA (modular stages)](video-qa.md)
+- [Daily single testing](daily-single-testing.md)
 - [Commands reference — daily_single section](commands.md#daily-single-video-pipeline)
 - [Video examples](../examples/videos/README.md)
 - [Fable pilot REUSE](../examples/videos/anthropic-claude-fable-5-mythos-5/REUSE.md)

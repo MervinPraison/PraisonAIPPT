@@ -63,7 +63,12 @@ nav:
       - Theme templates: templates.md
   - Video & media:
       - Video + transcript workflow: workflow-video-transcript-to-deck.md
-      - Pipeline architecture: architecture-pipeline.md
+      - Pipelines:
+          - Overview: pipeline-overview.md
+          - Pipeline architecture (decks): architecture-pipeline.md
+          - Daily single video: daily-single-video.md
+          - Video QA (modular stages): video-qa.md
+          - Daily single testing: daily-single-testing.md
       - Video export: video-export.md
       - Slide transitions: slide-transitions.md
       - HeyGen article examples: heygen-examples.md

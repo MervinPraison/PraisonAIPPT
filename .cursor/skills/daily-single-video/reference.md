@@ -120,7 +120,7 @@ Samples `merge/final.mp4` every **5 seconds** (plus visual-window midpoints):
 1. Extract JPEG → `merge/visual_audit_frames/frame-*.jpg`
 2. Compare to planned asset via **pixel similarity** (numpy grayscale MSE)
 3. Score spoken cue vs asset metadata (`VISUAL_META` / beat-map)
-4. Optional vision LLM describe when `PRAISONAIPPT_VISION_PROVIDER=openai|anthropic`
+4. Optional vision LLM (`gpt-4o-mini` via OpenAI when `OPENAI_API_KEY` set; override with `PRAISONAIPPT_VISION_MODEL`)
 
 ```bash
 python -m praisonaippt.daily_single --project $PROJECT audit-visual --interval 5

@@ -95,6 +95,8 @@ PROJECT=examples/videos/<slug>
 
 **Standard pipeline order:** `sync-assets` → `synthesise-vo` → `bookend-media` → `assemble-beats` → `build-captions` → `audit-visual` → `validate-sync --runs 3` → `validate-all`
 
+**Step-by-step with modular QA gates:** use `.cursor/skills/daily-single-video-pipeline/SKILL.md` (`validate-qa --when pre_build|pre_assemble|post_vo|post_build`).
+
 **Hook montage artefact:** `segments/00-hook/hook_montage.json` (phrase → hero plan; written on assemble).  
 **Visual audit artefact:** `merge/visual_audit_report.json` + `merge/visual_audit_frames/` (JPEG every 5s + cue midpoints).
 

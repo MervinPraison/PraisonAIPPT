@@ -674,13 +674,28 @@ python examples/sync_heygen_variants.py
 ## Daily single video pipeline
 
 Module: `python -m praisonaippt.daily_single` (alias: `daily-single`).  
-Full guide: [Daily single video pipeline](daily-single-video.md)
+Full guide: [Daily single video pipeline](daily-single-video.md) · Testing: [Daily single testing](daily-single-testing.md) · QA stages: [Video QA](video-qa.md)
 
 ```bash
 conda activate test
 PROJECT=examples/videos/anthropic-claude-fable-5-mythos-5
 
-# Standard order
+# QA-gated order (recommended)
+daily-single -p $PROJECT validate-qa --when pre_build
+daily-single -p $PROJECT sync-assets
+daily-single -p $PROJECT synthesise-vo
+daily-single -p $PROJECT validate-qa --when post_vo
+daily-single -p $PROJECT bookend-media 00-hook 99-outro
+daily-single -p $PROJECT validate-qa --when pre_assemble
+daily-single -p $PROJECT assemble-beats
+daily-single -p $PROJECT build-captions
+daily-single -p $PROJECT validate-qa --when post_build
+daily-single -p $PROJECT validate-all
+```
+
+Legacy build-only order (same steps without intermediate gates):
+
+```bash
 python -m praisonaippt.daily_single --project $PROJECT sync-assets
 python -m praisonaippt.daily_single --project $PROJECT synthesise-vo [--skip-existing] [--segments 00-hook]
 python -m praisonaippt.daily_single --project $PROJECT bookend-media 00-hook 99-outro [--skip-existing]
@@ -697,13 +712,16 @@ python -m praisonaippt.daily_single --project $PROJECT validate-all
 | `sync-assets` | Crawl canonical news page + HD YouTube (≥720p); patch beat-map |
 | `synthesise-vo` | ElevenLabs TTS; strips `Hook:` label |
 | `bookend-media` | HeyGen hook/outro |
-| `assemble-beats` | ffmpeg beat assembly + hook montage |
-| `build-captions` | SRT from locked script (Whisper timing only) |
+| `assemble-beats` | ffmpeg beat assembly + hook montage; writes `timeline.json` |
+| `build-captions` | SRT from locked script (Whisper timing or proportional fallback) |
+| `validate-qa` | Modular QA to `merge/qa/` — use `--when pre_build`, `post_vo`, `pre_assemble`, or `post_build` |
 | `audit-visual` | Pixel audit every N seconds → `visual_audit_report.json` |
 | `validate-sync` | Script lock + hook montage + display + YouTube quality (×3 runs) |
 | `validate-all` | Full publish gate |
 
-Agent skill: `.cursor/skills/daily-single-video/SKILL.md`
+Modular QA module: `python -m praisonaippt.video_qa` (alias: `video-qa`).
+
+Agent skills: `.cursor/skills/daily-single-video/SKILL.md`, `.cursor/skills/daily-single-video-pipeline/SKILL.md`
 
 ## 📚 Related Documentation
 
@@ -716,6 +734,8 @@ Agent skill: `.cursor/skills/daily-single-video/SKILL.md`
 - [Video export](video-export.md)
 - [Video + transcript workflow](workflow-video-transcript-to-deck.md)
 - [Daily single video pipeline](daily-single-video.md)
+- [Video QA](video-qa.md)
+- [Daily single testing](daily-single-testing.md)
 - [HeyGen article examples](heygen-examples.md)
 - [Avatar PiP calibration](avatar-calibration.md)
 - [Slide JPEG export](slide-images.md)

@@ -63,6 +63,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     sync_assets_p.add_argument("--skip-hd", action="store_true", help="Do not upgrade low-resolution videos")
     sync_assets_p.add_argument("--no-crawl", action="store_true", help="Skip canonical image crawl")
+    qa_p = sub.add_parser("validate-qa", help="Run modular video QA stages (merge/qa/)")
+    qa_p.add_argument("stage", nargs="?", help="Single stage id (e.g. s04-knowledge)")
+    qa_p.add_argument("--when", choices=["pre_build", "pre_assemble", "post_vo", "post_build", "all"], default="all")
+    qa_p.add_argument("--phase", help="Sub-phase for s01-assets or s06-coverage")
     sub.add_parser("emit-protocol", help="Write default protocol.json template")
 
     args = parser.parse_args(argv)
@@ -165,6 +169,24 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         print("FAIL:", "; ".join(report.get("issues", [])))
         return 1
+    if args.cmd == "validate-qa":
+        from praisonaippt.video_qa.runner import run_stage, run_suite
+
+        load_env()
+        if args.stage:
+            report = run_stage(project, args.stage, phase=getattr(args, "phase", None))
+            print(f"{'PASS' if report.ok else 'FAIL'}: {report.id}")
+            for check in report.checks:
+                if not check.ok:
+                    print(f"  [{check.severity}] {check.message}")
+            return 0 if report.ok or report.skipped else 1
+        suite = run_suite(project, when=args.when)
+        s = suite.summary or {}
+        print(
+            f"{'PASS' if suite.ok else 'FAIL'}: "
+            f"{s.get('stages_passed', 0)}/{s.get('stages_run', 0)} stages"
+        )
+        return 0 if suite.ok else 1
     if args.cmd == "emit-protocol":
         out = project.root / "scripts" / "config" / "protocol.json"
         out.parent.mkdir(parents=True, exist_ok=True)

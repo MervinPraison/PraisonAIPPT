@@ -304,18 +304,31 @@ def _build_beat_video(beat: int, spec: dict, dur: float, out_dir: Path, assets: 
         stat = generated[0] if generated else None
         stat_share = 0.32 if stat else 0.0
         clip_total = max(1.0, dur * (1.0 - stat_share))
-        order = {"carousel-solar.mp4": 0, "pokemon-timelapse.mp4": 1, "carousel-fluid.mp4": 2}
-        ordered = sorted(clips, key=lambda c: order.get(c.get("filename", ""), 99))
-        per = clip_total / max(1, len(ordered))
+        poke = next((c for c in clips if "pokemon" in c.get("filename", "")), None)
+        others = sorted(
+            [c for c in clips if c is not poke],
+            key=lambda c: {"carousel-solar.mp4": 0, "carousel-fluid.mp4": 1}.get(c.get("filename", ""), 99),
+        )
         parts: list[Path] = []
-        for i, c in enumerate(ordered):
-            src = Path(c["path"])
-            start = float(c.get("in_sec") or 0)
-            end = float(c.get("out_sec") or (start + per))
-            part = parts_dir / f"clip-{i}.mp4"
-            _trim_clip(src, part, start, min(end, start + per))
-            _extend_or_trim(part, part, per)
+        if poke:
+            poke_dur = clip_total * 0.55
+            part = parts_dir / "poke.mp4"
+            start = float(poke.get("in_sec") or 0)
+            _trim_clip(Path(poke["path"]), part, start, start + poke_dur)
+            _extend_or_trim(part, part, poke_dur)
             parts.append(part)
+            rest = clip_total - poke_dur
+        else:
+            rest = clip_total
+        if others and rest > 0:
+            per = rest / len(others)
+            for i, c in enumerate(others):
+                src = Path(c["path"])
+                start = float(c.get("in_sec") or 0)
+                part = parts_dir / f"clip-{i}.mp4"
+                _trim_clip(src, part, start, start + per)
+                _extend_or_trim(part, part, per)
+                parts.append(part)
         if stat:
             stat_v = parts_dir / "stat.mp4"
             _video_from_image(Path(stat["path"]), stat_v, dur - clip_total)

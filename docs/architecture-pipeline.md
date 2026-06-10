@@ -102,3 +102,6 @@ python examples/sync_heygen_variants.py   # same operation
 - [Video + transcript workflow](workflow-video-transcript-to-deck.md) — HeyGen 50590 end-to-end
 - [Deck reference](yaml-reference.md) — schema and `pipeline` keys
 - [Slide transitions](slide-transitions.md) — YAML matrix, showcase deck, FFmpeg paths
+- [Pipeline overview](pipeline-overview.md) — deck vs daily single pipelines
+- [Daily single video](daily-single-video.md) — create-news walkthrough pipeline
+- [Video QA](video-qa.md) — modular `validate-qa` stages
