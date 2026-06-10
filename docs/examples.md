@@ -362,10 +362,20 @@ python examples/build_showcase_examples.py
 
 Builds avatar layout gallery, deck template gallery, and all five HeyGen variant PPTX/MP4 files. See [Layouts overview](layouts-overview.md).
 
+## Video walkthrough examples
+
+| Project | Pipeline | Documentation |
+|---------|----------|---------------|
+| `examples/videos/june-2026-ai-roundup/` | Megapost HeyGen compositor | `.cursor/skills/segment-video-roundup/SKILL.md` |
+| `examples/videos/anthropic-claude-fable-5-mythos-5/` | Daily single (ffmpeg + hook montage) | [Daily single video pipeline](daily-single-video.md) |
+
+See also [examples/videos/README.md](../examples/videos/README.md).
+
 ## 🎯 Next Steps
 
 - [Installation Guide](installation.md)
 - [Command Reference](commands.md)
+- [Daily single video pipeline](daily-single-video.md)
 - [Video export](video-export.md)
 - [HeyGen article examples](heygen-examples.md)
 - [Python API Documentation](python-api.md)

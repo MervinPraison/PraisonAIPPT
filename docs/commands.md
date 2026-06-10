@@ -38,8 +38,9 @@ PraisonAI PPT is invoked as **`praisonaippt`**. Deck input may be **`.yaml`**, *
 | `setup-oauth` | Google Drive OAuth setup |
 | `setup-credentials` | Service-account credentials setup |
 | `secure-credentials` | Restrict credential file permissions |
+| `daily-single` | Daily single-topic video pipeline (see below) |
 
-**Architecture:** [Pipeline architecture](architecture-pipeline.md) · **HeyGen workflow:** [Video + transcript workflow](workflow-video-transcript-to-deck.md)
+**Architecture:** [Pipeline architecture](architecture-pipeline.md) · **HeyGen workflow:** [Video + transcript workflow](workflow-video-transcript-to-deck.md) · **Daily single video:** [Daily single pipeline](daily-single-video.md)
 
 ## JSON and YAML decks
 
@@ -670,6 +671,40 @@ python examples/build_showcase_examples.py --heygen-only
 python examples/sync_heygen_variants.py
 ```
 
+## Daily single video pipeline
+
+Module: `python -m praisonaippt.daily_single` (alias: `daily-single`).  
+Full guide: [Daily single video pipeline](daily-single-video.md)
+
+```bash
+conda activate test
+PROJECT=examples/videos/anthropic-claude-fable-5-mythos-5
+
+# Standard order
+python -m praisonaippt.daily_single --project $PROJECT sync-assets
+python -m praisonaippt.daily_single --project $PROJECT synthesise-vo [--skip-existing] [--segments 00-hook]
+python -m praisonaippt.daily_single --project $PROJECT bookend-media 00-hook 99-outro [--skip-existing]
+python -m praisonaippt.daily_single --project $PROJECT assemble-beats
+python -m praisonaippt.daily_single --project $PROJECT build-captions
+python -m praisonaippt.daily_single --project $PROJECT audit-visual [--interval 5] [--force]
+python -m praisonaippt.daily_single --project $PROJECT validate-display
+python -m praisonaippt.daily_single --project $PROJECT validate-sync --runs 3
+python -m praisonaippt.daily_single --project $PROJECT validate-all
+```
+
+| Command | Purpose |
+|---------|---------|
+| `sync-assets` | Crawl canonical news page + HD YouTube (≥720p); patch beat-map |
+| `synthesise-vo` | ElevenLabs TTS; strips `Hook:` label |
+| `bookend-media` | HeyGen hook/outro |
+| `assemble-beats` | ffmpeg beat assembly + hook montage |
+| `build-captions` | SRT from locked script (Whisper timing only) |
+| `audit-visual` | Pixel audit every N seconds → `visual_audit_report.json` |
+| `validate-sync` | Script lock + hook montage + display + YouTube quality (×3 runs) |
+| `validate-all` | Full publish gate |
+
+Agent skill: `.cursor/skills/daily-single-video/SKILL.md`
+
 ## 📚 Related Documentation
 
 - [Installation Guide](installation.md)
@@ -680,6 +715,7 @@ python examples/sync_heygen_variants.py
 - [Pipeline architecture](architecture-pipeline.md)
 - [Video export](video-export.md)
 - [Video + transcript workflow](workflow-video-transcript-to-deck.md)
+- [Daily single video pipeline](daily-single-video.md)
 - [HeyGen article examples](heygen-examples.md)
 - [Avatar PiP calibration](avatar-calibration.md)
 - [Slide JPEG export](slide-images.md)

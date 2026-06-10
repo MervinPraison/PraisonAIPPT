@@ -8,6 +8,7 @@ description: Builds per-segment HeyGen + ElevenLabs roundup videos from research
 Per-segment production (hook + N topics + outro) → compositor MP4 per segment → ffmpeg concat → **Short video walkthrough** on mer.vin.
 
 **Reference:** `examples/videos/june-2026-ai-roundup/` · layout index: `examples/videos/README.md`  
+**Single-topic (Phase 1 B-roll):** `.cursor/skills/daily-single-video/SKILL.md` · [docs/daily-single-video.md](../../docs/daily-single-video.md) — converges here in Phase 2 (HeyGen per beat)  
 **Deck template:** `examples/heygen-50590-video-audio-heygen-images.yaml`  
 **Publish:** `.cursor/skills/mer-vin-article-video-upload/SKILL.md`  
 **YAML QA:** `.cursor/skills/ppt-yaml-deck-workflow/SKILL.md`  
@@ -90,9 +91,9 @@ Or copy `examples/videos/june-2026-ai-roundup/` → `examples/videos/<slug>-roun
 
 | Segment | Target |
 |---------|--------|
-| hook | ~55–65 words, roll-call after "roundup:" |
+| hook | ~55–70 words: attention → overview roll-call → **Let's get started** |
 | each topic | ~80–95 words, 3 sentences when multi-cue |
-| outro | ~40–50 words |
+| outro | June CTA (~25 words): like/share/subscribe — no mer.vin spoken |
 
 ```bash
 python3 write_scripts.py
@@ -158,6 +159,7 @@ python3 pipeline.py run merge --force
 - Montage starts after **"roundup:"** (~2.44 s); compositor needs a **lead-in verse** or MP4 truncates ~2.7 s vs HeyGen
 - `build_segment_yaml.py` prepends intro slide when first cue `audio_start_sec > 0`
 - When `len(verses) != len(cue_timings)`: SRT from verses (`write_verses_srt`), not cue_timings alone
+- Caption rules: `.cursor/skills/video-script-captions/SKILL.md`
 - Rebuild hook: `align-cues` → `yaml` → `build --force 00-hook` → `normalize-audio` → `merge`
 
 ### Multi-cue topic segments

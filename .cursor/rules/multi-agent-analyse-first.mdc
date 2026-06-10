@@ -1,0 +1,59 @@
+---
+description: Use multi-agents to understand and analyse the codebase before implementing changes.
+alwaysApply: true
+---
+
+# Analyse first with multi-agents
+
+Before writing code, running pipelines, or changing files, **understand the system first**. Do not guess from memory or jump straight to edits.
+
+## Required workflow
+
+1. **Clarify the goal** — What does success look like? What must not break?
+2. **Launch parallel explore agents** — Use the Task tool with `subagent_type="explore"` (or `generalPurpose` when investigation spans tools/commands). Run **multiple agents in one message** when areas are independent.
+3. **Synthesise findings** — Gap analysis, existing patterns, blockers, and the minimal change path.
+4. **Then act** — Implement only after the analysis is written down (brief bullet summary is enough).
+
+## When multi-agents are mandatory
+
+- New features, refactors, or moving logic between packages (e.g. `examples/` → `praisonaippt/`)
+- Video/audio/script pipelines, skills, or protocol-driven workflows
+- Tasks touching more than one directory or subsystem
+- User asks to "find gaps", compare approaches, or audit quality
+
+## When a single agent is enough
+
+- One known file, one-line fix, or explicit file path given
+- Pure Q&A with no code changes
+- User says "only change X" and context is already complete
+
+## Agent split (examples)
+
+| Agent | Focus |
+|-------|--------|
+| Explore A | Where similar code already lives; reuse targets |
+| Explore B | Current project layout, manifests, configs, skills |
+| Explore C | Gaps vs reference implementation (e.g. June roundup vs daily_single) |
+
+## Anti-patterns
+
+```text
+❌ Read one file → start editing → discover missed dependencies mid-task
+❌ Duplicate logic under examples/ when package code exists
+❌ Regenerate expensive media (HeyGen, full TTS) without checking skip-existing
+```
+
+```text
+✅ Parallel explore → gap summary → minimal package change → thin example wrappers
+✅ Check manifest, protocol, and skills before pipeline runs
+```
+
+## Output before implementation
+
+State briefly:
+
+- What exists today
+- What is missing or wrong
+- What you will change (and what you will **not** change)
+
+Only skip this step when the task is trivial and fully scoped.
