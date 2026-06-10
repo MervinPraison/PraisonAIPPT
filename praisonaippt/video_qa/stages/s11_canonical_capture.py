@@ -18,6 +18,7 @@ def run_s11_canonical_capture(
     *,
     required: bool = True,
     when: str = "pre_assemble",
+    ctx=None,
 ) -> StageReport:
     checks: list[CheckResult] = []
     scroll = scroll_video_path(project)

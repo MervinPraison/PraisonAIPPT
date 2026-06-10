@@ -110,12 +110,14 @@ def build_scroll_video(src: Path, dest: Path, *, duration: float) -> None:
     scaled.unlink(missing_ok=True)
 
 
-def _capture_page_shot(page_url: str, dest: Path, *, settle_ms: int, max_attempts: int = 3) -> None:
+def _capture_page_shot(page_url: str, dest: Path, *, settle_ms: int, max_attempts: int = 3) -> dict | None:
     from playwright.sync_api import sync_playwright
 
+    from praisonaippt.daily_single.content_framing import detect_dom_content_bbox
     from praisonaippt.daily_single.page_capture_quality import validate_live_page
 
     last_issues: list[str] = []
+    dom_bbox_dict: dict | None = None
     ua = (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
         "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
@@ -150,12 +152,16 @@ def _capture_page_shot(page_url: str, dest: Path, *, settle_ms: int, max_attempt
             if tall > H:
                 page.set_viewport_size({"width": W, "height": tall})
                 page.wait_for_timeout(400)
+            dom = detect_dom_content_bbox(page)
+            if dom is not None:
+                dom_bbox_dict = dom.to_dict()
             page.screenshot(path=str(dest), full_page=False)
             page.close()
             break
         browser.close()
     if not dest.is_file():
         raise RuntimeError(f"Failed to capture screenshot: {'; '.join(last_issues) or 'unknown'}")
+    return dom_bbox_dict
 
 
 def record_canonical_scroll(
@@ -181,7 +187,7 @@ def record_canonical_scroll(
     tmp_dir.mkdir(parents=True)
 
     try:
-        _capture_page_shot(page_url, tmp_dir / "page.png", settle_ms=settle_ms)
+        dom_bbox_dict = _capture_page_shot(page_url, tmp_dir / "page.png", settle_ms=settle_ms)
     except ImportError as exc:
         raise RuntimeError(
             "Playwright required: pip install playwright && playwright install chromium"
@@ -191,7 +197,19 @@ def record_canonical_scroll(
     if not shot.is_file():
         raise RuntimeError("Failed to capture canonical page screenshot")
 
+    from praisonaippt.daily_single.content_framing import (
+        ContentFrame,
+        MAX_SCROLL_PX_PER_SEC,
+        TARGET_SCROLL_PX_PER_SEC,
+        measure_framing,
+        reframe_page_shot,
+        save_framing_diagram,
+        validate_framing,
+        validate_scroll_speed,
+        write_framing_report,
+    )
     from praisonaippt.daily_single.page_capture_quality import (
+        capture_qa_dir,
         persist_capture_artefacts,
         screenshot_looks_like_error_page,
     )
@@ -205,31 +223,57 @@ def record_canonical_scroll(
             "Screenshot looks like a browser error page: " + "; ".join(shot_issues)
         )
 
+    dom_frame = None
+    if dom_bbox_dict:
+        dom_frame = ContentFrame(**{k: dom_bbox_dict[k] for k in ("x0", "y0", "x1", "y1")}, source="dom", confidence=1.0)
+    encode_src, content_frame, _raw_metrics = reframe_page_shot(
+        shot, dom_bbox=dom_frame, dest=tmp_dir / "page-reframed.png",
+    )
+    framing_metrics = measure_framing(encode_src)
+    qa = capture_qa_dir(project)
+    save_framing_diagram(shot, framing_metrics, qa / "framing-diagram.png")
+    post_framing_ok, framing_issues = validate_framing(framing_metrics)
+    write_framing_report(qa, framing_metrics, ok=post_framing_ok, issues=framing_issues)
+
     use_scroll = mode == "scroll"
     if mode == "auto":
-        probe = tmp_dir / "probe.png"
-        _run_ffmpeg([
-            "ffmpeg", "-y", "-i", str(shot),
-            "-vf", f"scale={W}:-1", "-frames:v", "1", str(probe),
-        ])
-        use_scroll = _image_height(probe) >= H + MIN_SCROLL_PX
-        probe.unlink(missing_ok=True)
+        use_scroll = _image_height(encode_src) >= H + MIN_SCROLL_PX
+
+    travel = max(0, _image_height(encode_src) - H)
+    max_travel = int(TARGET_SCROLL_PX_PER_SEC * duration * 0.6)
+    if use_scroll and travel > max_travel:
+        trimmed = tmp_dir / "page-trimmed.png"
+        from praisonaippt.daily_single.content_framing import trim_for_hook_scroll
+        trim_for_hook_scroll(encode_src, trimmed, max_travel_px=max_travel)
+        encode_src = trimmed
+        travel = max_travel
+    encode_duration = duration
+    speed_ok, speed_issues = validate_scroll_speed(travel, encode_duration)
 
     if use_scroll:
-        build_scroll_video(shot, dest, duration=duration)
+        build_scroll_video(encode_src, dest, duration=encode_duration)
         motion = "scroll"
     else:
-        build_zoom_video(shot, dest, duration=duration)
+        build_zoom_video(encode_src, dest, duration=encode_duration)
         motion = "zoom"
 
     if not video_has_motion(dest):
-        build_zoom_video(shot, dest, duration=duration)
+        build_zoom_video(encode_src, dest, duration=encode_duration)
         motion = "zoom"
         if not video_has_motion(dest):
             raise RuntimeError("Hook attention clip has no visible motion — check canonical URL")
 
     persist_capture_artefacts(
-        project, screenshot=shot, page_url=page_url, ok=True, issues=[], motion_mode=motion,
+        project,
+        screenshot=shot,
+        page_url=page_url,
+        ok=post_framing_ok and speed_ok,
+        issues=framing_issues + speed_issues,
+        motion_mode=motion,
+        framing=framing_metrics.to_dict(),
+        scroll_travel_px=travel,
+        scroll_duration_sec=round(encode_duration, 2),
+        scroll_speed_px_per_sec=round(travel / encode_duration, 1) if encode_duration > 0 and travel > 0 else 0,
     )
     shutil.rmtree(tmp_dir, ignore_errors=True)
     print(f"Wrote {dest} ({ffprobe_duration(dest):.1f}s, {motion}) from {page_url}")

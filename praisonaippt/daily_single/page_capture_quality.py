@@ -93,6 +93,10 @@ def persist_capture_artefacts(
     ok: bool,
     issues: list[str],
     motion_mode: str = "",
+    framing: dict[str, Any] | None = None,
+    scroll_travel_px: int = 0,
+    scroll_duration_sec: float = 0.0,
+    scroll_speed_px_per_sec: float = 0.0,
 ) -> Path:
     qa = capture_qa_dir(project)
     qa.mkdir(parents=True, exist_ok=True)
@@ -105,6 +109,10 @@ def persist_capture_artefacts(
         "screenshot": str(dest_shot.relative_to(project.root)),
         "motion_mode": motion_mode,
         "issues": issues,
+        "framing": framing,
+        "scroll_travel_px": scroll_travel_px,
+        "scroll_duration_sec": scroll_duration_sec,
+        "scroll_speed_px_per_sec": scroll_speed_px_per_sec,
     }
     out = capture_report_path(project)
     out.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -112,7 +120,14 @@ def persist_capture_artefacts(
 
 
 def validate_scroll_asset(project: DailySingleProject, scroll_path: Path) -> tuple[bool, dict[str, Any]]:
-    """Post-encode gate: scroll clip exists, moves, and first frame is not an error page."""
+    """Post-encode gate: scroll clip exists, moves, framing OK, and first frame is not an error page."""
+    from praisonaippt.daily_single.content_framing import (
+        MAX_SCROLL_PX_PER_SEC,
+        measure_framing,
+        validate_viewport_gutters,
+        validate_scroll_speed,
+    )
+
     issues: list[str] = []
     if not scroll_path.is_file():
         return False, {"issues": [f"missing {scroll_path}"]}
@@ -125,11 +140,23 @@ def validate_scroll_asset(project: DailySingleProject, scroll_path: Path) -> tup
     export_frame(scroll_path, 0.12, frame)
     if frame_looks_like_browser_error(frame):
         issues.append("scroll clip frame shows browser error page")
+    frame_metrics = measure_framing(frame)
+    framing_ok, framing_issues = validate_viewport_gutters(frame)
+    if not framing_ok:
+        issues.extend(framing_issues)
     report_path = capture_report_path(project)
     if report_path.is_file():
         cap = json.loads(report_path.read_text(encoding="utf-8"))
         if not cap.get("ok"):
             issues.append("capture_report.json marked failed capture")
+        travel = int(cap.get("scroll_travel_px") or 0)
+        dur = float(cap.get("scroll_duration_sec") or dur)
+        speed_ok, speed_issues = validate_scroll_speed(travel, dur)
+        if not speed_ok:
+            issues.extend(speed_issues)
+        speed = float(cap.get("scroll_speed_px_per_sec") or 0)
+        if speed > MAX_SCROLL_PX_PER_SEC:
+            issues.append(f"scroll speed {speed:.0f}px/s exceeds max {MAX_SCROLL_PX_PER_SEC:.0f}")
     elif saved_screenshot_path(project).is_file():
         if frame_looks_like_browser_error(saved_screenshot_path(project)):
             issues.append("saved page.png looks like error page")
@@ -138,4 +165,9 @@ def validate_scroll_asset(project: DailySingleProject, scroll_path: Path) -> tup
         str(topic.get(k, "")) for k in ("title", "slug", "canonical_url")
     ).lower()
     expect = tuple(w for w in ("anthropic", "claude", "fable") if w in title_blob) or MIN_BODY_KEYWORDS
-    return len(issues) == 0, {"issues": issues, "duration_sec": round(dur, 2), "expected_keywords": expect}
+    return len(issues) == 0, {
+        "issues": issues,
+        "duration_sec": round(dur, 2),
+        "expected_keywords": expect,
+        "framing": frame_metrics.to_dict(),
+    }

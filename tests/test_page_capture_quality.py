@@ -62,6 +62,34 @@ def test_validate_live_page_accepts_news_body():
     assert ok, issues
 
 
+def test_validate_scroll_asset_checks_framing(tmp_path: Path):
+    from praisonaippt.daily_single.page_capture_quality import validate_scroll_asset
+
+    project_root = tmp_path / "proj"
+    scroll = project_root / "assets" / "videos" / "canonical-scroll.mp4"
+    scroll.parent.mkdir(parents=True)
+    _news_page_png(tmp_path / "frame.png")
+    import subprocess
+    subprocess.run(
+        [
+            "ffmpeg", "-y", "-loop", "1", "-i", str(tmp_path / "frame.png"),
+            "-t", "3", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(scroll),
+        ],
+        check=True,
+        capture_output=True,
+    )
+
+    class _Proj:
+        root = project_root
+        merge_dir = project_root / "merge"
+        research_dir = project_root / "research"
+        slug = "test"
+
+    _Proj.merge_dir.mkdir(parents=True)
+    ok, details = validate_scroll_asset(_Proj(), scroll)
+    assert "framing" in details
+
+
 def test_screenshot_heuristic_detects_error_layout(tmp_path: Path):
     err = tmp_path / "error.png"
     good = tmp_path / "good.png"

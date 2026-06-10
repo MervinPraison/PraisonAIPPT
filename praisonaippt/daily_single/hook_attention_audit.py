@@ -7,6 +7,7 @@ from pathlib import Path
 
 from praisonaippt.daily_single.canonical_scroll import SCROLL_FILENAME, frame_motion, scroll_video_path
 from praisonaippt.daily_single.hook_montage import build_hook_montage_plan, hook_attention_durations
+from praisonaippt.daily_single.content_framing import measure_framing, validate_framing
 from praisonaippt.daily_single.page_capture_quality import (
     frame_looks_like_browser_error,
     validate_scroll_asset,
@@ -91,11 +92,19 @@ def run_hook_attention_audit(
             issues.append(f"pixel_sim {pixel:.2f} < {MIN_PIXEL_SIM}")
         if frame_looks_like_browser_error(frame_out):
             issues.append("frame looks like browser error page (not news content)")
+        frame_metrics = measure_framing(frame_out)
+        framing_ok, framing_issues = validate_framing(frame_metrics)
+        if not framing_ok:
+            ok = False
+            issues.extend(framing_issues)
         samples.append({
             "t_sec": t,
             "frame": str(frame_out.relative_to(project.root)),
             "ref_scroll_t_sec": round(ref_t, 2),
             "pixel_sim": round(pixel, 3),
+            "left_margin": frame_metrics.left_margin_ratio,
+            "right_margin": frame_metrics.right_margin_ratio,
+            "content_fill": frame_metrics.content_fill_ratio,
             "spoken": spoken[:120],
             "ok": ok,
             "issues": issues,

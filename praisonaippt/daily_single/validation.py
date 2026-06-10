@@ -95,6 +95,7 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
     report["validators"]["spoken_visual"] = False
     report["validators"]["canonical_capture"] = False
     report["validators"]["hook_attention"] = False
+    report["validators"]["hook_framing"] = False
     sv_path = project.merge_dir / "sync_validation_report.json"
     va_path = project.merge_dir / "visual_audit_report.json"
     if sv_path.is_file():
@@ -146,6 +147,17 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
                 "canonical_capture: scroll clip shows error page — run record-canonical-scroll"
             )
     cap_path = project.merge_dir / "qa" / "canonical_capture" / "capture_report.json"
+    framing_path = project.merge_dir / "qa" / "canonical_capture" / "framing_report.json"
+    if framing_path.is_file():
+        fr = json.loads(framing_path.read_text(encoding="utf-8"))
+        report["validators"]["hook_framing"] = fr.get("ok", False)
+        if not fr.get("ok"):
+            issues.append("hook_framing: failed — inspect merge/qa/canonical_capture/framing-diagram.png")
+    elif cap_path.is_file():
+        cap = json.loads(cap_path.read_text(encoding="utf-8"))
+        framing = cap.get("framing") or {}
+        if framing:
+            report["validators"]["hook_framing"] = cap.get("ok", False)
     if cap_path.is_file():
         cap = json.loads(cap_path.read_text(encoding="utf-8"))
         if not cap.get("ok"):

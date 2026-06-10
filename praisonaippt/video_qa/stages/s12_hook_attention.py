@@ -12,6 +12,7 @@ def run_s12_hook_attention(
     seconds: int = 5,
     required: bool = True,
     when: str = "post_build",
+    ctx=None,
 ) -> StageReport:
     checks: list[CheckResult] = []
     try:

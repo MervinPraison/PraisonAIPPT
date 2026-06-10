@@ -177,6 +177,8 @@ video_export:
 
 Validation runs on load via `yaml_validate.validate_video_export` and `validate_verse_options`. `slide_timestamps` length is checked against the slide plan (warning if mismatched).
 
+**daily_single hook scroll:** `record-canonical-scroll` crops side gutters (column + MSER + DOM), caps speed at 100 px/s, and writes `merge/qa/canonical_capture/framing-diagram.png`. Gate with `validate-canonical-scroll` before assemble.
+
 ## Transcript-driven HeyGen decks
 
 Generate YAML from Whisper JSON:
