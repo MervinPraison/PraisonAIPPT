@@ -74,13 +74,16 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("validate-visual-audit", help="Gate on merge/visual_audit_report.json")
     hook_att_p = sub.add_parser(
         "validate-hook-attention",
-        help="Per-second frames for hook attention (first 5s vs canonical-scroll)",
+        help="Hook frames (1s for first 5s, then 2s) + spoken↔visual inline + scroll gates",
     )
-    hook_att_p.add_argument("--seconds", type=int, default=5)
+    hook_att_p.add_argument("--seconds", type=int, default=5, help="Attention window for 1 Hz + scroll checks")
     sub.add_parser(
         "validate-canonical-scroll",
         help="Gate canonical-scroll.mp4 — reject browser error pages before assemble",
     )
+    sub.add_parser("validate-slide-quality", help="Slide design tier gate → slide_design_report.json")
+    sub.add_parser("validate-engagement-assets", help="Motion/demo/social-proof gate → engagement_report.json")
+    sub.add_parser("validate-viral-readiness", help="Viral readiness composite → viral_readiness_report.json")
     sub.add_parser("validate-all", help="Full validation gate (tools, output, sync, display, visual audit)")
     sync_assets_p = sub.add_parser(
         "sync-assets",
@@ -148,7 +151,10 @@ def main(argv: list[str] | None = None) -> int:
         print(
             f"{'PASS' if report['ok'] else 'FAIL'}: "
             f"montage {report['montage_fragments_pass']}/{report['montage_fragments_total']}, "
-            f"windows {report['windows_pass']}/{report['windows_total']}"
+            f"windows {report['windows_pass']}/{report['windows_total']}, "
+            f"charts {report.get('charts_pass', 0)}/{report.get('charts_total', 0)}, "
+            f"coverage {report.get('coverage_pass', 0)}/{report.get('coverage_total', 0)}, "
+            f"plain_language={report.get('plain_language_ok')}"
         )
         if not report["ok"]:
             for issue in report.get("issues") or []:
@@ -206,13 +212,23 @@ def main(argv: list[str] | None = None) -> int:
         ok = bool(report.get("ok"))
         print(
             f"{'PASS' if ok else 'FAIL'}: {report.get('samples_pass', 0)}/"
-            f"{report.get('samples_total', 0)} second-frames, motion={report.get('motion_ok')} → "
+            f"{report.get('samples_total', 0)} frames, "
+            f"spoken_inline={report.get('spoken_inline_pass', 0)}/"
+            f"{report.get('samples_total', 0)}, "
+            f"charts={report.get('chart_inline_pass', 0)}/"
+            f"{report.get('samples_total', 0)}, "
+            f"plain={report.get('plain_language_pass', 0)}/"
+            f"{report.get('samples_total', 0)}, "
+            f"motion={report.get('motion_ok')} → "
             f"{report.get('frames_dir')}"
         )
         if not ok:
             for s in report.get("samples") or []:
                 if not s.get("ok"):
-                    print(f"  t={s['t_sec']:.0f}s pixel={s.get('pixel_sim')} {s.get('issues')}")
+                    print(
+                        f"  t={s['t_sec']:.0f}s file={s.get('planned_file')} "
+                        f"inline={s.get('spoken_inline_ok')} {s.get('issues')}"
+                    )
         return 0 if ok else 1
     if args.cmd == "validate-canonical-scroll":
         from praisonaippt.daily_single.canonical_scroll import scroll_video_path
@@ -239,6 +255,46 @@ def main(argv: list[str] | None = None) -> int:
         for issue in inv.get("issues") or []:
             print(f"  {issue}")
         return 1
+    if args.cmd == "validate-slide-quality":
+        from praisonaippt.daily_single.slide_design_audit import validate_slide_design
+
+        report = validate_slide_design(project)
+        print(
+            f"{'PASS' if report['ok'] else 'FAIL'}: "
+            f"gpt-image {report.get('gpt_image_body_ratio', 0):.0%}, "
+            f"text_slide {report.get('text_slide_body_ratio', 0):.0%}"
+        )
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
+    if args.cmd == "validate-engagement-assets":
+        from praisonaippt.daily_single.engagement_audit import validate_engagement_assets
+
+        report = validate_engagement_assets(project)
+        print(
+            f"{'PASS' if report['ok'] else 'FAIL'}: "
+            f"motion {report.get('motion_ratio', 0):.0%}, "
+            f"clip beats {len(report.get('beats_with_clips') or [])}, "
+            f"social {len(report.get('social_captures') or [])}"
+        )
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
+    if args.cmd == "validate-viral-readiness":
+        from praisonaippt.daily_single.viral_readiness import validate_viral_readiness
+
+        report = validate_viral_readiness(project)
+        print(
+            f"{'PASS' if report['ok'] else 'FAIL'}: "
+            f"proof cues {report.get('proof_cue_count', 0)}, "
+            f"comparisons {len(report.get('comparison_beats') or [])}"
+        )
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
     if args.cmd == "validate-all":
         ok, report = validate_all(project)
         if ok:

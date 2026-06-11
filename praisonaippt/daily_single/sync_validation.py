@@ -11,6 +11,7 @@ from praisonaippt.daily_single.protocol import SEGMENT_ORDER
 from praisonaippt.daily_single.hook_validation import validate_hook_montage
 from praisonaippt.daily_single.visual_audit import validate_visual_audit
 from praisonaippt.daily_single.spoken_visual_sync import validate_spoken_visual_sync
+from praisonaippt.daily_single.viral_readiness import validate_viral_readiness
 from praisonaippt.daily_single.youtube_quality import validate_youtube_quality
 
 BORDERLINE_MAX = 0.45
@@ -90,6 +91,7 @@ def run_sync_suite(project: DailySingleProject, *, runs: int = 3) -> dict[str, A
     visual_ok, visual_report = validate_visual_audit(project)
     spoken_visual = validate_spoken_visual_sync(project)
     last_spoken_visual = spoken_visual
+    viral_report = validate_viral_readiness(project)
 
     for n in range(1, runs + 1):
         display = validate_display_sync(project)
@@ -152,6 +154,12 @@ def run_sync_suite(project: DailySingleProject, *, runs: int = 3) -> dict[str, A
             "windows_pass": spoken_visual.get("windows_pass"),
             "windows_total": spoken_visual.get("windows_total"),
             "issues": (spoken_visual.get("issues") or [])[:10],
+        },
+        "viral_readiness": {
+            "ok": viral_report.get("ok"),
+            "proof_cue_count": viral_report.get("proof_cue_count"),
+            "comparison_beats": viral_report.get("comparison_beats"),
+            "issues": (viral_report.get("issues") or [])[:10],
         },
         "visual_audit": {
             "ok": visual_ok,

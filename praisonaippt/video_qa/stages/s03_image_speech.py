@@ -55,11 +55,20 @@ def run_s03_image_speech(
         message=(
             f"montage {spoken.get('montage_fragments_pass', 0)}/"
             f"{spoken.get('montage_fragments_total', 0)}, "
-            f"windows {spoken.get('windows_pass', 0)}/{spoken.get('windows_total', 0)} inline"
+            f"windows {spoken.get('windows_pass', 0)}/{spoken.get('windows_total', 0)}, "
+            f"charts {spoken.get('charts_pass', 0)}/{spoken.get('charts_total', 0)}, "
+            f"coverage {spoken.get('coverage_pass', 0)}/{spoken.get('coverage_total', 0)}"
         ),
         details={"issues": (spoken.get("issues") or [])[:5]},
     ))
-    ok = ok and spoken_ok
+    checks.append(CheckResult(
+        id="plain_language",
+        ok=bool(spoken.get("plain_language_ok")),
+        severity="error" if required else "warn",
+        message="spoken + scripts non-developer friendly" if spoken.get("plain_language_ok") else "plain language issues",
+        details=spoken.get("plain_language"),
+    ))
+    ok = ok and spoken_ok and bool(spoken.get("plain_language_ok"))
 
     return StageReport(
         id="s03-image-speech",

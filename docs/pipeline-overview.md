@@ -49,14 +49,16 @@ daily-single -p $PROJECT synthesise-vo
 daily-single -p $PROJECT validate-qa --when post_vo
 daily-single -p $PROJECT bookend-media
 daily-single -p $PROJECT validate-qa --when pre_assemble
-daily-single -p $PROJECT assemble-beats
 daily-single -p $PROJECT build-captions
+daily-single -p $PROJECT assemble-beats
+daily-single -p $PROJECT validate-display
+daily-single -p $PROJECT validate-spoken-visual
 daily-single -p $PROJECT validate-qa --when post_build
 daily-single -p $PROJECT validate-all
 ```
 
 **Pilot reference:** `examples/videos/anthropic-claude-fable-5-mythos-5/`  
-**Agent skills:** `.cursor/skills/daily-single-video/` and `.cursor/skills/daily-single-video-pipeline/`
+**Agent skills:** `.cursor/skills/daily-single-video/`, `.cursor/skills/daily-single-video-pipeline/` ([spoken-visual-sync.md](../.cursor/skills/daily-single-video-pipeline/spoken-visual-sync.md))
 
 ## Deck pipeline — quick path
 

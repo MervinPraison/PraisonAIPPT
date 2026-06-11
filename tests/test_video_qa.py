@@ -54,7 +54,7 @@ def mini_project(tmp_path: Path) -> DailySingleProject:
 
 def test_list_stages_includes_core():
     stages = list_stages()
-    assert len(stages) == 13
+    assert len(stages) == 16
     assert "s00-bookends" in stages
 
 

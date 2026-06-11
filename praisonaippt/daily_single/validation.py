@@ -96,6 +96,9 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
     report["validators"]["canonical_capture"] = False
     report["validators"]["hook_attention"] = False
     report["validators"]["hook_framing"] = False
+    report["validators"]["slide_design"] = False
+    report["validators"]["engagement"] = False
+    report["validators"]["viral_readiness"] = False
     sv_path = project.merge_dir / "sync_validation_report.json"
     va_path = project.merge_dir / "visual_audit_report.json"
     if sv_path.is_file():
@@ -171,6 +174,19 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
             issues.append("hook_attention: failed — run validate-hook-attention after assemble")
     elif scroll:
         issues.append("hook_attention: missing hook_attention_audit.json — run validate-hook-attention")
+    for key, path_name, label in (
+        ("slide_design", "slide_design_report.json", "validate-slide-quality"),
+        ("engagement", "engagement_report.json", "validate-engagement-assets"),
+        ("viral_readiness", "viral_readiness_report.json", "validate-viral-readiness"),
+    ):
+        p = project.merge_dir / path_name
+        if p.is_file():
+            data = json.loads(p.read_text(encoding="utf-8"))
+            report["validators"][key] = data.get("ok", False)
+            if not data.get("ok"):
+                issues.append(f"{key}: failed — run {label}")
+        else:
+            issues.append(f"{key}: missing merge/{path_name} — run {label}")
     report["passed"] = len(issues) == 0
     report["issues"] = issues
     (project.root / "validation_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")

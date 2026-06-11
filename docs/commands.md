@@ -687,8 +687,10 @@ daily-single -p $PROJECT synthesise-vo
 daily-single -p $PROJECT validate-qa --when post_vo
 daily-single -p $PROJECT bookend-media 00-hook 99-outro
 daily-single -p $PROJECT validate-qa --when pre_assemble
-daily-single -p $PROJECT assemble-beats
 daily-single -p $PROJECT build-captions
+daily-single -p $PROJECT assemble-beats
+daily-single -p $PROJECT validate-display
+daily-single -p $PROJECT validate-spoken-visual
 daily-single -p $PROJECT validate-qa --when post_build
 daily-single -p $PROJECT validate-all
 ```
@@ -699,10 +701,11 @@ Legacy build-only order (same steps without intermediate gates):
 python -m praisonaippt.daily_single --project $PROJECT sync-assets
 python -m praisonaippt.daily_single --project $PROJECT synthesise-vo [--skip-existing] [--segments 00-hook]
 python -m praisonaippt.daily_single --project $PROJECT bookend-media 00-hook 99-outro [--skip-existing]
-python -m praisonaippt.daily_single --project $PROJECT assemble-beats
 python -m praisonaippt.daily_single --project $PROJECT build-captions
-python -m praisonaippt.daily_single --project $PROJECT audit-visual [--interval 5] [--force]
+python -m praisonaippt.daily_single --project $PROJECT assemble-beats
 python -m praisonaippt.daily_single --project $PROJECT validate-display
+python -m praisonaippt.daily_single --project $PROJECT validate-spoken-visual
+python -m praisonaippt.daily_single --project $PROJECT audit-visual [--interval 5] [--force]
 python -m praisonaippt.daily_single --project $PROJECT validate-sync --runs 3
 python -m praisonaippt.daily_single --project $PROJECT validate-all
 ```
@@ -712,8 +715,10 @@ python -m praisonaippt.daily_single --project $PROJECT validate-all
 | `sync-assets` | Crawl canonical news page + HD YouTube (≥720p); patch beat-map |
 | `synthesise-vo` | ElevenLabs TTS; strips `Hook:` label |
 | `bookend-media` | HeyGen hook/outro |
-| `assemble-beats` | ffmpeg beat assembly + hook montage; writes `timeline.json` |
+| `assemble-beats` | ffmpeg beat assembly + hook montage; writes `timeline.json` (uses `final.srt` for cue-aligned beats when present) |
 | `build-captions` | SRT from locked script (Whisper timing or proportional fallback) |
+| `validate-display` | Per-cue midpoint → visual; `display_sync_report.json` |
+| `validate-spoken-visual` | Full spoken↔visual gate (windows, charts, transitions); `spoken_visual_sync_report.json` |
 | `validate-qa` | Modular QA to `merge/qa/` — use `--when pre_build`, `post_vo`, `pre_assemble`, or `post_build` |
 | `audit-visual` | Pixel audit every N seconds → `visual_audit_report.json` |
 | `validate-sync` | Script lock + hook montage + display + YouTube quality (×3 runs) |
@@ -721,7 +726,7 @@ python -m praisonaippt.daily_single --project $PROJECT validate-all
 
 Modular QA module: `python -m praisonaippt.video_qa` (alias: `video-qa`).
 
-Agent skills: `.cursor/skills/daily-single-video/SKILL.md`, `.cursor/skills/daily-single-video-pipeline/SKILL.md`
+Agent skills: `.cursor/skills/daily-single-video/SKILL.md`, `.cursor/skills/daily-single-video-pipeline/SKILL.md` (spoken↔visual: [spoken-visual-sync.md](../.cursor/skills/daily-single-video-pipeline/spoken-visual-sync.md))
 
 ## 📚 Related Documentation
 

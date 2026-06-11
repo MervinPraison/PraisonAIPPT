@@ -31,7 +31,9 @@ List stages: `python -m praisonaippt.video_qa --project $P list`
 | Hook/outro script | synthesise-vo + bookend-media | pre_assemble → assemble → captions → post_build |
 | Beat script only | synthesise-vo (beat dir) | post_vo → assemble-beats → build-captions → post_build |
 | B-roll / assembly | assemble-beats | build-captions → post_build |
-| Captions only | build-captions | post_build (s05 post_captions+) |
+| Captions only | build-captions | validate-display → validate-spoken-visual → post_build |
+| Cue-aligned beats (06, 01 views) | build-captions → assemble-beats | validate-display → validate-spoken-visual → pytest cue/spoken tests |
+| Spoken/visual metadata only | (none) | validate-spoken-visual |
 
 ## Degradation flags (`merge/qa/summary.json`)
 
@@ -61,9 +63,22 @@ daily-single -p $PROJECT validate-all
 | `merge/final.srt` | Script-locked captions |
 | `merge/timeline.json` | Segment start/duration (from `beats/*.mp4`) |
 | `merge/qa/summary.json` | Latest suite rollup |
-| `merge/display_sync_report.json` | Cue → asset mapping |
+| `merge/display_sync_report.json` | Cue → asset mapping (midpoint) |
+| `merge/spoken_visual_sync_report.json` | Montage, windows, charts, transitions, coverage |
 | `merge/sync_validation_report.json` | 3-run robust gate |
 | `merge/visual_audit_report.json` | 5s frame audit |
+
+## Spoken ↔ visual sync
+
+Full workflow: [spoken-visual-sync.md](spoken-visual-sync.md)
+
+| Command | Output | Pass |
+|---------|--------|------|
+| `validate-display` | `display_sync_report.json` | All cues ≥0.35 alignment |
+| `validate-spoken-visual` | `spoken_visual_sync_report.json` | `ok: true` — windows, charts, transitions |
+| `pytest tests/test_cue_slide_sync.py tests/test_spoken_visual_sync.py` | — | All green |
+
+Gate script: `scripts/run-spoken-visual-gate.sh $PROJECT --assemble`
 
 ## Protocol
 

@@ -4,12 +4,15 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 
-from praisonaippt.daily_single.project import DailySingleProject
+from praisonaippt.daily_single.brand_bumper import BUMPER_STEM
 from praisonaippt.segment_video.media import ffprobe_duration
 
 
 def build_timeline(project: DailySingleProject) -> dict:
     order = [project.beats_dir / "00-hook.mp4"]
+    bumper = project.beats_dir / f"{BUMPER_STEM}.mp4"
+    if bumper.is_file():
+        order.append(bumper)
     order += [project.beats_dir / f"beat-{i:02d}.mp4" for i in range(1, 11)]
     order.append(project.beats_dir / "99-outro.mp4")
     segments = []

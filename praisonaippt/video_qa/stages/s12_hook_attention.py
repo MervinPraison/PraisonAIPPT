@@ -40,7 +40,10 @@ def run_s12_hook_attention(
         ok=ok,
         severity="error" if required else "warn",
         message=(
-            f"{report.get('samples_pass', 0)}/{report.get('samples_total', 0)} second-frames, "
+            f"{report.get('samples_pass', 0)}/{report.get('samples_total', 0)} frames, "
+            f"spoken_inline={report.get('spoken_inline_pass', 0)}/{report.get('samples_total', 0)}, "
+            f"charts={report.get('chart_inline_pass', 0)}/{report.get('samples_total', 0)}, "
+            f"plain={report.get('plain_language_pass', 0)}/{report.get('samples_total', 0)}, "
             f"motion={report.get('motion_ok')}"
         ),
         details={"frames_dir": report.get("frames_dir"), "issues": [

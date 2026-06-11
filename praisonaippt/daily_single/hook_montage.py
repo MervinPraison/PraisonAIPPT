@@ -13,7 +13,6 @@ from praisonaippt.segment_video.align import _hook_roll_window
 SCROLL_ATTENTION_FILE = "canonical-scroll.mp4"
 ATTENTION_MOTION_SEC = 5.0
 
-# Order matches comma clauses in overview cue (June roll-call pattern).
 DEFAULT_MONTAGE_SPECS: list[dict[str, Any]] = [
     {
         "fragment": "what most teams actually get",
@@ -47,6 +46,45 @@ DEFAULT_MONTAGE_SPECS: list[dict[str, Any]] = [
         "visual": "API table",
     },
 ]
+
+TRUST_AUDIT_MONTAGE_SPECS: list[dict[str, Any]] = [
+    {
+        "fragment": "what the launch post promised",
+        "filename": "beat1-views-overlay.png",
+        "beat": 1,
+        "visual": "headline vs receipt",
+    },
+    {
+        "fragment": "what Reddit called AI inequality",
+        "filename": "social-capture-reddit-inequality.png",
+        "beat": 1,
+        "visual": "inequality ladder",
+    },
+    {
+        "fragment": "five-day gap after Anthropic's own safety essay",
+        "filename": "beat2-tier-diagram.png",
+        "beat": 2,
+        "visual": "RSI timeline",
+    },
+    {
+        "fragment": "a visible Fable safety fallback",
+        "filename": "gpt-image-safeguard-fallback.png",
+        "beat": 6,
+        "visual": "visible fallback",
+    },
+    {
+        "fragment": "a silent steering path",
+        "filename": "v2-quote-willison.png",
+        "beat": 6,
+        "visual": "silent steering",
+    },
+]
+
+
+def montage_specs_for(beat_map: dict[str, Any]) -> list[dict[str, Any]]:
+    if beat_map.get("variant") == "trust-audit":
+        return TRUST_AUDIT_MONTAGE_SPECS
+    return DEFAULT_MONTAGE_SPECS
 
 
 def _word_weights(parts: list[str]) -> list[float]:
@@ -99,9 +137,10 @@ def build_hook_montage_plan(project: DailySingleProject) -> dict[str, Any]:
     overview = sentences[1] if len(sentences) >= 2 else ""
     clauses = parse_overview_clauses(overview)
     beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+    specs = montage_specs_for(beat_map)
 
     cues: list[dict[str, Any]] = []
-    for i, spec in enumerate(DEFAULT_MONTAGE_SPECS):
+    for i, spec in enumerate(specs):
         path = _resolve_asset(project, beat_map, spec)
         fragment = clauses[i] if i < len(clauses) else spec["fragment"]
         cues.append({
@@ -119,7 +158,7 @@ def build_hook_montage_plan(project: DailySingleProject) -> dict[str, Any]:
         "overview_sentence": overview,
         "clauses": clauses,
         "cues": cues,
-        "min_cues": len(DEFAULT_MONTAGE_SPECS),
+        "min_cues": len(specs),
     }
     out = project.segments_dir / "00-hook" / "hook_montage.json"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -154,13 +193,14 @@ def hook_attention_durations(
     *,
     motion_clip: bool = False,
 ) -> tuple[float, float, float]:
-    """When a scroll/zoom clip is used, lock attention to ATTENTION_MOTION_SEC."""
-    att, overview, bridge = hook_sentence_durations(hook_dur, script)
+    """When a scroll clip is used, show scroll through hook line 1, then montage."""
+    s1, s2, s3 = hook_sentence_durations(hook_dur, script)
     if not motion_clip:
-        return att, overview, bridge
-    att = min(ATTENTION_MOTION_SEC, max(2.0, hook_dur - 4.0))
+        return s1, s2, s3
+    scroll_att = min(ATTENTION_MOTION_SEC, max(2.0, hook_dur - 4.0))
+    att = max(scroll_att, s1)
     rest = max(1.0, hook_dur - att)
-    share = overview / max(0.1, overview + bridge)
+    share = s2 / max(0.1, s2 + s3)
     overview = rest * share
     bridge = rest - overview
     return att, overview, bridge
@@ -213,7 +253,10 @@ def hook_visual_windows(
     bridge_file: str = "heygen.mp4",
 ) -> list[dict[str, Any]]:
     """Timeline windows for display_sync: attention → N heroes → bridge."""
-    motion = bool(project and scroll_video_path(project)) if project else False
+    motion = False
+    if project:
+        from praisonaippt.daily_single.canonical_scroll import scroll_video_path
+        motion = bool(scroll_video_path(project))
     att, overview, bridge = hook_attention_durations(hook_dur, script, motion_clip=motion)
     windows: list[dict[str, Any]] = []
     t = hook_start

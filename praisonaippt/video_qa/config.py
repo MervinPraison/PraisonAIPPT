@@ -22,6 +22,9 @@ DEFAULT_QA_STAGES: list[dict[str, Any]] = [
     {"id": "s09-on-screen-text", "when": "post_build", "required": False, "offline_ok": True},
     {"id": "s10-final-composite", "when": "post_build", "required": True, "offline_ok": False, "sync_runs": 3},
     {"id": "s12-hook-attention", "when": "post_build", "required": True, "offline_ok": True, "seconds": 5},
+    {"id": "s13-slide-design", "when": "post_build", "required": True, "offline_ok": True},
+    {"id": "s14-engagement", "when": "post_build", "required": True, "offline_ok": True},
+    {"id": "s15-viral-readiness", "when": "post_build", "required": True, "offline_ok": True},
 ]
 
 DEFAULT_DEGRADATION: dict[str, Any] = {

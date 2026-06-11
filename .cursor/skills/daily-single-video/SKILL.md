@@ -90,14 +90,17 @@ PROJECT=examples/videos/<slug>
 | **Sync canonical assets (HD)** | `python -m praisonaippt.daily_single --project $PROJECT sync-assets` |
 | Voice-over | `python -m praisonaippt.daily_single --project $PROJECT synthesise-vo` |
 | Hook/outro HeyGen | `python -m praisonaippt.daily_single --project $PROJECT bookend-media 00-hook 99-outro` |
-| Assemble B-roll | `python -m praisonaippt.daily_single --project $PROJECT assemble-beats` |
 | Captions | `python -m praisonaippt.daily_single --project $PROJECT build-captions` |
+| Assemble B-roll | `python -m praisonaippt.daily_single --project $PROJECT assemble-beats` |
 | Transcript ↔ visual map | `python -m praisonaippt.daily_single --project $PROJECT validate-display` |
+| **Spoken ↔ visual gate** | `python -m praisonaippt.daily_single --project $PROJECT validate-spoken-visual` |
 | **Pixel visual audit (every 5s)** | `python -m praisonaippt.daily_single --project $PROJECT audit-visual --interval 5` |
 | **Robust sync test (×3)** | `python -m praisonaippt.daily_single --project $PROJECT validate-sync --runs 3` |
 | Full gate | `python -m praisonaippt.daily_single --project $PROJECT validate-all` |
 
-**Standard pipeline order:** `sync-assets` → `synthesise-vo` → `bookend-media` → `assemble-beats` → `build-captions` → `audit-visual` → `validate-sync --runs 3` → `validate-all`
+**Standard pipeline order:** `sync-assets` → `synthesise-vo` → `bookend-media` → `build-captions` → `assemble-beats` → `validate-display` → `validate-spoken-visual` → `audit-visual` → `validate-sync --runs 3` → `validate-all`
+
+**Cue-aligned rebuild** (beat-06, beat-01): see `.cursor/skills/daily-single-video-pipeline/spoken-visual-sync.md`
 
 **Step-by-step with modular QA gates:** use `.cursor/skills/daily-single-video-pipeline/SKILL.md` (`validate-qa --when pre_build|pre_assemble|post_vo|post_build`).
 
@@ -106,7 +109,7 @@ PROJECT=examples/videos/<slug>
 
 **Skip existing media** unless scripts changed: add `--skip-existing` to `synthesise-vo` / `bookend-media`.
 
-**After any script edit:** re-run VO → bookends (if hook/outro) → `assemble-beats` → `build-captions` → `validate-display`.
+**After any script edit:** re-run VO → bookends (if hook/outro) → `build-captions` → `assemble-beats` → `validate-display` → `validate-spoken-visual`.
 
 **Before first assemble (and after handoff changes):** run `sync-assets` — crawls [canonical news URL](https://www.anthropic.com/news/claude-fable-5-mythos-5) images and re-downloads YouTube demos at **720p+** (not 360p progressive). Patches `beat-map.json` with carousel clips and biology charts.
 
@@ -175,7 +178,8 @@ See `.cursor/skills/segment-video-roundup/SKILL.md` and [reference.md](reference
 - [ ] Beat 1 starts content (no duplicate intro)
 - [ ] Outro = June subscribe CTA; no mer.vin spoken
 - [ ] `validate-sync --runs 3` pass (script lock + hook + **hook_montage** + image + **YouTube quality**, idempotent)
-- [ ] `build-captions` + `validate-display` pass
+- [ ] `build-captions` + `validate-display` + `validate-spoken-visual` pass
+- [ ] `merge/spoken_visual_sync_report.json` → `ok: true`
 - [ ] Plain language — readable without developer context
 
 ## Testing (spoken ↔ video ↔ image)
@@ -185,6 +189,7 @@ Three layers (mirrors June roundup, adapted for Phase 1 B-roll):
 | Layer | What it checks | Command / test |
 |-------|----------------|----------------|
 | **Caption lock** | SRT text == locked `script.md` (not Whisper) | `validate-sync` → `caption_script_lock` |
+| **Spoken↔visual gate** | Windows, charts, transitions, coverage | `validate-spoken-visual` → `spoken_visual_sync_report.json` |
 | **Image mapping** | Each cue midpoint → correct asset file + keyword score ≥0.35 | `validate-display` → `display_sync_report.json` |
 | **Hook structure** | Cues 1–3 = attention → overview → Let's get started | `validate-sync` → `hook_structure` |
 | **Hook montage** | Overview cue → ≥5 distinct heroes; alignment ≥0.45; not launch-only | `validate-sync` → `hook_montage` |
@@ -196,12 +201,15 @@ Three layers (mirrors June roundup, adapted for Phase 1 B-roll):
 pytest tests/test_daily_single_display_sync_unit.py \
        tests/test_daily_single_sync_validation.py \
        tests/test_daily_single_hook_montage.py \
-       tests/test_daily_single_visual_audit.py -q
+       tests/test_daily_single_visual_audit.py \
+       tests/test_cue_slide_sync.py \
+       tests/test_spoken_visual_sync.py -q
 
+python -m praisonaippt.daily_single --project examples/videos/<slug> validate-spoken-visual
 python -m praisonaippt.daily_single --project examples/videos/<slug> validate-sync --runs 3
 ```
 
-Outputs: `merge/sync_validation_report.json`, `merge/display_sync_report.json`
+Outputs: `merge/sync_validation_report.json`, `merge/display_sync_report.json`, `merge/spoken_visual_sync_report.json`
 
 ---
 

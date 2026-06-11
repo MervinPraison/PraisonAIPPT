@@ -133,6 +133,38 @@ Maps every SRT cue to the visual shown at the cue midpoint.
 daily-single -p $PROJECT validate-display
 ```
 
+### `validate-spoken-visual`
+
+Stricter full-video gate: montage fragments, slide **windows** (worst overlapping cue), chart/plain-language checks, **transition samples** at every image change, coverage, and plain-language rules.
+
+**Output:** `merge/spoken_visual_sync_report.json` — require `"ok": true` before publish.
+
+```bash
+daily-single -p $PROJECT validate-spoken-visual
+```
+
+**Cue-aligned rebuild** (beat-06, beat-01 views): `build-captions` → `assemble-beats` → `validate-display` → `validate-spoken-visual`. Skill: `.cursor/skills/daily-single-video-pipeline/spoken-visual-sync.md`
+
+### `validate-slide-quality` / `validate-engagement-assets` / `validate-viral-readiness`
+
+Professional and viral publish gates (trust-audit uses stricter thresholds via `variant: trust-audit` in beat-map).
+
+| Command | Output | What it checks |
+|---------|--------|----------------|
+| `validate-slide-quality` | `merge/slide_design_report.json` | Body PNG tier mix — rejects text_slide-heavy decks |
+| `validate-engagement-assets` | `merge/engagement_report.json` | Motion ratio, clip beats, social captures, demo beats |
+| `validate-viral-readiness` | `merge/viral_readiness_report.json` | Composite: slide + engagement + hook motion + proof density |
+
+Full matrix: `.cursor/skills/daily-single-video-pipeline/scripts/run-publish-gate.sh`
+
+**Unit tests:**
+
+```bash
+pytest tests/test_cue_slide_sync.py tests/test_spoken_visual_sync.py \
+       tests/test_slide_design_audit.py tests/test_engagement_audit.py \
+       tests/test_viral_readiness.py tests/test_video_qa.py -q
+```
+
 ### `validate-sync --runs 3`
 
 Runs the full spoken↔visual suite **three times** and requires identical results (idempotency).
@@ -144,6 +176,7 @@ Runs the full spoken↔visual suite **three times** and requires identical resul
 | `hook_montage` | Overview cue uses ≥ **5** distinct hero slides; alignment ≥ **0.45** |
 | `image_mapping` | Same as display sync pass rate |
 | `youtube_quality` | Hook stakes, plain language, pacing, outro CTA |
+| `spoken_visual` | Requires passing `spoken_visual_sync_report.json` |
 | `visual_audit` | Requires passing `visual_audit_report.json` |
 
 **Output:** `merge/sync_validation_report.json`
@@ -181,7 +214,7 @@ Single publish gate combining tools, output specs, media inventory, and all repo
 | Beat coverage | All beats assembled |
 | Bookends | HeyGen hook + outro present |
 | Media | Videos ≥720p from handoff |
-| Reports | display, sync, visual audit all pass |
+| Reports | display, sync, slide design, engagement, viral readiness, visual audit all pass |
 
 **Output:** `validation_report.json` (project root)
 
@@ -207,15 +240,23 @@ daily-single -p $PROJECT validate-qa --when post_vo
 # 3 — After HeyGen bookends
 daily-single -p $PROJECT validate-qa --when pre_assemble
 
-# 4 — After assemble + captions (main gate)
+# 4 — After captions + assemble (cue-aligned order)
+daily-single -p $PROJECT build-captions
+daily-single -p $PROJECT assemble-beats
+daily-single -p $PROJECT validate-display
+daily-single -p $PROJECT validate-spoken-visual
+pytest tests/test_cue_slide_sync.py tests/test_spoken_visual_sync.py -q
+
+# 5 — Main modular gate
 daily-single -p $PROJECT validate-qa --when post_build
 
-# 5 — Confirm legacy gates (optional if s10 passed)
+# 6 — Confirm legacy gates (optional if s10 passed)
 daily-single -p $PROJECT validate-all
 daily-single -p $PROJECT validate-sync --runs 3
 
-# 6 — After code changes only
-pytest tests/test_video_qa.py tests/test_daily_single_sync_validation.py -q
+# 7 — After code changes only
+pytest tests/test_video_qa.py tests/test_daily_single_sync_validation.py \
+       tests/test_cue_slide_sync.py tests/test_spoken_visual_sync.py -q
 ```
 
 ---
@@ -227,7 +268,8 @@ pytest tests/test_video_qa.py tests/test_daily_single_sync_validation.py -q
 | `merge/qa/summary.json` | Modular QA | Overall pass/fail, `failed_required`, degradation |
 | `merge/qa/s*_report.json` | Modular QA | Per-stage checks and messages |
 | `merge/display_sync_report.json` | Legacy | Per-cue alignment and asset file |
-| `merge/sync_validation_report.json` | Legacy | 3-run results, hook_montage, youtube_quality |
+| `merge/spoken_visual_sync_report.json` | Legacy | Windows, charts, transitions, coverage (`ok: true` required) |
+| `merge/sync_validation_report.json` | Legacy | 3-run results, hook_montage, youtube_quality, spoken_visual |
 | `merge/visual_audit_report.json` | Legacy | Per-sample pixel/topic pass |
 | `validation_report.json` | Legacy | Final publish gate issues list |
 
@@ -238,4 +280,4 @@ pytest tests/test_video_qa.py tests/test_daily_single_sync_validation.py -q
 - [Daily single video pipeline](daily-single-video.md)
 - [Video QA stages](video-qa.md)
 - [Commands — daily single](commands.md#daily-single-video-pipeline)
-- [Pipeline overview](pipeline-overview.md)
+- [Spoken↔visual workflow skill](../.cursor/skills/daily-single-video-pipeline/spoken-visual-sync.md)

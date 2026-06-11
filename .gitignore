@@ -160,6 +160,7 @@ Thumbs.db
 *.png
 *.mp3
 *.mp4
+!assets/brand/*.mp4
 *timestamps.txt
 *timestamps.json
 *.srt

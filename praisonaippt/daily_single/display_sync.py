@@ -7,8 +7,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from praisonaippt.daily_single.brand_bumper import BUMPER_FILENAME, BUMPER_STEM
+from praisonaippt.daily_single.beat01_timing import beat01_views_duration_sec
 from praisonaippt.daily_single.hook_montage import build_hook_montage_plan, hook_visual_windows
 from praisonaippt.daily_single.protocol import SEGMENT_ORDER
+from praisonaippt.daily_single.text_slide import slide_specs, visual_meta_from_specs
 from praisonaippt.segment_video.image_selection import script_alignment, tokenise
 from praisonaippt.segment_video.media import ffprobe_duration
 
@@ -22,102 +25,199 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "topics": ("walkthrough", "cover", "fable", "mythos", "overview", "started", "subscribe", "minutes", "stripe", "pricing", "safety"),
     },
     "claudeai-launch.mp4": {
-        "vision_description": "anthropic launch clip june shipped builders official b-roll",
-        "topics": ("launch", "june", "shipped", "walkthrough", "b-roll", "builders"),
+        "vision_description": "anthropic launch clip june shipped builders official b-roll pro max subscribers capable claude website api trap cloud footnote",
+        "topics": ("launch", "june", "shipped", "walkthrough", "b-roll", "builders", "pro", "max", "subscribers", "capable", "public", "claude", "live", "website", "api", "trap", "cloud", "footnote", "discourse", "launch-week", "brake", "pedal", "monday", "rsi", "timeline", "internet"),
     },
     "canonical-scroll.mp4": {
         "vision_description": "anthropic news blog claude fable mythos announcement scroll launch page",
         "topics": ("anthropic", "fable", "mythos", "launch", "announcement", "blog", "claude", "news", "dropped", "changes"),
     },
     "bio-aav-chart.png": {
-        "vision_description": "biology chemistry AAV viral shell assembly evaluation chart",
-        "topics": ("biology", "chemistry", "aav", "virus", "gene", "therapy", "classifier"),
+        "vision_description": "biology chemistry AAV viral capsid packaging classification chart",
+        "topics": ("biology", "chemistry", "aav", "virus", "viral", "capsid", "packaging", "gene", "therapy", "classifier", "chart"),
+        "visual_focus": ("biology", "chemistry", "aav", "viral", "capsid", "packaging", "chart"),
     },
     "beat1-views-overlay.png": {
-        "vision_description": "anthropic june launch views everyone claude fable five strongest models",
-        "topics": ("anthropic", "june", "launch", "everyone", "fable", "five", "strongest", "models", "teams", "claude"),
+        "vision_description": "twenty six million views on X official claude launch clip social viral reach engagement",
+        "topics": ("views", "million", "viral", "social", "launch", "clip", "engagement", "reach", "record"),
+        "visual_focus": ("views", "million", "viral", "social", "reach", "engagement", "clip", "record"),
     },
     "beat2-tier-diagram.png": {
-        "vision_description": "fable mythos glasswing tier api claude-fable-5 messages enterprise what teams get",
-        "topics": ("fable", "mythos", "glasswing", "engine", "surfaces", "api", "integrate", "teams", "get", "most", "actually"),
+        "vision_description": "fable mythos glasswing tier diagram api june live pro max subscribers capable public claude rsi timeline",
+        "topics": ("fable", "mythos", "glasswing", "tier", "tiers", "api", "integrate", "teams", "get", "most", "actually", "diagram", "chart", "june", "live", "pro", "max", "subscribers", "capable", "public", "claude", "rsi", "timeline", "essay", "whiplash", "anthropic"),
+        "visual_focus": ("tier", "tiers", "fable", "mythos", "glasswing", "api", "diagram", "chart", "june", "live", "pro", "max", "subscribers", "capable", "public", "claude"),
     },
     "beat3-stripe-card.png": {
-        "vision_description": "stripe fifty million lines migration one day manual months",
-        "topics": ("stripe", "million", "lines", "migration", "manual", "ruby"),
+        "vision_description": "stripe fifty million lines migration one day manual months gap real independent tests coding community roundups linkedin demos beast ferrari limiter",
+        "topics": ("stripe", "million", "lines", "migration", "manual", "ruby", "gap", "real", "independent", "tests", "coding", "tasks", "costing", "community", "roundups", "linkedin", "demos", "launch", "beast", "ferrari", "limiter", "willison", "hacker", "enterprise", "ceiling", "tuesday", "refactor"),
+    },
+    "beat1-launch-summary.png": {
+        "vision_description": "fable teams daily safety builder demos games apps social feeds festival software morning launch",
+        "topics": (
+            "fable", "teams", "daily", "safety", "answers", "builder", "demos", "games",
+            "simulations", "apps", "instructions", "social", "feeds", "festival", "software", "morning", "launch", "working",
+        ),
+    },
+    "beat1-views-overlay.png": {
+        "vision_description": "headline receipt launch promised mythos views million anthropic june official inequality reddit fable cyber biology copy-protection checks people opus",
+        "topics": ("views", "million", "launch", "anthropic", "june", "official", "headline", "receipt", "promised", "mythos", "inequality", "reddit", "fable", "included", "plan", "cyber", "biology", "copy-protection", "checks", "people", "opus", "glasswing", "researchers", "trusted"),
+        "visual_focus": ("views", "million", "launch", "headline", "receipt", "promised", "partner", "intelligence", "everyone", "anthropic", "said", "class", "engine", "experiences", "checks", "people", "opus", "copy-protection"),
     },
     "carousel-factorio.mp4": {
-        "vision_description": "factorio factory automation agentic loops coding tasks migrations community apps browser",
-        "topics": ("factorio", "factory", "automation", "agentic", "loops", "migrations", "coding", "tasks", "projects", "browser", "game", "match", "board", "windows", "community", "demos"),
+        "vision_description": "factorio factory automation agentic loops coding tasks migrations community apps browser hacker news beast ferrari",
+        "topics": ("factorio", "factory", "automation", "agentic", "loops", "migrations", "coding", "tasks", "projects", "browser", "game", "match", "board", "windows", "community", "demos", "hacker", "news", "beast", "ferrari", "stripe", "willison", "engineers"),
     },
     "carousel-vibecad.mp4": {
-        "vision_description": "cad vibecad engineering workflows",
-        "topics": ("cad", "workflows", "refactors", "automation", "clips", "design", "tools"),
+        "vision_description": "cad vibecad engineering workflows hacker news beast ferrari stripe",
+        "topics": ("cad", "workflows", "refactors", "automation", "clips", "design", "tools", "community", "demos", "roundups", "linkedin", "projects", "migrations", "hacker", "news", "beast", "ferrari", "stripe", "willison", "enterprise", "proof", "ceiling", "default", "experience", "treat", "migration"),
     },
     "carousel-solar.mp4": {
-        "vision_description": "solar system eclipse simulation community demo browser game city builder",
-        "topics": ("solar", "system", "eclipse", "simulation", "browser", "game", "city", "world", "prompt", "demo", "builders", "linkedin", "community"),
+        "vision_description": "solar system eclipse simulation community demo browser game city builder pokemon spectacle viral scroll",
+        "topics": ("solar", "system", "eclipse", "simulation", "browser", "game", "city", "world", "prompt", "demo", "builders", "linkedin", "community", "pokemon", "spectacle", "viral", "scroll", "timelapse", "vision", "harness", "clip"),
     },
     "carousel-fluid.mp4": {
-        "vision_description": "fluid simulation engineering demo b-roll clip",
-        "topics": ("fluid", "simulation", "engineering", "demo", "clip", "vision"),
+        "vision_description": "fluid simulation engineering demo b-roll clip benchmark swe terminal share social",
+        "topics": ("fluid", "simulation", "engineering", "demo", "clip", "vision", "benchmark", "swe", "terminal", "share", "social", "scores", "fable", "opus", "gpt", "table", "paste", "numbers", "paragraphs", "people", "three", "card", "comparison"),
     },
     "beat4-stat-overlay.png": {
-        "vision_description": "swe-bench verified ninety-five terminal-bench eighties fable mythos longer jobs advantage",
-        "topics": ("swe-bench", "ninety-five", "terminal", "eighties", "fable", "mythos", "benchmark", "longer", "jobs", "advantage"),
+        "vision_description": "swe-bench verified ninety-five terminal-bench eighties fable mythos longer jobs advantage scores companies office",
+        "topics": ("swe-bench", "ninety-five", "terminal", "eighties", "fable", "mythos", "benchmark", "longer", "jobs", "advantage", "scores", "companies", "office", "everyday", "coding"),
+        "visual_focus": ("ninety-five", "swe-bench", "terminal", "benchmark", "scores", "companies", "office", "fable", "mythos", "longer", "jobs", "advantage", "eighty", "three", "percent", "opus", "gpt", "numbers", "paste", "card", "comparison"),
     },
     "benchmark-table.png": {
-        "vision_description": "benchmark scorecard frontier leaderboard engineering knowledge vision",
-        "topics": ("frontier", "benchmark", "leaderboard", "engineering", "knowledge", "launch", "card"),
+        "vision_description": "benchmark scorecard frontier leaderboard engineering swe-bench eighty fable opus gpt",
+        "topics": ("frontier", "benchmark", "leaderboard", "engineering", "knowledge", "launch", "card", "coding", "tests", "eighty", "sixty-nine", "fifty-eight", "fable", "opus", "gpt", "swe-bench", "partner", "percent"),
+        "visual_focus": ("benchmark", "swe-bench", "eighty", "fable", "opus", "scores", "chart", "table", "terminal", "five", "percent", "fallback", "sessions", "comparison", "cards", "tier", "diagrams", "travel"),
     },
     "pokemon-timelapse.mp4": {
-        "vision_description": "pokemon firered vision screenshot navigation harness demo",
-        "topics": ("pokemon", "vision", "firered", "screenshot", "navigation", "demo", "scaffolding"),
+        "vision_description": "pokemon firered vision screenshot navigation harness demo solar browser games spectacle viral repo logging",
+        "topics": ("pokemon", "vision", "firered", "screenshot", "navigation", "demo", "scaffolding", "solar", "browser", "games", "city", "worlds", "prompt", "others", "modelled", "built", "spectacle", "harness", "viral", "logging", "tests", "budget", "scroll"),
     },
     "beat5-spire-stat.png": {
-        "vision_description": "slay spire memory three times final-act opus completion stat",
-        "topics": ("spire", "memory", "three", "final-act", "opus", "stat", "gameplay"),
+        "vision_description": "slay spire memory pokemon spectacle demo viral scroll harness clip budget logging tests",
+        "topics": ("spire", "memory", "three", "final-act", "opus", "stat", "gameplay", "pokemon", "spectacle", "demo", "viral", "scroll", "harness", "clip", "budget", "logging", "tests", "timelapse", "vision", "navigation"),
+        "visual_focus": ("pokemon", "spectacle", "demo", "viral", "scroll", "harness", "clip"),
     },
     "gpt-image-safeguard-fallback.png": {
-        "vision_description": "safeguard fallback diagram classifier backup not blocked safety dead ends",
-        "topics": ("fallback", "diagram", "safeguard", "classifier", "sessions", "refusing", "safety", "dead", "ends", "blocking"),
+        "vision_description": "safeguard fallback diagram classifier backup not blocked safety dead ends notice plan sessions",
+        "topics": ("fallback", "diagram", "safeguard", "classifier", "sessions", "refusing", "safety", "dead", "ends", "blocking", "support", "monitoring", "playbooks", "plan", "backup", "notice", "visible", "percent", "five"),
+        "visual_focus": ("fallback", "safeguard", "diagram", "notice", "plan", "visible", "sessions", "percent"),
     },
     "distillation-safeguard.png": {
-        "vision_description": "copy protection distillation safeguard biology chemistry checks training partner cyber testing",
-        "topics": ("distillation", "copy", "protection", "safeguard", "biology", "chemistry", "training", "steal", "abilities", "partner", "testing", "cyber", "harmful", "tricks", "bypass"),
+        "vision_description": "copy protection distillation safeguard model abilities training steal",
+        "topics": ("distillation", "copy", "protection", "steal", "abilities", "training", "model"),
+        "visual_focus": ("distillation", "copy", "protection", "steal", "abilities"),
     },
     "cyber-classifier.png": {
-        "vision_description": "cyber classifier exploitation offensive agentic hacking sessions backup ninety-five percent",
-        "topics": ("cyber", "classifier", "exploitation", "hacking", "offensive", "ninety", "five", "percent", "sessions", "backup", "need"),
+        "vision_description": "cyber classifier false positives innocuous biology homework greeting register ferrari meme villains incidents",
+        "topics": ("cyber", "classifier", "exploitation", "hacking", "offensive", "ninety", "five", "percent", "sessions", "backup", "need", "support", "monitoring", "playbooks", "plan", "false", "positive", "positives", "innocuous", "biology", "homework", "greeting", "register", "ferrari", "meme", "villains", "incidents", "refused", "pretend", "safeguards", "innocent", "willison", "simon", "sabotage", "paid", "product", "steering", "silent", "feels"),
+        "visual_focus": ("cyber", "classifier", "false", "positive", "biology", "homework", "greeting", "register", "ferrari", "incidents", "villains", "willison", "sabotage", "paid", "product", "steering", "silent"),
     },
     "jailbreak-resistance.png": {
-        "vision_description": "jailbreak resistance bounty harmful cyber completions thirty days bypass safety",
-        "topics": ("jailbreak", "bounty", "harmful", "cyber", "completions", "techniques", "thirty", "days", "bypass", "safety", "training", "stored"),
+        "vision_description": "jailbreak resistance decision matrix switch coder researcher alignment close",
+        "topics": ("jailbreak", "resistance", "attack", "bounty", "harmful", "cyber", "completions", "bypass", "safety", "chart", "copying", "testing", "keys", "production", "partner", "business", "prompts", "decision", "matrix", "switch", "researchers", "coders", "subscribers", "enterprise", "wait", "june", "long-horizon", "agentic", "refactors", "security", "biology", "fallbacks", "routing", "cost-sensitive", "pro", "job", "budget", "autonomous", "cloud", "spend", "chat", "instrument", "probably", "yes", "track"),
+        "visual_focus": ("jailbreak", "resistance", "decision", "matrix", "switch", "researchers", "coders", "subscribers", "long-horizon", "agentic", "refactors", "security", "biology", "fallbacks", "cost-sensitive", "pro", "wait", "june", "budget", "autonomous", "cloud", "spend"),
     },
     "beat7-api-table.png": {
-        "vision_description": "api messages web app block fallback claude.ai enterprise consumption website developer mistake",
-        "topics": ("api", "web", "app", "block", "fallback", "messages", "claude.ai", "enterprise", "opt", "website", "developer", "mistake", "versus"),
+        "vision_description": "api messages web app block fallback claude.ai enterprise website trap billing developer",
+        "topics": ("api", "web", "app", "block", "fallback", "messages", "claude.ai", "enterprise", "opt", "website", "developer", "mistake", "versus", "support", "tickets", "billing", "blocked", "error", "response", "developers", "sensitive", "prompts", "assume", "switch", "trap", "cloud", "platform"),
+        "visual_focus": ("api", "web", "website", "fallback", "developer", "billing", "trap", "platform", "block", "notification", "switch", "sensitive", "prompt", "cloud", "footnote", "enterprise", "hosted", "compliance", "continuity", "tweet", "launch"),
     },
     "beat8-glasswing.png": {
-        "vision_description": "project glasswing cyber defenders mythos preview tiers",
-        "topics": ("glasswing", "cyber", "defenders", "mythos", "preview", "tiers"),
+        "vision_description": "project glasswing cyber defenders mythos preview tiers headline receipt lab coat science slack",
+        "topics": ("glasswing", "cyber", "defenders", "mythos", "preview", "tiers", "headline", "receipt", "science", "slack", "lab", "partner", "biology", "cohort", "press", "coverage", "drug", "design", "genomics", "benchmarks", "protein", "methods", "inequality", "ladder", "coat", "faster", "preference", "scientist"),
     },
     "protein-complexes.png": {
-        "vision_description": "biology trusted access cohort researchers bio classifiers",
-        "topics": ("biology", "trusted", "researchers", "cohort", "bio", "classifiers"),
+        "vision_description": "biology trusted access cohort researchers bio classifiers public purchase sign online neither path",
+        "topics": ("biology", "trusted", "researchers", "cohort", "bio", "classifiers", "public", "purchase", "sign", "online", "neither", "path", "simple"),
     },
     "beat9-pricing.png": {
-        "vision_description": "pricing ten fifty dollars million tokens june subscription",
-        "topics": ("pricing", "ten", "fifty", "dollars", "tokens", "june", "subscription", "enterprise"),
+        "vision_description": "pricing ten fifty dollars million tokens june subscription deadline cliff rsi timeline launch mythos preview double",
+        "topics": ("pricing", "ten", "fifty", "dollars", "tokens", "june", "subscription", "enterprise", "usage", "billing", "budget", "autonomous", "plan", "limits", "deadline", "cliff", "rsi", "timeline", "launch", "copy", "fable", "mythos", "preview", "social", "math", "double", "model", "money", "clock", "twenty-two", "cloud", "spend", "chat", "runs", "unlimited"),
     },
     "jailbreak-retention.png": {
         "vision_description": "retention thirty days jailbreak prompts logged training distillation eval",
         "topics": ("retention", "thirty", "jailbreak", "prompts", "training", "distillation", "eval", "classifiers"),
     },
     "alignment-chart.png": {
-        "vision_description": "misaligned behaviour alignment eval chart mythos opus scores safeguards tighten launch",
-        "topics": ("misaligned", "alignment", "behaviour", "chart", "safeguards", "tighten", "launch", "settings", "copying", "model", "production"),
+        "vision_description": "misaligned behaviour alignment eval chart mythos opus scores safeguards decision matrix switch",
+        "topics": ("misaligned", "alignment", "behaviour", "chart", "safeguards", "tighten", "launch", "settings", "copying", "model", "production", "decision", "matrix", "switch", "researchers", "coders", "subscribers", "enterprise", "wait", "june", "log", "sessions", "receipts", "headlines", "confuse", "visible", "silent", "job"),
+        "visual_focus": ("alignment", "chart", "decision", "matrix", "switch", "log", "sessions", "receipts", "headlines", "confuse", "visible", "silent", "cost-sensitive", "pro", "subscribers", "wait", "june", "safeguards", "tune", "launch", "week", "job"),
+    },
+    "v2-inequality-ladder.png": {
+        "vision_description": "access paths inequality fable mythos glasswing bio trusted classifiers fallback",
+        "topics": ("inequality", "reddit", "preview", "fable", "mythos", "glasswing", "bio", "trusted", "classifiers", "fallback", "access", "receipt", "engine", "people", "partners", "researchers", "cyber", "biology", "copy-protection", "opus", "visible", "switch", "chemistry", "blunt", "launch", "model", "weights", "slide", "session"),
+    },
+    "v2-headline-vs-receipt.png": {
+        "vision_description": "headline receipt launch promised mythos-class included plan june cliff",
+        "topics": ("headline", "receipt", "promised", "launch", "mythos", "included", "plan", "june", "fallback", "classifiers", "reddit", "inequality", "session", "weights", "slide", "partner", "class", "everyone", "engine", "experiences"),
+    },
+    "v2-timeline-rsi-fable.png": {
+        "vision_description": "rsi essay five day whiplash june ship fable credits cliff brake pedal frontier",
+        "topics": ("rsi", "essay", "safety", "june", "ship", "fable", "whiplash", "credits", "twenty-two", "anthropic", "brake", "pedal", "frontier", "monday", "friday", "tension", "workflow"),
+    },
+    "v2-hn-split-quotes.png": {
+        "vision_description": "hacker news beast ferrari willison stripe scale session counter-meme limiter",
+        "topics": ("hacker", "news", "beast", "ferrari", "willison", "stripe", "thread", "speed", "limited", "counter", "meme", "limiter", "conversation"),
+    },
+    "v2-benchmark-3row.png": {
+        "vision_description": "swe-bench pro eighty point three fable opus gpt benchmark comparison table",
+        "topics": ("swe-bench", "benchmark", "eighty", "three", "percent", "fable", "opus", "gpt", "comparison", "scores", "terminal", "share", "social", "card", "verify"),
+        "visual_focus": ("swe-bench", "benchmark", "eighty", "fable", "opus", "percent", "table", "numbers", "paste", "paragraphs", "three"),
+    },
+    "v2-pricing-compare.png": {
+        "vision_description": "pricing ten fifty tokens opus double api cost cliff june subscription credits",
+        "topics": ("pricing", "ten", "fifty", "tokens", "opus", "double", "api", "cost", "credits", "june", "subscription", "pharmaceutical", "cliff", "plans"),
+    },
+    "v2-two-safeties.png": {
+        "vision_description": "visible fallback silent steering two safeties conflate trust opus sessions stories different breaks",
+        "topics": ("visible", "fallback", "silent", "steering", "safeties", "conflate", "trust", "opus", "sessions", "stories", "different", "safety", "willison", "sabotage", "breaks", "path", "stories", "conflating", "notice", "plan", "route", "classifiers", "percent", "average"),
+    },
+    "v2-false-positive-list.png": {
+        "vision_description": "false positives innocuous biology homework greeting register ferrari meme silent steering",
+        "topics": ("false", "positive", "innocent", "biology", "homework", "greeting", "register", "ferrari", "refused", "silent", "steering", "willison", "incidents", "villains", "safeguards", "pretend", "name"),
+    },
+    "v2-decision-matrix.png": {
+        "vision_description": "decision matrix switch coder researcher cost enterprise compliance june matrix",
+        "topics": ("decision", "matrix", "switch", "coder", "researchers", "subscribers", "safeguards", "festival", "billing", "logging", "long-horizon", "refactors", "fallbacks", "instrument", "wait", "june", "tune", "launch", "week", "sessions", "receipts", "headlines", "sla", "autonomous", "chat", "cloud", "spend"),
+    },
+    "v2-june22-calendar.png": {
+        "vision_description": "june twenty-two calendar cliff credits pro max billing pharmaceutical plans",
+        "topics": ("june", "twenty-two", "calendar", "cliff", "credits", "billing", "pro", "max", "included", "pharmaceutical", "plans", "required", "team", "enterprise", "seats", "twenty", "twenty-six", "deadline", "timeline", "rsi"),
+    },
+    "v2-quote-karpathy.png": {
+        "vision_description": "karpathy step change coding agents trigger-happy safeguards caveat pokemon demo",
+        "topics": ("karpathy", "step", "change", "coding", "agents", "trigger", "safeguards", "caveat", "pokemon", "timelapse", "scroll", "demo", "spectacle"),
+    },
+    "v2-quote-willison.png": {
+        "vision_description": "willison beast silent steering sabotage paid product hn",
+        "topics": ("willison", "beast", "silent", "steering", "sabotage", "paid", "product", "trust"),
+    },
+    "v2-platform-fallback-gaps.png": {
+        "vision_description": "website api fallback trap claude block error cloud model id footnote platform",
+        "topics": ("website", "api", "fallback", "trap", "block", "error", "cloud", "developer", "model", "footnote", "platform", "compliance", "continuity"),
+    },
+    "social-capture-hn-beast-ferrari.png": {
+        "vision_description": "hacker news beast ferrari willison stripe scale session counter-meme limiter shipped fable thread",
+        "topics": ("hacker", "news", "beast", "ferrari", "willison", "stripe", "thread", "speed", "limited", "counter", "meme", "limiter", "conversation", "shipped", "fable", "anthropic", "claude", "watched", "million"),
+    },
+    "social-capture-reddit-inequality.png": {
+        "vision_description": "access paths inequality fable mythos glasswing bio trusted classifiers fallback reddit blunt model launch preview",
+        "topics": ("inequality", "reddit", "preview", "fable", "mythos", "headline", "receipt", "promised", "launch", "fallback", "classifiers", "access", "engine", "blunt", "model", "frame", "session", "weights", "slide", "partner", "glasswing", "biology"),
+    },
+    "fallback-notification.mp4": {
+        "vision_description": "claude ai fallback notification visible safety classifier route opus session",
+        "topics": ("fallback", "visible", "notification", "classifier", "opus", "safety", "session", "route", "claude", "platform"),
     },
 }
+VISUAL_META.update(visual_meta_from_specs())
+VISUAL_META["beat1-launch-summary.png"].update({
+    "vision_description": "fable teams daily safety builder demos games apps social feeds festival software morning launch working",
+    "topics": (
+        "fable", "teams", "daily", "safety", "answers", "builder", "demos", "games",
+        "simulations", "apps", "instructions", "social", "feeds", "festival", "software", "morning", "launch", "working",
+    ),
+})
 
 
 def _srt_ts(ts: str) -> float:
@@ -199,6 +299,7 @@ def _windows_for_beat(
     *,
     hook_launch: bool = False,
     outro_table: bool = False,
+    segments_dir: Path | None = None,
 ) -> list[VisualWindow]:
     dur = seg_dur
     t0 = seg_start
@@ -228,28 +329,143 @@ def _windows_for_beat(
     images = _dedupe(images)
     wins: list[VisualWindow] = []
 
-    if beat_num == 7:
-        table = next((g for g in generated if "beat7" in g.get("filename", "")), None)
-        table_dur = min(28.0, max(12.0, dur * 0.5))
-        if table:
-            wins.append(VisualWindow(t0, t0 + table_dur, f"beat-{beat_num:02d}", "API table", Path(table["path"]).name))
-        flow = assets / "gpt-image-safeguard-fallback.png"
-        if flow.is_file() and table_dur < dur:
-            wins.append(VisualWindow(t0 + table_dur, t0 + dur, f"beat-{beat_num:02d}", "fallback diagram", flow.name))
-        return wins
-
-    if beat_num == 1 and generated:
+    if beat_num == 1 and images and not generated:
+        headline = next(
+            (i for i in images if "headline" in i.get("filename", "") or "views-overlay" in i.get("filename", "")),
+            images[0],
+        )
+        ladder = next(
+            (i for i in images if "inequality" in i.get("filename", "") or "social-capture" in i.get("filename", "")),
+            images[-1],
+        )
+        headline_d = dur * 0.20
+        off = t0
+        if clips:
+            clip_d = min(headline_d, dur * 0.22)
+            wins.append(VisualWindow(
+                off, off + clip_d, "beat-01", "launch clip", Path(clips[0]["path"]).name,
+            ))
+            off += clip_d
         wins.append(VisualWindow(
-            t0, t0 + dur, "beat-01", "views overlay", Path(generated[0]["path"]).name,
+            off, off + headline_d, "beat-01", "headline vs receipt",
+            Path(headline["path"]).name,
+        ))
+        wins.append(VisualWindow(
+            off + headline_d, t0 + dur, "beat-01", "inequality ladder",
+            Path(ladder["path"]).name,
         ))
         return wins
 
+    if beat_num == 1 and generated:
+        fname = Path(generated[0]["path"]).name
+        ts = (segments_dir or assets.parent) / "01-cold-open" / "timestamps.json"
+        root = segments_dir.parent if segments_dir else assets.parent
+        merged_srt = root / "merge" / "final.srt"
+        views_d = beat01_views_duration_sec(
+            dur, ts,
+            merged_srt=merged_srt if merged_srt.is_file() else None,
+            t0=t0,
+        )
+        wins.append(VisualWindow(t0, t0 + views_d, "beat-01", "views overlay", fname))
+        rest = max(0.0, dur - views_d)
+        points = slide_specs()["beat-01-rest"]
+        if rest >= 0.75 and points:
+            per = rest / len(points)
+            off = t0 + views_d
+            for spec in points:
+                wins.append(VisualWindow(
+                    off, off + per, "beat-01", spec["headline"], spec["file"],
+                ))
+                off += per
+        return wins
+
+    if beat_num == 2 and images and clips:
+        img_d = dur * 0.62
+        per = img_d / max(1, len(images))
+        off = t0
+        for img in images:
+            wins.append(VisualWindow(
+                off, off + per, "beat-02", "RSI timeline slide", Path(img["path"]).name,
+            ))
+            off += per
+        wins.append(VisualWindow(
+            off, t0 + dur, "beat-02", "launch clip", Path(clips[0]["path"]).name,
+        ))
+        return wins
+
+    if beat_num == 2 and generated:
+        tier = Path(generated[0]["path"]).name
+        tier_d = dur * 0.38
+        wins.append(VisualWindow(t0, t0 + tier_d, "beat-02", "tier diagram", tier))
+        points = slide_specs()["beat-02-extra"]
+        rest = max(0.0, dur - tier_d)
+        if points and rest >= 0.75:
+            per = rest / len(points)
+            off = t0 + tier_d
+            for spec in points:
+                wins.append(VisualWindow(off, off + per, "beat-02", spec["headline"], spec["file"]))
+                off += per
+        return wins
+
+    if beat_num == 7:
+        table = next((g for g in generated if "beat7" in g.get("filename", "")), None)
+        if not table and (assets / "generated" / "beat7-api-table.png").is_file():
+            table = {"path": str(assets / "generated" / "beat7-api-table.png"), "filename": "beat7-api-table.png"}
+        clip_d = min(10.0, dur * 0.25) if clips else 0.0
+        off = t0
+        if clips:
+            wins.append(VisualWindow(
+                off, off + clip_d, "beat-07", "launch clip", Path(clips[0]["path"]).name,
+            ))
+            off += clip_d
+        table_d = min(28.0, max(12.0, (dur - clip_d) * 0.55))
+        if table:
+            wins.append(VisualWindow(
+                off, off + table_d, "beat-07", "API table", Path(table["path"]).name,
+            ))
+        gap = next((g for g in generated[1:] if "fallback-gaps" in g.get("filename", "")), None)
+        points = slide_specs()["beat-07-rest"]
+        rest = max(0.0, dur - clip_d - table_d)
+        off = off + table_d if table else off
+        if gap and rest >= 0.75:
+            gap_d = min(18.0, rest * 0.45)
+            wins.append(VisualWindow(off, off + gap_d, "beat-07", "platform fallback gaps", Path(gap["path"]).name))
+            off += gap_d
+            rest = max(0.0, dur - clip_d - table_d - gap_d)
+        if points and rest >= 0.75:
+            per = rest / len(points)
+            for spec in points:
+                wins.append(VisualWindow(off, off + per, "beat-07", spec["headline"], spec["file"]))
+                off += per
+        return wins
+
+    if beat_num == 9 and generated:
+        fname = Path(generated[0]["path"]).name
+        wins.append(VisualWindow(t0, t0 + dur, "beat-09", "pricing card", fname))
+        return wins
+
     if beat_num == 3 and generated and clips:
-        card_d = min(14.0, dur * 0.38)
-        wins.append(VisualWindow(t0, t0 + card_d, f"beat-{beat_num:02d}", "Stripe card", Path(generated[0]["path"]).name))
-        rest = dur - card_d
+        social = next(
+            (i for i in images if "social-capture" in (i.get("filename") or "").lower()),
+            None,
+        )
+        off = t0
+        if social:
+            soc_d = min(14.0, dur * 0.32)
+            wins.append(VisualWindow(
+                off, off + soc_d, f"beat-{beat_num:02d}", "HN social capture",
+                Path(social["path"]).name,
+            ))
+            off += soc_d
+            card_d = min(12.0, dur * 0.26)
+        else:
+            card_d = min(14.0, dur * 0.38)
+        wins.append(VisualWindow(
+            off, off + card_d, f"beat-{beat_num:02d}", "Stripe card", Path(generated[0]["path"]).name,
+        ))
+        rest = dur - (off - t0) - card_d
         per = rest / len(clips)
-        off = t0 + card_d
+        off += card_d
         for c in clips:
             wins.append(VisualWindow(off, off + per, f"beat-{beat_num:02d}", "B-roll", Path(c["path"]).name))
             off += per
@@ -314,12 +530,20 @@ def _windows_for_beat(
         return wins
 
     if beat_num == 6 and images:
-        order = ("safeguard", "fallback", "cyber", "jailbreak")
+        from praisonaippt.daily_single.cue_slide_sync import beat6_cue_windows
+
+        seg_srt = (segments_dir or assets.parent) / "06-safeguards" / "segment.srt"
+        merged_srt = (segments_dir.parent if segments_dir else assets.parent) / "merge" / "final.srt"
+        wins = beat6_cue_windows(t0, dur, images, seg_srt, merged_srt)
+        if wins:
+            return wins
+        wins = []
+        order = ("fallback", "bio-aav", "distillation", "cyber", "jailbreak")
         ranked = sorted(
             images,
             key=lambda i: next((n for n, k in enumerate(order) if k in i.get("filename", "").lower()), 99),
-        )[:3]
-        per = dur / len(ranked)
+        )[:4]
+        per = dur / max(1, len(ranked))
         off = t0
         for img in ranked:
             wins.append(VisualWindow(off, off + per, f"beat-{beat_num:02d}", "safeguard slide", Path(img["path"]).name))
@@ -336,15 +560,48 @@ def _windows_for_beat(
         return wins
 
     if beat_num == 4 and generated and images:
-        slides = images[:1] + generated  # table first, stat second
-        per = dur / 2
+        clip_d = 0.0
         off = t0
+        if clips:
+            clip_d = min(14.0, dur * 0.28)
+            wins.append(VisualWindow(
+                off, off + clip_d, f"beat-{beat_num:02d}", "demo clip", Path(clips[0]["path"]).name,
+            ))
+            off += clip_d
+        slides = images[:1] + generated
+        remain = dur - clip_d
+        per = remain / max(1, len(slides))
         for s in slides:
             wins.append(VisualWindow(off, off + per, f"beat-{beat_num:02d}", "benchmark slide", Path(s["path"]).name))
             off += per
         return wins
 
+    if beat_num == 9 and images and any("v2-pricing" in i.get("filename", "") for i in images):
+        fracs = (0.38, 0.30, 0.32)
+        off = t0
+        for i, item in enumerate(images[:3]):
+            frac = fracs[i] if i < len(fracs) else 0.32
+            wins.append(VisualWindow(
+                off, off + dur * frac, f"beat-{beat_num:02d}", "pricing slide", item["filename"],
+            ))
+            off += dur * frac
+        return wins
+
     if beat_num == 10:
+        v2_items = [
+            i for i in (images or []) + (generated or [])
+            if (i.get("filename") or "").startswith("v2-")
+        ]
+        if v2_items:
+            per = dur / max(1, len(v2_items))
+            off = t0
+            for item in v2_items:
+                wins.append(VisualWindow(
+                    off, off + per, f"beat-{beat_num:02d}", "trust audit slide", item["filename"],
+                ))
+                off += per
+            return wins
+
         jail = assets / "jailbreak-resistance.png"
         align = assets / "alignment-chart.png"
         specs: list[tuple[Path, float]] = []
@@ -366,6 +623,15 @@ def _windows_for_beat(
         off = t0
         for c in clips:
             wins.append(VisualWindow(off, off + per, beat_key, "clip", Path(c["path"]).name))
+            off += per
+        return wins
+
+    if images and not clips:
+        slides = images + (generated or [])
+        per = dur / max(1, len(slides))
+        off = t0
+        for item in slides:
+            wins.append(VisualWindow(off, off + per, beat_key, "slide", Path(item["path"]).name))
             off += per
         return wins
 
@@ -415,14 +681,21 @@ def build_visual_timeline(project: DailySingleProject) -> list[VisualWindow]:
             else:
                 out.extend(_windows_for_beat("00-hook", None, start, dur, {}, assets, hook_launch=True))
         elif label == "99-outro":
-            heygen = project.segments_dir / "99-outro" / "heygen.mp4"
-            if heygen.is_file():
-                out.append(VisualWindow(start, start + dur, "99-outro", "HeyGen avatar", "heygen.mp4"))
-            else:
-                out.extend(_windows_for_beat("99-outro", None, start, dur, {}, assets, outro_table=True))
+            cta = slide_specs()["outro-cta"][0]
+            out.append(VisualWindow(
+                start, start + dur, "99-outro", cta["headline"], cta["file"],
+            ))
         else:
+            if label == "01-cold-open":
+                bumper_row = seg_by_id.get(BUMPER_STEM)
+                if bumper_row:
+                    bs = float(bumper_row["start_sec"])
+                    be = bs + float(bumper_row["duration_sec"])
+                    out.append(VisualWindow(
+                        bs, be, "brand-bumper", "brand bumper", BUMPER_FILENAME,
+                    ))
             spec = beats.get(str(beat_num), {})
-            out.extend(_windows_for_beat(tl_id, beat_num, start, dur, spec, assets))
+            out.extend(_windows_for_beat(tl_id, beat_num, start, dur, spec, assets, segments_dir=project.segments_dir))
     return out
 
 

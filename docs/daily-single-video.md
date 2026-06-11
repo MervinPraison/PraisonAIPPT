@@ -287,9 +287,35 @@ Output: `merge/sync_validation_report.json`
 
 ### 2. `validate-display`
 
+Per-cue midpoint: keyword alignment ≥ **0.35**.
+
 Output: `merge/display_sync_report.json`
 
-### 3. `audit-visual`
+### 3. `validate-spoken-visual`
+
+Full-video spoken↔visual gate — stricter than display sync alone:
+
+| Layer | Rule |
+|-------|------|
+| Hook montage | Overview fragments inline with hero slides |
+| Visual windows | Every overlapping cue while a slide is visible (worst-cue-wins) |
+| Chart windows | Chart/table slides + plain-language `visual_focus` |
+| Transitions | Sample at every slide change and cue start |
+| Coverage | Spoken chart/fact lines have matching slides |
+| Plain language | Audience-language pytest rules |
+
+Output: `merge/spoken_visual_sync_report.json` — publish requires `"ok": true`.
+
+Cue-aligned assembly (beat-06 safeguards, beat-01 views): run **`build-captions` before `assemble-beats`** so `merge/final.srt` drives slide durations. See [Daily single testing — spoken↔visual](daily-single-testing.md#validatespoken-visual) and skill [spoken-visual-sync.md](../.cursor/skills/daily-single-video-pipeline/spoken-visual-sync.md).
+
+```bash
+daily-single -p $PROJECT build-captions
+daily-single -p $PROJECT assemble-beats
+daily-single -p $PROJECT validate-display
+daily-single -p $PROJECT validate-spoken-visual
+```
+
+### 4. `audit-visual`
 
 Samples `final.mp4` every **5 s** (+ cue midpoints). Pixel similarity vs planned asset:
 
@@ -302,7 +328,7 @@ Samples `final.mp4` every **5 s** (+ cue midpoints). Pixel similarity vs planned
 Blocks generic B-roll (`claudeai-launch.mp4`) when enabled in protocol.  
 Output: `merge/visual_audit_report.json`, frames in `merge/visual_audit_frames/`.
 
-### 4. `validate-all`
+### 5. `validate-all`
 
 Final gate: tools, 1920×1080 output, duration 280–540 s, beat coverage, HeyGen bookends, media inventory ≥720p, all reports pass.  
 Output: `validation_report.json` at project root.
@@ -321,7 +347,10 @@ Output: `validation_report.json` at project root.
 | `hook_validation.py` | Montage gates |
 | `assemble.py` | ffmpeg beat assembly |
 | `captions.py` | Script-aligned SRT |
-| `display_sync.py` | Cue → visual scoring |
+| `display_sync.py` | Cue → visual scoring + `VISUAL_META` |
+| `cue_slide_sync.py` | Beat-06 cue-aligned slide windows + assembly |
+| `beat01_timing.py` | Beat-01 views overlay duration from merged SRT |
+| `spoken_visual_sync.py` | Montage, windows, charts, transitions gate |
 | `visual_audit.py` | Pixel frame audit |
 | `sync_validation.py` | Combined validation suite |
 | `youtube_quality.py` | YouTube style gates |

@@ -19,6 +19,9 @@ from praisonaippt.video_qa.stages.s09_on_screen_text import run_s09_on_screen_te
 from praisonaippt.video_qa.stages.s10_final_composite import run_s10_final_composite
 from praisonaippt.video_qa.stages.s11_canonical_capture import run_s11_canonical_capture
 from praisonaippt.video_qa.stages.s12_hook_attention import run_s12_hook_attention
+from praisonaippt.video_qa.stages.s13_slide_design import run_s13_slide_design
+from praisonaippt.video_qa.stages.s14_engagement import run_s14_engagement
+from praisonaippt.video_qa.stages.s15_viral_readiness import run_s15_viral_readiness
 
 StageFn = Callable[..., StageReport]
 
@@ -36,6 +39,9 @@ STAGE_RUNNERS: dict[str, StageFn] = {
     "s10-final-composite": run_s10_final_composite,
     "s11-canonical-capture": run_s11_canonical_capture,
     "s12-hook-attention": run_s12_hook_attention,
+    "s13-slide-design": run_s13_slide_design,
+    "s14-engagement": run_s14_engagement,
+    "s15-viral-readiness": run_s15_viral_readiness,
 }
 
 

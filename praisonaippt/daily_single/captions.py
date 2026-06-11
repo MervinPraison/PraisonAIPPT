@@ -52,6 +52,53 @@ def _transcribe_with_module(mp3: Path, ts: Path) -> None:
     ts.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _proportional_word_timestamps(mp3: Path, script_path: Path, ts: Path) -> None:
+    """When Whisper fails, map script words to audio duration (TTS matches script)."""
+    text = narration_text_for_tts(script_path.read_text(encoding="utf-8"))
+    raw_words = re.findall(r"\S+", text)
+    if not raw_words:
+        return
+    total = ffprobe_duration(mp3)
+    weights = [max(1, len(re.sub(r"[^\w']+", "", w.lower())) or 1) for w in raw_words]
+    total_w = sum(weights)
+    t = 0.0
+    words: list[dict] = []
+    segments: list[dict] = []
+    seg_words: list[dict] = []
+    seg_text: list[str] = []
+    seg_start = 0.0
+    for word_raw, weight in zip(raw_words, weights):
+        dur = total * (weight / total_w)
+        entry = {"word": word_raw, "start": round(t, 3), "end": round(t + dur, 3)}
+        words.append(entry)
+        seg_words.append(entry)
+        seg_text.append(word_raw)
+        t += dur
+        if word_raw.rstrip().endswith((".", "!", "?")):
+            segments.append({
+                "id": len(segments),
+                "start": seg_start,
+                "end": round(t, 3),
+                "text": " ".join(seg_text),
+                "words": seg_words,
+            })
+            seg_start = t
+            seg_words = []
+            seg_text = []
+    if seg_words:
+        segments.append({
+            "id": len(segments),
+            "start": seg_start,
+            "end": round(t, 3),
+            "text": " ".join(seg_text),
+            "words": seg_words,
+        })
+    ts.write_text(
+        json.dumps({"text": text, "duration": total, "segments": segments, "words": words}, indent=2),
+        encoding="utf-8",
+    )
+
+
 def _ensure_transcript(mp3: Path, ts: Path, *, force: bool = False) -> None:
     if ts.is_file() and not force and ts.stat().st_mtime >= mp3.stat().st_mtime:
         return
@@ -65,8 +112,13 @@ def _ensure_transcript(mp3: Path, ts: Path, *, force: bool = False) -> None:
             env=env,
             timeout=600,
         )
+        if ts.is_file():
+            return
     except (subprocess.CalledProcessError, FileNotFoundError, OSError, subprocess.TimeoutExpired):
         pass
+    script = mp3.parent / "script.md"
+    if script.is_file():
+        _proportional_word_timestamps(mp3, script, ts)
 
 
 def _proportional_cues(sentences: list[str], total_dur: float) -> list[dict]:

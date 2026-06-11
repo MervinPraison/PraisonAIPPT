@@ -16,6 +16,7 @@ examples/videos/
 |---------|------|------|
 | [june-2026-ai-roundup](june-2026-ai-roundup/) | Megapost HeyGen roundup | `.cursor/skills/segment-video-roundup/SKILL.md` |
 | [anthropic-claude-fable-5-mythos-5](anthropic-claude-fable-5-mythos-5/) | Daily single (ffmpeg + hook montage) | [docs/daily-single-video.md](../../docs/daily-single-video.md) |
+| [anthropic-claude-fable-5-trust-audit](anthropic-claude-fable-5-trust-audit/) | **V2** social/trust audit (gap report + X comparisons) | [GAP-REPORT.md](anthropic-claude-fable-5-trust-audit/research/GAP-REPORT.md) |
 
 ---
 
@@ -26,10 +27,11 @@ Single-topic YouTube walkthrough (~5–9 min). **Not** the segment-video-roundup
 | Step | Command |
 |------|---------|
 | Bootstrap | `scripts/bootstrap-daily-single.sh` |
-| Skill | `.cursor/skills/daily-single-video/SKILL.md` |
+| Skill | `.cursor/skills/daily-single-video/SKILL.md` · pipeline: `.cursor/skills/daily-single-video-pipeline/SKILL.md` |
+| Spoken↔visual | `.cursor/skills/daily-single-video-pipeline/spoken-visual-sync.md` |
 | Full docs | [docs/daily-single-video.md](../../docs/daily-single-video.md) |
 
-Standard pipeline:
+Standard pipeline (cue-aligned):
 
 ```bash
 conda activate test
@@ -38,8 +40,10 @@ PROJECT=examples/videos/<slug>
 python -m praisonaippt.daily_single --project $PROJECT sync-assets
 python -m praisonaippt.daily_single --project $PROJECT synthesise-vo
 python -m praisonaippt.daily_single --project $PROJECT bookend-media 00-hook 99-outro
-python -m praisonaippt.daily_single --project $PROJECT assemble-beats
 python -m praisonaippt.daily_single --project $PROJECT build-captions
+python -m praisonaippt.daily_single --project $PROJECT assemble-beats
+python -m praisonaippt.daily_single --project $PROJECT validate-display
+python -m praisonaippt.daily_single --project $PROJECT validate-spoken-visual
 python -m praisonaippt.daily_single --project $PROJECT audit-visual --interval 5
 python -m praisonaippt.daily_single --project $PROJECT validate-sync --runs 3
 python -m praisonaippt.daily_single --project $PROJECT validate-all
