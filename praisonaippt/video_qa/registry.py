@@ -22,6 +22,13 @@ from praisonaippt.video_qa.stages.s12_hook_attention import run_s12_hook_attenti
 from praisonaippt.video_qa.stages.s13_slide_design import run_s13_slide_design
 from praisonaippt.video_qa.stages.s14_engagement import run_s14_engagement
 from praisonaippt.video_qa.stages.s15_viral_readiness import run_s15_viral_readiness
+from praisonaippt.video_qa.stages.s16_montage_clock import run_s16_montage_clock
+from praisonaippt.video_qa.stages.s17_cue_picture_map import run_s17_cue_picture_map
+from praisonaippt.video_qa.stages.s18_video_first_policy import run_s18_video_first_policy
+from praisonaippt.video_qa.stages.s19_chart_script import run_s19_chart_script
+from praisonaippt.video_qa.stages.s20_asset_inventory import run_s20_asset_inventory
+from praisonaippt.video_qa.stages.s21_beat_map_policy import run_s21_beat_map_policy
+from praisonaippt.video_qa.stages.s22_word_visual_sync import run_s22_word_visual_sync
 
 StageFn = Callable[..., StageReport]
 
@@ -42,6 +49,13 @@ STAGE_RUNNERS: dict[str, StageFn] = {
     "s13-slide-design": run_s13_slide_design,
     "s14-engagement": run_s14_engagement,
     "s15-viral-readiness": run_s15_viral_readiness,
+    "s16-montage-clock": run_s16_montage_clock,
+    "s17-cue-picture-map": run_s17_cue_picture_map,
+    "s18-video-first-policy": run_s18_video_first_policy,
+    "s19-chart-script": run_s19_chart_script,
+    "s20-asset-inventory": run_s20_asset_inventory,
+    "s21-beat-map-policy": run_s21_beat_map_policy,
+    "s22-word-visual-sync": run_s22_word_visual_sync,
 }
 
 
@@ -95,5 +109,7 @@ def run_registered_stage(
         kwargs["sync_runs"] = int(stage_cfg.get("sync_runs", 3))
     elif stage_id == "s12-hook-attention":
         kwargs["seconds"] = int(stage_cfg.get("seconds", 5))
+    elif stage_id == "s22-word-visual-sync":
+        kwargs["use_vlm"] = bool(stage_cfg.get("use_vlm", True))
 
     return fn(project, **kwargs)

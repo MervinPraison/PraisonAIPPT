@@ -20,7 +20,20 @@ def main(argv: list[str] | None = None) -> int:
 
     run_p = sub.add_parser("run", help="Run QA stage(s)")
     run_p.add_argument("stage", nargs="?", help="Stage id (e.g. s04-knowledge); omit with --when")
-    run_p.add_argument("--when", choices=["pre_build", "pre_assemble", "post_vo", "post_build", "all"], default="all")
+    run_p.add_argument(
+        "--when",
+        choices=[
+            "pre_build",
+            "post_vo",
+            "post_bookends",
+            "pre_assemble",
+            "post_assemble",
+            "post_captions",
+            "post_build",
+            "all",
+        ],
+        default="all",
+    )
     run_p.add_argument("--phase", help="Sub-phase for s01-assets or s06-coverage")
     run_p.add_argument("--stages", nargs="*", dest="stage_list", help="Explicit stage ids for suite run")
     run_p.add_argument("--fail-fast", action="store_true", help="Stop on first stage exception")

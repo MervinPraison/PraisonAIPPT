@@ -89,6 +89,57 @@ def render_point_slide(
     return dest
 
 
+_DEFAULT_OUTRO_CTA: list[dict[str, Any]] = [
+    {
+        "file": "outro-cta.png",
+        "headline": "Like · Share · Subscribe",
+        "bullets": ["Builder demos link in description", "Thanks for watching"],
+        "topics": ("like", "share", "subscribe", "demos", "description", "thanks", "watching"),
+    },
+]
+
+_SOCIAL_COMPARISON_OUTRO: list[dict[str, Any]] = [
+    {
+        "file": "outro-cta.png",
+        "headline": "Every comparison clip is sourced",
+        "accent": "Benchmark tables and clip links in the description",
+        "bullets": [
+            "Subscribe for launch-week breakdowns",
+            "Thanks for watching",
+        ],
+        "topics": (
+            "source", "links", "comparison", "clip", "benchmark", "tables",
+            "description", "subscribe", "launch-week", "breakdowns", "thanks", "watching",
+        ),
+    },
+]
+
+_TRUST_AUDIT_OUTRO: list[dict[str, Any]] = [
+    {
+        "file": "outro-cta.png",
+        "headline": "Full comparison tables",
+        "accent": "Source links in the video description",
+        "bullets": [
+            "Subscribe for launch-week breakdowns",
+            "Thanks for watching",
+        ],
+        "topics": (
+            "comparison", "tables", "source", "links", "description",
+            "subscribe", "launch-week", "breakdowns", "thanks", "watching",
+        ),
+    },
+]
+
+
+def outro_slide_specs(variant: str = "") -> list[dict[str, Any]]:
+    """Variant-aware outro CTA slide — matches segments/99-outro/script.md tone."""
+    if variant == "social-comparison":
+        return _SOCIAL_COMPARISON_OUTRO
+    if variant == "trust-audit":
+        return _TRUST_AUDIT_OUTRO
+    return _DEFAULT_OUTRO_CTA
+
+
 def slide_specs() -> dict[str, list[dict[str, Any]]]:
     """Slide content keyed by beat id — mirrored in display_sync."""
     return {
@@ -163,27 +214,27 @@ def slide_specs() -> dict[str, list[dict[str, Any]]]:
                 "topics": ("budget", "autonomous", "runs", "usage", "billing", "limits"),
             },
         ],
-        "outro-cta": [
-            {
-                "file": "outro-cta.png",
-                "headline": "Like · Share · Subscribe",
-                "bullets": ["Builder demos link in description", "Thanks for watching"],
-                "topics": ("like", "share", "subscribe", "demos", "description", "thanks", "watching"),
-            },
-        ],
+        "outro-cta": _DEFAULT_OUTRO_CTA,
     }
 
 
 def visual_meta_from_specs() -> dict[str, dict[str, Any]]:
     out: dict[str, dict[str, Any]] = {}
-    for group in slide_specs().values():
+    groups = list(slide_specs().values()) + [
+        _DEFAULT_OUTRO_CTA,
+        _SOCIAL_COMPARISON_OUTRO,
+        _TRUST_AUDIT_OUTRO,
+    ]
+    for group in groups:
         for spec in group:
             fn = spec["file"]
             topics = tuple(spec.get("topics") or ())
+            prev = out.get(fn, {}).get("topics") or ()
+            merged = tuple(dict.fromkeys(prev + topics))
             out[fn] = {
-                "vision_description": " ".join(topics),
-                "topics": topics,
-                "visual_focus": topics[:6],
+                "vision_description": " ".join(merged),
+                "topics": merged,
+                "visual_focus": merged[:6],
             }
     return out
 

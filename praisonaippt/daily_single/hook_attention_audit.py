@@ -73,16 +73,23 @@ def run_hook_attention_audit(
     if not mp4.is_file():
         raise FileNotFoundError("Missing merge/final.mp4 — run assemble-beats first")
 
-    scroll = scroll_video_path(project)
-    if not scroll:
-        raise FileNotFoundError(f"Missing assets/videos/{SCROLL_FILENAME} — run record-canonical-scroll")
+    try:
+        beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        beat_map = {}
+    skip_scroll = beat_map.get("variant") in ("trust-audit", "social-comparison")
 
-    scroll_ok, scroll_details = validate_scroll_asset(project, scroll)
-    if not scroll_ok:
-        raise RuntimeError(
-            "canonical-scroll.mp4 failed content gate: "
-            + "; ".join(scroll_details.get("issues") or [])
-        )
+    scroll = scroll_video_path(project)
+    scroll_ok, scroll_details = True, {}
+    if not skip_scroll:
+        if not scroll:
+            raise FileNotFoundError(f"Missing assets/videos/{SCROLL_FILENAME} — run record-canonical-scroll")
+        scroll_ok, scroll_details = validate_scroll_asset(project, scroll)
+        if not scroll_ok:
+            raise RuntimeError(
+                "canonical-scroll.mp4 failed content gate: "
+                + "; ".join(scroll_details.get("issues") or [])
+            )
 
     tl_path = project.merge_dir / "timeline.json"
     hook_dur = ffprobe_duration(mp4)
@@ -107,8 +114,16 @@ def run_hook_attention_audit(
     if srt.is_file():
         cues = parse_srt(srt)
 
-    scroll_dur = ffprobe_duration(scroll)
+    scroll_dur = ffprobe_duration(scroll) if scroll and scroll.is_file() else 0.0
     att_dur = min(attention_sec, hook_dur)
+    montage_plan = build_hook_montage_plan(project)
+    montage_cues = [c for c in (montage_plan.get("cues") or []) if c.get("ok")]
+    hook_script = project.segment_script("00-hook")
+    hook_script_text = hook_script.read_text(encoding="utf-8") if hook_script.is_file() else ""
+    from praisonaippt.daily_single.hook_montage import attention_visual
+
+    att_cue = attention_visual(project, montage_cues, script=hook_script_text) if skip_scroll else {}
+    att_ref_path = Path(att_cue["path"]) if att_cue.get("path") else None
     samples: list[dict] = []
 
     for t in sample_times:
@@ -116,11 +131,18 @@ def run_hook_attention_audit(
         export_frame(mp4, hook_start + t, frame_out)
         vis = visual_at(windows, t)
         spoken = _spoken_at(cues, hook_start + t)
+        if not spoken.strip() and vis and vis.section == "overview" and vis.script_fragment:
+            spoken = vis.script_fragment
 
         in_attention = t < att_dur - 0.05
         ref_t = 0.0
         pixel = 0.0
-        if in_attention and scroll_dur > 0:
+        if in_attention and skip_scroll and att_ref_path and att_ref_path.is_file():
+            att_clip_dur = ffprobe_duration(att_ref_path)
+            ref_t = min(max(0.0, att_clip_dur - 0.05), t)
+            ref_path = reference_frame_for_asset(att_ref_path, ref_cache, at_sec=ref_t)
+            pixel = pixel_similarity(frame_out, ref_path) if ref_path else 0.0
+        elif in_attention and scroll_dur > 0:
             ref_t = min(max(0.0, scroll_dur - 0.05), (t / max(0.1, att_dur)) * scroll_dur)
             ref_path = reference_frame_for_asset(scroll, ref_cache, at_sec=ref_t)
             pixel = pixel_similarity(frame_out, ref_path) if ref_path else 0.0
@@ -136,7 +158,7 @@ def run_hook_attention_audit(
         ok = inline_ok and chart_ok and plain_ok and not frame_looks_like_browser_error(frame_out)
         issues: list[str] = list(inline_issues) + list(chart_issues) + list(plain_issues)
 
-        if in_attention:
+        if in_attention and not skip_scroll:
             if pixel < MIN_PIXEL_SIM:
                 ok = False
                 issues.append(f"pixel_sim {pixel:.2f} < {MIN_PIXEL_SIM}")
@@ -145,6 +167,8 @@ def run_hook_attention_audit(
             if not framing_ok:
                 ok = False
                 issues.extend(framing_issues)
+        elif in_attention:
+            frame_metrics = measure_framing(frame_out)
         else:
             frame_metrics = measure_framing(frame_out)
 
@@ -174,25 +198,26 @@ def run_hook_attention_audit(
 
     motion_checks: list[dict] = []
     att_samples = [s for s in samples if s["t_sec"] < att_dur - 0.05]
-    for i in range(len(att_samples) - 1):
-        a = project.root / att_samples[i]["frame"]
-        b = project.root / att_samples[i + 1]["frame"]
-        delta = round(frame_motion(a, b), 4)
-        moved = delta >= MIN_MOTION
-        motion_checks.append({
-            "from_sec": att_samples[i]["t_sec"],
-            "to_sec": att_samples[i + 1]["t_sec"],
-            "motion_delta": delta,
-            "ok": moved,
-        })
-        if not moved:
-            for s in samples:
-                if s["t_sec"] == att_samples[i + 1]["t_sec"]:
-                    s["ok"] = False
-                    s["issues"] = list(s.get("issues") or []) + [
-                        f"no scroll/zoom motion {att_samples[i]['t_sec']:.0f}s→"
-                        f"{att_samples[i + 1]['t_sec']:.0f}s (delta={delta:.3f})"
-                    ]
+    if not skip_scroll:
+        for i in range(len(att_samples) - 1):
+            a = project.root / att_samples[i]["frame"]
+            b = project.root / att_samples[i + 1]["frame"]
+            delta = round(frame_motion(a, b), 4)
+            moved = delta >= MIN_MOTION
+            motion_checks.append({
+                "from_sec": att_samples[i]["t_sec"],
+                "to_sec": att_samples[i + 1]["t_sec"],
+                "motion_delta": delta,
+                "ok": moved,
+            })
+            if not moved:
+                for s in samples:
+                    if s["t_sec"] == att_samples[i + 1]["t_sec"]:
+                        s["ok"] = False
+                        s["issues"] = list(s.get("issues") or []) + [
+                            f"no scroll/zoom motion {att_samples[i]['t_sec']:.0f}s→"
+                            f"{att_samples[i + 1]['t_sec']:.0f}s (delta={delta:.3f})"
+                        ]
 
     fails = [s for s in samples if not s["ok"]]
     inline_fails = [s for s in samples if not s.get("spoken_inline_ok")]
@@ -226,7 +251,8 @@ def run_hook_attention_audit(
         "attention_sec": round(att_dur, 2),
         "sample_cadence": "1s for first 5s, then 2s until hook end",
         "seconds_checked": len(sample_times),
-        "planned_file": SCROLL_FILENAME,
+        "planned_file": att_cue.get("file") if skip_scroll else SCROLL_FILENAME,
+        "skip_canonical_scroll": skip_scroll,
         "samples_total": len(samples),
         "samples_pass": len(samples) - len(fails),
         "spoken_inline_pass": len(samples) - len(inline_fails),

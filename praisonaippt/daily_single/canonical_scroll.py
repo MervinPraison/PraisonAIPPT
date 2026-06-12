@@ -74,7 +74,7 @@ def _pan_filter(*, duration: float, overscale_w: int = PAN_SCALE_W) -> str:
     return (
         f"scale={W}:{H}:force_original_aspect_ratio=decrease,"
         f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:black,"
-        f"scale={overscale_w}:-1,"
+        f"scale={overscale_w}:-1,fps={FPS},"
         f"crop={W}:{H}:(iw-{W})/2:(ih-{H})*t/{duration:.4f}"
     )
 
@@ -84,7 +84,7 @@ def build_zoom_video(src: Path, dest: Path, *, duration: float) -> None:
     _run_ffmpeg([
         "ffmpeg", "-y", "-framerate", str(FPS), "-loop", "1", "-i", str(src),
         "-vf", _pan_filter(duration=duration), "-t", f"{duration:.3f}",
-        "-an", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(dest),
+        "-r", str(FPS), "-an", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(dest),
     ])
 
 
@@ -101,11 +101,12 @@ def build_scroll_video(src: Path, dest: Path, *, duration: float) -> None:
         build_zoom_video(scaled, dest, duration=duration)
         scaled.unlink(missing_ok=True)
         return
-    vf = f"scale={W}:-1,setsar=1,crop={W}:{H}:0:(ih-{H})*t/{duration:.4f}"
+    # fps filter before crop — without it ffmpeg emits ~1fps and the hook scroll judders
+    vf = f"scale={W}:-1,setsar=1,fps={FPS},crop={W}:{H}:0:(ih-{H})*t/{duration:.4f}"
     _run_ffmpeg([
         "ffmpeg", "-y", "-framerate", str(FPS), "-loop", "1", "-i", str(scaled),
         "-vf", vf, "-t", f"{duration:.3f}",
-        "-an", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(dest),
+        "-r", str(FPS), "-an", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(dest),
     ])
     scaled.unlink(missing_ok=True)
 

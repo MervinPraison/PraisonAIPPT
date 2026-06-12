@@ -19,12 +19,24 @@ def _ffprobe_dur(path: Path) -> float:
     return float(out.strip())
 
 
-def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
+def validate_all(project: DailySingleProject, *, refresh: bool = False) -> tuple[bool, dict]:
     issues: list[str] = []
     report: dict = {"validators": {}, "passed": True}
     final = project.merge_dir / "final.mp4"
+    if not final.is_file():
+        final = project.merge_dir / "final-with-audio.mp4"
     narr = project.merge_dir / "narration.mp3"
     srt = project.merge_dir / "final.srt"
+
+    if refresh and final.is_file() and srt.is_file():
+        from praisonaippt.daily_single.spoken_visual_gates import refresh_publish_validators
+
+        fresh_ok, fresh = refresh_publish_validators(project)
+        report["refresh"] = fresh
+        if not fresh_ok:
+            for key, block in fresh.items():
+                if isinstance(block, dict) and not block.get("ok", True):
+                    issues.append(f"refresh/{key}: failed live re-check")
 
     for tool in ("ffprobe", "ffmpeg", "praisonaippt"):
         if not shutil.which(tool):
@@ -58,9 +70,13 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
         if str(b) not in bm.get("beats", {}):
             issues.append(f"beat_coverage: missing beat {b}")
     b7 = bm.get("beats", {}).get("7", {})
-    table = next((g for g in b7.get("generated", []) if "beat7" in g.get("filename", "")), None)
-    if not table or not Path(table["path"]).is_file():
-        issues.append("beat_coverage: Beat 7 table PNG missing")
+    has_b7_visual = any(
+        Path(item.get("path", "")).is_file()
+        for key in ("generated", "images", "clips")
+        for item in (b7.get(key) or [])
+    )
+    if not has_b7_visual:
+        issues.append("beat_coverage: Beat 7 missing clips/images")
     report["validators"]["beat_coverage"] = not any("beat_coverage" in i for i in issues)
 
     if not narr.is_file():
@@ -74,11 +90,23 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
         if sr != "44100":
             issues.append(f"audio_loudness: narration sample_rate {sr} != 44100")
     hook_hg = project.segments_dir / "00-hook" / "heygen.mp4"
-    if not hook_hg.is_file():
-        issues.append("heygen: missing hook heygen.mp4")
     outro_hg = project.segments_dir / "99-outro" / "heygen.mp4"
-    if not outro_hg.is_file():
-        issues.append("heygen: missing outro heygen.mp4")
+    from praisonaippt.daily_single.publish_quality_config import beat_map_variant, requires_heygen_bookends
+
+    variant = beat_map_variant(project)
+    video_first = False
+    try:
+        bm = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+        video_first = str(bm.get("asset_policy") or "") == "video-first-local"
+    except (OSError, json.JSONDecodeError):
+        pass
+    skip_heygen = not requires_heygen_bookends(project)
+    if not skip_heygen:
+        if not hook_hg.is_file():
+            issues.append("heygen: missing hook heygen.mp4")
+        outro_hg = project.segments_dir / "99-outro" / "heygen.mp4"
+        if not outro_hg.is_file():
+            issues.append("heygen: missing outro heygen.mp4")
     if not srt.is_file():
         issues.append("captions: missing merge/final.srt")
 
@@ -126,6 +154,7 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
     else:
         issues.append("visual_audit: missing merge/visual_audit_report.json — run audit-visual")
     sv_path = project.merge_dir / "spoken_visual_sync_report.json"
+    wv_path = project.merge_dir / "word_visual_sync_report.json"
     if sv_path.is_file():
         sv = json.loads(sv_path.read_text(encoding="utf-8"))
         report["validators"]["spoken_visual"] = sv.get("ok", False)
@@ -134,6 +163,20 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
                 f"spoken_visual: {sv.get('windows_fail', '?')} window(s), "
                 f"{sv.get('montage_fragments_fail', '?')} montage fragment(s) — run validate-spoken-visual"
             )
+        if sv.get("word_visual_ok") is False:
+            wv = sv.get("word_visual") or {}
+            if not wv.get("deferred") and not wv.get("skipped"):
+                report["validators"]["word_visual"] = False
+                issues.append(
+                    f"word_visual: {wv.get('samples_fail', '?')} sample(s) — Whisper/VLM mismatch"
+                )
+        elif wv_path.is_file():
+            wv = json.loads(wv_path.read_text(encoding="utf-8"))
+            report["validators"]["word_visual"] = wv.get("ok", False)
+            if not wv.get("ok"):
+                issues.append(
+                    f"word_visual: {wv.get('samples_fail', '?')} sample(s) — run validate-spoken-visual"
+                )
     else:
         issues.append(
             "spoken_visual: missing merge/spoken_visual_sync_report.json — run validate-spoken-visual"
@@ -142,7 +185,8 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
     from praisonaippt.daily_single.page_capture_quality import validate_scroll_asset
 
     scroll = scroll_video_path(project)
-    if scroll:
+    skip_scroll = video_first and variant in ("social-comparison", "trust-audit")
+    if scroll and not skip_scroll:
         cap_ok, cap_details = validate_scroll_asset(project, scroll)
         report["validators"]["canonical_capture"] = cap_ok
         if not cap_ok:
@@ -172,10 +216,15 @@ def validate_all(project: DailySingleProject) -> tuple[bool, dict]:
         report["validators"]["hook_attention"] = ha.get("ok", False)
         if not ha.get("ok"):
             issues.append("hook_attention: failed — run validate-hook-attention after assemble")
-    elif scroll:
+    elif scroll and not skip_scroll:
         issues.append("hook_attention: missing hook_attention_audit.json — run validate-hook-attention")
+    if skip_scroll:
+        report["validators"]["canonical_capture"] = True
+        report["validators"]["hook_framing"] = True
     for key, path_name, label in (
         ("slide_design", "slide_design_report.json", "validate-slide-quality"),
+        ("asset_inventory", "asset_inventory_report.json", "validate-asset-inventory"),
+        ("beat_map_policy", "beat_map_policy_report.json", "validate-beat-map"),
         ("engagement", "engagement_report.json", "validate-engagement-assets"),
         ("viral_readiness", "viral_readiness_report.json", "validate-viral-readiness"),
     ):

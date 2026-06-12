@@ -8,10 +8,18 @@ from pathlib import Path
 from typing import Any
 
 from praisonaippt.daily_single.brand_bumper import BUMPER_FILENAME, BUMPER_STEM
+from praisonaippt.daily_single.beat10_timing import beat10_chart_durations
+from praisonaippt.daily_single.segment_cue_timing import (
+    beat4_visual_durations,
+    beat8_clip_durations,
+    beat9_visual_durations,
+    clip_durations_for_cues,
+)
 from praisonaippt.daily_single.beat01_timing import beat01_views_duration_sec
 from praisonaippt.daily_single.hook_montage import build_hook_montage_plan, hook_visual_windows
 from praisonaippt.daily_single.protocol import SEGMENT_ORDER
-from praisonaippt.daily_single.text_slide import slide_specs, visual_meta_from_specs
+from praisonaippt.daily_single.publish_quality_config import beat_map_variant
+from praisonaippt.daily_single.text_slide import outro_slide_specs, slide_specs, visual_meta_from_specs
 from praisonaippt.segment_video.image_selection import script_alignment, tokenise
 from praisonaippt.segment_video.media import ffprobe_duration
 
@@ -114,9 +122,10 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "visual_focus": ("cyber", "classifier", "false", "positive", "biology", "homework", "greeting", "register", "ferrari", "incidents", "villains", "willison", "sabotage", "paid", "product", "steering", "silent"),
     },
     "jailbreak-resistance.png": {
-        "vision_description": "jailbreak resistance decision matrix switch coder researcher alignment close",
-        "topics": ("jailbreak", "resistance", "attack", "bounty", "harmful", "cyber", "completions", "bypass", "safety", "chart", "copying", "testing", "keys", "production", "partner", "business", "prompts", "decision", "matrix", "switch", "researchers", "coders", "subscribers", "enterprise", "wait", "june", "long-horizon", "agentic", "refactors", "security", "biology", "fallbacks", "routing", "cost-sensitive", "pro", "job", "budget", "autonomous", "cloud", "spend", "chat", "instrument", "probably", "yes", "track"),
-        "visual_focus": ("jailbreak", "resistance", "decision", "matrix", "switch", "researchers", "coders", "subscribers", "long-horizon", "agentic", "refactors", "security", "biology", "fallbacks", "cost-sensitive", "pro", "wait", "june", "budget", "autonomous", "cloud", "spend"),
+        "vision_description": "jailbreak resistance cyber adversarial robustness attack success rate bar chart opus fable",
+        "chart_kind": "attack_rate_bar",
+        "topics": ("jailbreak", "resistance", "attack", "adversarial", "robustness", "success", "rate", "cyber", "bounty", "harmful", "completions", "bypass", "safety", "chart", "red-teaming", "stress", "fable", "opus", "percent", "bar"),
+        "visual_focus": ("jailbreak", "resistance", "attack", "adversarial", "robustness", "success", "rate", "cyber", "stress", "red-teaming", "bar"),
     },
     "beat7-api-table.png": {
         "vision_description": "api messages web app block fallback claude.ai enterprise website trap billing developer",
@@ -140,9 +149,10 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "topics": ("retention", "thirty", "jailbreak", "prompts", "training", "distillation", "eval", "classifiers"),
     },
     "alignment-chart.png": {
-        "vision_description": "misaligned behaviour alignment eval chart mythos opus scores safeguards decision matrix switch",
-        "topics": ("misaligned", "alignment", "behaviour", "chart", "safeguards", "tighten", "launch", "settings", "copying", "model", "production", "decision", "matrix", "switch", "researchers", "coders", "subscribers", "enterprise", "wait", "june", "log", "sessions", "receipts", "headlines", "confuse", "visible", "silent", "job"),
-        "visual_focus": ("alignment", "chart", "decision", "matrix", "switch", "log", "sessions", "receipts", "headlines", "confuse", "visible", "silent", "cost-sensitive", "pro", "subscribers", "wait", "june", "safeguards", "tune", "launch", "week", "job"),
+        "vision_description": "misaligned behaviour alignment eval chart scores off-track answers",
+        "chart_kind": "alignment_eval",
+        "topics": ("misaligned", "alignment", "behaviour", "chart", "off-track", "scores", "safeguards", "launch", "settings", "rules", "company", "data", "plan", "switch", "hype"),
+        "visual_focus": ("alignment", "misaligned", "behaviour", "off-track", "chart", "scores", "rules", "company"),
     },
     "v2-inequality-ladder.png": {
         "vision_description": "access paths inequality fable mythos glasswing bio trusted classifiers fallback",
@@ -175,7 +185,7 @@ VISUAL_META: dict[str, dict[str, Any]] = {
     },
     "v2-false-positive-list.png": {
         "vision_description": "false positives innocuous biology homework greeting register ferrari meme silent steering",
-        "topics": ("false", "positive", "innocent", "biology", "homework", "greeting", "register", "ferrari", "refused", "silent", "steering", "willison", "incidents", "villains", "safeguards", "pretend", "name"),
+        "topics": ("false", "positive", "innocent", "biology", "homework", "greeting", "register", "ferrari", "refused", "silent", "steering", "willison", "incidents", "villains", "safeguards", "pretend", "name", "pop-up", "popup", "safety", "see", "may", "deserve", "know", "kind", "hit", "which", "bad", "point"),
     },
     "v2-decision-matrix.png": {
         "vision_description": "decision matrix switch coder researcher cost enterprise compliance june matrix",
@@ -191,7 +201,7 @@ VISUAL_META: dict[str, dict[str, Any]] = {
     },
     "v2-quote-willison.png": {
         "vision_description": "willison beast silent steering sabotage paid product hn",
-        "topics": ("willison", "beast", "silent", "steering", "sabotage", "paid", "product", "trust"),
+        "topics": ("willison", "beast", "silent", "steering", "sabotage", "paid", "product", "trust", "cheaper", "quietly", "takes", "over", "telling", "model", "without", "banner"),
     },
     "v2-platform-fallback-gaps.png": {
         "vision_description": "website api fallback trap claude block error cloud model id footnote platform",
@@ -199,15 +209,95 @@ VISUAL_META: dict[str, dict[str, Any]] = {
     },
     "social-capture-hn-beast-ferrari.png": {
         "vision_description": "hacker news beast ferrari willison stripe scale session counter-meme limiter shipped fable thread",
-        "topics": ("hacker", "news", "beast", "ferrari", "willison", "stripe", "thread", "speed", "limited", "counter", "meme", "limiter", "conversation", "shipped", "fable", "anthropic", "claude", "watched", "million"),
+        "topics": ("hacker", "news", "beast", "ferrari", "willison", "stripe", "thread", "speed", "limited", "counter", "meme", "limiter", "conversation", "shipped", "fable", "anthropic", "claude", "watched", "million", "linkedin", "side", "comparison", "five", "real", "jobs", "tasks"),
     },
     "social-capture-reddit-inequality.png": {
         "vision_description": "access paths inequality fable mythos glasswing bio trusted classifiers fallback reddit blunt model launch preview",
-        "topics": ("inequality", "reddit", "preview", "fable", "mythos", "headline", "receipt", "promised", "launch", "fallback", "classifiers", "access", "engine", "blunt", "model", "frame", "session", "weights", "slide", "partner", "glasswing", "biology"),
+        "topics": ("inequality", "reddit", "preview", "fable", "mythos", "headline", "receipt", "promised", "launch", "fallback", "classifiers", "access", "engine", "blunt", "model", "frame", "session", "weights", "slide", "partner", "glasswing", "biology", "unequal", "toy", "everyone", "vip", "lanes", "highway", "vip lanes"),
     },
     "fallback-notification.mp4": {
-        "vision_description": "claude ai fallback notification visible safety classifier route opus session",
-        "topics": ("fallback", "visible", "notification", "classifier", "opus", "safety", "session", "route", "claude", "platform"),
+        "vision_description": "claude ai fallback notification visible safety classifier route opus session pop-up",
+        "topics": ("fallback", "visible", "notification", "classifier", "opus", "safety", "session", "route", "claude", "platform", "pop-up", "popup", "notice", "message", "switch", "clear", "check", "fired", "percent", "sessions"),
+    },
+    "linkedin-cintas-fable5-vs-opus.mp4": {
+        "vision_description": "linkedin side by side fable opus five real jobs comparison clip cintas montage hours proof screen",
+        "topics": (
+            "linkedin", "side", "comparison", "fable", "opus", "five", "real", "jobs", "clip", "cintas", "montage", "hours", "proof", "screen", "side-by-side", "beating", "tasks", "watch", "launch", "video", "same", "big", "jobs", "tackling", "working", "checks", "sharing",
+            "asteroid", "nasa", "solar", "flares", "aurora", "fitness", "retreat", "apollo", "panels", "world", "cup", "jersey", "absurd", "work", "promised", "people", "actually", "get", "recording", "multi-step", "sandbox", "log", "model", "answered",
+        ),
+        "visual_focus": ("linkedin", "fable", "opus", "comparison", "side", "tasks", "clip", "montage", "screen", "recording"),
+    },
+    "x-claudeai-launch.mp4": {
+        "vision_description": "claudeai official X launch video Fable 5 Mythos announcement",
+        "topics": ("x", "launch", "claudeai", "fable", "anthropic", "official", "announcement", "mythos"),
+        "visual_focus": ("launch", "claudeai", "fable", "official", "x"),
+    },
+    "x-claudedevs-launch.mp4": {
+        "vision_description": "claudedevs engineering X launch video Fable 5 API agent tooling rollout",
+        "topics": ("x", "launch", "claudedevs", "engineering", "fable", "anthropic", "api", "agent", "rollout"),
+        "visual_focus": ("launch", "claudedevs", "engineering", "fable", "x", "rollout"),
+    },
+    "x-claudeai-safeguards.mp4": {
+        "vision_description": "Anthropic X safeguards video Fable routes to Opus 4.8 cyber bio chemistry classifiers",
+        "topics": ("x", "safeguards", "fable", "opus", "routing", "classifier", "cyber", "biology", "comparison"),
+        "visual_focus": ("safeguards", "opus", "fable", "routing", "classifier"),
+    },
+    "x-chrissgpt-minecraft.mp4": {
+        "vision_description": "ChrissGPT X screen recording Minecraft clone one prompt Fable 5 biomes caves",
+        "topics": ("x", "minecraft", "clone", "game", "build", "chrissgpt", "one-shot", "biomes", "caves"),
+        "visual_focus": ("minecraft", "clone", "game", "build", "biomes"),
+    },
+    "x-chrissgpt-pokemon.mp4": {
+        "vision_description": "ChrissGPT X Pokemon clone Gen-1 sprites Fable 5 one shot build",
+        "topics": ("x", "pokemon", "clone", "game", "sprites", "chrissgpt", "build", "gen-1"),
+        "visual_focus": ("pokemon", "clone", "sprites", "game", "build"),
+    },
+    "x-pootlepress-wp-theme.mp4": {
+        "vision_description": "pootlepress X WordPress block theme one shot Fable 5 build",
+        "topics": ("x", "wordpress", "theme", "block", "build", "one-shot", "pootlepress"),
+        "visual_focus": ("wordpress", "theme", "block", "build"),
+    },
+    "x-trq212-edit-2064826394589442448.mp4": {
+        "vision_description": "trq212 X walkthrough Fable 5 edited launch video ffmpeg Remotion pipeline",
+        "topics": ("x", "trq212", "video", "edit", "ffmpeg", "remotion", "fable", "pipeline"),
+        "visual_focus": ("video", "edit", "ffmpeg", "remotion", "pipeline"),
+    },
+    "x-trq212-edit-2064828193446740023.mp4": {
+        "vision_description": "trq212 X Fable 5 self-edited launch video tool calls transcription",
+        "topics": ("x", "trq212", "video", "edit", "fable", "launch", "tool", "calls"),
+        "visual_focus": ("video", "edit", "fable", "launch"),
+    },
+    "linkedin-cintas-frame.png": {
+        "vision_description": "linkedin side by side fable opus comparison frame five real jobs split screen montage",
+        "topics": ("linkedin", "side", "comparison", "fable", "opus", "five", "real", "jobs", "clip", "cintas", "montage", "side-by-side", "tasks", "split", "screen", "comparison", "real-world"),
+    },
+    "demo-launch.mp4": {
+        "vision_description": "anthropic launch clip june shipped builders official b-roll pro max subscribers capable claude website price table",
+        "topics": ("launch", "june", "shipped", "walkthrough", "b-roll", "builders", "pro", "max", "subscribers", "capable", "public", "claude", "live", "website", "price", "table", "promised", "anthropic", "everyone", "headline"),
+    },
+    "demo-scroll.mp4": {
+        "vision_description": "anthropic news blog claude fable mythos announcement scroll launch page",
+        "topics": ("anthropic", "fable", "mythos", "launch", "announcement", "blog", "claude", "news", "dropped", "changes", "promised", "montage", "hype", "influencers", "absurd", "experience", "account"),
+    },
+    "demo-factorio.mp4": {
+        "vision_description": "factorio factory automation agentic loops coding tasks migrations community apps browser game engineers share clips proof",
+        "topics": ("factorio", "factory", "automation", "agentic", "loops", "migrations", "coding", "tasks", "projects", "browser", "game", "community", "demos", "engineers", "share", "clips", "proof", "poetry", "forum", "developer", "beast", "months", "staged", "launch", "reel", "tuesday", "afternoon"),
+    },
+    "demo-vibecad.mp4": {
+        "vision_description": "cad vibecad engineering workflows design tools three dimensions spinning partners programme",
+        "topics": ("cad", "workflows", "design", "tools", "three", "dimensions", "spinning", "engineering", "demos", "partners", "programme", "public", "limits", "flaunt", "builds", "simulations", "richer", "fluid", "partner", "tier", "headline", "story"),
+    },
+    "demo-solar.mp4": {
+        "vision_description": "solar system eclipse simulation demo pokemon spectacle viral scroll navigating sight pixels memory",
+        "topics": ("solar", "system", "eclipse", "simulation", "demo", "pokemon", "spectacle", "viral", "scroll", "navigating", "sight", "pixels", "memory", "cheat", "sheet", "studio", "retries", "budget", "popup", "session", "wow", "genuine"),
+    },
+    "demo-fluid.mp4": {
+        "vision_description": "fluid simulation engineering demo benchmark swe terminal share social scores fable opus chart",
+        "topics": ("fluid", "simulation", "engineering", "demo", "benchmark", "swe", "terminal", "share", "social", "scores", "fable", "opus", "chart", "numbers", "official", "score", "card", "ahead", "hard", "coding", "tests", "rivals", "openai", "percent", "meeting", "date", "move", "vendors"),
+    },
+    "demo-pokemon.mp4": {
+        "vision_description": "pokemon firered vision screenshot navigation harness demo solar browser games spectacle viral logging",
+        "topics": ("pokemon", "vision", "firered", "screenshot", "navigation", "demo", "solar", "browser", "games", "spectacle", "viral", "scroll", "timelapse", "sight", "pixels", "memory", "studio", "retries", "budget", "account", "default", "show"),
     },
 }
 VISUAL_META.update(visual_meta_from_specs())
@@ -268,7 +358,7 @@ def score_cue_visual(cue_text: str, visual_file: str) -> float:
         score = max(score, min(1.0, hit * 2.5))
     # Hard penalties for known mismatches
     if "alignment-chart" in visual_file and any(
-        w in cue_tokens for w in ("retention", "thirty", "prompts", "mer.vin", "distillation")
+        w in cue_tokens for w in ("thirty", "prompts", "mer.vin", "distillation", "jailbreak")
     ):
         score = min(score, 0.15)
     if "beat4-stat-overlay" in visual_file and "leaderboard" in cue_text.lower() and "swe" not in cue_text.lower():
@@ -408,6 +498,17 @@ def _windows_for_beat(
         return wins
 
     if beat_num == 7:
+        if clips and not generated and not images:
+            root = segments_dir.parent if segments_dir else assets.parent
+            lens = clip_durations_for_cues(root, "07-api-integration", dur, [0, 1])
+            off = t0
+            for i, c in enumerate(clips):
+                if i < len(lens) and lens[i] >= 0.25:
+                    wins.append(VisualWindow(
+                        off, off + lens[i], "beat-07", "X clip", Path(c["path"]).name,
+                    ))
+                    off += lens[i]
+            return wins
         table = next((g for g in generated if "beat7" in g.get("filename", "")), None)
         if not table and (assets / "generated" / "beat7-api-table.png").is_file():
             table = {"path": str(assets / "generated" / "beat7-api-table.png"), "filename": "beat7-api-table.png"}
@@ -472,6 +573,18 @@ def _windows_for_beat(
         return wins
 
     if beat_num == 5 and clips:
+        root5 = segments_dir.parent if segments_dir else assets.parent
+        if not generated and not images:
+            lens = clip_durations_for_cues(root5, "05-vision-memory", dur, [0, 1, 1])
+            if len(lens) == len(clips):
+                off = t0
+                for i, c in enumerate(clips):
+                    if lens[i] >= 0.25:
+                        wins.append(VisualWindow(
+                            off, off + lens[i], f"beat-{beat_num:02d}", "X clip", Path(c["path"]).name,
+                        ))
+                        off += lens[i]
+                return wins
         stat = generated[0] if generated else None
         poke = next((c for c in clips if "pokemon" in c.get("filename", "")), None)
         solar = next((c for c in clips if "solar" in c.get("filename", "")), None)
@@ -576,6 +689,46 @@ def _windows_for_beat(
             off += per
         return wins
 
+    root = segments_dir.parent if segments_dir else assets.parent
+
+    if beat_num == 4 and clips and images and not generated:
+        chart_d, clip_d, tail_d = beat4_visual_durations(root, dur)
+        chart_name = Path(images[0]["path"]).name
+        clip_name = Path(clips[0]["path"]).name
+        off = t0
+        wins.append(VisualWindow(off, off + chart_d, f"beat-{beat_num:02d}", "benchmark slide", chart_name))
+        off += chart_d
+        wins.append(VisualWindow(off, off + clip_d, f"beat-{beat_num:02d}", "clip", clip_name))
+        off += clip_d
+        if tail_d >= 0.25:
+            wins.append(VisualWindow(off, off + tail_d, f"beat-{beat_num:02d}", "benchmark slide", chart_name))
+        return wins
+
+    cue_clip_beats: dict[int, tuple[str, list[int]]] = {
+        1: ("01-cold-open", [0, 1, 1]),
+        2: ("02-mythos-tier", [0, 0, 1]),
+        3: ("03-engineers-care", [0, 1, 1, 1]),
+        5: ("05-vision-memory", [0, 1, 1]),
+        6: ("06-safeguards", [0, 1, 1, 1]),
+    }
+    if beat_num == 8 and clips and not generated and not images:
+        lens = beat8_clip_durations(root, dur)
+        off = t0
+        for i, c in enumerate(clips):
+            if i < len(lens) and lens[i] >= 0.25:
+                wins.append(VisualWindow(off, off + lens[i], beat_key, "clip", Path(c["path"]).name))
+                off += lens[i]
+        return wins
+    if beat_num in cue_clip_beats and clips and not generated and not images:
+        seg_dir, cue_map = cue_clip_beats[beat_num]
+        lens = clip_durations_for_cues(root, seg_dir, dur, cue_map)
+        off = t0
+        for i, c in enumerate(clips):
+            if i < len(lens) and lens[i] >= 0.25:
+                wins.append(VisualWindow(off, off + lens[i], beat_key, "clip", Path(c["path"]).name))
+                off += lens[i]
+        return wins
+
     if beat_num == 9 and images and any("v2-pricing" in i.get("filename", "") for i in images):
         fracs = (0.38, 0.30, 0.32)
         off = t0
@@ -585,6 +738,21 @@ def _windows_for_beat(
                 off, off + dur * frac, f"beat-{beat_num:02d}", "pricing slide", item["filename"],
             ))
             off += dur * frac
+        return wins
+
+    if beat_num == 9 and images and not clips and not generated:
+        pricing = next((i for i in images if "pricing" in i.get("filename", "")), images[0])
+        bench = next((i for i in images if "benchmark" in i.get("filename", "")), images[-1])
+        p_d, b_d, tail_d = beat9_visual_durations(root, dur)
+        off = t0
+        wins.append(VisualWindow(off, off + p_d, f"beat-{beat_num:02d}", "pricing slide", pricing["filename"]))
+        off += p_d
+        wins.append(VisualWindow(off, off + b_d, f"beat-{beat_num:02d}", "benchmark slide", bench["filename"]))
+        off += b_d
+        if tail_d >= 0.25:
+            wins.append(VisualWindow(
+                off, off + tail_d, f"beat-{beat_num:02d}", "pricing slide", pricing["filename"],
+            ))
         return wins
 
     if beat_num == 10:
@@ -602,20 +770,25 @@ def _windows_for_beat(
                 off += per
             return wins
 
-        jail = assets / "jailbreak-resistance.png"
-        align = assets / "alignment-chart.png"
+        jail_item = next((i for i in (images or []) if "jailbreak" in i.get("filename", "")), None)
+        align_item = next((i for i in (images or []) if "alignment" in i.get("filename", "")), None)
+        jail = Path(jail_item["path"]) if jail_item else assets / "jailbreak-resistance.png"
+        align = Path(align_item["path"]) if align_item else assets / "alignment-chart.png"
+        root = segments_dir.parent if segments_dir else assets.parent
+        jail_d, align_d, tail_d = beat10_chart_durations(root, dur)
         specs: list[tuple[Path, float]] = []
         if jail.is_file():
-            specs.append((jail, 0.65))
+            specs.append((jail, jail_d))
         if align.is_file():
-            specs.append((align, 0.35))
+            specs.append((align, align_d))
+        if jail.is_file() and tail_d > 0:
+            specs.append((jail, tail_d))
         if not specs and images:
-            specs = [(Path(images[0]["path"]), 1.0)]
+            specs = [(Path(images[0]["path"]), dur)]
         off = t0
-        for path, frac in specs:
-            seg_dur = dur * frac
-            wins.append(VisualWindow(off, off + seg_dur, f"beat-{beat_num:02d}", "close slide", path.name))
-            off += seg_dur
+        for path, seg_len in specs:
+            wins.append(VisualWindow(off, off + seg_len, f"beat-{beat_num:02d}", "close slide", path.name))
+            off += seg_len
         return wins
 
     if clips and not generated:
@@ -681,7 +854,7 @@ def build_visual_timeline(project: DailySingleProject) -> list[VisualWindow]:
             else:
                 out.extend(_windows_for_beat("00-hook", None, start, dur, {}, assets, hook_launch=True))
         elif label == "99-outro":
-            cta = slide_specs()["outro-cta"][0]
+            cta = outro_slide_specs(beat_map_variant(project))[0]
             out.append(VisualWindow(
                 start, start + dur, "99-outro", cta["headline"], cta["file"],
             ))
@@ -751,6 +924,11 @@ def validate_display_sync(project: DailySingleProject) -> dict[str, Any]:
         score, vis = _score_cue_against_windows(cue, windows, hook_overview=hook_overview)
         file = vis.file if vis else "none"
         threshold = HOOK_MONTAGE_MIN_ALIGNMENT if hook_overview else MIN_ALIGNMENT
+        if vis and vis.file.endswith(".png"):
+            from praisonaippt.daily_single.spoken_visual_sync import is_chart_or_table_file
+
+            if is_chart_or_table_file(vis.file):
+                threshold = max(threshold, 0.38)
         ok = score >= threshold
         if not ok:
             fails += 1

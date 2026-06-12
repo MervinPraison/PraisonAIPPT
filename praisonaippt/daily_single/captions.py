@@ -48,6 +48,7 @@ def _transcribe_with_module(mp3: Path, ts: Path) -> None:
             for i, s in enumerate(result.get("segments") or [])
         ],
         "words": words,
+        "source": "local-whisper",
     }
     ts.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
@@ -94,13 +95,41 @@ def _proportional_word_timestamps(mp3: Path, script_path: Path, ts: Path) -> Non
             "words": seg_words,
         })
     ts.write_text(
-        json.dumps({"text": text, "duration": total, "segments": segments, "words": words}, indent=2),
+        json.dumps({
+            "text": text,
+            "duration": total,
+            "segments": segments,
+            "words": words,
+            "source": "proportional",
+        }, indent=2),
         encoding="utf-8",
     )
 
 
 def _ensure_transcript(mp3: Path, ts: Path, *, force: bool = False) -> None:
     if ts.is_file() and not force and ts.stat().st_mtime >= mp3.stat().st_mtime:
+        try:
+            from praisonaippt.transcript_loader import load_whisper_json
+
+            raw = json.loads(ts.read_text(encoding="utf-8"))
+            data = load_whisper_json(ts)
+            if len(data.words or []) >= 8 and str(raw.get("source") or "") != "proportional":
+                return
+        except (OSError, ValueError, json.JSONDecodeError):
+            pass
+    from praisonaippt.daily_single.openai_whisper import transcribe_mp3_openai, whisper_provider
+
+    provider = whisper_provider()
+    if provider in ("openai", "auto"):
+        try:
+            if transcribe_mp3_openai(mp3, ts):
+                return
+        except Exception:
+            pass
+    if provider == "openai":
+        script = mp3.parent / "script.md"
+        if script.is_file():
+            _proportional_word_timestamps(mp3, script, ts)
         return
     env = os.environ.copy()
     env.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
@@ -115,6 +144,12 @@ def _ensure_transcript(mp3: Path, ts: Path, *, force: bool = False) -> None:
         if ts.is_file():
             return
     except (subprocess.CalledProcessError, FileNotFoundError, OSError, subprocess.TimeoutExpired):
+        pass
+    try:
+        _transcribe_with_module(mp3, ts)
+        if ts.is_file():
+            return
+    except Exception:
         pass
     script = mp3.parent / "script.md"
     if script.is_file():

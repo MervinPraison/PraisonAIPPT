@@ -1,6 +1,7 @@
 """Stage s00 — bookend gate before assemble."""
 from __future__ import annotations
 
+from praisonaippt.daily_single.publish_quality_config import beat_map_variant, requires_heygen_bookends
 from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.video_qa.base import CheckResult, StageReport
 from praisonaippt.video_qa.context import SuiteContext
@@ -13,6 +14,8 @@ def run_s00_bookends(
     when: str = "pre_assemble",
     ctx: SuiteContext | None = None,
 ) -> StageReport:
+    variant = beat_map_variant(project)
+
     checks: list[CheckResult] = []
     for label in ("00-hook", "99-outro"):
         script = project.segment_script(label)
@@ -30,12 +33,20 @@ def run_s00_bookends(
             severity="error" if required else "warn",
             message=f"{label} narration present" if narration.is_file() else f"missing {label}/narration.mp3",
         ))
-        checks.append(CheckResult(
-            id=f"{label}_heygen",
-            ok=heygen.is_file(),
-            severity="error" if required else "warn",
-            message=f"{label} heygen.mp4 present" if heygen.is_file() else f"missing {label}/heygen.mp4 — run bookend-media",
-        ))
+        if not requires_heygen_bookends(project):
+            checks.append(CheckResult(
+                id=f"{label}_heygen",
+                ok=True,
+                severity="info",
+                message=f"{label} HeyGen skipped — video-first {variant or 'local'} uses montage + CTA slide",
+            ))
+        else:
+            checks.append(CheckResult(
+                id=f"{label}_heygen",
+                ok=heygen.is_file(),
+                severity="error" if required else "warn",
+                message=f"{label} heygen.mp4 present" if heygen.is_file() else f"missing {label}/heygen.mp4 — run bookend-media",
+            ))
 
     ok = all(c.ok or c.severity != "error" for c in checks)
     return StageReport(id="s00-bookends", ok=ok, required=required, when=when, checks=checks)

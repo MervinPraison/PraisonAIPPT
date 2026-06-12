@@ -54,8 +54,9 @@ def mini_project(tmp_path: Path) -> DailySingleProject:
 
 def test_list_stages_includes_core():
     stages = list_stages()
-    assert len(stages) == 16
+    assert len(stages) >= 22
     assert "s00-bookends" in stages
+    assert "s22-word-visual-sync" in stages
 
 
 def test_default_qa_stages_have_ids():
@@ -73,6 +74,12 @@ def test_s06_coverage_passes_with_beat_assets(mini_project: DailySingleProject):
     assert report.id == "s06-coverage"
 
 
+def test_s13_pre_build_is_warn_only():
+    stages = [s for s in DEFAULT_QA_STAGES if s.get("id") == "s13-slide-design" and s.get("when") == "pre_build"]
+    assert len(stages) == 1
+    assert stages[0].get("required") is False
+
+
 def test_s05_transcript_warns_without_narration(mini_project: DailySingleProject):
     report = run_s05_transcript(mini_project, phase="post_vo")
     assert not report.ok
@@ -80,13 +87,25 @@ def test_s05_transcript_warns_without_narration(mini_project: DailySingleProject
 
 
 def test_s05_post_vo_checks_narration_only(mini_project: DailySingleProject):
+    from unittest.mock import patch
+
     for seg_id, seg_dir, _ in __import__(
         "praisonaippt.daily_single.protocol", fromlist=["SEGMENT_ORDER"]
     ).SEGMENT_ORDER:
         folder = seg_dir or seg_id
         seg = mini_project.segments_dir / folder
         (seg / "narration.mp3").write_bytes(b"\x00" * 50)
-    report = run_s05_transcript(mini_project, phase="post_vo")
+        (seg / "timestamps.json").write_text(
+            json.dumps({
+                "text": "word " * 12,
+                "source": "openai-whisper",
+                "words": [{"word": f"w{i}", "start": i * 0.1, "end": i * 0.1 + 0.08} for i in range(12)],
+                "segments": [],
+            }),
+            encoding="utf-8",
+        )
+    with patch("praisonaippt.daily_single.spoken_visual_gates.ensure_whisper_after_vo"):
+        report = run_s05_transcript(mini_project, phase="post_vo")
     assert report.ok
 
 
@@ -99,6 +118,21 @@ def test_s05_transcript_fails_without_timestamps(mini_project: DailySingleProjec
         (seg / "narration.mp3").write_bytes(b"\x00" * 50)
     report = run_s05_transcript(mini_project, phase="post_captions")
     assert not report.ok
+
+
+def test_s05_transcript_fails_proportional_timestamps(mini_project: DailySingleProject):
+    seg = mini_project.segments_dir / "01-cold-open"
+    script = seg / "script.md"
+    text = script.read_text(encoding="utf-8")
+    (seg / "narration.mp3").write_bytes(b"\x00" * 100)
+    (seg / "timestamps.json").write_text(
+        json.dumps({"text": text, "source": "proportional", "segments": [], "words": []}),
+        encoding="utf-8",
+    )
+    report = run_s05_transcript(mini_project, phase="post_captions")
+    assert not report.ok
+    prop = next(c for c in report.checks if c.id == "beat-01_whisper")
+    assert not prop.ok
 
 
 def test_s05_transcript_passes_with_whisper(mini_project: DailySingleProject):
@@ -121,12 +155,63 @@ def test_s05_transcript_passes_with_whisper(mini_project: DailySingleProject):
 
 def test_stage_skip_when_final_mp4_missing(mini_project: DailySingleProject):
     degradation = detect_degradation(mini_project)
-    skip, reason = stage_should_skip(
+    skip, _ = stage_should_skip(
         {"id": "s10-final-composite", "when": "post_build"},
         degradation,
     )
-    assert skip
-    assert reason == "missing_final_mp4"
+    assert not skip
+
+
+def test_s22_not_skipped_when_final_mp4_missing(mini_project: DailySingleProject):
+    degradation = detect_degradation(mini_project)
+    skip, _ = stage_should_skip(
+        {"id": "s22-word-visual-sync", "when": "post_build", "offline_ok": False},
+        degradation,
+    )
+    assert not skip
+
+
+def test_run_suite_post_vo_includes_phase_gates(mini_project: DailySingleProject):
+    from unittest.mock import patch
+
+    for seg_id, seg_dir, _ in __import__(
+        "praisonaippt.daily_single.protocol", fromlist=["SEGMENT_ORDER"]
+    ).SEGMENT_ORDER:
+        folder = seg_dir or seg_id
+        seg = mini_project.segments_dir / folder
+        (seg / "narration.mp3").write_bytes(b"\x00" * 50)
+        (seg / "timestamps.json").write_text(
+            json.dumps({
+                "text": "word " * 12,
+                "source": "openai-whisper",
+                "words": [{"word": f"w{i}", "start": i * 0.1, "end": i * 0.1 + 0.08} for i in range(12)],
+                "segments": [],
+            }),
+            encoding="utf-8",
+        )
+    with patch(
+        "praisonaippt.daily_single.spoken_visual_gates.ensure_whisper_after_vo",
+        return_value={"segments": []},
+    ):
+        suite = run_suite(mini_project, when="post_vo")
+    gate_ids = [s.id for s in suite.stages if s.id.startswith("sdk-phase-gates-")]
+    assert "sdk-phase-gates-post_vo" in gate_ids
+
+
+def test_post_build_stages_run_without_final_mp4(mini_project: DailySingleProject):
+    degradation = detect_degradation(mini_project)
+    skip, _ = stage_should_skip(
+        {"id": "s03-image-speech", "when": "post_build", "required": True},
+        degradation,
+    )
+    assert not skip
+
+
+def test_post_build_suite_fails_without_final_mp4(mini_project: DailySingleProject):
+    suite = run_suite(mini_project, when="post_build")
+    assert not suite.ok
+    failed = suite.summary.get("failed_required") or []
+    assert any("s22" in s or "sdk-phase-gates" in s for s in failed)
 
 
 def test_run_suite_pre_build_writes_summary(mini_project: DailySingleProject):

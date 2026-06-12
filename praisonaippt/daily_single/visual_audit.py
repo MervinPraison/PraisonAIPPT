@@ -60,8 +60,10 @@ def _run_ffmpeg(args: list[str]) -> None:
 
 def export_frame(mp4: Path, t_sec: float, dest: Path) -> Path:
     dest.parent.mkdir(parents=True, exist_ok=True)
+    dur = ffprobe_duration(mp4)
+    t = max(0.0, min(float(t_sec), max(0.0, dur - 0.05)))
     _run_ffmpeg([
-        "ffmpeg", "-y", "-ss", f"{max(0.0, t_sec):.3f}", "-i", str(mp4.resolve()),
+        "ffmpeg", "-y", "-ss", f"{t:.3f}", "-i", str(mp4.resolve()),
         "-frames:v", "1", "-q:v", "2", "-update", "1", str(dest),
     ])
     return dest
@@ -148,15 +150,17 @@ def _spoken_at(cues: list[dict[str, Any]], t: float) -> str:
 
 
 def _sample_times(duration: float, interval: float, windows: list[Any]) -> list[float]:
+    cap = max(0.0, duration - 0.15)
     times: set[float] = set()
     t = interval / 2
-    while t < duration:
+    while t < cap:
         times.add(round(t, 2))
         t += interval
     for w in windows:
-        mid = (w.start_sec + w.end_sec) / 2
-        times.add(round(mid, 2))
-    return sorted(times)
+        mid = min((w.start_sec + w.end_sec) / 2, cap)
+        if mid >= 0:
+            times.add(round(mid, 2))
+    return sorted(t for t in times if t <= cap)
 
 
 def _pixel_threshold(planned_file: str, section: str) -> float:
@@ -232,6 +236,7 @@ def audit_sample(
         issues.append(f"no reference asset for {planned_file}")
     if generic_broll:
         issues.append(f"generic/off-topic B-roll ({planned_file})")
+        ok = False
 
     return {
         "t_sec": t_sec,
@@ -259,9 +264,9 @@ def run_visual_audit(
     force: bool = False,
 ) -> dict[str, Any]:
     """Sample final.mp4 every `interval` seconds + at visual window midpoints."""
-    mp4 = project.merge_dir / "final.mp4"
+    mp4 = project.merge_dir / "final-with-audio.mp4"
     if not mp4.is_file():
-        mp4 = project.merge_dir / "final-with-audio.mp4"
+        mp4 = project.merge_dir / "final.mp4"
     if not mp4.is_file():
         raise FileNotFoundError("Missing merge/final.mp4 — run assemble-beats first")
 

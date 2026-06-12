@@ -1,6 +1,8 @@
 """Stage s05 — post-VO transcript validation (Whisper vs script)."""
 from __future__ import annotations
 
+import json
+
 from praisonaippt.daily_single.captions import split_caption_cues
 from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.daily_single.protocol import SEGMENT_ORDER
@@ -34,6 +36,20 @@ def run_s05_transcript(
     whisper_degraded = False
 
     if phase == "post_vo":
+        from praisonaippt.daily_single.spoken_visual_gates import (
+            ensure_whisper_after_vo,
+            validate_whisper_word_timings,
+        )
+
+        ensure_whisper_after_vo(project)
+        whisper_ok, whisper_detail = validate_whisper_word_timings(project)
+        checks.append(CheckResult(
+            id="whisper_word_timings",
+            ok=whisper_ok,
+            severity="error" if required else "warn",
+            message="Whisper word timings ready" if whisper_ok else "Whisper word timings missing or proportional",
+            details=whisper_detail,
+        ))
         for seg_id, seg_folder, _beat_n in SEGMENT_ORDER:
             seg_path = project.segments_dir / _segment_dir(project, seg_id, seg_folder)
             narration = seg_path / "narration.mp3"
@@ -95,11 +111,11 @@ def run_s05_transcript(
             if srt_path.is_file():
                 checks.append(CheckResult(
                     id=f"{seg_id}_whisper",
-                    ok=True,
-                    severity="warn",
+                    ok=False,
+                    severity="error" if required else "warn",
                     message=f"{seg_id} proportional captions (no Whisper timestamps)",
                 ))
-                segments_out.append({"segment": seg_id, "ok": True, "degraded": True, "reason": "proportional"})
+                segments_out.append({"segment": seg_id, "ok": False, "degraded": True, "reason": "proportional"})
                 continue
             checks.append(CheckResult(
                 id=f"{seg_id}_whisper",
@@ -107,6 +123,18 @@ def run_s05_transcript(
                 severity="error" if required else "warn",
                 message=f"{seg_id} missing timestamps.json — run build-captions",
             ))
+            continue
+
+        raw = json.loads(ts_path.read_text(encoding="utf-8"))
+        if str(raw.get("source") or "") == "proportional":
+            whisper_degraded = True
+            checks.append(CheckResult(
+                id=f"{seg_id}_whisper",
+                ok=False,
+                severity="error" if required else "warn",
+                message=f"{seg_id} proportional timestamps — re-run Whisper after VO",
+            ))
+            segments_out.append({"segment": seg_id, "ok": False, "degraded": True, "reason": "proportional"})
             continue
 
         td = load_whisper_json(ts_path)

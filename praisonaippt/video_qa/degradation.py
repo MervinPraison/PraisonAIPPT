@@ -62,10 +62,6 @@ def stage_should_skip(stage: dict[str, Any], degradation: dict[str, Any]) -> tup
     if degradation.get("vlm") == "offline" and sid == "s02-source-vlm":
         return True, "vlm_offline"
 
-    if when == "post_build" and degradation.get("final_mp4") == "missing":
-        if sid in ("s03-image-speech", "s07-framing", "s08-av-sync", "s09-on-screen-text", "s10-final-composite"):
-            return True, "missing_final_mp4"
-
     return False, ""
 
 

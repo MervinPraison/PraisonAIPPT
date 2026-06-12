@@ -57,7 +57,9 @@ def run_s03_image_speech(
             f"{spoken.get('montage_fragments_total', 0)}, "
             f"windows {spoken.get('windows_pass', 0)}/{spoken.get('windows_total', 0)}, "
             f"charts {spoken.get('charts_pass', 0)}/{spoken.get('charts_total', 0)}, "
-            f"coverage {spoken.get('coverage_pass', 0)}/{spoken.get('coverage_total', 0)}"
+            f"coverage {spoken.get('coverage_pass', 0)}/{spoken.get('coverage_total', 0)}, "
+            f"word-visual {spoken.get('word_visual', {}).get('samples_pass', '—')}/"
+            f"{spoken.get('word_visual', {}).get('samples_total', '—')}"
         ),
         details={"issues": (spoken.get("issues") or [])[:5]},
     ))

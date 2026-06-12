@@ -5,6 +5,9 @@ description: Builds YouTube-style daily single-topic videos from create-news han
 
 # daily-single-video
 
+**Pipeline order + QA gates:** repo root [`AGENTS.md`](../../AGENTS.md)  
+**Social comparison variant:** `examples/videos/anthropic-claude-fable-5-social-comparison/`
+
 Single-topic walkthrough (one launch story, ~5–9 min). **Reference run:** `examples/videos/anthropic-claude-fable-5-mythos-5/`  
 **June roundup pattern:** `examples/videos/june-2026-ai-roundup/`  
 **Handoff:** create-news `research/<slug>/HANDOFF.md`

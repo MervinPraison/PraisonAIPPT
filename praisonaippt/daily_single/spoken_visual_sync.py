@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 from typing import Any
 
 from praisonaippt.daily_single.audience_language import BANNED_PATTERNS
@@ -25,7 +26,7 @@ FRAGMENT_MIN_HIT = 0.28
 MIN_WINDOW_SEC = 0.75
 MIN_CHART_ALIGNMENT = 0.38
 SKIP_FILES = frozenset({"heygen.mp4", "none", "claudeai-launch.mp4", "brand-bumper-1080p-hevc.mp4"})
-TRANSITION_SKIP = SKIP_FILES | frozenset({"canonical-scroll.mp4", "outro-cta.png"})
+TRANSITION_SKIP = SKIP_FILES | frozenset({"canonical-scroll.mp4"})
 GENERIC_FILES = frozenset({"claudeai-launch.mp4"})
 FRAG_STOP = frozenset({"the", "a", "an", "and", "or", "that", "this", "in", "to", "of", "for"})
 
@@ -35,7 +36,7 @@ CHART_SPEECH = re.compile(
     r"swe-bench|terminal-bench|stripe|million|lines|biology|aav|"
     r"jailbreak|alignment|throughput|ninety|eighty|frontier|tier|tiers|"
     r"pricing|safeguard|classifier|api|glasswing|pok[eé]mon|spire|"
-    r"resistance|attack|matrix|decision"
+    r"resistance|attack|matrix|decision|red.?team|bars|success.?rate"
     r")\b",
     re.I,
 )
@@ -46,11 +47,80 @@ NON_CHART_SLIDES = frozenset({
     "social-capture-reddit-inequality.png",
 })
 
+DECISION_TABLE_SPEECH = re.compile(
+    r"\b(decision table|decision matrix|different rows|chart rows|table says|table splits)\b",
+    re.I,
+)
+
+CHART_KIND_RULES: dict[str, dict[str, Any]] = {
+    "attack_rate_bar": {
+        "must_mention": re.compile(
+            r"\b(jailbreak|attack|resistance|adversarial|robustness|red.?team|success rate|cyber stress)\b",
+            re.I,
+        ),
+        "must_not_say": DECISION_TABLE_SPEECH,
+    },
+    "alignment_eval": {
+        "must_mention": re.compile(
+            r"\b(alignment|misaligned|off.?track|behaviour|behavior)\b",
+            re.I,
+        ),
+        "must_not_say": re.compile(
+            r"\b(decision table|attack success|jailbreak resistance|adversarial robustness)\b",
+            re.I,
+        ),
+    },
+    "decision_table": {
+        "must_mention": DECISION_TABLE_SPEECH,
+        "must_not_say": re.compile(
+            r"\b(attack success rate|adversarial robustness|jailbreak resistance bar)\b",
+            re.I,
+        ),
+    },
+}
+
+
+def chart_kind_for(visual_file: str) -> str:
+    meta = _meta_for(visual_file)
+    kind = str(meta.get("chart_kind") or "")
+    if kind:
+        return kind
+    fn = (visual_file or "").lower()
+    if "decision-matrix" in fn or "decision_matrix" in fn:
+        return "decision_table"
+    if "jailbreak" in fn and "resistance" in fn:
+        return "attack_rate_bar"
+    if "alignment" in fn and "chart" in fn:
+        return "alignment_eval"
+    return ""
+
+
+def validate_chart_kind_parity(spoken: str, visual_file: str) -> tuple[bool, list[str]]:
+    """Ensure narration describes the chart type actually on screen — not just shared keywords."""
+    kind = chart_kind_for(visual_file)
+    rules = CHART_KIND_RULES.get(kind)
+    if not rules or not spoken.strip():
+        return True, []
+    issues: list[str] = []
+    must_mention = rules.get("must_mention")
+    must_not_say = rules.get("must_not_say")
+    if must_not_say and must_not_say.search(spoken):
+        issues.append(
+            f"spoken describes a different chart type than {Path(visual_file).name} ({kind})"
+        )
+    if must_mention and not must_mention.search(spoken):
+        issues.append(
+            f"chart on screen is {kind} — name jailbreak/attack or alignment terms in plain words"
+        )
+    return len(issues) == 0, issues
+
 
 def is_chart_or_table_file(filename: str) -> bool:
     """Slides that show numbers, tables, or benchmark charts."""
     fn = (filename or "").lower()
     if not fn or fn in SKIP_FILES:
+        return False
+    if fn.endswith(".mp4"):
         return False
     if "-point-" in fn or fn in ("beat1-launch-summary.png", "outro-cta.png"):
         return False
@@ -86,12 +156,8 @@ def validate_chart_inline(spoken: str, visual_file: str) -> tuple[bool, float, l
     score = score_cue_visual(spoken, visual_file)
     topics_ok = spoken_topic_overlap(spoken, visual_file)
     focus_ok = spoken_hits_visual_focus(spoken, visual_file)
+    kind_ok, kind_issues = validate_chart_kind_parity(spoken, visual_file)
     mentions_chart = bool(CHART_SPEECH.search(spoken))
-    ok = score >= MIN_CHART_ALIGNMENT and topics_ok and focus_ok
-    if not ok and focus_ok and score >= MIN_WINDOW_ALIGNMENT:
-        ok = True
-    if ok and not mentions_chart and score < 0.55:
-        ok = False
     issues: list[str] = []
     if score < MIN_CHART_ALIGNMENT:
         issues.append(f"chart alignment {score:.2f} < {MIN_CHART_ALIGNMENT}")
@@ -99,9 +165,14 @@ def validate_chart_inline(spoken: str, visual_file: str) -> tuple[bool, float, l
         issues.append("spoken words do not match chart topics")
     if not focus_ok:
         issues.append("narration does not describe what is on screen — name the stat or chart in plain words")
-    elif ok and not mentions_chart and score < 0.55:
+    issues.extend(kind_issues)
+    ok = score >= MIN_CHART_ALIGNMENT and topics_ok and focus_ok and kind_ok
+    if not ok and focus_ok and kind_ok and score >= MIN_WINDOW_ALIGNMENT:
+        ok = True
+    if ok and not mentions_chart and score < 0.55:
+        ok = False
         issues.append("narration loosely related — name what the chart shows in plain words")
-    elif not ok and not mentions_chart and topics_ok:
+    elif not ok and not mentions_chart and topics_ok and not kind_ok:
         issues.append("narration does not describe what the chart shows — add plain terms")
     return ok, score, issues
 
@@ -291,6 +362,8 @@ def _transition_inline_ok(spoken: str, vis: VisualWindow) -> tuple[bool, float, 
         return ok, score, issues
     if is_chart_or_table_file(vis.file):
         return validate_hook_sample_inline(spoken, vis)
+    if fn.endswith(".mp4") and score >= MIN_WINDOW_ALIGNMENT:
+        return True, score, []
     if score >= 0.45:
         return True, score, []
     return validate_hook_sample_inline(spoken, vis)
@@ -543,6 +616,25 @@ def validate_spoken_visual_sync(project: DailySingleProject) -> dict[str, Any]:
     except FileNotFoundError:
         pass
 
+    word_visual_ok = True
+    word_visual: dict[str, Any] = {}
+    mp4 = project.merge_dir / "final-with-audio.mp4"
+    if not mp4.is_file():
+        mp4 = project.merge_dir / "final.mp4"
+    if mp4.is_file():
+        from praisonaippt.daily_single.word_visual_sync import validate_word_visual_sync
+
+        word_visual = validate_word_visual_sync(project)
+        word_visual_ok = bool(word_visual.get("ok"))
+    else:
+        word_visual_ok = True
+        word_visual = {
+            "ok": True,
+            "skipped": True,
+            "deferred": True,
+            "note": "word/VLM gate runs after assemble-beats (s22 + post_build phase gates)",
+        }
+
     transition_fails = sum(1 for r in transition_rows if not r["ok"])
     montage_fails = sum(1 for r in montage_rows if not r["ok"])
     window_fails = sum(1 for r in window_rows if not r["ok"])
@@ -592,15 +684,17 @@ def validate_spoken_visual_sync(project: DailySingleProject) -> dict[str, Any]:
                         f"word-map {row['file']}: {row.get('hit_count', 0)} topic hits "
                         f"(need {row.get('min_hits')})"
                     )
+    if not word_visual_ok and word_visual.get("issues"):
+        issues.extend(word_visual["issues"][:8])
     issues.extend(srt_plain_issues[:5])
     issues.extend(script_plain_issues[:5])
     issues.extend(audience_issues[:5])
 
     report: dict[str, Any] = {
-        "schema_version": 2,
+        "schema_version": 3,
         "ok": (
             montage_ok and windows_ok and chart_ok and coverage_ok
-            and plain_ok and slide_words_ok and transitions_ok
+            and plain_ok and slide_words_ok and transitions_ok and word_visual_ok
         ),
         "transitions_total": len(transition_rows),
         "transitions_pass": len(transition_rows) - transition_fails,
@@ -619,6 +713,8 @@ def validate_spoken_visual_sync(project: DailySingleProject) -> dict[str, Any]:
         "coverage_fail": coverage_fails,
         "slide_word_map_ok": slide_words_ok,
         "slide_word_map": slide_words,
+        "word_visual_ok": word_visual_ok,
+        "word_visual": word_visual,
         "plain_language_ok": plain_ok,
         "plain_language": {
             "srt_ok": srt_plain_ok,

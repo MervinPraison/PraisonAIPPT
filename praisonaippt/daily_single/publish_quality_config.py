@@ -28,6 +28,16 @@ TRUST_AUDIT_ENGAGEMENT: dict[str, Any] = {
     "min_comparison_beats": 2,
 }
 
+SOCIAL_COMPARISON_ENGAGEMENT: dict[str, Any] = {
+    "motion_ratio_min": 0.40,
+    "min_beats_with_clips": 4,
+    "min_social_captures": 3,
+    "text_slide_max_body_ratio": 0.45,
+    "demo_beats": [1, 2, 3, 4, 5],
+    "min_proof_cues": 6,
+    "min_comparison_beats": 4,
+}
+
 DEFAULT_SLIDE_DESIGN: dict[str, Any] = {
     "text_slide_max_kb": 120,
     "text_slide_max_body_ratio": 0.55,
@@ -59,7 +69,25 @@ def beat_map_variant(project: DailySingleProject) -> str:
 def engagement_config(project: DailySingleProject) -> dict[str, Any]:
     proto = _load_protocol(project)
     block = proto.get("engagement_audit") or {}
-    if beat_map_variant(project) == "trust-audit":
+    try:
+        bm = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        bm = {}
+    variant = str(bm.get("variant") or "")
+    if bm.get("asset_policy") == "video-first-local":
+        if variant == "social-comparison":
+            return {
+                **SOCIAL_COMPARISON_ENGAGEMENT,
+                **(block.get("social_comparison") or block.get("video_first") or {}),
+            }
+        return {
+            **TRUST_AUDIT_ENGAGEMENT,
+            "min_social_captures": 1,
+            **(block.get("video_first") or {}),
+        }
+    if variant == "social-comparison":
+        return {**SOCIAL_COMPARISON_ENGAGEMENT, **(block.get("social_comparison") or {})}
+    if variant == "trust-audit":
         return {**TRUST_AUDIT_ENGAGEMENT, **(block.get("trust_audit") or {})}
     return {**DEFAULT_ENGAGEMENT, **(block.get("default") or block)}
 
@@ -67,6 +95,17 @@ def engagement_config(project: DailySingleProject) -> dict[str, Any]:
 def slide_design_config(project: DailySingleProject) -> dict[str, Any]:
     proto = _load_protocol(project)
     block = proto.get("slide_design_audit") or {}
+    try:
+        bm = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        bm = {}
+    if bm.get("asset_policy") == "video-first-local":
+        return {
+            **TRUST_AUDIT_SLIDE_DESIGN,
+            "min_gpt_image_ratio": 0.0,
+            "text_slide_max_body_ratio": 0.55,
+            **(block.get("video_first") or {}),
+        }
     if beat_map_variant(project) == "trust-audit":
         return {**TRUST_AUDIT_SLIDE_DESIGN, **(block.get("trust_audit") or {})}
     return {**DEFAULT_SLIDE_DESIGN, **(block.get("default") or block)}
@@ -75,10 +114,15 @@ def slide_design_config(project: DailySingleProject) -> dict[str, Any]:
 def asset_tier(path: str, item: dict[str, Any] | None = None) -> str:
     """Classify visual asset for quality gates."""
     if item and item.get("asset_tier"):
-        return str(item["asset_tier"])
+        tier = str(item["asset_tier"])
+        if tier == "social":
+            return "social-capture"
+        return tier
     p = Path(path)
     fn = p.name.lower()
     if fn.endswith(".mp4"):
+        if fn.startswith("x-") or fn.startswith("linkedin-"):
+            return "social-capture"
         return "motion"
     if "social-capture" in fn or fn.startswith("hn-") or fn.startswith("reddit-"):
         return "social-capture"
@@ -102,4 +146,21 @@ def asset_tier(path: str, item: dict[str, Any] | None = None) -> str:
 
 def is_social_capture_path(path: str) -> bool:
     fn = Path(path).name.lower()
-    return "social-capture" in fn or fn.startswith("hn-") or fn.startswith("reddit-")
+    return (
+        "social-capture" in fn
+        or fn.startswith("hn-")
+        or fn.startswith("reddit-")
+        or fn.startswith("x-")
+        or fn.startswith("youtube-")
+        or fn.startswith("linkedin-")
+        or "linkedin-cintas" in fn
+    )
+
+
+def requires_heygen_bookends(project: DailySingleProject) -> bool:
+    """Video-first builds use montage + CTA slide instead of HeyGen bookends."""
+    try:
+        bm = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return True
+    return str(bm.get("asset_policy") or "") != "video-first-local"

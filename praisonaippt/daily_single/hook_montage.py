@@ -49,41 +49,81 @@ DEFAULT_MONTAGE_SPECS: list[dict[str, Any]] = [
 
 TRUST_AUDIT_MONTAGE_SPECS: list[dict[str, Any]] = [
     {
-        "fragment": "what the launch post promised",
-        "filename": "beat1-views-overlay.png",
+        "fragment": "what the launch promised",
+        "filename": "demo-launch.mp4",
+        "in_sec": 18.0,
         "beat": 1,
-        "visual": "headline vs receipt",
+        "visual": "launch clip",
     },
     {
-        "fragment": "what Reddit called AI inequality",
-        "filename": "social-capture-reddit-inequality.png",
-        "beat": 1,
-        "visual": "inequality ladder",
+        "fragment": "what the real task demos actually look like",
+        "filename": "demo-fluid.mp4",
+        "in_sec": 2.0,
+        "beat": 4,
+        "visual": "engineering demo clip",
     },
     {
-        "fragment": "five-day gap after Anthropic's own safety essay",
-        "filename": "beat2-tier-diagram.png",
+        "fragment": "the LinkedIn comparison on five real jobs",
+        "filename": "linkedin-cintas-fable5-vs-opus.mp4",
+        "in_sec": 0.0,
+        "beat": 1,
+        "visual": "LinkedIn comparison clip",
+    },
+    {
+        "fragment": "the safety pop-up you may see",
+        "filename": "demo-factorio.mp4",
+        "in_sec": 0.0,
+        "beat": 3,
+        "visual": "agent task demo clip",
+    },
+    {
+        "fragment": "when the cheaper model quietly takes over without telling you",
+        "filename": "linkedin-cintas-fable5-vs-opus.mp4",
+        "in_sec": 8.0,
         "beat": 2,
-        "visual": "RSI timeline",
+        "visual": "side-by-side agent clip",
+    },
+]
+
+
+SOCIAL_COMPARISON_MONTAGE_SPECS: list[dict[str, Any]] = [
+    {
+        "fragment": "the official launch clip on X",
+        "filename": "x-claudeai-launch.mp4",
+        "in_sec": 0.0,
+        "beat": 1,
+        "visual": "@claudeai launch on X",
     },
     {
-        "fragment": "a visible Fable safety fallback",
-        "filename": "gpt-image-safeguard-fallback.png",
-        "beat": 6,
-        "visual": "visible fallback",
+        "fragment": "how Fable five routes to Opus four point eight when safeguards fire",
+        "filename": "x-claudeai-safeguards.mp4",
+        "in_sec": 18.0,
+        "beat": 2,
+        "visual": "safeguards routing to Opus on X",
     },
     {
-        "fragment": "a silent steering path",
-        "filename": "v2-quote-willison.png",
-        "beat": 6,
-        "visual": "silent steering",
+        "fragment": "the Minecraft build from one prompt",
+        "filename": "x-chrissgpt-minecraft.mp4",
+        "in_sec": 0.0,
+        "beat": 1,
+        "visual": "ChrissGPT Minecraft clone on X",
+    },
+    {
+        "fragment": "the Pokémon clone posted the same week.",
+        "filename": "x-chrissgpt-pokemon.mp4",
+        "in_sec": 0.0,
+        "beat": 4,
+        "visual": "ChrissGPT Pokémon build on X",
     },
 ]
 
 
 def montage_specs_for(beat_map: dict[str, Any]) -> list[dict[str, Any]]:
-    if beat_map.get("variant") == "trust-audit":
+    variant = beat_map.get("variant")
+    if variant == "trust-audit":
         return TRUST_AUDIT_MONTAGE_SPECS
+    if variant == "social-comparison":
+        return SOCIAL_COMPARISON_MONTAGE_SPECS
     return DEFAULT_MONTAGE_SPECS
 
 
@@ -98,7 +138,15 @@ def _resolve_asset(
 ) -> Path | None:
     assets = project.assets_dir
     fname = spec["filename"]
+    local_ref = project.root / "research" / "reference-images"
+    local_vid = project.root / "research" / "reference-videos"
     for candidate in (
+        local_ref / "generated" / fname,
+        local_ref / "videos" / fname,
+        local_ref / fname,
+        local_vid / "anthropic" / fname,
+        local_vid / "x" / fname,
+        local_vid / "social" / fname,
         assets / "generated" / fname,
         assets / "images" / fname,
         assets / fname,
@@ -150,6 +198,7 @@ def build_hook_montage_plan(project: DailySingleProject) -> dict[str, Any]:
             "path": str(path) if path else "",
             "visual": spec["visual"],
             "beat": spec.get("beat"),
+            "in_sec": float(spec.get("in_sec") or 0),
             "ok": path is not None and path.is_file(),
         })
 
@@ -206,8 +255,77 @@ def hook_attention_durations(
     return att, overview, bridge
 
 
-def montage_cue_durations(overview_dur: float, montage_cues: list[dict]) -> list[float]:
-    """Word-weight duration per montage hero within overview window."""
+def montage_cue_durations_from_whisper(
+    project_root: Path,
+    overview_dur: float,
+    montage_cues: list[dict],
+) -> list[float] | None:
+    """Split overview montage using Whisper word spans from hook timestamps.json."""
+    ts_path = project_root / "segments" / "00-hook" / "timestamps.json"
+    if not ts_path.is_file() or not montage_cues:
+        return None
+    try:
+        data = json.loads(ts_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    segs = data.get("segments") or []
+    if len(segs) < 2:
+        return None
+    words = segs[1].get("words") or []
+    if len(words) < 8:
+        return None
+    ov_start = float(segs[1].get("start") or 0)
+    preamble_end = ov_start
+    for w in words:
+        if "minutes" in (w.get("word") or ""):
+            preamble_end = float(w["end"])
+            break
+    ends: list[float] = []
+    for w in words:
+        tok = (w.get("word") or "").rstrip(",.:;")
+        if tok in ("X", "fire", "prompt", "week"):
+            ends.append(float(w["end"]))
+    if len(ends) < len(montage_cues):
+        return None
+    ends = ends[: len(montage_cues)]
+    starts = [preamble_end, *ends[:-1]]
+    durs = [max(0.5, e - s) for s, e in zip(starts, ends)]
+    total = sum(durs)
+    if total <= 0:
+        return None
+    scale = overview_dur / total
+    durs = [d * scale for d in durs]
+    durs[-1] += overview_dur - sum(durs)
+    return durs
+
+
+def overview_montage_start_sec(project_root: Path) -> float | None:
+    """Segment time when the first montage clause is spoken (after overview preamble)."""
+    ts_path = project_root / "segments" / "00-hook" / "timestamps.json"
+    if not ts_path.is_file():
+        return None
+    try:
+        data = json.loads(ts_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    words = (data.get("segments") or [{}, {}])[1].get("words") or []
+    for w in words:
+        if "minutes" in (w.get("word") or ""):
+            return float(w["end"])
+    return None
+
+
+def montage_cue_durations(
+    overview_dur: float,
+    montage_cues: list[dict],
+    *,
+    project_root: Path | None = None,
+) -> list[float]:
+    """Duration per montage hero within overview window."""
+    if project_root is not None:
+        whisper = montage_cue_durations_from_whisper(project_root, overview_dur, montage_cues)
+        if whisper:
+            return whisper
     weights = _word_weights([c.get("script_fragment", "") for c in montage_cues])
     total_w = sum(weights) or len(montage_cues)
     durs = [max(0.5, overview_dur * (w / total_w)) for w in weights]
@@ -229,6 +347,31 @@ def attention_visual(
     script: str = "",
 ) -> dict[str, Any]:
     """Prefer canonical page scroll video for hook attention when present."""
+    beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+    if beat_map.get("variant") == "trust-audit":
+        for prefer in (
+            "linkedin-cintas-fable5-vs-opus.mp4",
+            "demo-fluid.mp4",
+            "demo-launch.mp4",
+            "demo-factorio.mp4",
+        ):
+            for cue in montage_cues:
+                if cue.get("file") == prefer and cue.get("path"):
+                    return cue
+        return attention_hero(montage_cues)
+
+    if beat_map.get("variant") == "social-comparison":
+        for prefer in (
+            "x-claudeai-launch.mp4",
+            "x-chrissgpt-minecraft.mp4",
+            "x-claudeai-safeguards.mp4",
+            "x-pootlepress-wp-theme.mp4",
+        ):
+            for cue in montage_cues:
+                if cue.get("file") == prefer and cue.get("path"):
+                    return cue
+        return attention_hero(montage_cues)
+
     scroll = project.assets_dir / "videos" / SCROLL_ATTENTION_FILE
     if scroll.is_file():
         sentences = split_caption_cues(script) if script else []
@@ -256,8 +399,35 @@ def hook_visual_windows(
     motion = False
     if project:
         from praisonaippt.daily_single.canonical_scroll import scroll_video_path
-        motion = bool(scroll_video_path(project))
+
+        try:
+            beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            beat_map = {}
+        skip_scroll = beat_map.get("variant") in ("trust-audit", "social-comparison")
+        motion = bool(scroll_video_path(project)) and not skip_scroll
     att, overview, bridge = hook_attention_durations(hook_dur, script, motion_clip=motion)
+    if project:
+        from praisonaippt.daily_single.cue_slide_sync import _parse_segment_srt
+
+        seg_srt = project.segments_dir / "00-hook" / "segment.srt"
+        if seg_srt.is_file():
+            rows = _parse_segment_srt(seg_srt)
+            if len(rows) >= 3:
+                att = max(att, rows[0][1])
+                overview = max(0.5, rows[1][1] - att)
+                bridge = max(0.5, rows[2][1] - rows[1][1])
+                drift = hook_dur - att - overview - bridge
+                if abs(drift) > 0.05:
+                    bridge = max(0.5, bridge + drift)
+        montage_t0 = overview_montage_start_sec(project.root)
+        if montage_t0 is not None and montage_t0 > hook_start + att:
+            att = montage_t0 - hook_start
+            overview = max(0.5, rows[1][1] - att)
+            bridge = max(0.5, rows[2][1] - rows[1][1])
+            drift = hook_dur - att - overview - bridge
+            if abs(drift) > 0.05:
+                bridge = max(0.5, bridge + drift)
     windows: list[dict[str, Any]] = []
     t = hook_start
     hero = attention_visual(project, montage_cues, script=script) if project else attention_hero(montage_cues)
@@ -271,7 +441,7 @@ def hook_visual_windows(
         "script_fragment": hero.get("script_fragment", ""),
     })
     t += att
-    per = montage_cue_durations(overview, montage_cues)
+    per = montage_cue_durations(overview, montage_cues, project_root=project.root if project else None)
     for cue, dur in zip(montage_cues, per):
         windows.append({
             "start": t,
@@ -283,11 +453,25 @@ def hook_visual_windows(
             "script_fragment": cue.get("script_fragment", ""),
         })
         t += dur
+    bridge_file = launch_file
+    bridge_visual = "bridge B-roll"
+    if project:
+        from praisonaippt.daily_single.canonical_scroll import scroll_video_path
+
+        beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+        skip_scroll = beat_map.get("variant") in ("trust-audit", "social-comparison")
+        scroll = scroll_video_path(project) if not skip_scroll else None
+        if scroll:
+            bridge_file = SCROLL_ATTENTION_FILE
+            bridge_visual = "canonical blog scroll"
+        elif montage_cues:
+            bridge_file = str(montage_cues[0].get("file") or launch_file)
+            bridge_visual = str(montage_cues[0].get("visual") or "montage hero")
     windows.append({
         "start": t,
         "end": hook_start + hook_dur,
         "beat": "00-hook",
-        "visual": "HeyGen avatar",
+        "visual": bridge_visual,
         "file": bridge_file,
         "section": "bridge",
     })

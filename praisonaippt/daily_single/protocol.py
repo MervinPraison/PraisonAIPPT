@@ -3,12 +3,14 @@ from __future__ import annotations
 
 from typing import Any
 
+from praisonaippt.daily_single.pipeline import pipeline_manifest
 from praisonaippt.video_qa.config import DEFAULT_VIDEO_QA_PROTOCOL
 
 DEFAULT_PROTOCOL: dict[str, Any] = {
     "schema_version": 3,
     "name": "daily-single-pipeline",
     "profile": "daily_single",
+    "central_pipeline": pipeline_manifest(),
     "stages": [
         {
             "id": "write-scripts",

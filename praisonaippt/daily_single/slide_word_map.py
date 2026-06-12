@@ -97,29 +97,34 @@ def validate_beat01_slide_word_map(project: DailySingleProject) -> tuple[bool, d
     beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
     beat1 = (beat_map.get("beats") or {}).get("1") or {}
     images = beat1.get("images") or []
+    if str(beat_map.get("asset_policy") or "") == "video-first-local" and not images:
+        return True, {"skipped": "video-first beat 1 — clips only, no slide word-map"}
     if images and not beat1.get("generated"):
         total = ffprobe_duration(mp3)
-        headline_d = total * 0.20
-        first_ok, first_report = validate_segment_slide_words(
+        seg_srt = project.segments_dir / "01-cold-open" / "segment.srt"
+        reddit_start = total * 0.45
+        reddit_end = total
+        if seg_srt.is_file():
+            from praisonaippt.daily_single.cue_slide_sync import _parse_segment_srt
+
+            hits: list[tuple[float, float]] = []
+            for start, end, text in _parse_segment_srt(seg_srt):
+                lower = text.lower()
+                if any(k in lower for k in ("reddit", "unequal", "vip", "highway", "screenshot")):
+                    hits.append((start, end))
+            if hits:
+                reddit_start = min(s for s, _ in hits)
+                reddit_end = max(e for _, e in hits)
+        reddit_file = Path(images[0]["path"]).name
+        reddit_ok, reddit_report = validate_segment_slide_words(
             project,
             "01-cold-open",
-            slide_files=[Path(images[0]["path"]).name],
-            local_start=0.0,
-            local_end=headline_d,
+            slide_files=[reddit_file],
+            local_start=reddit_start,
+            local_end=reddit_end,
             min_hits=2,
         )
-        second_ok, second_report = validate_segment_slide_words(
-            project,
-            "01-cold-open",
-            slide_files=[Path(images[1]["path"]).name if len(images) > 1 else Path(images[0]["path"]).name],
-            local_start=headline_d,
-            local_end=total,
-            min_hits=2,
-        )
-        return first_ok and second_ok, {
-            "views_window": first_report,
-            "summary_window": second_report,
-        }
+        return reddit_ok, {"reddit_window": reddit_report}
 
     total = ffprobe_duration(mp3)
     ts = project.segments_dir / "01-cold-open" / "timestamps.json"

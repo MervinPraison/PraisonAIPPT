@@ -14,11 +14,26 @@ from praisonaippt.daily_single.display_sync import (
 )
 from praisonaippt.daily_single.engagement_audit import validate_engagement_assets
 from praisonaippt.daily_single.project import DailySingleProject
-from praisonaippt.daily_single.publish_quality_config import asset_tier, engagement_config
+from praisonaippt.daily_single.publish_quality_config import asset_tier, engagement_config, is_social_capture_path
 from praisonaippt.daily_single.slide_design_audit import validate_slide_design
 from praisonaippt.daily_single.youtube_quality import validate_compelling_hook
 
-COMPARISON_MARKERS = ("benchmark", "pricing", "compare", "table", "stat", "tier", "social-capture")
+COMPARISON_MARKERS = (
+    "benchmark",
+    "pricing",
+    "compare",
+    "table",
+    "stat",
+    "tier",
+    "social-capture",
+    "linkedin",
+    "cintas",
+    "x-trq212",
+    "x-claudeai",
+    "x-chrissgpt",
+    "x-pootlepress",
+    "x-claudedevs",
+)
 
 
 def _hook_has_motion(windows: list[VisualWindow], hook_end: float) -> bool:
@@ -52,6 +67,9 @@ def _comparison_beats(windows: list[VisualWindow]) -> set[str]:
         if w.beat in ("00-hook", "99-outro"):
             continue
         fn = w.file.lower()
+        if is_social_capture_path(w.file) or asset_tier(w.file) == "social-capture":
+            beats.add(w.beat)
+            continue
         if any(m in fn for m in COMPARISON_MARKERS):
             beats.add(w.beat)
     return beats

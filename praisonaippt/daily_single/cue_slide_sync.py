@@ -47,15 +47,16 @@ BEAT6_CUE_IMAGES: list[tuple[str, ...]] = [
 ]
 
 BEAT6_TRUST_CUE_IMAGES: list[tuple[str, ...]] = [
-    ("v2-two-safeties", "two-safeties", "safety", "stories"),
-    ("fallback-notification", "fallback", "visible"),
-    ("gpt-image-safeguard", "safeguard-fallback", "percent", "opus", "sessions"),
-    ("v2-two-safeties", "notice", "plan"),
-    ("v2-quote-willison", "willison", "steering", "silent"),
-    ("v2-quote-willison", "willison", "sabotage"),
-    ("v2-false-positive", "false", "positive", "ferrari"),
-    ("v2-false-positive", "register", "innocuous"),
-    ("v2-false-positive", "villains", "incidents"),
+    ("fallback-notification", "stories", "safety", "trust", "mixed", "two"),
+    ("fallback-notification", "fallback", "visible", "switched", "older", "message", "clear"),
+    ("fallback-notification", "notice", "plan", "percent", "sessions", "five", "anthropic"),
+    ("fallback-notification", "notice", "plan", "percent", "sessions"),
+    ("v2-quote-willison", "willison", "banner", "steering", "silent", "announcing"),
+    ("v2-quote-willison", "willison", "steer", "steering", "silent", "swap", "announcing"),
+    ("v2-quote-willison", "willison", "sabotage", "paid", "product", "simon"),
+    ("v2-false-positive", "false", "positive", "homework", "hello", "everyday", "architecture"),
+    ("v2-false-positive", "false", "positive", "safety", "bad", "point"),
+    ("v2-false-positive", "deserve", "kind", "hit", "know", "which"),
 ]
 
 

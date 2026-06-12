@@ -39,6 +39,9 @@ class DailySingleProject:
 
     @property
     def video_script_path(self) -> Path:
+        local = self.root / "research" / "video-script.md"
+        if local.is_file():
+            return local
         return self.research_dir / "video-script.md"
 
     @property

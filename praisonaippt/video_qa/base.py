@@ -61,10 +61,12 @@ class SuiteReport:
         warns = sum(
             1 for s in self.stages for c in s.checks if not c.ok and c.severity == "warn"
         )
-        failed_required = [s.id for s in self.stages if s.required and not s.ok and not s.skipped]
+        failed_required = [
+            s.id for s in self.stages if s.required and (not s.ok or s.skipped)
+        ]
         self.summary = {
             "stages_run": len(self.stages),
-            "stages_passed": sum(1 for s in self.stages if s.ok or s.skipped),
+            "stages_passed": sum(1 for s in self.stages if s.ok and not s.skipped),
             "errors": errors,
             "warnings": warns,
             "failed_required": failed_required,

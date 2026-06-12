@@ -5,10 +5,10 @@ from typing import Any
 
 from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.video_qa.adapters import export_vlm_timeline, load_protocol, write_stage_report, write_summary
-from praisonaippt.video_qa.base import StageReport, SuiteReport
+from praisonaippt.video_qa.base import CheckResult, StageReport, SuiteReport
 from praisonaippt.video_qa.config import DEFAULT_QA_STAGES
 from praisonaippt.video_qa.context import SuiteContext
-from praisonaippt.video_qa.degradation import detect_degradation, stage_should_skip
+from praisonaippt.video_qa.degradation import detect_degradation, qa_offline_mode, stage_should_skip
 from praisonaippt.video_qa.registry import run_registered_stage
 
 
@@ -60,12 +60,19 @@ def run_stage(
 
     skip, reason = stage_should_skip(cfg, degradation)
     if skip:
+        required = bool(cfg.get("required", True))
         report = StageReport(
             id=stage_id,
-            ok=True,
-            required=bool(cfg.get("required", True)),
+            ok=not required,
+            required=required,
             when=str(cfg.get("when", "all")),
             skipped=True,
+            checks=[CheckResult(
+                id="skipped",
+                ok=not required,
+                severity="error" if required else "info",
+                message=reason or "skipped",
+            )],
             details={"skip_reason": reason, "stage_key": _stage_key(cfg)},
         )
         _persist_stage(project, report, phase=phase)
@@ -116,12 +123,19 @@ def run_suite(
         phase_str = str(phase) if phase else None
         skip, reason = stage_should_skip(cfg, degradation)
         if skip:
+            required = bool(cfg.get("required", True))
             report = StageReport(
                 id=sid,
-                ok=True,
-                required=bool(cfg.get("required", True)),
+                ok=not required,
+                required=required,
                 when=str(cfg.get("when", "all")),
                 skipped=True,
+                checks=[CheckResult(
+                    id="skipped",
+                    ok=not required,
+                    severity="error" if required else "info",
+                    message=reason or "skipped",
+                )],
                 details={"skip_reason": reason, "phase": phase, "stage_key": _stage_key(cfg)},
             )
             _persist_stage(project, report, phase=phase_str)
@@ -146,6 +160,28 @@ def run_suite(
         report.details["stage_key"] = _stage_key(cfg)
         _persist_stage(project, report, phase=phase_str)
         suite.stages.append(report)
+
+    from praisonaippt.daily_single.spoken_visual_gates import PHASE_GATES, run_phase_gates
+
+    gate_whens = [when] if when != "all" else list(PHASE_GATES.keys())
+    for gate_when in gate_whens:
+        if gate_when not in PHASE_GATES:
+            continue
+        use_vlm = degradation.get("vlm") != "offline" and not qa_offline_mode()
+        gate_ok, gate_detail = run_phase_gates(project, gate_when, use_vlm=use_vlm)
+        suite.stages.append(StageReport(
+            id=f"sdk-phase-gates-{gate_when}",
+            ok=gate_ok,
+            required=True,
+            when=gate_when,
+            checks=[CheckResult(
+                id="phase_gates",
+                ok=gate_ok,
+                severity="error" if not gate_ok else "info",
+                message=f"SDK A/V phase gates ({gate_when})",
+                details=gate_detail,
+            )],
+        ))
 
     if when in ("post_build", "all"):
         export_vlm_timeline(project)

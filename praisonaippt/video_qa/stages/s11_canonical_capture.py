@@ -21,6 +21,25 @@ def run_s11_canonical_capture(
     ctx=None,
 ) -> StageReport:
     checks: list[CheckResult] = []
+    try:
+        beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        beat_map = {}
+    if beat_map.get("variant") in ("trust-audit", "social-comparison"):
+        checks.append(CheckResult(
+            id="scroll_asset",
+            ok=True,
+            severity="info",
+            message=f"canonical scroll not required for {beat_map.get('variant')} variant",
+        ))
+        return StageReport(
+            id="s11-canonical-capture",
+            ok=True,
+            required=required,
+            when=when,
+            checks=checks,
+        )
+
     scroll = scroll_video_path(project)
     if not scroll:
         checks.append(CheckResult(

@@ -15,12 +15,21 @@ from praisonaippt.daily_single.hook_montage import (
     build_hook_montage_plan,
     hook_attention_durations,
     montage_cue_durations,
+    overview_montage_start_sec,
 )
 from praisonaippt.daily_single.brand_bumper import BUMPER_STEM, prepare_brand_bumper
 from praisonaippt.daily_single.avatar_pip import overlay_circle_pip
 from praisonaippt.daily_single.beat01_timing import beat01_views_duration_sec
 from praisonaippt.daily_single.canonical_scroll import scroll_video_path
-from praisonaippt.daily_single.text_slide import render_slide_group, slide_specs
+from praisonaippt.daily_single.beat10_timing import beat10_chart_durations
+from praisonaippt.daily_single.segment_cue_timing import (
+    beat4_visual_durations,
+    beat8_clip_durations,
+    beat9_visual_durations,
+    clip_durations_for_cues,
+)
+from praisonaippt.daily_single.publish_quality_config import beat_map_variant
+from praisonaippt.daily_single.text_slide import outro_slide_specs, render_slide_group, slide_specs
 from praisonaippt.daily_single.vo import synthesise_segments
 from praisonaippt.segment_video.media import ffprobe_duration
 
@@ -45,6 +54,17 @@ def _video_from_image(src: Path, dest: Path, dur: float) -> None:
         "ffmpeg", "-y", "-loop", "1", "-i", str(src), "-t", f"{dur:.3f}",
         "-vf", _scale_pad_filter(), "-c:v", "libx264", "-pix_fmt", "yuv420p", str(dest),
     ])
+
+
+def _asset_to_clip(src: Path, dest: Path, dur: float, *, in_sec: float = 0.0) -> None:
+    """Still image or motion clip scaled to target duration."""
+    if src.suffix.lower() == ".mp4":
+        start = max(0.0, in_sec)
+        clip_d = min(dur, max(0.5, ffprobe_duration(src) - start))
+        _trim_clip(src, dest, start, start + clip_d)
+        _extend_or_trim(dest, dest, dur)
+        return
+    _video_from_image(src, dest, dur)
 
 
 def _trim_clip(src: Path, dest: Path, start: float, end: float) -> None:
@@ -97,22 +117,52 @@ def _heygen_bookend_segment(heygen: Path, dest: Path, dur: float) -> None:
 
 def _hook_montage(
     project: DailySingleProject,
-    heygen: Path,
     launch: Path,
     dest: Path,
     dur: float,
 ) -> None:
-    """June-style hook: hero attention → phrase montage → HeyGen bridge."""
+    """Hook: scroll attention → phrase montage → bridge (full-frame video, no avatar)."""
     script = project.segment_script("00-hook").read_text(encoding="utf-8")
     plan = build_hook_montage_plan(project)
     cues = [c for c in plan.get("cues") or [] if c.get("ok") and c.get("path")]
     if len(cues) < 3:
-        _hook_with_launch(heygen, launch, dest, dur)
+        _hook_launch_only(launch, dest, dur)
         return
 
+    beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
+    skip_scroll = beat_map.get("variant") in ("trust-audit", "social-comparison")
     att, overview, bridge = hook_attention_durations(
-        dur, script, motion_clip=bool(scroll_video_path(project)),
+        dur,
+        script,
+        motion_clip=bool(scroll_video_path(project)) and not skip_scroll,
     )
+    seg_srt = project.segments_dir / "00-hook" / "segment.srt"
+    if seg_srt.is_file():
+        from praisonaippt.daily_single.cue_slide_sync import _parse_segment_srt
+
+        rows = _parse_segment_srt(seg_srt)
+        if len(rows) >= 3:
+            att = max(att, rows[0][1])
+            overview = max(0.5, rows[1][1] - att)
+            bridge = max(0.5, rows[2][1] - rows[1][1])
+            drift = dur - att - overview - bridge
+            if abs(drift) > 0.05:
+                bridge = max(0.5, bridge + drift)
+    montage_t0 = overview_montage_start_sec(project.root)
+    if montage_t0 is not None and montage_t0 > att:
+        att = montage_t0
+        if seg_srt.is_file():
+            rows = _parse_segment_srt(seg_srt)
+            if len(rows) >= 3:
+                overview = max(0.5, rows[1][1] - att)
+                bridge = max(0.5, rows[2][1] - rows[1][1])
+                drift = dur - att - overview - bridge
+                if abs(drift) > 0.05:
+                    bridge = max(0.5, bridge + drift)
+            else:
+                overview = max(0.5, dur - att - bridge)
+        else:
+            overview = max(0.5, dur - att - bridge)
     parts_dir = dest.parent / "hook-parts"
     parts_dir.mkdir(parents=True, exist_ok=True)
 
@@ -120,40 +170,40 @@ def _hook_montage(
     intro = parts_dir / "intro.mp4"
     scroll_path = Path(hero["path"]) if hero.get("file") == "canonical-scroll.mp4" and hero.get("path") else None
     if scroll_path and scroll_path.is_file():
-        _extend_or_trim(scroll_path, intro, att)
+        clip_d = min(att, ffprobe_duration(scroll_path))
+        _trim_clip(scroll_path, intro, 0.0, clip_d)
+        if ffprobe_duration(intro) < att - 0.15:
+            _extend_or_trim(intro, intro, att)
     else:
         hero_path = Path(hero["path"]) if hero.get("path") else Path(cues[0]["path"])
-        _video_from_image(hero_path, intro, att)
+        _asset_to_clip(hero_path, intro, att, in_sec=float(hero.get("in_sec") or 0))
 
     montage_clips: list[Path] = []
-    for i, (cue, cdur) in enumerate(zip(cues, montage_cue_durations(overview, cues))):
+    montage_lens = montage_cue_durations(overview, cues, project_root=project.root)
+    for i, (cue, cdur) in enumerate(zip(cues, montage_lens)):
         part = parts_dir / f"montage-{i:02d}.mp4"
-        _video_from_image(Path(cue["path"]), part, cdur)
+        _asset_to_clip(Path(cue["path"]), part, cdur, in_sec=float(cue.get("in_sec") or 0))
         montage_clips.append(part)
     montage = parts_dir / "montage.mp4"
     _concat_videos(montage_clips, montage)
 
     bridge_bg = parts_dir / "bridge-bg.mp4"
-    tail_hero = Path(cues[0]["path"])
-    _video_from_image(tail_hero, bridge_bg, bridge)
+    use_scroll_bridge = (
+        scroll_path
+        and scroll_path.is_file()
+        and not skip_scroll
+    )
+    bridge_src = scroll_path if use_scroll_bridge else Path(cues[0]["path"])
+    _asset_to_clip(bridge_src, bridge_bg, bridge)
 
     body = parts_dir / "body.mp4"
     _concat_videos([intro, montage, bridge_bg], body)
-    hg_trim = parts_dir / "heygen-trim.mp4"
-    _heygen_bookend_segment(heygen, hg_trim, dur)
-    overlay_circle_pip(body, hg_trim, dest, dur)
+    _extend_or_trim(body, dest, dur)
 
 
-def _hook_with_launch(heygen: Path, launch: Path, dest: Path, dur: float) -> None:
-    """Launch B-roll hook with circle HeyGen PiP for the full segment."""
-    launch_dur = min(30.0, ffprobe_duration(launch))
-    launch_part = dest.parent / "hook-launch.mp4"
-    _trim_clip(launch, launch_part, 0, min(launch_dur, dur + 2.0))
-    body = dest.parent / "hook-body.mp4"
-    _extend_or_trim(launch_part, body, dur)
-    hg_trim = dest.parent / "hook-heygen.mp4"
-    _heygen_bookend_segment(heygen, hg_trim, dur)
-    overlay_circle_pip(body, hg_trim, dest, dur)
+def _hook_with_launch(launch: Path, dest: Path, dur: float) -> None:
+    """Launch B-roll hook for the full segment (no avatar)."""
+    _hook_launch_only(launch, dest, dur)
 
 
 def _outro_with_avatar(heygen: Path, dest: Path, dur: float, bg_png: Path) -> None:
@@ -203,6 +253,33 @@ def _concat_videos(parts: list[Path], dest: Path) -> None:
             f.write(f"file '{p.resolve()}'\n")
         lst = f.name
     _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", str(dest)])
+
+
+def _clip_part(parts_dir: Path, clip: dict, seg_len: float, name: str) -> Path:
+    part = parts_dir / name
+    start = float(clip.get("in_sec") or 0)
+    end = float(clip.get("out_sec") or start + seg_len)
+    _trim_clip(Path(clip["path"]), part, start, end)
+    _extend_or_trim(part, part, seg_len)
+    return part
+
+
+def _assemble_clips_from_lens(
+    parts_dir: Path,
+    clips: list[dict],
+    lens: list[float],
+    out: Path,
+    dur: float,
+) -> Path:
+    parts: list[Path] = []
+    for i, c in enumerate(clips):
+        if i >= len(lens) or lens[i] < 0.25:
+            continue
+        parts.append(_clip_part(parts_dir, c, lens[i], f"clip-{i}.mp4"))
+    merged = parts_dir / "merged.mp4"
+    _concat_videos(parts, merged)
+    _extend_or_trim(merged, out, dur)
+    return out
 
 
 def _unique_assets(items: list[dict]) -> list[dict]:
@@ -297,10 +374,25 @@ def _build_beat_video(
 
     if beat == 7:
         table = next((g for g in generated if "beat7" in g.get("filename", "")), None)
+        gap = next((i for i in images if "fallback-gaps" in i.get("filename", "")), None)
+        if not table and not gap and not generated and len(clips) >= 2:
+            per = dur / max(1, len(clips))
+            parts = []
+            for i, c in enumerate(clips):
+                part = parts_dir / f"clip-{i}.mp4"
+                start = float(c.get("in_sec") or 0)
+                end = float(c.get("out_sec") or start + per)
+                _trim_clip(Path(c["path"]), part, start, end)
+                _extend_or_trim(part, part, per)
+                parts.append(part)
+            merged = parts_dir / "merged.mp4"
+            _concat_videos(parts, merged)
+            _extend_or_trim(merged, out, dur)
+            return out
         clip_d = 0.0
         parts: list[Path] = []
         if clips:
-            clip_d = min(10.0, dur * 0.25)
+            clip_d = min(10.0, dur * 0.35)
             clip = clips[0]
             part = parts_dir / "launch-clip.mp4"
             start = float(clip.get("in_sec") or 0)
@@ -308,27 +400,50 @@ def _build_beat_video(
             _trim_clip(Path(clip["path"]), part, start, end)
             _extend_or_trim(part, part, clip_d)
             parts.append(part)
-        table_dur = min(28.0, max(12.0, (dur - clip_d) * 0.55))
-        rest = max(1.0, dur - clip_d - table_dur)
+        table_dur = 0.0
         if table:
+            table_dur = min(28.0, max(12.0, (dur - clip_d) * 0.55))
             parts.append(parts_dir / "table.mp4")
-            _video_from_image(Path(table["path"]), parts[0], table_dur)
+            _video_from_image(Path(table["path"]), parts[-1], table_dur)
+        rest = max(1.0, dur - clip_d - table_dur)
         if rest > 0.75:
-            gap = next((g for g in generated[1:] if "fallback-gaps" in g.get("filename", "")), None)
             if gap:
-                gap_d = min(18.0, rest * 0.45)
+                gap_d = min(18.0, rest * 0.55)
                 gap_part = parts_dir / "platform-gaps.mp4"
                 _video_from_image(Path(gap["path"]), gap_part, gap_d)
                 parts.append(gap_part)
                 rest = max(0.0, rest - gap_d)
             if rest > 0.75:
                 parts.extend(_point_slideshow(parts_dir, "beat-07-rest", rest, "dev"))
-        elif table:
-            _extend_or_trim(parts[0], out, dur)
-            return out
-        else:
+        if not parts and clips:
+            clip_dur = dur / max(1, len(clips))
+            for i, c in enumerate(clips):
+                part = parts_dir / f"clip-{i}.mp4"
+                _trim_clip(Path(c["path"]), part, float(c.get("in_sec") or 0), float(c.get("out_sec") or clip_dur))
+                _extend_or_trim(part, part, clip_dur)
+                parts.append(part)
+        if not parts:
             _video_from_image(assets / "generated" / "beat7-api-table.png", out, dur)
             return out
+        merged = parts_dir / "merged.mp4"
+        _concat_videos(parts, merged)
+        _extend_or_trim(merged, out, dur)
+        return out
+
+    if beat == 1 and clips and not any(
+        "views-overlay" in (i.get("filename") or "") for i in images + generated
+    ):
+        root = out_dir.parent
+        lens = clip_durations_for_cues(root, "01-cold-open", dur, [0, 1, 1])
+        parts: list[Path] = []
+        for i, c in enumerate(clips):
+            if i < len(lens):
+                parts.append(_clip_part(parts_dir, c, lens[i], f"clip-{i}.mp4"))
+        rest = dur - sum(lens[: len(clips)])
+        if images and rest > 0.5:
+            part = parts_dir / "social.mp4"
+            _video_from_image(Path(images[0]["path"]), part, rest)
+            parts.append(part)
         merged = parts_dir / "merged.mp4"
         _concat_videos(parts, merged)
         _extend_or_trim(merged, out, dur)
@@ -487,22 +602,26 @@ def _build_beat_video(
     if beat == 6 and images:
         from praisonaippt.daily_single.cue_slide_sync import assemble_beat6_from_cues
 
-        project_root = out_dir.parent
-        seg_srt = project_root / "segments" / "06-safeguards" / "segment.srt"
-        merged_srt = project_root / "merge" / "final.srt"
-        t0 = 0.0
-        tl_path = project_root / "merge" / "timeline.json"
-        if tl_path.is_file():
-            tl = json.loads(tl_path.read_text(encoding="utf-8"))
-            for row in tl.get("segments") or []:
-                if row.get("id") == "beat-06":
-                    t0 = float(row["start_sec"])
-                    break
-        built = assemble_beat6_from_cues(
-            parts_dir, seg_srt, images, out, dur, t0=t0, merged_srt=merged_srt,
+        v2_only = all(
+            (i.get("filename") or "").startswith("v2-") for i in images
         )
-        if built:
-            return out
+        if not v2_only:
+            project_root = out_dir.parent
+            seg_srt = project_root / "segments" / "06-safeguards" / "segment.srt"
+            merged_srt = project_root / "merge" / "final.srt"
+            t0 = 0.0
+            tl_path = project_root / "merge" / "timeline.json"
+            if tl_path.is_file():
+                tl = json.loads(tl_path.read_text(encoding="utf-8"))
+                for row in tl.get("segments") or []:
+                    if row.get("id") == "beat-06":
+                        t0 = float(row["start_sec"])
+                        break
+            built = assemble_beat6_from_cues(
+                parts_dir, seg_srt, images, out, dur, t0=t0, merged_srt=merged_srt,
+            )
+            if built:
+                return out
 
     if beat == 8 and generated:
         slides = generated + [i for i in images if "protein" in i.get("filename", "")]
@@ -510,6 +629,20 @@ def _build_beat_video(
         merged = parts_dir / "merged.mp4"
         _concat_videos(vparts, merged)
         shutil.copy2(merged, out)
+        return out
+
+    if beat == 4 and clips and images and not generated:
+        chart_d, clip_d, tail_d = beat4_visual_durations(out_dir.parent, dur)
+        parts: list[Path] = []
+        parts.append(parts_dir / "chart-0.mp4")
+        _video_from_image(Path(images[0]["path"]), parts[-1], chart_d)
+        parts.append(_clip_part(parts_dir, clips[0], clip_d, "pokemon.mp4"))
+        if tail_d >= 0.25:
+            parts.append(parts_dir / "chart-1.mp4")
+            _video_from_image(Path(images[0]["path"]), parts[-1], tail_d)
+        merged = parts_dir / "merged.mp4"
+        _concat_videos(parts, merged)
+        _extend_or_trim(merged, out, dur)
         return out
 
     if beat == 4 and generated and images:
@@ -537,6 +670,23 @@ def _build_beat_video(
         _extend_or_trim(merged, out, dur)
         return out
 
+    if beat == 9 and images and not clips and not generated:
+        pricing = next((i for i in images if "pricing" in i.get("filename", "")), images[0])
+        bench = next((i for i in images if "benchmark" in i.get("filename", "")), images[-1])
+        p_d, b_d, tail_d = beat9_visual_durations(out_dir.parent, dur)
+        parts: list[Path] = []
+        parts.append(parts_dir / "price-0.mp4")
+        _video_from_image(Path(pricing["path"]), parts[-1], p_d)
+        parts.append(parts_dir / "bench-0.mp4")
+        _video_from_image(Path(bench["path"]), parts[-1], b_d)
+        if tail_d >= 0.25:
+            parts.append(parts_dir / "price-1.mp4")
+            _video_from_image(Path(pricing["path"]), parts[-1], tail_d)
+        merged = parts_dir / "merged.mp4"
+        _concat_videos(parts, merged)
+        _extend_or_trim(merged, out, dur)
+        return out
+
     if beat == 9 and images and any("v2-pricing" in i.get("filename", "") for i in images):
         fracs = (0.38, 0.30, 0.32)
         parts: list[Path] = []
@@ -548,6 +698,26 @@ def _build_beat_video(
             _video_from_image(Path(item["path"]), part, seg_d)
             parts.append(part)
             off += frac
+        merged = parts_dir / "merged.mp4"
+        _concat_videos(parts, merged)
+        shutil.copy2(merged, out)
+        return out
+
+    if beat == 10 and clips and images:
+        clip_d = dur * 0.72
+        per = clip_d / max(1, len(clips))
+        parts: list[Path] = []
+        for i, c in enumerate(clips):
+            part = parts_dir / f"clip-{i}.mp4"
+            start = float(c.get("in_sec") or 0)
+            end = float(c.get("out_sec") or start + per)
+            _trim_clip(Path(c["path"]), part, start, end)
+            _extend_or_trim(part, part, per)
+            parts.append(part)
+        rest = max(0.5, dur - clip_d)
+        part = parts_dir / "align.mp4"
+        _video_from_image(Path(images[0]["path"]), part, rest)
+        parts.append(part)
         merged = parts_dir / "merged.mp4"
         _concat_videos(parts, merged)
         shutil.copy2(merged, out)
@@ -571,17 +741,18 @@ def _build_beat_video(
             jail = {"path": str(assets / "jailbreak-resistance.png"), "filename": "jailbreak-resistance.png"}
         if not align and (assets / "alignment-chart.png").is_file():
             align = {"path": str(assets / "alignment-chart.png"), "filename": "alignment-chart.png"}
-        weighted = [(jail, 0.65), (align, 0.35)]
+        jail_d, align_d, tail_d = beat10_chart_durations(out_dir.parent, dur)
+        weighted = [(jail, jail_d), (align, align_d), (jail, tail_d)]
         slides = [s for s, _ in weighted if s]
         if not slides and images:
             slides = [images[0]]
         if slides:
             parts: list[Path] = []
-            for spec, frac in weighted:
+            for i, (spec, seg_len) in enumerate(weighted):
                 if not spec:
                     continue
-                part = parts_dir / f"close-{spec['filename']}.mp4"
-                _video_from_image(Path(spec["path"]), part, dur * frac)
+                part = parts_dir / f"close-{i}-{spec['filename']}.mp4"
+                _video_from_image(Path(spec["path"]), part, seg_len)
                 parts.append(part)
             merged = parts_dir / "merged.mp4"
             _concat_videos(parts, merged)
@@ -594,6 +765,23 @@ def _build_beat_video(
         _concat_videos(vparts, merged)
         shutil.copy2(merged, out)
         return out
+
+    beat_cue_clips: dict[int, tuple[str, list[int]]] = {
+        2: ("02-mythos-tier", [0, 0, 1]),
+        3: ("03-engineers-care", [0, 1, 1, 1]),
+        5: ("05-vision-memory", [0, 1, 1]),
+        6: ("06-safeguards", [0, 1, 1, 1]),
+        7: ("07-api-integration", [0, 1]),
+    }
+    if beat == 8 and clips and not generated and not images:
+        lens = beat8_clip_durations(out_dir.parent, dur)
+        if len(lens) == len(clips):
+            return _assemble_clips_from_lens(parts_dir, clips, lens, out, dur)
+    if beat in beat_cue_clips and clips and not generated and not images:
+        seg_dir, cue_map = beat_cue_clips[beat]
+        lens = clip_durations_for_cues(out_dir.parent, seg_dir, dur, cue_map)
+        if len(lens) == len(clips):
+            return _assemble_clips_from_lens(parts_dir, clips, lens, out, dur)
 
     if clips:
         clip_dur = dur / max(1, len(clips))
@@ -663,12 +851,11 @@ def assemble(project: DailySingleProject) -> Path:
 
         if label == "00-hook":
             hook_v = project.beats_dir / "00-hook.mp4"
-            heygen_hook = project.segments_dir / "00-hook" / "heygen.mp4"
             launch = project.assets_dir / "videos" / "claudeai-launch.mp4"
-            if heygen_hook.is_file():
-                _hook_montage(project, heygen_hook, launch, hook_v, dur)
-            elif heygen_hook.is_file():
-                _heygen_bookend_segment(heygen_hook, hook_v, dur)
+            plan = build_hook_montage_plan(project)
+            cues = [c for c in plan.get("cues") or [] if c.get("ok") and c.get("path")]
+            if len(cues) >= 3:
+                _hook_montage(project, launch, hook_v, dur)
             elif launch.is_file():
                 _hook_launch_only(launch, hook_v, dur)
             else:
@@ -688,7 +875,9 @@ def assemble(project: DailySingleProject) -> Path:
             outro_v = project.beats_dir / "99-outro.mp4"
             heygen_out = project.segments_dir / "99-outro" / "heygen.mp4"
             cta_dir = project.beats_dir / "outro-slides"
-            cta_png = render_slide_group(slide_specs()["outro-cta"], cta_dir)[0]
+            cta_png = render_slide_group(
+                outro_slide_specs(beat_map_variant(project)), cta_dir,
+            )[0]
             if heygen_out.is_file():
                 _outro_with_avatar(heygen_out, outro_v, dur, cta_png)
             else:

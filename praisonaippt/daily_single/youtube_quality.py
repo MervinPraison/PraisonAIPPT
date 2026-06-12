@@ -26,7 +26,8 @@ HOOK_STAKES = re.compile(
     re.I,
 )
 OVERVIEW_TOPICS = re.compile(
-    r"\b(fable|mythos|stripe|benchmark|safety|pricing|api|glasswing|pok[eé]mon)\b",
+    r"\b(fable|mythos|stripe|benchmark|safety|pricing|api|glasswing|pok[eé]mon|"
+    r"linkedin|reddit|opus|comparison|access|launch|tier|alignment)\b",
     re.I,
 )
 OUTRO_SUBSCRIBE = re.compile(r"\bsubscribe\b", re.I)

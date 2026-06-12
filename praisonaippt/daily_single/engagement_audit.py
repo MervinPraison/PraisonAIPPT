@@ -78,7 +78,12 @@ def validate_engagement_assets(project: DailySingleProject) -> dict[str, Any]:
 
     clips_beats = [
         int(k) for k, b in beats.items()
-        if b.get("clips") and any(Path(c.get("path", "")).is_file() for c in b["clips"])
+        if any(
+            Path(str(item.get("path") or "")).is_file()
+            and str(item.get("path") or "").lower().endswith(".mp4")
+            for key in ("clips", "images", "generated")
+            for item in (b.get(key) or [])
+        )
     ]
     min_clips = int(cfg.get("min_beats_with_clips", 2))
     if len(clips_beats) < min_clips:

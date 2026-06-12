@@ -36,6 +36,15 @@ def test_comparison_beats_from_filenames():
     assert "beat-4" in _comparison_beats(wins)
 
 
+def test_comparison_beats_counts_social_clips():
+    wins = [
+        _window("beat-6", "x-pootlepress-wp-theme.mp4", 0, 8),
+        _window("beat-7", "plain-slide.png", 8, 16),
+    ]
+    assert "beat-6" in _comparison_beats(wins)
+    assert "beat-7" not in _comparison_beats(wins)
+
+
 def test_validate_viral_readiness_writes_report(tmp_path: Path):
     root = tmp_path / "proj"
     merge = root / "merge"

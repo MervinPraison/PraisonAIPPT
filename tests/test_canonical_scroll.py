@@ -48,3 +48,11 @@ def test_scroll_video_from_tall_image(tmp_path: Path):
     build_scroll_video(src, dest, duration=2.0)
     assert dest.is_file()
     assert video_has_motion(dest, min_motion=MIN_MOTION)
+    rate = subprocess.check_output(
+        [
+            "ffprobe", "-v", "error", "-select_streams", "v:0",
+            "-show_entries", "stream=avg_frame_rate", "-of", "csv=p=0", str(dest),
+        ],
+        text=True,
+    ).strip()
+    assert rate == "30/1", f"expected 30fps scroll, got {rate}"

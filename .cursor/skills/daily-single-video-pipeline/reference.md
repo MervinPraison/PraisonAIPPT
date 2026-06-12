@@ -7,7 +7,10 @@
 | s04-knowledge | pre_build | — | yes | manifest, video-script, handoff, beat-map, segment scripts |
 | s06-coverage | pre_build | post_scripts | yes | script→asset coverage, hook montage plan |
 | s01-assets | pre_build | pre_sync | yes | handoff + beat-map present |
-| s01-assets | pre_build | post_sync | yes | media inventory on disk |
+| s18-video-first-policy | pre_build | post_scripts | yes | video-first / social-comparison bans |
+| s19-chart-script | pre_build | post_scripts | yes | chart names + kind parity in scripts |
+| s21-beat-map-policy | pre_build / pre_assemble | — | yes | banned assets, LinkedIn beats, clip mix |
+| s20-asset-inventory | pre_assemble | — | yes | per-asset frame export + hook allowlist |
 | s02-source-vlm | pre_build | — | no | 5s VLM samples on source clips (needs API key) |
 | s06-coverage | pre_build | post_sync | no | post-sync coverage gaps (warn) |
 | s00-bookends | pre_assemble | — | yes | hook/outro script, narration, heygen.mp4 |

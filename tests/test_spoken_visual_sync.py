@@ -1,10 +1,12 @@
 """Tests for spoken↔slide inline validation."""
 from praisonaippt.daily_single.display_sync import VisualWindow
 from praisonaippt.daily_single.spoken_visual_sync import (
+    TRANSITION_SKIP,
     fragment_token_hit,
     is_chart_or_table_file,
     spoken_hits_visual_focus,
     validate_chart_inline,
+    validate_chart_kind_parity,
     validate_chart_windows,
     validate_hook_sample_inline,
     validate_montage_fragments,
@@ -292,3 +294,76 @@ def test_hook_sample_chart_at_benchmark_slide():
     )
     ok, _, issues = validate_hook_sample_inline(spoken, window)
     assert ok, issues
+
+
+def test_chart_kind_rejects_decision_table_speech_on_jailbreak_bar():
+    """Regression ~5:59 — cyber adversarial bar chart while VO says decision table."""
+    spoken = (
+        "The safety stress-test chart on screen is a decision table: people who run long "
+        "coding jobs, security testers, and budget-conscious subscribers do not all belong "
+        "on the same plan."
+    )
+    ok, issues = validate_chart_kind_parity(spoken, "jailbreak-resistance.png")
+    assert not ok
+    assert any("different chart type" in i for i in issues)
+
+    ok_inline, _, inline_issues = validate_chart_inline(spoken, "jailbreak-resistance.png")
+    assert not ok_inline
+    assert inline_issues
+
+
+def test_chart_kind_passes_jailbreak_speech_on_jailbreak_bar():
+    spoken = (
+        "The jailbreak resistance chart on screen shows attack success rates under "
+        "automated red teaming — Fable five sits far below earlier Opus models."
+    )
+    ok, issues = validate_chart_kind_parity(spoken, "jailbreak-resistance.png")
+    assert ok, issues
+    ok_inline, score, inline_issues = validate_chart_inline(spoken, "jailbreak-resistance.png")
+    assert ok_inline, inline_issues
+    assert score >= 0.38
+
+
+def test_chart_inline_passes_red_team_bars_on_jailbreak_chart():
+    """Beat 10 cue 3 — plain 'red-team bars' must pass while jailbreak chart is visible."""
+    spoken = (
+        "If you only need quick summaries, these red-team bars still matter — "
+        "do not upgrade because of a LinkedIn clip alone."
+    )
+    ok_inline, score, issues = validate_chart_inline(spoken, "jailbreak-resistance.png")
+    assert ok_inline, (score, issues)
+
+
+def test_chart_windows_fails_beat10_decision_table_over_jailbreak_chart():
+    windows = [
+        VisualWindow(355.0, 392.0, "beat-10", "close slide", "jailbreak-resistance.png"),
+    ]
+    cues = [
+        {
+            "start_sec": 355.2,
+            "end_sec": 368.0,
+            "text": (
+                "The safety stress-test chart on screen is a decision table: people who run "
+                "long coding jobs, security testers, and budget-conscious subscribers do not "
+                "all belong on the same plan."
+            ),
+        },
+    ]
+    ok, rows = validate_chart_windows(windows, cues)
+    assert not ok
+    assert not rows[0]["ok"]
+    assert rows[0]["issues"]
+
+
+def test_outro_cta_not_in_transition_skip():
+    assert "outro-cta.png" not in TRANSITION_SKIP
+
+
+def test_transition_points_check_outro_cta():
+    windows = [
+        VisualWindow(400.0, 405.0, "99-outro", "CTA", "outro-cta.png"),
+    ]
+    cues = [{"start_sec": 400.5, "end_sec": 404.0, "text": "Subscribe for daily AI breakdowns."}]
+    ok, rows = validate_transition_points(windows, cues)
+    assert rows, "outro-cta should be sampled, not skipped"
+    assert any(r["file"] == "outro-cta.png" for r in rows)

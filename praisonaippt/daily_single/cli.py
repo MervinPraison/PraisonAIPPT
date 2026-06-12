@@ -19,6 +19,8 @@ from praisonaippt.daily_single.sync_validation import run_sync_suite
 from praisonaippt.daily_single.media_sync import run_sync_assets, validate_media_inventory
 from praisonaippt.daily_single.validation import validate_all
 from praisonaippt.daily_single.visual_audit import run_visual_audit, validate_visual_audit
+from praisonaippt.daily_single.engine import DailySinglePipelineEngine
+from praisonaippt.daily_single.pipeline import BUILD_PIPELINE, PUBLISH_GATE, pipeline_manifest
 from praisonaippt.daily_single.vo import synthesise_segments
 
 
@@ -82,6 +84,14 @@ def main(argv: list[str] | None = None) -> int:
         help="Gate canonical-scroll.mp4 — reject browser error pages before assemble",
     )
     sub.add_parser("validate-slide-quality", help="Slide design tier gate → slide_design_report.json")
+    sub.add_parser(
+        "validate-asset-inventory",
+        help="Export one frame per planned asset; ban hook spectacle clips → asset_inventory_report.json",
+    )
+    sub.add_parser(
+        "validate-beat-map",
+        help="Beat-map policy — banned assets, LinkedIn beats, clip diversity → beat_map_policy_report.json",
+    )
     sub.add_parser("validate-engagement-assets", help="Motion/demo/social-proof gate → engagement_report.json")
     sub.add_parser("validate-viral-readiness", help="Viral readiness composite → viral_readiness_report.json")
     sub.add_parser("validate-all", help="Full validation gate (tools, output, sync, display, visual audit)")
@@ -93,12 +103,40 @@ def main(argv: list[str] | None = None) -> int:
     sync_assets_p.add_argument("--no-crawl", action="store_true", help="Skip canonical image crawl")
     qa_p = sub.add_parser("validate-qa", help="Run modular video QA stages (merge/qa/)")
     qa_p.add_argument("stage", nargs="?", help="Single stage id (e.g. s04-knowledge)")
-    qa_p.add_argument("--when", choices=["pre_build", "pre_assemble", "post_vo", "post_build", "all"], default="all")
+    qa_p.add_argument(
+        "--when",
+        choices=[
+            "pre_build",
+            "post_vo",
+            "post_bookends",
+            "pre_assemble",
+            "post_assemble",
+            "post_captions",
+            "post_build",
+            "all",
+        ],
+        default="all",
+    )
     qa_p.add_argument("--phase", help="Sub-phase for s01-assets or s06-coverage")
     sub.add_parser("emit-protocol", help="Write default protocol.json template")
 
+    pipe = sub.add_parser("pipeline", help="Central SDK pipeline — list, run build, or publish gate")
+    pipe_sub = pipe.add_subparsers(dest="pipe_cmd", required=True)
+    pipe_sub.add_parser("list", help="Print build + publish_gate step order (JSON with --json)")
+    list_p = pipe_sub.add_parser("manifest", help="Alias for pipeline list")
+    run_p = pipe_sub.add_parser("run", help="Run BUILD_PIPELINE steps")
+    run_p.add_argument("--no-skip-optional", action="store_true", help="Include optional steps")
+    run_p.add_argument("--continue-on-fail", action="store_true")
+    gate_p = pipe_sub.add_parser("publish-gate", help="Run V1–V19 publish gate matrix")
+    gate_p.add_argument("--assemble", action="store_true", help="Re-run assemble-beats before gates")
+    gate_p.add_argument("--continue-on-fail", action="store_true")
+    pipe_sub.add_parser("status", help="Project outputs + embedded pipeline manifest")
+    for p in (pipe, list_p, run_p, gate_p):
+        p.add_argument("--json", action="store_true", help="JSON output")
+
     args = parser.parse_args(argv)
-    project = _project(args.project)
+    needs_project = args.cmd != "pipeline" or args.pipe_cmd not in ("list", "manifest")
+    project = _project(args.project) if needs_project else None
 
     if args.cmd == "write-scripts":
         write_beat_scripts(project)
@@ -145,21 +183,24 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  cue {row['cue']} [{row['start_sec']:.1f}s] score={row['alignment']}: {row['spoken'][:60]}… → {row['file']}")
         return 1
     if args.cmd == "validate-spoken-visual":
-        from praisonaippt.daily_single.spoken_visual_sync import validate_spoken_visual_sync
+        from praisonaippt.daily_single.spoken_visual_gates import run_spoken_visual_map
 
-        report = validate_spoken_visual_sync(project)
+        sv_ok, report = run_spoken_visual_map(project)
+        if report.get("error") and report.get("prerequisites"):
+            print(f"FAIL: {report['error']}")
+            return 1
         print(
-            f"{'PASS' if report['ok'] else 'FAIL'}: "
+            f"{'PASS' if sv_ok else 'FAIL'}: "
             f"montage {report['montage_fragments_pass']}/{report['montage_fragments_total']}, "
             f"windows {report['windows_pass']}/{report['windows_total']}, "
             f"charts {report.get('charts_pass', 0)}/{report.get('charts_total', 0)}, "
             f"coverage {report.get('coverage_pass', 0)}/{report.get('coverage_total', 0)}, "
             f"plain_language={report.get('plain_language_ok')}"
         )
-        if not report["ok"]:
+        if not sv_ok:
             for issue in report.get("issues") or []:
                 print(f"  {issue}")
-        return 0 if report["ok"] else 1
+        return 0 if sv_ok else 1
     if args.cmd == "validate-sync":
         report = run_sync_suite(project, runs=max(1, args.runs))
         s = report.get("summary") or {}
@@ -268,6 +309,30 @@ def main(argv: list[str] | None = None) -> int:
             for issue in report.get("issues") or []:
                 print(f"  {issue}")
         return 0 if report["ok"] else 1
+    if args.cmd == "validate-asset-inventory":
+        from praisonaippt.daily_single.asset_inventory_audit import validate_asset_inventory
+
+        report = validate_asset_inventory(project, export_frames=True, use_vision=False)
+        print(
+            f"{'PASS' if report['ok'] else 'FAIL'}: "
+            f"{report.get('assets_pass')}/{report.get('assets_total')} assets "
+            f"→ {report.get('frame_dir')}"
+        )
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
+    if args.cmd == "validate-beat-map":
+        from praisonaippt.daily_single.beat_map_audit import validate_beat_map_policy
+
+        report = validate_beat_map_policy(project)
+        print(f"{'PASS' if report['ok'] else 'FAIL'}: beat-map policy")
+        if report.get("body_clip_seconds"):
+            print(f"  body clip mix: {report['body_clip_seconds']}")
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
     if args.cmd == "validate-engagement-assets":
         from praisonaippt.daily_single.engagement_audit import validate_engagement_assets
 
@@ -296,7 +361,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  {issue}")
         return 0 if report["ok"] else 1
     if args.cmd == "validate-all":
-        ok, report = validate_all(project)
+        ok, report = validate_all(project, refresh=True)
         if ok:
             print("PASS")
             return 0
@@ -326,7 +391,57 @@ def main(argv: list[str] | None = None) -> int:
         out.write_text(json.dumps(DEFAULT_PROTOCOL, indent=2), encoding="utf-8")
         print(f"Wrote {out}")
         return 0
+    if args.cmd == "pipeline":
+        if args.pipe_cmd in ("list", "manifest"):
+            data = pipeline_manifest()
+            if getattr(args, "json", False):
+                print(json.dumps(data, indent=2))
+            else:
+                print("BUILD_PIPELINE:")
+                for s in BUILD_PIPELINE:
+                    opt = " (optional)" if s.optional else ""
+                    print(f"  {s.id}{opt} — {s.label}")
+                print("PUBLISH_GATE:")
+                for s in PUBLISH_GATE:
+                    opt = " (optional)" if s.optional else ""
+                    print(f"  {s.id}{opt} — {s.label}")
+            return 0
+        engine = DailySinglePipelineEngine(project)
+        if args.pipe_cmd == "status":
+            data = engine.status()
+            if getattr(args, "json", False):
+                print(json.dumps(data, indent=2))
+            else:
+                print(f"slug: {data['slug']}")
+                print(f"root: {data['root']}")
+                for k, v in (data.get("outputs") or {}).items():
+                    print(f"  {k}: {v}")
+            return 0
+        if args.pipe_cmd == "run":
+            report = engine.run_build(
+                skip_optional=not args.no_skip_optional,
+                stop_on_fail=not args.continue_on_fail,
+            )
+            _print_pipeline_report(report, json_out=getattr(args, "json", False))
+            return 0 if report.ok else 1
+        if args.pipe_cmd == "publish-gate":
+            report = engine.run_publish_gate(
+                assemble=args.assemble,
+                stop_on_fail=not args.continue_on_fail,
+            )
+            _print_pipeline_report(report, json_out=getattr(args, "json", False))
+            return 0 if report.ok else 1
     return 1
+
+
+def _print_pipeline_report(report, *, json_out: bool = False) -> None:
+    if json_out:
+        print(json.dumps(report.to_dict(), indent=2))
+        return
+    for step in report.steps:
+        tag = "PASS" if step.ok else "FAIL"
+        print(f"{tag}: {step.step_id} — {step.message}")
+    print(f"{'PASS' if report.ok else 'FAIL'}: pipeline complete")
 
 
 if __name__ == "__main__":

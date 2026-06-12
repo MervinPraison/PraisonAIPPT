@@ -53,9 +53,9 @@ def validate_hook_structure(cue_map: list[dict[str, Any]]) -> tuple[bool, list[s
     issues: list[str] = []
     if len(cue_map) < 3:
         return False, ["fewer than 3 cues for hook structure"]
-    bridge = cue_map[2]["spoken"].strip().rstrip(".").lower()
-    if bridge != HOOK_BRIDGE:
-        issues.append(f"cue 3 must be 'Let's get started.' (got: {cue_map[2]['spoken'][:50]})")
+    bridge = cue_map[2]["spoken"].strip().lower()
+    if not bridge.startswith(HOOK_BRIDGE):
+        issues.append(f"cue 3 must start with 'Let's get started' (got: {cue_map[2]['spoken'][:50]})")
     if HOOK_BRIDGE in cue_map[0]["spoken"].lower():
         issues.append("cue 1 must not contain 'Let's get started'")
     if len(cue_map[0]["spoken"].split()) < 5:

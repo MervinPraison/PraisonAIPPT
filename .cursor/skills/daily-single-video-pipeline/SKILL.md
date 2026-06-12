@@ -1,9 +1,11 @@
 ---
 name: daily-single-video-pipeline
-description: Step-by-step daily_single video build with modular QA gates, spoken↔visual sync, social research via last30days (X/Reddit/HN), pytest, and validate-sync. Use for Fable-style pilots, A/V sync fixes, viral angle research, or end-to-end daily-single orchestration.
+description: Step-by-step daily_single video build with modular QA gates, spoken↔visual sync, social comparison clips, pytest, and validate-sync. Use for Fable-style pilots, social-comparison videos, A/V sync fixes, or end-to-end daily-single orchestration.
 ---
 
 # daily_single video pipeline (step by step)
+
+**Agent contract:** read repo root [`AGENTS.md`](../../AGENTS.md) first — full BUILD_PIPELINE, PUBLISH_GATE, and QA-between-steps matrix.
 
 Orchestrate **build commands** and **QA gates** in order. Do not skip gates after a step fails — fix, re-run that step, then re-gate.
 
@@ -11,6 +13,8 @@ Orchestrate **build commands** and **QA gates** in order. Do not skip gates afte
 **Spoken↔visual sync (cue assembly, 178 s regression):** [spoken-visual-sync.md](spoken-visual-sync.md)  
 **Social / viral research (X, Reddit, last30days):** [social-research-last30days.md](social-research-last30days.md)  
 **Reference pilot:** `examples/videos/anthropic-claude-fable-5-mythos-5/`  
+**Trust audit:** `examples/videos/anthropic-claude-fable-5-trust-audit/`  
+**Social comparison (same-prompt clips):** `examples/videos/anthropic-claude-fable-5-social-comparison/` — download clips first: `bash scripts/download_social_videos.sh`  
 **Stage details:** [reference.md](reference.md)
 
 ## Environment
