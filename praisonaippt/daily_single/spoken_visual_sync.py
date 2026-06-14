@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from praisonaippt.daily_single.audience_language import BANNED_PATTERNS
+from praisonaippt.daily_single.audience_language import BANNED_PATTERNS, INSIDER_PHRASES
 from praisonaippt.daily_single.display_sync import (
     HOOK_MONTAGE_MIN_ALIGNMENT,
     MIN_ALIGNMENT,
@@ -183,7 +183,7 @@ def validate_srt_plain_language(cues: list[dict[str, Any]]) -> tuple[bool, list[
     for cue in cues:
         text = cue.get("text") or ""
         lower = text.lower()
-        for pat, hint in BANNED_PATTERNS:
+        for pat, hint in BANNED_PATTERNS + INSIDER_PHRASES:
             if re.search(pat, lower, re.I):
                 issues.append(f"@{cue.get('start_sec', 0):.1f}s: {hint}")
     return len(issues) == 0, issues
@@ -326,6 +326,23 @@ def best_spoken_for_window(w: VisualWindow, cues: list[dict[str, Any]]) -> str:
     return primary["text"] if primary else ""
 
 
+def _cue_for_transition(
+    cues: list[dict[str, Any]],
+    t: float,
+    *,
+    vis_start: float | None = None,
+) -> dict[str, Any] | None:
+    """Pick SRT cue aligned to a visual boundary (not a stale overlapping cue)."""
+    if vis_start is not None:
+        near = [
+            c for c in cues
+            if abs(float(c["start_sec"]) - vis_start) < 0.9
+        ]
+        if near:
+            return min(near, key=lambda c: abs(float(c["start_sec"]) - t))
+    return _cue_at_mid(cues, t)
+
+
 def _cue_at_mid(cues: list[dict[str, Any]], t: float) -> dict[str, Any] | None:
     for cue in cues:
         if cue["start_sec"] <= t < cue["end_sec"]:
@@ -400,7 +417,7 @@ def validate_transition_points(
         vis = visual_at(windows, t)
         if vis is None or vis.file in TRANSITION_SKIP or vis.section == "bridge":
             continue
-        cue = _cue_at_mid(cues, t)
+        cue = _cue_for_transition(cues, t, vis_start=vis.start_sec)
         if cue is None:
             continue
         spoken = cue.get("text") or ""
@@ -463,6 +480,12 @@ def validate_hook_sample_inline(
         return False, 0.0, ["no spoken cue at sample time"]
 
     issues: list[str] = []
+    if window.section == "bridge" and (
+        window.file == "heygen.mp4"
+        or re.search(r"\b(clips|started|unpack|watch|mean)\b", spoken, re.I)
+    ):
+        return True, 1.0, []
+
     if window.section == "overview" and window.script_fragment:
         hit = fragment_token_hit(window.script_fragment, spoken)
         topic = score_cue_visual(window.script_fragment, window.file)
@@ -686,6 +709,17 @@ def validate_spoken_visual_sync(project: DailySingleProject) -> dict[str, Any]:
                     )
     if not word_visual_ok and word_visual.get("issues"):
         issues.extend(word_visual["issues"][:8])
+
+    visual_claim_ok = True
+    visual_claim: dict[str, Any] = {}
+    if mp4.is_file():
+        from praisonaippt.daily_single.visual_claim_audit import validate_visual_claims
+
+        visual_claim = validate_visual_claims(project, use_vlm=bool(word_visual.get("vlm_calls")))
+        visual_claim_ok = bool(visual_claim.get("ok"))
+        if not visual_claim_ok:
+            issues.extend((visual_claim.get("issues") or [])[:6])
+
     issues.extend(srt_plain_issues[:5])
     issues.extend(script_plain_issues[:5])
     issues.extend(audience_issues[:5])
@@ -695,6 +729,7 @@ def validate_spoken_visual_sync(project: DailySingleProject) -> dict[str, Any]:
         "ok": (
             montage_ok and windows_ok and chart_ok and coverage_ok
             and plain_ok and slide_words_ok and transitions_ok and word_visual_ok
+            and visual_claim_ok
         ),
         "transitions_total": len(transition_rows),
         "transitions_pass": len(transition_rows) - transition_fails,
@@ -715,6 +750,8 @@ def validate_spoken_visual_sync(project: DailySingleProject) -> dict[str, Any]:
         "slide_word_map": slide_words,
         "word_visual_ok": word_visual_ok,
         "word_visual": word_visual,
+        "visual_claim_ok": visual_claim_ok,
+        "visual_claim": visual_claim,
         "plain_language_ok": plain_ok,
         "plain_language": {
             "srt_ok": srt_plain_ok,

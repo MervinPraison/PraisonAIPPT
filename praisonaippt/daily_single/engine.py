@@ -237,6 +237,51 @@ class DailySinglePipelineEngine:
             ok = bool(report["ok"])
             msg = "; ".join((report.get("issues") or [])[:2]) or "beat-map policy OK"
             return StepResult(cmd, ok, 0 if ok else 1, msg)
+        if cmd == "validate-visual-duplicates":
+            from praisonaippt.daily_single.visual_duplicate_audit import validate_visual_duplicates
+
+            report = validate_visual_duplicates(p)
+            ok = bool(report["ok"])
+            n = report.get("files_checked", 0) - report.get("files_fail", 0)
+            msg = f"{n}/{report.get('files_checked', 0)} unique MP4s"
+            if not ok:
+                msg = "; ".join((report.get("issues") or [])[:2])
+            return StepResult(cmd, ok, 0 if ok else 1, msg)
+        if cmd == "validate-simple-language":
+            from praisonaippt.daily_single.simple_language_audit import validate_simple_language
+
+            report = validate_simple_language(p)
+            ok = bool(report["ok"])
+            msg = "simple language OK" if ok else "; ".join((report.get("issues") or [])[:2])
+            return StepResult(cmd, ok, 0 if ok else 1, msg)
+        if cmd == "validate-clip-trims":
+            from praisonaippt.daily_single.clip_trim_audit import validate_clip_trims
+
+            report = validate_clip_trims(p)
+            ok = bool(report["ok"])
+            n = report.get("clips_checked", 0) - report.get("clips_fail", 0)
+            msg = f"{n}/{report.get('clips_checked', 0)} clip trims OK"
+            if not ok:
+                msg = "; ".join((report.get("issues") or [])[:2])
+            return StepResult(cmd, ok, 0 if ok else 1, msg)
+        if cmd == "validate-resource-usefulness":
+            from praisonaippt.daily_single.resource_usefulness_audit import validate_resource_usefulness
+
+            report = validate_resource_usefulness(p)
+            ok = bool(report["ok"])
+            msg = (
+                f"{report.get('useful_catalog_count', 0)}/{report.get('min_useful_catalog', 0)} useful resources"
+            )
+            if not ok:
+                msg = "; ".join((report.get("issues") or [])[:2])
+            return StepResult(cmd, ok, 0 if ok else 1, msg)
+        if cmd == "validate-visual-claims":
+            from praisonaippt.daily_single.visual_claim_audit import validate_visual_claims
+
+            report = validate_visual_claims(p)
+            ok = bool(report["ok"])
+            msg = "visual claims OK" if ok else "; ".join((report.get("issues") or [])[:2])
+            return StepResult(cmd, ok, 0 if ok else 1, msg)
         if cmd == "validate-engagement-assets":
             from praisonaippt.daily_single.engagement_audit import validate_engagement_assets
 

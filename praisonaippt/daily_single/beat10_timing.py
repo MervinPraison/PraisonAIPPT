@@ -31,9 +31,7 @@ def beat10_chart_durations(project_root: Path, seg_dur: float) -> tuple[float, f
 
     durs = cue_span_durations(project_root, "10-alignment", seg_dur)
     if len(durs) >= 3:
-        jail_d, align_d, tail_d = durs[0], durs[1], durs[2]
-        pad = min(0.3, jail_d * 0.05)
-        return max(0.5, jail_d - pad), align_d + pad, tail_d
+        return durs[0], durs[1], durs[2]
     if len(durs) == 2:
         return durs[0], durs[1], max(0.5, seg_dur - durs[0] - durs[1])
     return seg_dur * 0.45, seg_dur * 0.35, seg_dur * 0.2

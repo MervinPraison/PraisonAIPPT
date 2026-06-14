@@ -18,6 +18,7 @@ LINKEDIN_MARKER = "linkedin-cintas"
 TRUST_AUDIT_LINKEDIN_BODY_BEATS = frozenset({"1", "2"})
 SOCIAL_COMPARISON_LINKEDIN_BEATS = frozenset({"1", "2", "3", "4"})
 SOCIAL_CLIP_MARKERS = ("x-", "social-capture")
+COMPARISON_CLIP_PREFIX = "x-comparison-"
 YOUTUBE_CLIP_MARKER = "youtube-"
 MIN_DISTINCT_SOCIAL_CLIPS = 3
 BODY_BEATS = tuple(str(n) for n in range(3, 11))
@@ -108,9 +109,9 @@ def validate_beat_map_policy(project: DailySingleProject) -> dict[str, Any]:
                     issues.append(
                         f"Beat {beat_n}: {name} — social-comparison is X-only; remove YouTube clips"
                     )
-                if social and pool == "clips" and "linkedin-cintas" in lower:
+                if social and pool == "clips" and "linkedin-cintas" in lower and COMPARISON_CLIP_PREFIX not in lower:
                     issues.append(
-                        f"Beat {beat_n}: {name} — use X clips in research/reference-videos/x/, not LinkedIn"
+                        f"Beat {beat_n}: {name} — use x-comparison-* trims in research/reference-videos/x/"
                     )
                 if social and pool == "clips":
                     sec = _clip_seconds(item)

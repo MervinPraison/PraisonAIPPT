@@ -58,3 +58,12 @@ def test_backup_model_needs_gloss(tmp_path: Path):
     })
     ok, issues = validate_audience_language(project)
     assert not ok
+
+
+def test_headline_logo_refresh_banned(tmp_path: Path):
+    project = _mini_project(tmp_path, {
+        "01-cold-open": "That is the headline this week: not a logo refresh.",
+    })
+    ok, issues = validate_audience_language(project)
+    assert not ok
+    assert any("01-cold-open" in i for i in issues)

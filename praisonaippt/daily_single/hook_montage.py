@@ -86,6 +86,84 @@ TRUST_AUDIT_MONTAGE_SPECS: list[dict[str, Any]] = [
 ]
 
 
+COMBINED_MONTAGE_SPECS: list[dict[str, Any]] = [
+    {
+        "fragment": "what most teams actually get",
+        "filename": "claudeai-launch.mp4",
+        "in_sec": 0.0,
+        "beat": 1,
+        "visual": "launch clip",
+    },
+    {
+        "fragment": "benchmark scores that matter",
+        "filename": "carousel-factorio.mp4",
+        "in_sec": 0.0,
+        "beat": 3,
+        "visual": "engineering demo",
+    },
+    {
+        "fragment": "the X demo wave builders are sharing",
+        "filename": "x-demo-deveshcodes-blackhole.mp4",
+        "in_sec": 0.0,
+        "beat": 5,
+        "visual": "black hole demo",
+    },
+    {
+        "fragment": "same-prompt comparisons on screen",
+        "filename": "x-comparison-jono-flight.mp4",
+        "in_sec": 0.0,
+        "beat": 6,
+        "visual": "flight comparison",
+    },
+    {
+        "fragment": "safety without dead ends",
+        "filename": "x-comparison-cintas-fable5-opus.mp4",
+        "in_sec": 0.0,
+        "beat": 6,
+        "visual": "fable vs opus split",
+    },
+]
+
+
+DISABLED_MONTAGE_SPECS: list[dict[str, Any]] = [
+    {
+        "fragment": "the launch hype that aged in 72 hours",
+        "filename": "demo-launch.mp4",
+        "in_sec": 18.0,
+        "beat": 1,
+        "visual": "launch clip",
+    },
+    {
+        "fragment": "Anthropic's shutdown letter on screen",
+        "filename": "demo-fluid.mp4",
+        "in_sec": 2.0,
+        "beat": 3,
+        "visual": "engineering demo clip",
+    },
+    {
+        "fragment": "why a jailbreak story killed access",
+        "filename": "demo-factorio.mp4",
+        "in_sec": 0.0,
+        "beat": 5,
+        "visual": "agent task demo clip",
+    },
+    {
+        "fragment": "demos you cannot reproduce anymore",
+        "filename": "demo-pokemon.mp4",
+        "in_sec": 0.0,
+        "beat": 5,
+        "visual": "vision demo clip",
+    },
+    {
+        "fragment": "five fixes for your stack tonight",
+        "filename": "linkedin-cintas-fable5-vs-opus.mp4",
+        "in_sec": 0.0,
+        "beat": 1,
+        "visual": "comparison clip",
+    },
+]
+
+
 SOCIAL_COMPARISON_MONTAGE_SPECS: list[dict[str, Any]] = [
     {
         "fragment": "the official launch clip on X",
@@ -95,11 +173,11 @@ SOCIAL_COMPARISON_MONTAGE_SPECS: list[dict[str, Any]] = [
         "visual": "@claudeai launch on X",
     },
     {
-        "fragment": "how Fable five routes to Opus four point eight when safeguards fire",
-        "filename": "x-claudeai-safeguards.mp4",
-        "in_sec": 18.0,
-        "beat": 2,
-        "visual": "safeguards routing to Opus on X",
+        "fragment": "a black-hole gravity sim posted on X the same week",
+        "filename": "x-demo-deveshcodes-blackhole.mp4",
+        "in_sec": 0.0,
+        "beat": 1,
+        "visual": "deveshcodes black hole sim on X",
     },
     {
         "fragment": "the Minecraft build from one prompt",
@@ -109,7 +187,7 @@ SOCIAL_COMPARISON_MONTAGE_SPECS: list[dict[str, Any]] = [
         "visual": "ChrissGPT Minecraft clone on X",
     },
     {
-        "fragment": "the Pokémon clone posted the same week.",
+        "fragment": "the Pokémon clone on screen that builders shared alongside it.",
         "filename": "x-chrissgpt-pokemon.mp4",
         "in_sec": 0.0,
         "beat": 4,
@@ -120,10 +198,14 @@ SOCIAL_COMPARISON_MONTAGE_SPECS: list[dict[str, Any]] = [
 
 def montage_specs_for(beat_map: dict[str, Any]) -> list[dict[str, Any]]:
     variant = beat_map.get("variant")
+    if beat_map.get("story_angle") == "policy_shutdown_playbook":
+        return DISABLED_MONTAGE_SPECS
     if variant == "trust-audit":
         return TRUST_AUDIT_MONTAGE_SPECS
     if variant == "social-comparison":
         return SOCIAL_COMPARISON_MONTAGE_SPECS
+    if variant == "combined":
+        return COMBINED_MONTAGE_SPECS
     return DEFAULT_MONTAGE_SPECS
 
 
@@ -372,6 +454,17 @@ def attention_visual(
                     return cue
         return attention_hero(montage_cues)
 
+    if beat_map.get("variant") == "combined":
+        for prefer in (
+            "claudeai-launch.mp4",
+            "x-demo-deveshcodes-blackhole.mp4",
+            "x-comparison-jono-flight.mp4",
+        ):
+            for cue in montage_cues:
+                if cue.get("file") == prefer and cue.get("path"):
+                    return cue
+        return attention_hero(montage_cues)
+
     scroll = project.assets_dir / "videos" / SCROLL_ATTENTION_FILE
     if scroll.is_file():
         sentences = split_caption_cues(script) if script else []
@@ -404,7 +497,7 @@ def hook_visual_windows(
             beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             beat_map = {}
-        skip_scroll = beat_map.get("variant") in ("trust-audit", "social-comparison")
+        skip_scroll = beat_map.get("variant") in ("trust-audit", "social-comparison", "combined")
         motion = bool(scroll_video_path(project)) and not skip_scroll
     att, overview, bridge = hook_attention_durations(hook_dur, script, motion_clip=motion)
     if project:
@@ -459,11 +552,14 @@ def hook_visual_windows(
         from praisonaippt.daily_single.canonical_scroll import scroll_video_path
 
         beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
-        skip_scroll = beat_map.get("variant") in ("trust-audit", "social-comparison")
+        skip_scroll = beat_map.get("variant") in ("trust-audit", "social-comparison", "combined")
         scroll = scroll_video_path(project) if not skip_scroll else None
         if scroll:
             bridge_file = SCROLL_ATTENTION_FILE
             bridge_visual = "canonical blog scroll"
+        elif beat_map.get("variant") in ("social-comparison", "combined"):
+            bridge_file = "heygen.mp4"
+            bridge_visual = "hook avatar bridge"
         elif montage_cues:
             bridge_file = str(montage_cues[0].get("file") or launch_file)
             bridge_visual = str(montage_cues[0].get("visual") or "montage hero")

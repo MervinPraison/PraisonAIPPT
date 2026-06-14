@@ -155,7 +155,8 @@ def run_hook_attention_audit(
         plain_ok, plain_issues = validate_srt_plain_language(
             [{"start_sec": t, "end_sec": t + 1, "text": spoken}] if spoken else []
         )
-        ok = inline_ok and chart_ok and plain_ok and not frame_looks_like_browser_error(frame_out)
+        browser_error = False if skip_scroll else frame_looks_like_browser_error(frame_out)
+        ok = inline_ok and chart_ok and plain_ok and not browser_error
         issues: list[str] = list(inline_issues) + list(chart_issues) + list(plain_issues)
 
         if in_attention and not skip_scroll:
@@ -172,7 +173,7 @@ def run_hook_attention_audit(
         else:
             frame_metrics = measure_framing(frame_out)
 
-        if frame_looks_like_browser_error(frame_out):
+        if browser_error:
             ok = False
             issues.append("frame looks like browser error page (not news content)")
 

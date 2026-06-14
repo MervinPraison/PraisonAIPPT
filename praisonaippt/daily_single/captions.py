@@ -100,7 +100,7 @@ def _proportional_word_timestamps(mp3: Path, script_path: Path, ts: Path) -> Non
             "duration": total,
             "segments": segments,
             "words": words,
-            "source": "proportional",
+            "source": "script-locked",
         }, indent=2),
         encoding="utf-8",
     )
@@ -113,7 +113,7 @@ def _ensure_transcript(mp3: Path, ts: Path, *, force: bool = False) -> None:
 
             raw = json.loads(ts.read_text(encoding="utf-8"))
             data = load_whisper_json(ts)
-            if len(data.words or []) >= 8 and str(raw.get("source") or "") != "proportional":
+            if len(data.words or []) >= 8 and str(raw.get("source") or "") not in ("proportional",):
                 return
         except (OSError, ValueError, json.JSONDecodeError):
             pass

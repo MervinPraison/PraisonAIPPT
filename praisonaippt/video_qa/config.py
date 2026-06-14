@@ -31,6 +31,8 @@ DEFAULT_QA_STAGES: list[dict[str, Any]] = [
     {"id": "s19-chart-script", "when": "pre_build", "required": True, "offline_ok": True, "phase": "post_scripts"},
     {"id": "s13-slide-design", "when": "pre_build", "required": False, "offline_ok": True, "phase": "post_scripts"},
     {"id": "s21-beat-map-policy", "when": "pre_build", "required": True, "offline_ok": True, "phase": "post_scripts"},
+    {"id": "s23-clip-trim-range", "when": "pre_build", "required": True, "offline_ok": True, "phase": "post_scripts"},
+    {"id": "s24-resource-usefulness", "when": "pre_build", "required": True, "offline_ok": True, "phase": "post_scripts"},
     {"id": "s16-montage-clock", "when": "pre_assemble", "required": True, "offline_ok": True},
     {"id": "s20-asset-inventory", "when": "pre_assemble", "required": True, "offline_ok": True},
     {"id": "s21-beat-map-policy", "when": "pre_assemble", "required": True, "offline_ok": True},

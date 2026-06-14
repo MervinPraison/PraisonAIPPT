@@ -6,7 +6,14 @@ import re
 from pathlib import Path
 from typing import Any
 
-from praisonaippt.daily_single.cue_slide_sync import beat6_absolute_cues, beat6_cue_image_map, find_image
+from praisonaippt.daily_single.cue_slide_sync import (
+    BEAT6_COMBINED_CLIP_CUES,
+    BEAT6_COMBINED_IMAGE_CUES,
+    beat6_absolute_cues,
+    beat6_cue_image_map,
+    find_clip as find_cue_clip,
+    find_image,
+)
 from praisonaippt.daily_single.display_sync import MIN_ALIGNMENT, score_cue_visual
 from praisonaippt.daily_single.project import DailySingleProject
 from praisonaippt.daily_single.protocol import BEAT_SEGMENT_DIRS
@@ -14,25 +21,33 @@ from praisonaippt.segment_video.media import ffprobe_duration
 
 MIN_CUE_SCORE = MIN_ALIGNMENT
 
+BEAT3_CUE_CLIPS: list[tuple[str, ...]] = [
+    ("factorio", "factory", "complex"),
+    ("factorio", "million", "lines"),
+    ("vibecad", "design", "coding"),
+    ("vibecad", "roundup", "demos"),
+    ("factorio", "vibecad", "automation"),
+]
+
 BEAT6_SOCIAL_CUE_CLIPS: list[tuple[str, ...]] = [
-    ("claudeai-safeguards", "safeguard"),
-    ("pootlepress", "wp-theme", "wordpress", "marsland"),
-    ("claudeai-safeguards", "pootlepress", "wordpress", "benchmark"),
-    ("claudeai-safeguards", "pootlepress", "fable", "output", "concrete"),
+    ("jono", "flight", "comparison"),
+    ("bridgemind", "one-shot", "comparison"),
+    ("bridgemind", "jono", "benchmark"),
+    ("bridgemind", "jono", "receipt", "compare"),
 ]
 
 BEAT7_SOCIAL_CUE_CLIPS: list[tuple[str, ...]] = [
-    ("trq212", "pipeline", "whisper", "ffmpeg", "remotion"),
-    ("claudeai", "launch", "rollout", "engineering", "demo"),
+    ("romanlogic", "dayone", "comparison"),
+    ("asapguide", "opus", "comparison"),
+    ("romanlogic", "asapguide", "proof", "split"),
 ]
 
 BEAT8_SOCIAL_CUE_CLIPS: list[tuple[str, ...]] = [
-    ("pokemon", "chrissgpt"),
-    ("trq212", "walkthrough", "ffmpeg", "remotion"),
-    ("claudeai", "launch", "engineering", "api"),
-    ("witness", "author", "theme", "clone", "edit", "pokemon", "trq212", "claudeai"),
-    ("drafts", "premium", "long", "builds", "pokemon", "trq212", "claudeai"),
-    ("agentic", "overnight", "dress", "rehearsal", "pokemon", "trq212", "claudeai"),
+    ("coderabbit", "coding", "comparison"),
+    ("mattvidpro", "gpt55", "comparison"),
+    ("witness", "author", "statement", "coderabbit", "mattvidpro"),
+    ("drafts", "premium", "long", "builds", "comparison"),
+    ("agentic", "overnight", "rehearsal", "comparison"),
 ]
 
 _SOCIAL_BEATS: dict[int, tuple[str, list[tuple[str, ...]]]] = {
@@ -58,6 +73,8 @@ def _clip_cue_needles(clips: list[dict]) -> list[tuple[str, ...]]:
 def _cue_map_for_clip_beat(beat_n: int, clips: list[dict]) -> list[tuple[str, ...]]:
     if beat_n in _SOCIAL_BEATS:
         return _SOCIAL_BEATS[beat_n][1]
+    if beat_n == 3:
+        return BEAT3_CUE_CLIPS
     if beat_n == 6:
         return BEAT6_SOCIAL_CUE_CLIPS
     return _clip_cue_needles(clips)
@@ -98,12 +115,8 @@ def _validate_social_beat_cues(
 
     seg_dur = ffprobe_duration(mp3)
     t0 = _beat_timeline_start(project, tl_id)
-    merged_srt = project.merge_dir / "final.srt"
     seg_srt = project.segments_dir / seg_dir / "segment.srt"
-    cues = beat6_absolute_cues(
-        t0, seg_dur, seg_srt,
-        merged_srt=merged_srt if merged_srt.is_file() else None,
-    )
+    cues = beat6_absolute_cues(t0, seg_dur, seg_srt, merged_srt=None)
 
     for i, (_start, _end, text) in enumerate(cues):
         needles = cue_map[i] if i < len(cue_map) else cue_map[-1]
@@ -119,6 +132,57 @@ def _validate_social_beat_cues(
             )
 
     return issues, {"beat": beat_n, "cues": len(cues), "clips": len(clips), "mode": "clips"}
+
+
+def _validate_beat6_combined_cues(
+    project: DailySingleProject,
+    *,
+    clips: list[dict],
+    images: list[dict],
+) -> tuple[list[str], dict[str, Any]]:
+    issues: list[str] = []
+    mp3 = project.segment_narration("06-safeguards")
+    if not mp3.is_file():
+        return ["Beat 6: record voice-over before checking picture map"], {}
+
+    seg_dur = ffprobe_duration(mp3)
+    t0 = _beat_timeline_start(project, "beat-06")
+    merged_srt = project.merge_dir / "final.srt"
+    seg_srt = project.segments_dir / "06-safeguards" / "segment.srt"
+    cues = beat6_absolute_cues(
+        t0, seg_dur, seg_srt,
+        merged_srt=merged_srt if merged_srt.is_file() else None,
+    )
+
+    for i, (_start, _end, text) in enumerate(cues):
+        if i < len(BEAT6_COMBINED_CLIP_CUES):
+            needles = BEAT6_COMBINED_CLIP_CUES[i]
+            asset = find_cue_clip(clips, *needles)
+        else:
+            img_i = i - len(BEAT6_COMBINED_CLIP_CUES)
+            needles = (
+                BEAT6_COMBINED_IMAGE_CUES[img_i]
+                if img_i < len(BEAT6_COMBINED_IMAGE_CUES)
+                else BEAT6_COMBINED_IMAGE_CUES[-1]
+            )
+            asset = find_image(images, *needles)
+        if not asset:
+            issues.append(f"Beat 6 cue {i + 1}: no picture matched — speech: {text[:60]}…")
+            continue
+        score = score_cue_visual(text, Path(asset["path"]).name)
+        if score < MIN_CUE_SCORE:
+            issues.append(
+                f"Beat 6 cue {i + 1}: words do not match {Path(asset['path']).name} "
+                f"(score {score:.2f}) — {text[:50]}…"
+            )
+
+    return issues, {
+        "beat": 6,
+        "cues": len(cues),
+        "clips": len(clips),
+        "images": len(images),
+        "mode": "combined",
+    }
 
 
 def _validate_beat6_image_cues(
@@ -180,7 +244,13 @@ def validate_cue_picture_map(project: DailySingleProject) -> tuple[bool, list[st
         clips = list(beat.get("clips") or [])
 
         if images and beat_n == 6:
-            beat_issues, beat_detail = _validate_beat6_image_cues(project, images=images)
+            x_comparisons = any("x-comparison" in (c.get("filename") or "") for c in clips)
+            if clips and x_comparisons:
+                beat_issues, beat_detail = _validate_beat6_combined_cues(
+                    project, clips=clips, images=images,
+                )
+            else:
+                beat_issues, beat_detail = _validate_beat6_image_cues(project, images=images)
             issues.extend(beat_issues)
             details["beats"].append(beat_detail)
             continue

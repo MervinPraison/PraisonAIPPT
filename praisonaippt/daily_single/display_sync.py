@@ -14,6 +14,7 @@ from praisonaippt.daily_single.segment_cue_timing import (
     beat8_clip_durations,
     beat9_visual_durations,
     clip_durations_for_cues,
+    cue_span_durations,
 )
 from praisonaippt.daily_single.beat01_timing import beat01_views_duration_sec
 from praisonaippt.daily_single.hook_montage import build_hook_montage_plan, hook_visual_windows
@@ -73,7 +74,7 @@ VISUAL_META: dict[str, dict[str, Any]] = {
     },
     "carousel-factorio.mp4": {
         "vision_description": "factorio factory automation agentic loops coding tasks migrations community apps browser hacker news beast ferrari",
-        "topics": ("factorio", "factory", "automation", "agentic", "loops", "migrations", "coding", "tasks", "projects", "browser", "game", "match", "board", "windows", "community", "demos", "hacker", "news", "beast", "ferrari", "stripe", "willison", "engineers"),
+        "topics": ("factorio", "factory", "automation", "agentic", "loops", "migrations", "coding", "tasks", "projects", "browser", "game", "match", "board", "windows", "community", "demos", "hacker", "news", "beast", "ferrari", "stripe", "willison", "engineers", "benchmark", "scores", "matter"),
     },
     "carousel-vibecad.mp4": {
         "vision_description": "cad vibecad engineering workflows hacker news beast ferrari stripe",
@@ -238,9 +239,9 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "visual_focus": ("launch", "claudedevs", "engineering", "fable", "x", "rollout"),
     },
     "x-claudeai-safeguards.mp4": {
-        "vision_description": "Anthropic X safeguards video Fable routes to Opus 4.8 cyber bio chemistry classifiers",
-        "topics": ("x", "safeguards", "fable", "opus", "routing", "classifier", "cyber", "biology", "comparison"),
-        "visual_focus": ("safeguards", "opus", "fable", "routing", "classifier"),
+        "vision_description": "anthropic launch livestream safeguards lead explaining classifiers presenter talking head not routing table UI",
+        "topics": ("x", "safeguards", "fable", "opus", "classifier", "cyber", "biology", "livestream", "explaining", "routing", "badge", "model"),
+        "visual_focus": ("safeguards", "presenter", "classifier", "explaining", "routing", "badge", "opus", "fable"),
     },
     "x-chrissgpt-minecraft.mp4": {
         "vision_description": "ChrissGPT X screen recording Minecraft clone one prompt Fable 5 biomes caves",
@@ -248,9 +249,9 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "visual_focus": ("minecraft", "clone", "game", "build", "biomes"),
     },
     "x-chrissgpt-pokemon.mp4": {
-        "vision_description": "ChrissGPT X Pokemon clone Gen-1 sprites Fable 5 one shot build",
-        "topics": ("x", "pokemon", "clone", "game", "sprites", "chrissgpt", "build", "gen-1"),
-        "visual_focus": ("pokemon", "clone", "sprites", "game", "build"),
+        "vision_description": "ChrissGPT X Pokemon clone Gen-1 sprites Fable 5 one shot build builders shared",
+        "topics": ("x", "pokemon", "clone", "game", "sprites", "chrissgpt", "build", "gen-1", "builders", "shared", "screen", "screenshots", "style"),
+        "visual_focus": ("pokemon", "clone", "sprites", "game", "build", "screenshots"),
     },
     "x-pootlepress-wp-theme.mp4": {
         "vision_description": "pootlepress X WordPress block theme one shot Fable 5 build",
@@ -266,6 +267,96 @@ VISUAL_META: dict[str, dict[str, Any]] = {
         "vision_description": "trq212 X Fable 5 self-edited launch video tool calls transcription",
         "topics": ("x", "trq212", "video", "edit", "fable", "launch", "tool", "calls"),
         "visual_focus": ("video", "edit", "fable", "launch"),
+    },
+    "x-demo-deveshcodes-blackhole.mp4": {
+        "vision_description": "deveshcodes X black hole gravity simulation particles spiralling Fable 5 one shot",
+        "topics": ("x", "blackhole", "black", "hole", "gravity", "simulation", "particles", "spiralling", "deveshcodes", "fable", "physics", "builders", "sharing", "demos", "launch", "hours"),
+        "visual_focus": ("blackhole", "black", "hole", "gravity", "simulation", "particles", "spiralling"),
+    },
+    "x-demo-coldopn-github.mp4": {
+        "vision_description": "coldopn X GitHub repo scaffold README starter code Fable 5 one prompt",
+        "topics": ("x", "github", "repo", "scaffold", "readme", "coldopn", "code", "build"),
+        "visual_focus": ("github", "repo", "scaffold", "readme"),
+    },
+    "x-demo-kieradev-racing.mp4": {
+        "vision_description": "kieradev X browser racing game laps track car physics Fable 5 build",
+        "topics": ("x", "racing", "game", "browser", "track", "kieradev", "laps", "physics", "car"),
+        "visual_focus": ("racing", "game", "track", "browser", "laps", "physics"),
+    },
+    "x-demo-ai-for-success-dino.mp4": {
+        "vision_description": "ai_for_success X dinosaur runner side scrolling jump game Fable 5 one shot",
+        "topics": ("x", "dinosaur", "runner", "game", "jump", "side-scroll", "ai_for_success"),
+        "visual_focus": ("dinosaur", "runner", "game", "jump"),
+    },
+    "x-demo-scottstts-friends.mp4": {
+        "vision_description": "scottstts X Friends sitcom UI clone apartment layout character cards theme",
+        "topics": ("x", "friends", "sitcom", "ui", "clone", "apartment", "scottstts", "theme"),
+        "visual_focus": ("friends", "ui", "sitcom", "apartment"),
+    },
+    "x-demo-tetumemo-solar.mp4": {
+        "vision_description": "tetumemo X solar system orbit simulation planets sun labels Fable 5 build",
+        "topics": ("x", "solar", "system", "orbit", "planets", "simulation", "tetumemo"),
+        "visual_focus": ("solar", "system", "orbit", "planets"),
+    },
+    "x-demo-intheworldofai-macos.mp4": {
+        "vision_description": "intheworldofai X macOS desktop app windows dock menus Fable 5 one prompt",
+        "topics": ("x", "macos", "desktop", "app", "windows", "dock", "intheworldofai"),
+        "visual_focus": ("macos", "desktop", "windows", "dock"),
+    },
+    "x-demo-quanghuynt-watch.mp4": {
+        "vision_description": "quanghuynt X Apple Watch face complications hands wrist UI Fable 5 build",
+        "topics": ("x", "watch", "apple", "face", "complications", "wrist", "quanghuynt"),
+        "visual_focus": ("watch", "face", "complications", "wrist"),
+    },
+    "x-demo-vikvang-rust-mc.mp4": {
+        "vision_description": "vikvang X Rust Minecraft voxel world blocks terrain camera Fable 5 build",
+        "topics": ("x", "rust", "minecraft", "voxel", "blocks", "terrain", "vikvang"),
+        "visual_focus": ("minecraft", "voxel", "blocks", "terrain"),
+    },
+    "x-demo-ydamitcodes-minecraft.mp4": {
+        "vision_description": "ydamitcodes X Minecraft clone blocks world one prompt Fable 5 builder demo",
+        "topics": ("x", "minecraft", "clone", "blocks", "world", "ydamitcodes", "build"),
+        "visual_focus": ("minecraft", "clone", "blocks", "world"),
+    },
+    "x-comparison-cintas-fable5-opus.mp4": {
+        "vision_description": "linkedin side by side Fable five Opus four point eight same prompt real jobs comparison",
+        "topics": ("linkedin", "linkedin-style", "style", "comparison", "fable", "opus", "side", "prompt", "jobs", "split", "real", "versus", "five", "safety", "dead", "ends", "without"),
+        "visual_focus": ("comparison", "fable", "opus", "side", "split", "jobs", "linkedin", "safety"),
+    },
+    "x-comparison-jono-flight.mp4": {
+        "vision_description": "flight simulator same prompt Fable five Opus four point eight physics comparison split screen",
+        "topics": ("comparison", "flight", "simulator", "fable", "opus", "physics", "prompt"),
+        "visual_focus": ("comparison", "flight", "simulator", "fable", "opus"),
+    },
+    "x-comparison-romanlogic-dayone.mp4": {
+        "vision_description": "parallel UI test Fable five Opus four point eight day one same prompt comparison",
+        "topics": ("comparison", "parallel", "ui", "fable", "opus", "day", "prompt"),
+        "visual_focus": ("comparison", "ui", "fable", "opus", "parallel"),
+    },
+    "x-comparison-bridgemind.mp4": {
+        "vision_description": "one shot app build comparison Fable five Opus split screen same prompt",
+        "topics": ("comparison", "one-shot", "one", "shot", "app", "build", "fable", "opus", "prompt", "models", "side", "two"),
+        "visual_focus": ("comparison", "build", "app", "fable", "opus", "models", "side"),
+    },
+    "x-comparison-mattvidpro-gpt55.mp4": {
+        "vision_description": "Fable five GPT five point five cross vendor globe build same prompt comparison",
+        "topics": ("comparison", "fable", "gpt", "globe", "three-d", "vendor", "prompt"),
+        "visual_focus": ("comparison", "fable", "gpt", "globe", "vendor"),
+    },
+    "x-comparison-asapguide-opus.mp4": {
+        "vision_description": "game doc same prompt Fable five Opus four point eight comparison split tasks",
+        "topics": ("comparison", "game", "doc", "fable", "opus", "prompt", "tasks"),
+        "visual_focus": ("comparison", "game", "fable", "opus", "tasks"),
+    },
+    "x-comparison-ryan-doser.mp4": {
+        "vision_description": "multi demo same prompt Fable five Opus comparison walkthrough several splits",
+        "topics": ("comparison", "multi", "demo", "fable", "opus", "walkthrough", "prompt"),
+        "visual_focus": ("comparison", "demo", "fable", "opus", "walkthrough"),
+    },
+    "x-comparison-coderabbit.mp4": {
+        "vision_description": "coding task repo same prompt Fable five Opus four point eight split review",
+        "topics": ("comparison", "coding", "repo", "fable", "opus", "review", "prompt"),
+        "visual_focus": ("comparison", "coding", "fable", "opus", "repo"),
     },
     "linkedin-cintas-frame.png": {
         "vision_description": "linkedin side by side fable opus comparison frame five real jobs split screen montage",
@@ -358,13 +449,27 @@ def score_cue_visual(cue_text: str, visual_file: str) -> float:
         score = max(score, min(1.0, hit * 2.5))
     # Hard penalties for known mismatches
     if "alignment-chart" in visual_file and any(
-        w in cue_tokens for w in ("thirty", "prompts", "mer.vin", "distillation", "jailbreak")
+        w in cue_tokens for w in ("thirty", "prompts", "mer.vin", "distillation")
     ):
+        score = min(score, 0.15)
+    if "alignment-chart" in visual_file and "jailbreak" in cue_tokens and "not jailbreak" not in cue_text.lower():
         score = min(score, 0.15)
     if "beat4-stat-overlay" in visual_file and "leaderboard" in cue_text.lower() and "swe" not in cue_text.lower():
         score = min(score, 0.25)
     if "benchmark-table" in visual_file and any(w in cue_tokens for w in ("swe-bench", "ninety-five", "terminal")):
         score = max(score, 0.5)
+    if "benchmark-table" in visual_file and cue_tokens & {"benchmark", "table", "receipt", "screen", "score", "inspect"}:
+        score = max(score, 0.62)
+    if "claudeai-launch" in visual_file and cue_tokens & {"fable", "model", "launch", "capable", "anthropic", "release", "api", "agent", "tooling", "patterns", "teams", "actually", "get", "most"}:
+        score = max(score, 0.62)
+    if "claudeai-safeguards" in visual_file and cue_tokens & {"model", "badge", "safety", "safeguard", "opus", "route", "interface", "classifier"}:
+        score = max(score, 0.62)
+    if "trq212" in visual_file and cue_tokens & {"video", "edit", "ffmpeg", "remotion", "pipeline", "editor", "tool", "launch", "walkthrough", "pair", "range"}:
+        score = max(score, 0.62)
+    if "chrissgpt-minecraft" in visual_file and cue_tokens & {"minecraft", "builders", "headline", "prompt", "game", "refresh"}:
+        score = max(score, 0.62)
+    if "pootlepress" in visual_file and cue_tokens & {"wordpress", "theme", "block", "pattern", "screenshot", "jamie", "next", "screen"}:
+        score = max(score, 0.62)
     return round(score, 3)
 
 
@@ -574,6 +679,23 @@ def _windows_for_beat(
 
     if beat_num == 5 and clips:
         root5 = segments_dir.parent if segments_dir else assets.parent
+        stat = generated[0] if generated else None
+        x_clips = all((c.get("filename") or "").startswith("x-") for c in clips)
+        if x_clips and stat:
+            from praisonaippt.daily_single.segment_cue_timing import beat5_x_clip_durations
+
+            clip_lens, stat_dur = beat5_x_clip_durations(root5, dur)
+            if len(clip_lens) == len(clips) and stat_dur > 0:
+                off = t0
+                for i, c in enumerate(clips):
+                    wins.append(VisualWindow(
+                        off, off + clip_lens[i], f"beat-{beat_num:02d}", "X clip", Path(c["path"]).name,
+                    ))
+                    off += clip_lens[i]
+                wins.append(VisualWindow(
+                    off, t0 + dur, f"beat-{beat_num:02d}", "Spire stat", Path(stat["path"]).name,
+                ))
+                return wins
         if not generated and not images:
             lens = clip_durations_for_cues(root5, "05-vision-memory", dur, [0, 1, 1])
             if len(lens) == len(clips):
@@ -585,7 +707,6 @@ def _windows_for_beat(
                         ))
                         off += lens[i]
                 return wins
-        stat = generated[0] if generated else None
         poke = next((c for c in clips if "pokemon" in c.get("filename", "")), None)
         solar = next((c for c in clips if "solar" in c.get("filename", "")), None)
         if stat and poke and solar:
@@ -642,6 +763,16 @@ def _windows_for_beat(
             ))
         return wins
 
+    if beat_num == 6 and clips and images:
+        from praisonaippt.daily_single.cue_slide_sync import beat6_combined_cue_windows
+
+        if any("x-comparison" in (c.get("filename") or "") for c in clips):
+            seg_srt = (segments_dir or assets.parent) / "06-safeguards" / "segment.srt"
+            merged_srt = (segments_dir.parent if segments_dir else assets.parent) / "merge" / "final.srt"
+            wins = beat6_combined_cue_windows(t0, dur, clips, images, seg_srt, merged_srt)
+            if wins:
+                return wins
+
     if beat_num == 6 and images:
         from praisonaippt.daily_single.cue_slide_sync import beat6_cue_windows
 
@@ -692,41 +823,54 @@ def _windows_for_beat(
     root = segments_dir.parent if segments_dir else assets.parent
 
     if beat_num == 4 and clips and images and not generated:
-        chart_d, clip_d, tail_d = beat4_visual_durations(root, dur)
+        cue_durs = cue_span_durations(root, "04-benchmarks", dur)
         chart_name = Path(images[0]["path"]).name
-        clip_name = Path(clips[0]["path"]).name
         off = t0
-        wins.append(VisualWindow(off, off + chart_d, f"beat-{beat_num:02d}", "benchmark slide", chart_name))
-        off += chart_d
-        wins.append(VisualWindow(off, off + clip_d, f"beat-{beat_num:02d}", "clip", clip_name))
-        off += clip_d
-        if tail_d >= 0.25:
-            wins.append(VisualWindow(off, off + tail_d, f"beat-{beat_num:02d}", "benchmark slide", chart_name))
+        if len(clips) >= 2 and len(cue_durs) >= 4:
+            wins.append(VisualWindow(off, off + cue_durs[0], f"beat-{beat_num:02d}", "benchmark slide", chart_name))
+            off += cue_durs[0]
+            wins.append(VisualWindow(off, off + cue_durs[1], f"beat-{beat_num:02d}", "clip", Path(clips[0]["path"]).name))
+            off += cue_durs[1]
+            wins.append(VisualWindow(off, off + cue_durs[2], f"beat-{beat_num:02d}", "clip", Path(clips[1]["path"]).name))
+            off += cue_durs[2]
+            wins.append(VisualWindow(off, off + cue_durs[3], f"beat-{beat_num:02d}", "benchmark slide", chart_name))
+        elif len(clips) >= 2 and len(cue_durs) >= 3:
+            wins.append(VisualWindow(off, off + cue_durs[0], f"beat-{beat_num:02d}", "benchmark slide", chart_name))
+            off += cue_durs[0]
+            wins.append(VisualWindow(off, off + cue_durs[1], f"beat-{beat_num:02d}", "clip", Path(clips[0]["path"]).name))
+            off += cue_durs[1]
+            wins.append(VisualWindow(off, off + cue_durs[2], f"beat-{beat_num:02d}", "clip", Path(clips[1]["path"]).name))
+        else:
+            chart_d, clip_d, tail_d = beat4_visual_durations(root, dur)
+            clip_name = Path(clips[0]["path"]).name
+            wins.append(VisualWindow(off, off + chart_d, f"beat-{beat_num:02d}", "benchmark slide", chart_name))
+            off += chart_d
+            wins.append(VisualWindow(off, off + clip_d, f"beat-{beat_num:02d}", "clip", clip_name))
+            off += clip_d
+            if tail_d >= 0.25:
+                wins.append(VisualWindow(off, off + tail_d, f"beat-{beat_num:02d}", "benchmark slide", chart_name))
         return wins
 
     cue_clip_beats: dict[int, tuple[str, list[int]]] = {
-        1: ("01-cold-open", [0, 1, 1]),
+        1: ("01-cold-open", [0, 1, 2, 1]),
         2: ("02-mythos-tier", [0, 0, 1]),
-        3: ("03-engineers-care", [0, 1, 1, 1]),
-        5: ("05-vision-memory", [0, 1, 1]),
-        6: ("06-safeguards", [0, 1, 1, 1]),
+        3: ("03-engineers-care", [0, 1, 2]),
+        5: ("05-vision-memory", [0, 1, 2, 2]),
+        6: ("06-safeguards", [0, 1, 2, 1]),
+        7: ("07-api-integration", [0, 1, 2, 3, 3]),
+        8: ("08-glasswing", [0, 1, 2, 3, 0, 3, 3, 0]),
     }
-    if beat_num == 8 and clips and not generated and not images:
-        lens = beat8_clip_durations(root, dur)
-        off = t0
-        for i, c in enumerate(clips):
-            if i < len(lens) and lens[i] >= 0.25:
-                wins.append(VisualWindow(off, off + lens[i], beat_key, "clip", Path(c["path"]).name))
-                off += lens[i]
-        return wins
     if beat_num in cue_clip_beats and clips and not generated and not images:
         seg_dir, cue_map = cue_clip_beats[beat_num]
-        lens = clip_durations_for_cues(root, seg_dir, dur, cue_map)
+        cue_lens = cue_span_durations(root, seg_dir, dur)
         off = t0
-        for i, c in enumerate(clips):
-            if i < len(lens) and lens[i] >= 0.25:
-                wins.append(VisualWindow(off, off + lens[i], beat_key, "clip", Path(c["path"]).name))
-                off += lens[i]
+        for i, clip_idx in enumerate(cue_map):
+            if i < len(cue_lens) and cue_lens[i] >= 0.25 and clip_idx < len(clips):
+                c = clips[clip_idx]
+                wins.append(VisualWindow(
+                    off, off + cue_lens[i], beat_key, "clip", Path(c["path"]).name,
+                ))
+                off += cue_lens[i]
         return wins
 
     if beat_num == 9 and images and any("v2-pricing" in i.get("filename", "") for i in images):
@@ -854,10 +998,18 @@ def build_visual_timeline(project: DailySingleProject) -> list[VisualWindow]:
             else:
                 out.extend(_windows_for_beat("00-hook", None, start, dur, {}, assets, hook_launch=True))
         elif label == "99-outro":
-            cta = outro_slide_specs(beat_map_variant(project))[0]
-            out.append(VisualWindow(
-                start, start + dur, "99-outro", cta["headline"], cta["file"],
-            ))
+            variant = beat_map_variant(project)
+            heygen_out = project.segments_dir / "99-outro" / "heygen.mp4"
+            if variant == "social-comparison" and not heygen_out.is_file():
+                out.append(VisualWindow(
+                    start, start + dur, "99-outro",
+                    "comparison reel outro", "x-comparison-cintas-fable5-opus.mp4",
+                ))
+            else:
+                cta = outro_slide_specs(variant)[0]
+                out.append(VisualWindow(
+                    start, start + dur, "99-outro", cta["headline"], cta["file"],
+                ))
         else:
             if label == "01-cold-open":
                 bumper_row = seg_by_id.get(BUMPER_STEM)

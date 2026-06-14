@@ -14,6 +14,10 @@ conda activate test 2>/dev/null || true
 REPO_ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 cd "$REPO_ROOT"
 
-daily-single -p "$PROJECT" pipeline publish-gate "${EXTRA[@]}"
+if ((${#EXTRA[@]})); then
+  daily-single -p "$PROJECT" pipeline publish-gate "${EXTRA[@]}"
+else
+  daily-single -p "$PROJECT" pipeline publish-gate
+fi
 
 echo "Reports under $PROJECT/merge/"

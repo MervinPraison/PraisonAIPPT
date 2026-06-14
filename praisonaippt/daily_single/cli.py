@@ -92,6 +92,26 @@ def main(argv: list[str] | None = None) -> int:
         "validate-beat-map",
         help="Beat-map policy — banned assets, LinkedIn beats, clip diversity → beat_map_policy_report.json",
     )
+    sub.add_parser(
+        "validate-visual-duplicates",
+        help="Assembled timeline duplicate clip gate → visual_duplicate_report.json",
+    )
+    sub.add_parser(
+        "validate-simple-language",
+        help="Plain-language gate — scripts/captions non-developer friendly → simple_language_report.json",
+    )
+    sub.add_parser(
+        "validate-clip-trims",
+        help="Clip trim bounds + source cut suggestions → clip_trim_report.json",
+    )
+    sub.add_parser(
+        "validate-resource-usefulness",
+        help="Related resource topical usefulness → resource_usefulness_report.json",
+    )
+    sub.add_parser(
+        "validate-visual-claims",
+        help="On-screen table/chart claims vs assembled pixels → visual_claim_report.json",
+    )
     sub.add_parser("validate-engagement-assets", help="Motion/demo/social-proof gate → engagement_report.json")
     sub.add_parser("validate-viral-readiness", help="Viral readiness composite → viral_readiness_report.json")
     sub.add_parser("validate-all", help="Full validation gate (tools, output, sync, display, visual audit)")
@@ -329,6 +349,65 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{'PASS' if report['ok'] else 'FAIL'}: beat-map policy")
         if report.get("body_clip_seconds"):
             print(f"  body clip mix: {report['body_clip_seconds']}")
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
+    if args.cmd == "validate-visual-duplicates":
+        from praisonaippt.daily_single.visual_duplicate_audit import validate_visual_duplicates
+
+        report = validate_visual_duplicates(project)
+        print(
+            f"{'PASS' if report['ok'] else 'FAIL'}: "
+            f"{report.get('files_checked', 0) - report.get('files_fail', 0)}/"
+            f"{report.get('files_checked', 0)} unique MP4s"
+        )
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
+    if args.cmd == "validate-simple-language":
+        from praisonaippt.daily_single.simple_language_audit import validate_simple_language
+
+        report = validate_simple_language(project)
+        print(f"{'PASS' if report['ok'] else 'FAIL'}: simple language")
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
+    if args.cmd == "validate-clip-trims":
+        from praisonaippt.daily_single.clip_trim_audit import validate_clip_trims
+
+        report = validate_clip_trims(project)
+        n_ok = report.get("clips_checked", 0) - report.get("clips_fail", 0)
+        print(f"{'PASS' if report['ok'] else 'FAIL'}: clip trims {n_ok}/{report.get('clips_checked', 0)}")
+        if report.get("source_trim_suggestions"):
+            print(f"  source suggestions: {len(report['source_trim_suggestions'])} catalog clips")
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
+    if args.cmd == "validate-resource-usefulness":
+        from praisonaippt.daily_single.resource_usefulness_audit import validate_resource_usefulness
+
+        report = validate_resource_usefulness(project)
+        print(
+            f"{'PASS' if report['ok'] else 'FAIL'}: "
+            f"resources {report.get('useful_catalog_count', 0)}/"
+            f"{report.get('min_useful_catalog', 0)} useful"
+        )
+        recs = report.get("recommendations") or []
+        if recs:
+            print(f"  unused recommendations: {', '.join(r['id'] for r in recs[:3])}")
+        if not report["ok"]:
+            for issue in report.get("issues") or []:
+                print(f"  {issue}")
+        return 0 if report["ok"] else 1
+    if args.cmd == "validate-visual-claims":
+        from praisonaippt.daily_single.visual_claim_audit import validate_visual_claims
+
+        report = validate_visual_claims(project)
+        print(f"{'PASS' if report['ok'] else 'FAIL'}: visual claims {report.get('claims_checked', 0)} checked")
         if not report["ok"]:
             for issue in report.get("issues") or []:
                 print(f"  {issue}")

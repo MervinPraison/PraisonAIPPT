@@ -69,20 +69,30 @@ def beat4_visual_durations(project_root: Path, seg_dur: float) -> tuple[float, f
     durs = cue_span_durations(project_root, "04-benchmarks", seg_dur)
     if len(durs) >= 3:
         chart_d, clip_d, tail_d = durs[0], durs[1], durs[2]
-        # Nudge boundary so Pokémon clip starts with Pokémon speech, not trailing chart words.
-        pad = min(0.4, chart_d * 0.08)
-        return max(0.5, chart_d - pad), clip_d + pad, tail_d
+        nudge = min(0.85, clip_d * 0.1)
+        return chart_d, clip_d + nudge, max(0.5, tail_d - nudge)
     if len(durs) == 2:
         return durs[0], durs[1], 0.5
     return seg_dur * 0.45, seg_dur * 0.45, seg_dur * 0.1
 
 
 def beat8_clip_durations(project_root: Path, seg_dur: float) -> list[float]:
-    """Pokémon → Thariq → claudedevs per cue; closing lines stay on claudedevs."""
+    """Comparison splits then voxel Minecraft demos; closing lines stay on last clip."""
     rows = parse_segment_srt(project_root / "segments" / "08-glasswing" / "segment.srt")
-    n = max(4, len(rows))
-    cue_map = [0, 1, 2] + [2] * (n - 3)
+    n = max(5, len(rows))
+    cue_map = [0, 1, 2, 3] + [1] * (n - 4)
     return clip_durations_for_cues(project_root, "08-glasswing", seg_dur, cue_map)
+
+
+def beat5_x_clip_durations(project_root: Path, seg_dur: float) -> tuple[list[float], float]:
+    """Three curated X clips from first three cues; spire stat from fourth."""
+    durs = cue_span_durations(project_root, "05-vision-memory", seg_dur)
+    if len(durs) >= 4:
+        return [max(0.5, d) for d in durs[:3]], max(0.5, durs[3])
+    if len(durs) == 3:
+        return [max(0.5, d) for d in durs], 0.0
+    per = seg_dur / 3.0
+    return [per, per, per], 0.0
 
 
 def beat9_visual_durations(project_root: Path, seg_dur: float) -> tuple[float, float, float]:

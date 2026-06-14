@@ -63,7 +63,7 @@ def validate_whisper_word_timings(project: DailySingleProject, *, min_words: int
         source = str(raw.get("source") or "")
         data = load_whisper_json(ts)
         word_count = len(data.words or [])
-        seg_ok = word_count >= min_words and source != "proportional"
+        seg_ok = word_count >= min_words and source not in ("proportional",)
         if not seg_ok:
             ok = False
         rows.append({
@@ -360,7 +360,7 @@ def validate_post_bookends_av(project: DailySingleProject) -> tuple[bool, dict[s
         if ts.is_file():
             raw = json.loads(ts.read_text(encoding="utf-8"))
             data = load_whisper_json(ts)
-            whisper_ok = len(data.words or []) >= 8 and str(raw.get("source") or "") != "proportional"
+            whisper_ok = len(data.words or []) >= 8 and str(raw.get("source") or "") not in ("proportional",)
             if not whisper_ok:
                 ok = False
         row.update({"ok": dur >= 0.5 and whisper_ok, "duration_sec": round(dur, 2), "whisper_ok": whisper_ok})

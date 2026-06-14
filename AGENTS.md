@@ -20,16 +20,19 @@ All video-first variants use `asset_policy: "video-first-local"` in `research/be
 |------|-----|------------------------------|
 | 1 | `sync-assets` | — |
 | 2 | `write-scripts` | — |
-| 3 | **`validate-qa --when pre_build`** | s04 knowledge, s06 coverage, s01 assets, **s18 video-first**, **s19 chart-script**, **s21 beat-map** |
-| 4 | `synthesise-vo` | — |
-| 5 | **`validate-qa --when post_vo`** | s05 transcript overlap per segment |
-| 6 | `bookend-media` | — |
-| 7 | `record-canonical-scroll` *(optional)* | — |
-| 8 | **`validate-qa --when pre_assemble`** | s00 bookends, s11 canonical capture, **s16 montage-clock**, **s17 cue-map**, **s20 asset-inventory**, **s21 beat-map** |
-| 9 | `assemble-beats` | — |
-| 10 | `build-captions` | — |
-| 11 | **`validate-spoken-visual`** | windows, charts, transitions, montage, plain language → `spoken_visual_sync_report.json` |
-| 12 | **`validate-beat-map`** | banned assets, clip mix, LinkedIn placement → `beat_map_policy_report.json` |
+| 3 | **`validate-simple-language`** | Insider jargon + gloss rules → `simple_language_report.json` |
+| 4 | **`validate-clip-trims`** | Beat-map bounds + source cut suggestions → `clip_trim_report.json` |
+| 5 | **`validate-resource-usefulness`** | Catalog clips vs main topic → `resource_usefulness_report.json` |
+| 6 | **`validate-qa --when pre_build`** | s04 knowledge, s06 coverage, s01 assets, **s18**, **s19**, **s21**, **s23**, **s24** |
+| 7 | `synthesise-vo` | — |
+| 8 | **`validate-qa --when post_vo`** | s05 transcript overlap per segment |
+| 9 | `bookend-media` | — |
+| 10 | `record-canonical-scroll` *(optional)* | — |
+| 11 | **`validate-qa --when pre_assemble`** | s00 bookends, s11 canonical capture, **s16 montage-clock**, **s17 cue-map**, **s20 asset-inventory**, **s21 beat-map** |
+| 12 | `assemble-beats` | — |
+| 13 | `build-captions` | — |
+| 14 | **`validate-spoken-visual`** | windows, charts, transitions, montage, plain language → `spoken_visual_sync_report.json` |
+| 15 | **`validate-beat-map`** | banned assets, clip mix, LinkedIn placement → `beat_map_policy_report.json` |
 
 **Rule:** If a QA step fails, fix the cause, re-run from the failed **build** step, then re-run all QA gates below it.
 
@@ -47,6 +50,10 @@ All video-first variants use `asset_policy: "video-first-local"` in `research/be
 | V5 | `validate-slide-quality` | Slide design tier |
 | V5b | `validate-asset-inventory` | No banned hook/body assets |
 | V5c | `validate-beat-map` | Beat-map policy |
+| V5d | `validate-visual-duplicates` | No MP4 reused across body beats |
+| V5e | `validate-simple-language` | Scripts/captions non-developer friendly |
+| V5f | `validate-clip-trims` | Beat-map trim bounds + source cut suggestions |
+| V5g | `validate-resource-usefulness` | Related clips informational for main topic |
 | V6 | `validate-engagement-assets` | Motion + social proof |
 | V7 | `validate-viral-readiness` | Composite viral score |
 | V8 | `audit-visual` | 5s frame audit |
@@ -112,5 +119,9 @@ zsh -c "source $(conda info --base)/etc/profile.d/conda.sh && conda activate tes
 | `merge/timeline.json` | Segment timing |
 | `merge/spoken_visual_sync_report.json` | V4 gate |
 | `merge/beat_map_policy_report.json` | V5c gate |
+| `merge/visual_duplicate_report.json` | V5d gate |
+| `merge/simple_language_report.json` | V5e gate |
+| `merge/clip_trim_report.json` | V5f gate — `source_trim_suggestions` for editors |
+| `merge/resource_usefulness_report.json` | V5g gate — `recommendations` for unused high-score clips |
 | `merge/asset_inventory_report.json` | V5b gate |
 | `merge/qa/summary.json` | Modular QA rollup |

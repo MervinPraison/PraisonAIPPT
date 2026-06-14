@@ -26,6 +26,7 @@ VIDEO_FIRST_BRIDGE_FILES = frozenset({
     "x-claudeai-safeguards.mp4",
     "x-chrissgpt-minecraft.mp4",
     "x-chrissgpt-pokemon.mp4",
+    "x-demo-deveshcodes-blackhole.mp4",
     "x-pootlepress-wp-theme.mp4",
     "x-trq212-edit-2064826394589442448.mp4",
     "x-trq212-edit-2064828193446740023.mp4",

@@ -25,7 +25,7 @@ def run_s11_canonical_capture(
         beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         beat_map = {}
-    if beat_map.get("variant") in ("trust-audit", "social-comparison"):
+    if beat_map.get("variant") in ("trust-audit", "social-comparison", "combined"):
         checks.append(CheckResult(
             id="scroll_asset",
             ok=True,

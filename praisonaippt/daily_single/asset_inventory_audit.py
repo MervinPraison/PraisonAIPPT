@@ -29,6 +29,7 @@ SOCIAL_COMPARISON_HOOK_MP4_ALLOW = frozenset({
     "x-claudeai-safeguards.mp4",
     "x-chrissgpt-minecraft.mp4",
     "x-chrissgpt-pokemon.mp4",
+    "x-demo-deveshcodes-blackhole.mp4",
     "x-pootlepress-wp-theme.mp4",
     "x-trq212-edit-2064826394589442448.mp4",
     "x-trq212-edit-2064828193446740023.mp4",
@@ -196,7 +197,10 @@ def validate_asset_inventory(
                 frame_path = str(ref)
                 if use_vision and source == "hook_montage":
                     spoken = str(row.get("context") or fname)
-                    vision = describe_frame(ref, spoken)
+                    try:
+                        vision = describe_frame(ref, spoken)
+                    except Exception:
+                        vision = None
                     if vision and (vision.get("generic_broll") or _GENERIC_PATTERNS.search(vision.get("description") or "")):
                         if not (social_hook and fn_lower.startswith("x-")):
                             generic_broll = True

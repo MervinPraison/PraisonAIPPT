@@ -119,7 +119,7 @@ def validate_engagement_assets(project: DailySingleProject) -> dict[str, Any]:
                 if not Path(path).is_file():
                     continue
                 tier = asset_tier(path, item)
-                if tier in ("motion", "social-capture", "chart", "gpt-image"):
+                if tier in ("motion", "social-capture", "chart", "gpt-image", "comparison"):
                     has_demo = True
                     break
             if has_demo:

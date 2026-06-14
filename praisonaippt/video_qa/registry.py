@@ -29,6 +29,8 @@ from praisonaippt.video_qa.stages.s19_chart_script import run_s19_chart_script
 from praisonaippt.video_qa.stages.s20_asset_inventory import run_s20_asset_inventory
 from praisonaippt.video_qa.stages.s21_beat_map_policy import run_s21_beat_map_policy
 from praisonaippt.video_qa.stages.s22_word_visual_sync import run_s22_word_visual_sync
+from praisonaippt.video_qa.stages.s23_clip_trim_range import run_s23_clip_trim_range
+from praisonaippt.video_qa.stages.s24_resource_usefulness import run_s24_resource_usefulness
 
 StageFn = Callable[..., StageReport]
 
@@ -56,6 +58,8 @@ STAGE_RUNNERS: dict[str, StageFn] = {
     "s20-asset-inventory": run_s20_asset_inventory,
     "s21-beat-map-policy": run_s21_beat_map_policy,
     "s22-word-visual-sync": run_s22_word_visual_sync,
+    "s23-clip-trim-range": run_s23_clip_trim_range,
+    "s24-resource-usefulness": run_s24_resource_usefulness,
 }
 
 

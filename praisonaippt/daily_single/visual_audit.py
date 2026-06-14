@@ -61,7 +61,7 @@ def _run_ffmpeg(args: list[str]) -> None:
 def export_frame(mp4: Path, t_sec: float, dest: Path) -> Path:
     dest.parent.mkdir(parents=True, exist_ok=True)
     dur = ffprobe_duration(mp4)
-    t = max(0.0, min(float(t_sec), max(0.0, dur - 0.05)))
+    t = max(0.0, min(float(t_sec), max(0.0, dur - 0.5)))
     _run_ffmpeg([
         "ffmpeg", "-y", "-ss", f"{t:.3f}", "-i", str(mp4.resolve()),
         "-frames:v", "1", "-q:v", "2", "-update", "1", str(dest),

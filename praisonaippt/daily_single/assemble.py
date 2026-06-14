@@ -27,6 +27,7 @@ from praisonaippt.daily_single.segment_cue_timing import (
     beat8_clip_durations,
     beat9_visual_durations,
     clip_durations_for_cues,
+    cue_span_durations,
 )
 from praisonaippt.daily_single.publish_quality_config import beat_map_variant
 from praisonaippt.daily_single.text_slide import outro_slide_specs, render_slide_group, slide_specs
@@ -213,6 +214,36 @@ def _outro_with_avatar(heygen: Path, dest: Path, dur: float, bg_png: Path) -> No
     hg_trim = dest.parent / "outro-heygen.mp4"
     _heygen_bookend_segment(heygen, hg_trim, dur)
     overlay_circle_pip(bg_v, hg_trim, dest, dur)
+
+
+def _outro_comparison_reel(project: DailySingleProject, dest: Path, dur: float) -> None:
+    """Social-comparison outro — comparison clip reel instead of bare text slide."""
+    xdir = project.root / "research" / "reference-videos" / "x"
+    picks = (
+        "x-comparison-cintas-fable5-opus.mp4",
+        "x-comparison-jono-flight.mp4",
+        "x-comparison-ryan-doser.mp4",
+        "x-comparison-coderabbit.mp4",
+    )
+    sources = [xdir / name for name in picks if (xdir / name).is_file()]
+    if not sources:
+        cta_dir = project.beats_dir / "outro-slides"
+        png = render_slide_group(outro_slide_specs(beat_map_variant(project)), cta_dir)[0]
+        _video_from_image(png, dest, dur)
+        return
+    parts_dir = dest.parent / "outro-reel-parts"
+    parts_dir.mkdir(parents=True, exist_ok=True)
+    slot = max(1.5, dur / len(sources))
+    vparts: list[Path] = []
+    for i, src in enumerate(sources):
+        part = parts_dir / f"outro-{i}.mp4"
+        end = min(slot, max(1.0, ffprobe_duration(src)))
+        _trim_clip(src, part, 0.0, end)
+        _extend_or_trim(part, part, slot)
+        vparts.append(part)
+    reel = dest.parent / "outro-reel.mp4"
+    _concat_videos(vparts, reel)
+    _extend_or_trim(reel, dest, dur)
 
 
 def _concat_av(parts_v: list[Path], parts_a: list[Path], dest_v: Path, dest_a: Path) -> None:
@@ -434,12 +465,18 @@ def _build_beat_video(
         "views-overlay" in (i.get("filename") or "") for i in images + generated
     ):
         root = out_dir.parent
-        lens = clip_durations_for_cues(root, "01-cold-open", dur, [0, 1, 1])
+        cue_map = [0, 1, 2, 2]
+        lens = clip_durations_for_cues(root, "01-cold-open", dur, cue_map)
+        if len(clips) >= len(lens):
+            return _assemble_clips_from_lens(parts_dir, clips, lens, out, dur)
+        cue_lens = cue_span_durations(root, "01-cold-open", dur)
         parts: list[Path] = []
-        for i, c in enumerate(clips):
-            if i < len(lens):
-                parts.append(_clip_part(parts_dir, c, lens[i], f"clip-{i}.mp4"))
-        rest = dur - sum(lens[: len(clips)])
+        for i, clip_idx in enumerate(cue_map[: len(cue_lens)]):
+            if clip_idx < len(clips):
+                parts.append(
+                    _clip_part(parts_dir, clips[clip_idx], cue_lens[i], f"cue-{i}.mp4"),
+                )
+        rest = dur - sum(cue_lens[: min(len(cue_map), len(cue_lens))])
         if images and rest > 0.5:
             part = parts_dir / "social.mp4"
             _video_from_image(Path(images[0]["path"]), part, rest)
@@ -563,6 +600,27 @@ def _build_beat_video(
 
     if beat == 5 and clips:
         stat = generated[0] if generated else None
+        x_clips = all((c.get("filename") or "").startswith("x-") for c in clips)
+        if x_clips and stat:
+            from praisonaippt.daily_single.segment_cue_timing import beat5_x_clip_durations
+
+            clip_lens, stat_dur = beat5_x_clip_durations(out_dir.parent, dur)
+            if len(clip_lens) == len(clips) and stat_dur > 0:
+                parts: list[Path] = []
+                for i, (c, seg_len) in enumerate(zip(clips, clip_lens)):
+                    src = Path(c["path"])
+                    start = float(c.get("in_sec") or 0)
+                    part = parts_dir / f"x-clip-{i}.mp4"
+                    _trim_clip(src, part, start, start + seg_len)
+                    _extend_or_trim(part, part, seg_len)
+                    parts.append(part)
+                stat_v = parts_dir / "stat.mp4"
+                _video_from_image(Path(stat["path"]), stat_v, stat_dur)
+                parts.append(stat_v)
+                merged = parts_dir / "merged.mp4"
+                _concat_videos(parts, merged)
+                _extend_or_trim(merged, out, dur)
+                return out
         stat_share = 0.32 if stat else 0.0
         clip_total = max(1.0, dur * (1.0 - stat_share))
         poke = next((c for c in clips if "pokemon" in c.get("filename", "")), None)
@@ -599,6 +657,28 @@ def _build_beat_video(
         _extend_or_trim(merged, out, dur)
         return out
 
+    if beat == 6 and clips and images:
+        from praisonaippt.daily_single.cue_slide_sync import assemble_beat6_combined_from_cues
+
+        x_comparisons = any("x-comparison" in (c.get("filename") or "") for c in clips)
+        if x_comparisons:
+            project_root = out_dir.parent
+            seg_srt = project_root / "segments" / "06-safeguards" / "segment.srt"
+            merged_srt = project_root / "merge" / "final.srt"
+            t0 = 0.0
+            tl_path = project_root / "merge" / "timeline.json"
+            if tl_path.is_file():
+                tl = json.loads(tl_path.read_text(encoding="utf-8"))
+                for row in tl.get("segments") or []:
+                    if row.get("id") == "beat-06":
+                        t0 = float(row["start_sec"])
+                        break
+            built = assemble_beat6_combined_from_cues(
+                parts_dir, seg_srt, clips, images, out, dur, t0=t0, merged_srt=merged_srt,
+            )
+            if built:
+                return out
+
     if beat == 6 and images:
         from praisonaippt.daily_single.cue_slide_sync import assemble_beat6_from_cues
 
@@ -632,14 +712,31 @@ def _build_beat_video(
         return out
 
     if beat == 4 and clips and images and not generated:
-        chart_d, clip_d, tail_d = beat4_visual_durations(out_dir.parent, dur)
+        cue_durs = cue_span_durations(out_dir.parent, "04-benchmarks", dur)
         parts: list[Path] = []
-        parts.append(parts_dir / "chart-0.mp4")
-        _video_from_image(Path(images[0]["path"]), parts[-1], chart_d)
-        parts.append(_clip_part(parts_dir, clips[0], clip_d, "pokemon.mp4"))
-        if tail_d >= 0.25:
-            parts.append(parts_dir / "chart-1.mp4")
-            _video_from_image(Path(images[0]["path"]), parts[-1], tail_d)
+        if len(clips) >= 2 and len(cue_durs) >= 4:
+            chart_d, poke_d, dino_d, tail_d = cue_durs[0], cue_durs[1], cue_durs[2], cue_durs[3]
+            parts.append(parts_dir / "chart-0.mp4")
+            _video_from_image(Path(images[0]["path"]), parts[-1], chart_d)
+            parts.append(_clip_part(parts_dir, clips[0], poke_d, "pokemon.mp4"))
+            parts.append(_clip_part(parts_dir, clips[1], dino_d, "dino.mp4"))
+            if tail_d >= 0.25:
+                parts.append(parts_dir / "chart-1.mp4")
+                _video_from_image(Path(images[0]["path"]), parts[-1], tail_d)
+        elif len(clips) >= 2 and len(cue_durs) >= 3:
+            chart_d, poke_d, dino_d = cue_durs[0], cue_durs[1], cue_durs[2]
+            parts.append(parts_dir / "chart-0.mp4")
+            _video_from_image(Path(images[0]["path"]), parts[-1], chart_d)
+            parts.append(_clip_part(parts_dir, clips[0], poke_d, "pokemon.mp4"))
+            parts.append(_clip_part(parts_dir, clips[1], dino_d, "dino.mp4"))
+        else:
+            chart_d, clip_d, tail_d = beat4_visual_durations(out_dir.parent, dur)
+            parts.append(parts_dir / "chart-0.mp4")
+            _video_from_image(Path(images[0]["path"]), parts[-1], chart_d)
+            parts.append(_clip_part(parts_dir, clips[0], clip_d, "pokemon.mp4"))
+            if tail_d >= 0.25:
+                parts.append(parts_dir / "chart-1.mp4")
+                _video_from_image(Path(images[0]["path"]), parts[-1], tail_d)
         merged = parts_dir / "merged.mp4"
         _concat_videos(parts, merged)
         _extend_or_trim(merged, out, dur)
@@ -768,15 +865,12 @@ def _build_beat_video(
 
     beat_cue_clips: dict[int, tuple[str, list[int]]] = {
         2: ("02-mythos-tier", [0, 0, 1]),
-        3: ("03-engineers-care", [0, 1, 1, 1]),
-        5: ("05-vision-memory", [0, 1, 1]),
-        6: ("06-safeguards", [0, 1, 1, 1]),
-        7: ("07-api-integration", [0, 1]),
+        3: ("03-engineers-care", [0, 1, 2]),
+        5: ("05-vision-memory", [0, 1, 2, 2]),
+        6: ("06-safeguards", [0, 1, 2, 1]),
+        7: ("07-api-integration", [0, 1, 2, 3, 3]),
+        8: ("08-glasswing", [0, 1, 2, 3, 0, 3, 3, 0]),
     }
-    if beat == 8 and clips and not generated and not images:
-        lens = beat8_clip_durations(out_dir.parent, dur)
-        if len(lens) == len(clips):
-            return _assemble_clips_from_lens(parts_dir, clips, lens, out, dur)
     if beat in beat_cue_clips and clips and not generated and not images:
         seg_dir, cue_map = beat_cue_clips[beat]
         lens = clip_durations_for_cues(out_dir.parent, seg_dir, dur, cue_map)
@@ -822,10 +916,21 @@ def assemble(project: DailySingleProject) -> Path:
     """Build beats/*.mp4 and merge/final.mp4 from segment narration + beat-map."""
     load_env()
     require_keys("ELEVEN_API_KEY")
+    from praisonaippt.daily_single.captions import build_segment_captions
+
     beat_map = json.loads(project.beat_map_path.read_text(encoding="utf-8"))
     beats = beat_map.get("beats") or {}
     project.beats_dir.mkdir(parents=True, exist_ok=True)
     project.merge_dir.mkdir(parents=True, exist_ok=True)
+
+    # Cue-timed beats (4, 8, 10, …) need fresh segment.srt before assembly.
+    for _label, seg_dir, _beat in SEGMENT_ORDER:
+        seg_path = project.segments_dir / seg_dir
+        if (seg_path / "script.md").is_file() and (seg_path / "narration.mp3").is_file():
+            try:
+                build_segment_captions(seg_path)
+            except (OSError, RuntimeError, ValueError):
+                pass
 
     narr = project.merge_dir / "narration.mp3"
     if not narr.is_file() or narr.stat().st_size < 5000:
@@ -874,12 +979,13 @@ def assemble(project: DailySingleProject) -> Path:
         elif label == "99-outro":
             outro_v = project.beats_dir / "99-outro.mp4"
             heygen_out = project.segments_dir / "99-outro" / "heygen.mp4"
+            variant = beat_map_variant(project)
             cta_dir = project.beats_dir / "outro-slides"
-            cta_png = render_slide_group(
-                outro_slide_specs(beat_map_variant(project)), cta_dir,
-            )[0]
+            cta_png = render_slide_group(outro_slide_specs(variant), cta_dir)[0]
             if heygen_out.is_file():
                 _outro_with_avatar(heygen_out, outro_v, dur, cta_png)
+            elif variant == "social-comparison":
+                _outro_comparison_reel(project, outro_v, dur)
             else:
                 _video_from_image(cta_png, outro_v, dur)
             vparts.append(outro_v)

@@ -15,6 +15,16 @@ BANNED_PATTERNS: tuple[tuple[str, str], ...] = (
     (r"\bmetered api\b", "Say 'pay-as-you-go billing' instead"),
 )
 
+# Newsroom / insider framing — general YouTube viewers should not need media jargon.
+INSIDER_PHRASES: tuple[tuple[str, str], ...] = (
+    (r"\bthat is the headline\b", "Say what happened plainly — e.g. 'The story this week is…'"),
+    (r"\bheadline this week\b", "Avoid newsroom jargon — say 'the big story' or 'what builders care about'"),
+    (r"\bnot a logo refresh\b", "Say 'not just a rebrand' or 'not only a name change'"),
+    (r"\blogo refresh\b", "Say 'rebrand' or 'new logo only' in plain terms"),
+    (r"\bhot take\b", "Say 'quick opinion' or drop the phrase"),
+    (r"\btakes? the internet\b", "Insider framing — say 'people online' or 'builders on X'"),
+)
+
 # Allowed only after beat 02 (mythos-tier) introduces the tiers.
 MYTHOS_BEFORE_TIER_BEAT = re.compile(r"\bmythos\b", re.I)
 
@@ -68,7 +78,7 @@ def validate_audience_language(project: DailySingleProject) -> tuple[bool, list[
             seen_tier_beat = True
 
         lower = text.lower()
-        for pat, hint in BANNED_PATTERNS:
+        for pat, hint in BANNED_PATTERNS + INSIDER_PHRASES:
             if re.search(pat, lower, re.I):
                 issues.append(f"{seg_dir}: {hint}")
 
