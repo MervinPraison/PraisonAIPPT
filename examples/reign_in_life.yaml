@@ -29,28 +29,6 @@ sections:
     - faith
     - text: not by works
       color: green
-  - reference: Romans 11:6 (NKJV)
-    text: And if by grace, then it is no longer of works; otherwise grace is no longer
-      grace. But if it is of works, it is no longer grace; otherwise work is no longer
-      work.
-    highlights:
-    - text: no longer of works
-      color: green
-    - grace
-  - reference: Titus 3:5 (NKJV)
-    text: not by works of righteousness which we have done, but according to His mercy
-      He saved us, through the washing of regeneration and renewing of the Holy Spirit,
-    highlights:
-    - text: not by works
-      color: green
-    - saved
-  - reference: Romans 3:21 (NKJV)
-    text: But now the righteousness of God apart from the law is revealed, being witnessed
-      by the Law and the Prophets;
-    highlights:
-    - text: righteousness of God
-    - text: apart from the law
-      color: green
   - reference: Romans 3:28 (NKJV)
     text: Therefore we conclude that a man is justified by faith apart from the deeds
       of the law.
@@ -77,6 +55,28 @@ sections:
     - text: not justified by the works of the law
       color: green
     - faith in Jesus Christ
+  - reference: Romans 11:6 (NKJV)
+    text: And if by grace, then it is no longer of works; otherwise grace is no longer
+      grace. But if it is of works, it is no longer grace; otherwise work is no longer
+      work.
+    highlights:
+    - text: no longer of works
+      color: green
+    - grace
+  - reference: Titus 3:5 (NKJV)
+    text: not by works of righteousness which we have done, but according to His mercy
+      He saved us, through the washing of regeneration and renewing of the Holy Spirit,
+    highlights:
+    - text: not by works
+      color: green
+    - saved
+  - reference: Romans 3:21 (NKJV)
+    text: But now the righteousness of God apart from the law is revealed, being witnessed
+      by the Law and the Prophets;
+    highlights:
+    - text: righteousness of God
+    - text: apart from the law
+      color: green
 - section: ''
   verses:
   - reference: Romans 5:17 (NKJV)
