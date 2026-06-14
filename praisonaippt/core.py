@@ -742,13 +742,19 @@ def _normalise_highlights(highlights, highlight_rgb=None):
                            'underline': False, 'annotation': None})
         elif isinstance(h, dict) and h.get('text'):
             ann = h.get('annotation', None)
+            if ann is None:
+                ann_display = None
+            elif isinstance(ann, int):
+                ann_display = BUBBLES.get(ann)
+            else:
+                ann_display = str(ann)
             result.append({
                 'text': h['text'],
                 'color': _parse_color(h.get('color', 'orange')),
                 'bold': h.get('bold', True),
                 'italic': h.get('italic', False),
                 'underline': h.get('underline', True if ann else False),
-                'annotation': BUBBLES.get(ann) if ann else None,
+                'annotation': ann_display,
             })
     return result
 
