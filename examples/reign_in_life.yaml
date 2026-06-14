@@ -130,7 +130,22 @@ sections:
       color: green
     - made righteous
 
-- section: ''
+- section: Faith without works vs Faith with works
+  verses:
+  - reference: James 2:26 (NKJV)
+    text: For as the body without the spirit is dead, so faith without works is dead
+      also.
+    highlights:
+    - text: faith without works is dead
+      color: green
+  - reference: James 2:18 (NKJV)
+    text: But someone will say, "You have faith, and I have works." Show me your faith
+      without your works, and I will show you my faith by my works.
+    highlights:
+    - text: faith without your works
+      color: green
+    - faith by my works
+- section: Righteousness before God vs Righteousness before man
   verses:
   - reference: ''
     text: 'Hamartiá (ἁμαρτία) — noun: sin / sin nature
