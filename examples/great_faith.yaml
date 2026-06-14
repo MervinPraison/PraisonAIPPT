@@ -10,11 +10,7 @@ sections:
     highlights:
     - text: reign in life
       color: green
-    - text: abundance of grace
-      color: '#FFD700'
-      annotation: 1
     - text: gift of righteousness
-      annotation: 2
   - reference: Romans 5:19 (NKJV)
     text: 19 For as by one man's disobedience many were made sinners, so also by one
       Man's obedience many will be made righteous.
