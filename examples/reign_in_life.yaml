@@ -3,12 +3,18 @@ presentation_subtitle: ''
 sections:
 - section: ''
   verses:
-  - reference: James 2:26 (NKJV)
-    text: For as the body without the spirit is dead, so faith without works is dead
-      also.
+  - reference: Romans 5:17 (NKJV)
+    text: 17 For if by the one man's offense death reigned through the one, much more
+      those who receive abundance of grace and of the gift of righteousness will reign
+      in life through the One, Jesus Christ.
     highlights:
-    - text: faith without works is dead
+    - text: reign in life
       color: green
+    - text: abundance of grace
+      color: '#FFD700'
+      annotation: 1
+    - text: gift of righteousness
+      annotation: 2
 - section: Faith without works is life
   verses:
   - reference: Romans 4:5 (NKJV)
@@ -55,14 +61,6 @@ sections:
     - text: not justified by the works of the law
       color: green
     - faith in Jesus Christ
-  - reference: Romans 11:6 (NKJV)
-    text: And if by grace, then it is no longer of works; otherwise grace is no longer
-      grace. But if it is of works, it is no longer grace; otherwise work is no longer
-      work.
-    highlights:
-    - text: no longer of works
-      color: green
-    - grace
   - reference: Titus 3:5 (NKJV)
     text: not by works of righteousness which we have done, but according to His mercy
       He saved us, through the washing of regeneration and renewing of the Holy Spirit,
@@ -76,6 +74,14 @@ sections:
     highlights:
     - text: righteousness of God
     - text: apart from the law
+      color: green
+- section: Faith without works is dead
+  verses:
+  - reference: James 2:26 (NKJV)
+    text: For as the body without the spirit is dead, so faith without works is dead
+      also.
+    highlights:
+    - text: faith without works is dead
       color: green
 - section: ''
   verses:
@@ -99,6 +105,20 @@ sections:
     - Grace
     - multiplied
     - knowledge of Jesus Christ
+  - reference: Romans 11:6 (NKJV)
+    text: And if by grace, then it is no longer of works; otherwise grace is no longer
+      grace.
+    highlights:
+    - text: no longer of works
+      color: green
+    - grace
+  - reference: Romans 11:6 (NKJV)
+    text: But if it is of works, it is no longer grace; otherwise work is no longer
+      work.
+    highlights:
+    - text: no longer grace
+      color: green
+    - work
 - section: 2. Gift of Righteousness
   verses:
   - reference: Romans 5:19 (NKJV)
