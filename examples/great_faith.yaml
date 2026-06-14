@@ -84,16 +84,13 @@ sections:
 
       Even if I touch the helm of the garment'
     list_type: bullet
-  - reference: Romans 5:20–21 (NKJV)
+  - reference: Romans 5:20 (NKJV)
     text: 20 Moreover the law entered that the offense might abound.
-    highlights: []
-  - reference: Romans 5:20–21 (NKJV)
-    text: 21 But where sin abounded, grace abounded much more, so that as sin reigned
-      in death, even so grace might reign through righteousness to eternal life through
-      Jesus Christ our Lord.
     highlights:
-    - where sin abounded, grace abounded much more
-    - grace might reign through righteousness to eternal life
+    - text: law entered
+      color: green
+    - text: offense might abound
+      color: '#FFD700'
   - reference: Matthew 8:8 (NKJV)
     text: The centurion answered and said, 'Lord, I am not worthy that You should
       come under my roof. But only speak a word, and my servant will be healed.'
