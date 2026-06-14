@@ -158,6 +158,19 @@ sections:
     - text: justified by works
       color: green
     - text: faith was working together with his works
+    - text: accounted to him for righteousness
+      color: '#FFD700'
+  - reference: James 2:21–23 (NKJV)
+    split_max_length: 500
+    text: Was not Abraham our father justified by works when he offered Isaac his son
+      on the altar? Do you see that faith was working together with his works, and
+      by works faith was made perfect? And the Scripture was fulfilled which says,
+      "Abraham believed God, and it was accounted to him for righteousness." And
+      he was called the friend of God.
+    highlights:
+    - text: justified by works
+      color: green
+    - text: faith was working together with his works
       annotation: age approx. 110
     - text: accounted to him for righteousness
       color: '#FFD700'
