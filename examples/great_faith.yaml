@@ -100,7 +100,27 @@ sections:
     highlights:
     - only speak a word
     - my servant will be healed
-- section: 3. They Knew the Gospel
+- section: 3. Knew Heart of God
+  verses:
+  - reference: ''
+    text: 'They Knew His Heart Is Fatherly
+
+      Fatherly Heart Wants to Heal
+
+      Fatherly Heart Responds Immediately
+
+      Fatherly Heart Wants His Children to Take Authority
+
+      Fatherly Heart Wants His Children to Claim Their Blessing'
+    list_type: bullet
+  - reference: Matthew 7:11 (NKJV)
+    text: If you then, being evil, know how to give good gifts to your children, how
+      much more will your Father who is in heaven give good things to those who ask
+      Him!
+    highlights:
+    - how much more will your Father
+    - give good things
+- section: 4. They Knew the Gospel
   verses:
   - reference: ''
     text: 'They heard about Jesus
@@ -126,26 +146,6 @@ sections:
       and she came and fell at His feet.
     highlights:
     - heard about Him
-- section: 4. Knew Heart of God
-  verses:
-  - reference: ''
-    text: 'They Knew His Heart Is Fatherly
-
-      Fatherly Heart Wants to Heal
-
-      Fatherly Heart Responds Immediately
-
-      Fatherly Heart Wants His Children to Take Authority
-
-      Fatherly Heart Wants His Children to Claim Their Blessing'
-    list_type: bullet
-  - reference: Matthew 7:11 (NKJV)
-    text: If you then, being evil, know how to give good gifts to your children, how
-      much more will your Father who is in heaven give good things to those who ask
-      Him!
-    highlights:
-    - your Father who is in heaven
-    - give good things to those who ask Him
 slide_style:
   background_image: assets/background_alt.jpg
   text_color: white
