@@ -50,7 +50,8 @@ sections:
       color: green
     - text: through the law
       color: green
-    - righteousness of faith
+    - faith
+    - heir of the world
   - reference: Galatians 2:16 (NKJV)
     split_max_length: 500
     text: knowing that a man is not justified by the works of the law but by faith
@@ -83,6 +84,30 @@ sections:
     highlights:
     - text: faith without works is dead
       color: green
+- section: ''
+  verses:
+  - reference: ''
+    text: 'Hamartiá (ἁμαρτία) — noun: sin / sin nature
+
+      Hamartanō (ἁμαρτάνω) — verb: to sin / miss the mark'
+    list_type: bullet
+  - reference: Romans 5:21 (NKJV)
+    text: 21 But where sin abounded, grace abounded much more, so that as sin reigned
+      in death, even so grace might reign through righteousness to eternal life through
+      Jesus Christ our Lord.
+    highlights:
+    - text: sin abounded
+      color: green
+    - text: sin reigned
+      color: green
+    - grace abounded much more
+  - reference: Romans 5:20 (NKJV)
+    text: 20 Moreover the law entered that the offense might abound.
+    highlights:
+    - text: law entered
+      color: green
+    - text: offense might abound
+      color: '#FFD700'
 - section: ''
   verses:
   - reference: Romans 5:17 (NKJV)
