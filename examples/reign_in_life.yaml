@@ -172,9 +172,6 @@ sections:
     text: But someone will say, "You have faith, and I have works." Show me your faith
       without your works, and I will show you my faith by my works.
     highlights:
-    - text: faith without your works
-      color: green
-    - faith by my works
     - text: your
       color: green
     - text: my
