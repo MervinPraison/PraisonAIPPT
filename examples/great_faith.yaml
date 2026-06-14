@@ -63,16 +63,16 @@ sections:
       29 Immediately the fountain of her blood was dried up, and she felt in her body
       that she was healed of the affliction.'
     highlights:
-    - she came behind Him in the crowd and touched His garment
+    - she came behind Him
   - reference: Matthew 8:7 (NKJV)
     text: And Jesus said to him, "I will come and heal him."
-    highlights: []
+    highlights: 
+    - I will come
   - reference: Matthew 15:22 (NKJV)
     text: And behold, a woman of Canaan came from that region and cried out to Him,
       saying, 'Have mercy on me, O Lord, Son of David! My daughter is severely demon-possessed.'
     highlights:
-    - came from that region and cried out to Him
-    - Have mercy on me, O Lord, Son of David
+    - Son of David
 - section: 2. Knew the Power of God
   verses:
   - reference: ''
@@ -116,19 +116,16 @@ sections:
       His garment.
     highlights:
     - she heard about Jesus
-    - touched His garment
   - reference: Luke 7:3 (NKJV)
     text: So when he heard about Jesus, he sent elders of the Jews to Him, pleading
       with Him to come and heal his servant.
     highlights:
     - he heard about Jesus
-    - pleading with Him to come and heal his servant
   - reference: Mark 7:25 (NKJV)
     text: For a woman whose young daughter had an unclean spirit heard about Him,
       and she came and fell at His feet.
     highlights:
     - heard about Him
-    - she came and fell at His feet
 - section: 4. Knew Heart of God
   verses:
   - reference: ''
