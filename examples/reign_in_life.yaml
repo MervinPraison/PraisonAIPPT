@@ -86,32 +86,6 @@ sections:
       color: green
 - section: ''
   verses:
-  - reference: ''
-    text: 'Hamartiá (ἁμαρτία) — noun: sin / sin nature
-
-      Hamartōloi (ἁμαρτωλοί) — noun: sinners
-
-      Hamartanō (ἁμαρτάνω) — verb: to sin / miss the mark'
-    list_type: bullet
-  - reference: Romans 5:21 (NKJV)
-    text: 21 But where sin abounded, grace abounded much more, so that as sin reigned
-      in death, even so grace might reign through righteousness to eternal life through
-      Jesus Christ our Lord.
-    highlights:
-    - text: sin abounded
-      color: green
-    - text: sin reigned
-      color: green
-    - grace abounded much more
-  - reference: Romans 5:20 (NKJV)
-    text: 20 Moreover the law entered that the offense might abound.
-    highlights:
-    - text: law entered
-      color: green
-    - text: offense might abound
-      color: '#FFD700'
-- section: ''
-  verses:
   - reference: Romans 5:17 (NKJV)
     text: 17 For if by the one man's offense death reigned through the one, much more
       those who receive abundance of grace and of the gift of righteousness will reign
@@ -155,6 +129,18 @@ sections:
     - text: one Man's obedience
       color: green
     - made righteous
+
+- section: ''
+  verses:
+  - reference: ''
+    text: 'Hamartiá (ἁμαρτία) — noun: sin / sin nature
+
+      Hamartōloi (ἁμαρτωλοί) — noun: sinners
+
+      Hamartanō (ἁμαρτάνω) — verb: to sin / miss the mark'
+    list_type: bullet
+
+
 slide_style:
   background_image: assets/background_alt.jpg
   text_color: white
