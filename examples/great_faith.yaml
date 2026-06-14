@@ -146,6 +146,23 @@ sections:
       and she came and fell at His feet.
     highlights:
     - heard about Him
+  - reference: Romans 5:5 (NKJV)
+    text: Now hope does not disappoint, because the love of God has been poured out
+      in our hearts by the Holy Spirit who was given to us.
+    highlights:
+    - love of God
+    - Holy Spirit
+  - reference: Romans 5:8 (NKJV)
+    text: But God demonstrates His own love toward us, in that while we were still
+      sinners, Christ died for us.
+    highlights:
+    - His own love
+  - reference: 1 John 4:10 (NKJV)
+    text: 'This is love: not that we loved God, but that he loved us and sent his
+      Son as an atoning sacrifice for our sins.'
+    highlights:
+    - This is love
+    - he loved us
 slide_style:
   background_image: assets/background_alt.jpg
   text_color: white
