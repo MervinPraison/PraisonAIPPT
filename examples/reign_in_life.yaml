@@ -129,6 +129,13 @@ sections:
     - text: one Man's obedience
       color: green
     - made righteous
+  - reference: ''
+    text: 'Hamartiá (ἁμαρτία) — noun: sin / sin nature
+
+      Hamartōloi (ἁμαρτωλοί) — noun: sinners
+
+      Hamartanō (ἁμαρτάνω) — verb: to sin / miss the mark'
+    list_type: bullet
 
 - section: Faith without works vs Faith with works
   verses:
@@ -145,15 +152,12 @@ sections:
     - text: faith without your works
       color: green
     - faith by my works
+    - text: your
+      color: green
+    - text: my
+      color: green
 - section: Righteousness before God vs Righteousness before man
   verses:
-  - reference: ''
-    text: 'Hamartiá (ἁμαρτία) — noun: sin / sin nature
-
-      Hamartōloi (ἁμαρτωλοί) — noun: sinners
-
-      Hamartanō (ἁμαρτάνω) — verb: to sin / miss the mark'
-    list_type: bullet
 
 
 slide_style:
