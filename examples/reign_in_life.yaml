@@ -145,6 +145,29 @@ sections:
     highlights:
     - text: faith without works is dead
       color: green
+- section: Righteousness before God vs Righteousness before man
+  verses:
+  - reference: Romans 4:2 (NKJV)
+    text: For if Abraham was justified by works, he has something to boast about, but
+      not before God.
+    highlights:
+    - text: justified by works
+      color: green
+    - text: not before God
+      color: '#FFD700'
+  - reference: James 2:21–23 (NKJV)
+    split_max_length: 500
+    text: Was not Abraham our father justified by works when he offered Isaac his son
+      on the altar? Do you see that faith was working together with his works, and
+      by works faith was made perfect? And the Scripture was fulfilled which says,
+      "Abraham believed God, and it was accounted to him for righteousness." And
+      he was called the friend of God.
+    highlights:
+    - text: justified by works
+      color: green
+    - faith was working together with his works
+    - text: accounted to him for righteousness
+      color: '#FFD700'
   - reference: James 2:18 (NKJV)
     text: But someone will say, "You have faith, and I have works." Show me your faith
       without your works, and I will show you my faith by my works.
@@ -156,9 +179,6 @@ sections:
       color: green
     - text: my
       color: green
-- section: Righteousness before God vs Righteousness before man
-  verses:
-
 
 slide_style:
   background_image: assets/background_alt.jpg
