@@ -96,6 +96,7 @@ _VERSE_KEYS = {
     "narration_mode",
     "sync_mode",
     "color_scheme",
+    "slide_style",
     "items",
     "rows",
     "cells",

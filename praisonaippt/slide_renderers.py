@@ -350,10 +350,12 @@ class VerseRenderer:
             raise SchemaError(f"{path} must have 'reference' or 'text'")
 
     def render(self, prs, verse: dict, style: dict, *, source_file: Optional[str] = None) -> None:
+        from .deck_slides import resolve_deck_style
         from .layout_tokens import body_font_size, split_max_length_default
         from .core import add_verse_slide
         from .utils import split_long_text
 
+        style = resolve_deck_style(style, verse, self.kind)
         highlights = verse.get("highlights")
         large_text = verse.get("large_text")
         alignment = verse.get("alignment", style.get("alignment", "left"))
