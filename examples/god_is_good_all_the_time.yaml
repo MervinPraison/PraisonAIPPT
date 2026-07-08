@@ -77,9 +77,11 @@ sections:
     text: '"For just as through the disobedience of the one man the many were made
       sinners, so also through the obedience of the one man the many will be made
       righteous."'
-  - reference: ''
-    text: 2 Corinthians 3
-  - reference: Psalms 19
-    text: '"[Full chapter reference - text to be added]"'
-  - reference: Hebrews 10
-    text: '"[Full chapter reference - text to be added]"'
+  - reference: 2 Corinthians 3:6 (NKJV)
+    text: '"who also made us sufficient as ministers of the new covenant, not of the
+      letter but of the Spirit; for the letter kills, but the Spirit gives life."'
+  - reference: Psalm 19:1 (NKJV)
+    text: '"The heavens declare the glory of God; and the firmament shows His handiwork."'
+  - reference: Hebrews 10:4 (NKJV)
+    text: '"For it is not possible that the blood of bulls and goats should take away
+      sins."'

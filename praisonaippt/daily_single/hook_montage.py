@@ -125,6 +125,40 @@ COMBINED_MONTAGE_SPECS: list[dict[str, Any]] = [
 ]
 
 
+SPACEX_CURSOR_MONTAGE_SPECS: list[dict[str, Any]] = [
+    {
+        "fragment": "the headline numbers on screen",
+        "filename": "beat1-deal-headline.png",
+        "beat": 1,
+        "visual": "deal headline card",
+    },
+    {
+        "fragment": "what Cursor and Anysphere actually are",
+        "filename": "beat2-cursor-stats.png",
+        "beat": 2,
+        "visual": "cursor stats card",
+    },
+    {
+        "fragment": "how the all-stock merger works",
+        "filename": "beat3-deal-structure.png",
+        "beat": 3,
+        "visual": "deal structure card",
+    },
+    {
+        "fragment": "why a rocket company wants an IDE",
+        "filename": "beat5-why-spacex.png",
+        "beat": 5,
+        "visual": "strategy card",
+    },
+    {
+        "fragment": "five things to watch before Q3 close",
+        "filename": "beat6-dev-watchlist.png",
+        "beat": 6,
+        "visual": "watchlist card",
+    },
+]
+
+
 DISABLED_MONTAGE_SPECS: list[dict[str, Any]] = [
     {
         "fragment": "the launch hype that aged in 72 hours",
@@ -198,6 +232,8 @@ SOCIAL_COMPARISON_MONTAGE_SPECS: list[dict[str, Any]] = [
 
 def montage_specs_for(beat_map: dict[str, Any]) -> list[dict[str, Any]]:
     variant = beat_map.get("variant")
+    if beat_map.get("story_angle") == "m_and_a_developer_impact":
+        return SPACEX_CURSOR_MONTAGE_SPECS
     if beat_map.get("story_angle") == "policy_shutdown_playbook":
         return DISABLED_MONTAGE_SPECS
     if variant == "trust-audit":
