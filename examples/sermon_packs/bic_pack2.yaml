@@ -1,0 +1,272 @@
+# BIC Sermon Deck Pack-2 — protocol-driven job manifest
+# SDK: python -m praisonaippt.sermon_article.cli pipeline run --pack examples/sermon_packs/bic_pack2.yaml
+
+pack_id: bic-pack-2
+pack_dir: ~/Downloads/BIC-Sermon-Deck-Pack-2
+draft_dir: /tmp
+cover_dir: /tmp/sermon-covers
+yaml_examples_dir: ~/praisonaippt/examples
+visual_briefs: ~/praisonaippt/examples/sermon_packs/bic_pack2_visual_briefs.yaml
+
+jobs:
+  - slug: gospel-of-christ-hear-right-covenant
+    title: "The Gospel of Christ: Hear the Right Covenant and Receive Every Blessing"
+    video_id: RXcnbvcXkYU+kVGjQRlLZxk
+    pack_name: Gospel
+    transcript_file: Gospel.transcript.txt
+    yaml_file: Gospel.yaml
+    topic: hearing the gospel of Christ and the right covenant
+    excerpt: "Hear the gospel of Christ and the right covenant — faith, healing, and hundredfold blessing."
+    categories: Gospel,Wisdom
+    post_id: 240543
+    builder: generic
+    reference_slug: receive-a-hundredfold-now
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-receive-a-hundredfold-now.html
+    yaml_deck: gospel.yaml
+    takeaway:
+      - "📖 <strong>Hear the word of Christ</strong> — faith comes by hearing the right gospel."
+      - "🍞 <strong>Eating is fighting</strong> — lechem/lacham; feed on Christ as living bread."
+      - "📜 <strong>First covenant had fault</strong> — study the new covenant syllabus."
+      - "✝️ <strong>Gospel = power</strong> — teaching, preaching, and healing together."
+      - "🎁 <strong>Hundredfold now</strong> — Mark 10:30 through the gospel of Christ."
+
+  - slug: first-adam-vs-last-adam-identity-in-christ
+    title: "First Adam vs Last Adam: Your True Identity in Christ"
+    video_id: 3-oz3g2foCY
+    pack_name: First Adam Vs Last Adam
+    transcript_file: First Adam Vs Last Adam.transcript.txt
+    yaml_file: First Adam Vs Last Adam.yaml
+    topic: your true identity in Christ as righteous in the last Adam
+    excerpt: "First Adam vs Last Adam — zero harm, full healing, gift righteousness in Christ."
+    categories: Gospel,Redemption
+    post_id: 240545
+    builder: generic
+    reference_slug: love-of-god
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-love-of-god.html
+    yaml_deck: first_adam_vs_last_adam.yaml
+    takeaway:
+      - "👁️ God <strong>sees, hears, and feels</strong> the righteous."
+      - "🛡️ <strong>Zero harm</strong> and healing of <strong>all</strong> disease belong to the righteous."
+      - "🍎 One man's disobedience made <strong>many sinners</strong>."
+      - "✝️ The <strong>last Adam</strong> restores what the first Adam lost."
+      - "🎁 Righteousness is a <strong>gift</strong> — Ephesians 2:8–9."
+
+  - slug: miracles-are-easy-stand-still
+    title: "Miracles Are Easy When You Stand Still and Seek His Face"
+    video_id: pgYkdVyj7R4
+    pack_name: Miracles Are Easy
+    transcript_file: Miracles Are Easy.transcript.txt
+    yaml_file: Miracles Are Easy.yaml
+    topic: miracles through standing still and seeking His face
+    excerpt: "Miracles are easy when you stand still, seek His face, and receive by grace."
+    categories: Blessings,Gospel
+    post_id: 240547
+    builder: generic
+    reference_slug: freedom
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-freedom.html
+    yaml_deck: miracles_are_easy.yaml
+    takeaway:
+      - "🔍 <strong>Seek the Lord and His strength</strong> — seek His face evermore."
+      - "🏔️ <strong>Believe it is easy</strong> — Caleb's well able confession."
+      - "🛑 <strong>Stand still</strong> — let the Lord fight for you."
+      - "🙏 <strong>Humble faith</strong> — the tax collector went home justified."
+      - "🎁 <strong>Miracles are free</strong> — gift of God, not wages."
+
+  - slug: freedom-from-troubles-righteousness-apart-from-works
+    title: "Freedom From Every Trouble: Righteousness Apart From the Law"
+    video_id: aaq6bWK0kSs
+    pack_name: Freedom from ALL your troubles
+    transcript_file: Freedom from ALL your troubles.transcript.txt
+    yaml_file: Freedom from ALL your troubles.yaml
+    topic: freedom from every trouble through righteousness apart from the law
+    excerpt: "Freedom from every trouble — righteousness apart from the law, hear Him only."
+    categories: Gospel,Redemption
+    post_id: 240549
+    builder: generic
+    reference_slug: freedom-from-all-your-troubles
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-freedom-from-all-your-troubles.html
+    yaml_deck: freedom_from_all_your_troubles.yaml
+    takeaway:
+      - "⚖️ <strong>Righteousness apart from the law</strong> — Romans 3:21."
+      - "⛓️ <strong>Separated from Christ</strong> when justified by law — fallen from grace."
+      - "☠️ <strong>Ministry of death</strong> — the letter kills; the Spirit gives life."
+      - "🔊 <strong>Hear Him</strong> — do not mix law and gospel."
+      - "🕊️ <strong>Holy Spirit falls</strong> while the gospel is preached."
+
+  - slug: full-restoration-hundred-percent-in-christ
+    title: "Full Restoration: 100% Healing and Provision in Christ"
+    video_id: LLZhFYDUXRI
+    pack_name: Full Restoration
+    transcript_file: Full Restoration.transcript.txt
+    yaml_file: Full Restoration.yaml
+    topic: full restoration and hundred-percent life in Christ
+    excerpt: "Full restoration in Christ — 100% healing, zōē life, dry bones live again."
+    categories: Blessings,Gospel
+    post_id: 240551
+    builder: generic
+    reference_slug: love-of-god
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-love-of-god.html
+    yaml_deck: full_restoration.yaml
+    takeaway:
+      - "💯 <strong>Full restoration</strong> — 100%, not partial."
+      - "🌬️ <strong>Zōē life</strong> — breath restored at Pentecost."
+      - "🦴 <strong>Ezekiel 37</strong> — dry bones live when breath enters."
+      - "👑 <strong>Heir of the world</strong> — through faith, not law."
+      - "🛡️ <strong>Your righteousness</strong> — Psalm 71 restoration."
+
+  - slug: be-fruitful-and-multiply-every-area
+    title: "Be Fruitful and Multiply: God's Blessing in Every Area of Life"
+    video_id: mw7d4zY75LU
+    pack_name: Be Fruitful and Multiply
+    transcript_file: Be Fruitful and Multiply.transcript.txt
+    yaml_file: Be Fruitful and Multiply.yaml
+    topic: being fruitful and multiplying in every area of life
+    excerpt: "Be fruitful and multiply in every area — shalom completeness in Christ."
+    categories: Blessings,Gospel
+    post_id: 240553
+    builder: generic
+    reference_slug: receive-a-hundredfold-now
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-receive-a-hundredfold-now.html
+    yaml_deck: be_fruitful_and_multiply.yaml
+    takeaway:
+      - "🌳 <strong>Shalom</strong> — completeness in health, riches, family, and calling."
+      - "🌬️ <strong>Zōē restored</strong> — Pentecost wind brings Adam's breath-life."
+      - "🩸 <strong>Touch Jesus by faith</strong> — the woman with the issue of blood."
+      - "📈 <strong>Fruitful in every area</strong> — sowing, reaping, and dominion."
+      - "🆕 <strong>Former things passed</strong> — sorrow and pain are old things."
+
+  - slug: why-delay-abraham-instant-blessing
+    title: "Why Delay Ends at 99: Abraham's Instant Blessing Through El Shaddai"
+    video_id: DF46Ce8Qp0s
+    pack_name: Why Delay?
+    transcript_file: Why Delay?.transcript.txt
+    yaml_file: Why Delay?.yaml
+    topic: why delay ends and Abraham's instant blessing at ninety-nine
+    excerpt: "Why delay ends at ninety-nine — Abraham's instant blessing through El Shaddai."
+    categories: Redemption,Blessings
+    post_id: 240555
+    builder: generic
+    reference_slug: freedom-from-all-your-troubles
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-freedom-from-all-your-troubles.html
+    yaml_deck: why_delay.yaml
+    takeaway:
+      - "⏱️ <strong>Delay is not God's plan</strong> — instant blessing through faith."
+      - "👴 <strong>At ninety-nine</strong> — El Shaddai appears; Abram becomes Abraham."
+      - "⚖️ <strong>Righteousness apart from works</strong> — Romans 4:3."
+      - "💯 <strong>100% His power</strong> — not a 50/50 mix of effort and grace."
+      - "🕊️ <strong>Fallen from grace</strong> — mixing law and gospel delays blessing."
+
+  - slug: freedom-in-the-spirit-son-and-father
+    title: "Freedom Through Spirit, Son, and Father: Choose the Tree of Life"
+    video_id: VjjYOKni7vY
+    pack_name: Freedom
+    transcript_file: Freedom.transcript.txt
+    yaml_file: Freedom.yaml
+    topic: freedom through Spirit, Son, and Father — choosing the Tree of Life
+    excerpt: "Freedom through Spirit, Son, and Father — choose the Tree of Life."
+    categories: Gospel,Redemption
+    post_id: 240557
+    builder: generic
+    reference_slug: freedom
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-freedom.html
+    yaml_deck: freedom_in_spirit.yaml
+    takeaway:
+      - "🕊️ <strong>In His presence</strong> — deliverance, solution, and miracles."
+      - "🌳 <strong>Tree of Life vs Tree of Knowledge</strong> — choose grace."
+      - "👂 <strong>Four benefits of hearing</strong> — victorious, noble, grace, healing."
+      - "✝️ <strong>Christ has set us free</strong> — do not return to slavery."
+      - "🍞 <strong>Eat freely</strong> — the gift of God, not the reward system."
+
+  - slug: why-listen-to-the-word-of-god
+    title: "Why Listen to the Word of God: Four Blessings of Hearing"
+    video_id: BrHrmowpAUg
+    pack_name: Why Should We Listen to the Word of God
+    transcript_file: Why Should We Listen to the Word of God.transcript.txt
+    yaml_file: Why Should We Listen to the Word of God.yaml
+    topic: why we must listen to the word of God for victory and healing
+    excerpt: "Why listen to the word of God — four blessings of hearing for victory and healing."
+    categories: Gospel,Wisdom
+    post_id: 240559
+    builder: generic
+    reference_slug: freedom
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-freedom.html
+    yaml_deck: why_listen_word_of_god.yaml
+    takeaway:
+      - "💧 <strong>Valley filled without rain</strong> — 2 Kings 3:17 through hearing."
+      - "🍞 <strong>Eating is fighting</strong> — lechem/lacham; living bread."
+      - "👑 <strong>Noble like Bereans</strong> — examine Scripture daily."
+      - "📈 <strong>Grace multiplied</strong> — 2 Peter 1:2."
+      - "🩺 <strong>Healing by hearing</strong> — Lystra cripple heard and leaped."
+
+  - slug: heir-of-the-world-through-faith-not-law
+    title: "Heir of the World: How Faith—not Law—Makes You an Inheritor"
+    video_id: 2mdU9czZ2E8+eHq2f86DyrI
+    pack_name: "How to become heir of the world? [2mdU9czZ2E8+eHq2f86DyrI]"
+    transcript_file: "How to become heir of the world? [2mdU9czZ2E8+eHq2f86DyrI].transcript.txt"
+    yaml_file: "How to become heir of the world? [2mdU9czZ2E8+eHq2f86DyrI].yaml"
+    topic: becoming heir of the world through faith not law
+    excerpt: "Heir of the world through faith not law — Romans 4:13, hear Him, supernatural exaltation."
+    categories: Redemption,Gospel
+    post_id: 240561
+    builder: generic
+    reference_slug: freedom-from-all-your-troubles
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-freedom-from-all-your-troubles.html
+    yaml_deck: how_to_become_heir_of_the_world.yaml
+    takeaway:
+      - "👑 <strong>Heir of the world</strong> — Romans 4:13; not through law but faith."
+      - "🔊 <strong>Hear Him</strong> — Matthew 17:5; do not mix law and gospel."
+      - "⚖️ <strong>Justified apart from works</strong> — Galatians 2:16."
+      - "☠️ <strong>Under the curse</strong> — works of the law bring curse."
+      - "🕊️ <strong>Sons are free</strong> — heirs walk in supernatural exaltation."
+
+  - slug: holy-communion-one-reason-for-sickness
+    title: "Holy Communion: The One Reason for Sickness and Four Remedies"
+    video_id: _scM90efH1E
+    pack_name: Only One Reason for Your Sickness
+    transcript_file: Only One Reason for Your Sickness.transcript.txt
+    yaml_file: Only One Reason for Your Sickness.yaml
+    topic: Holy Communion and the one reason for sickness
+    excerpt: "Holy Communion — one reason for sickness and four remedies through discerning Christ's body."
+    categories: Gospel,Blessings
+    post_id: 240563
+    builder: generic
+    reference_slug: love-of-god
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-love-of-god.html
+    yaml_deck: only_one_reason_sickness.yaml
+    takeaway:
+      - "☝️ <strong>One reason</strong> — not discerning the Lord's body."
+      - "🎁 <strong>Remember it's free</strong> — prevent falling like Adam."
+      - "👁️ <strong>Open your eyes</strong> — provision is near."
+      - "⛓️ <strong>Redeemed from bondage</strong> — Passover lamb."
+      - "🌳 <strong>Eat the Tree of Life</strong> — reverse Adam's curse."
+
+  - slug: miracles-are-easy-next-level-faith
+    title: "Miracles Are Easy: Stand Still and Go to the Next Level"
+    video_id: oMe-lhWDsdg
+    pack_name: "Miracles Are Easy [oMe-lhWDsdg]"
+    transcript_file: "Miracles Are Easy [oMe-lhWDsdg].transcript.txt"
+    yaml_file: "Miracles Are Easy [oMe-lhWDsdg].yaml"
+    topic: standing still and going to the next level of miracles
+    excerpt: "Miracles are easy — stand still and go to the next level through humble faith."
+    categories: Blessings,Gospel
+    post_id: 240565
+    builder: generic
+    reference_slug: freedom
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-freedom.html
+    yaml_deck: miracles_are_easy.yaml
+    takeaway:
+      - "🚀 <strong>Go to the next level</strong> — do not remain in the same situation."
+      - "🔍 <strong>Seek His face evermore</strong> — 1 Chronicles 16:11."
+      - "🛑 <strong>Stand still</strong> — see salvation; the Lord fights for you."
+      - "🙏 <strong>Humble yourself</strong> — miracles are easy for the justified."
+      - "🎁 <strong>Miracles are free</strong> — grace, not wages."
+
+  - slug: great-faith-centurion-canaanite-woman
+    title: "Great Faith: What the Centurion and Canaanite Woman Knew"
+    video_id: cppgcxw-C_Y
+    pack_name: Great Faith
+    transcript_file: Great Faith.transcript.txt
+    yaml_file: Great Faith.yaml
+    topic: great faith and faith comes by hearing
+    skip: true
+    skip_reason: "Article already published — do not recreate or update"

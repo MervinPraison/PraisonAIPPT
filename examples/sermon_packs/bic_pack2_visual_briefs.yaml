@@ -1,0 +1,64 @@
+# Unique featured-image concepts for Pack-2 biblerevelation articles.
+# Rules: 1536x1024 landscape, NO text/letters/logos, one visual metaphor for the whole sermon.
+# Generate: cd ~/create-post/gpt-image && uv run scripts/generate.py --size 1536x1024 --quality high
+
+briefs:
+  gospel-of-christ-hear-right-covenant:
+    post_id: 240543
+    concept: "Dry desert valley between rocky hills suddenly filling with still water from underground — three weary kings and soldiers kneeling to drink with cattle, golden dawn light, miracle without rain clouds, wide horizontal cinematic composition"
+    alt: "Dry valley miraculously filled with water — hearing the right gospel"
+
+  first-adam-vs-last-adam-identity-in-christ:
+    post_id: 240545
+    concept: "Split wide landscape — left side lush Garden of Eden with radiant first man among fruit trees; right side risen Christ in white light restoring the garden, broken chains at the divide, photorealistic biblical epic, horizontal banner"
+    alt: "First Adam garden life restored through the last Adam"
+
+  miracles-are-easy-stand-still:
+    post_id: 240547
+    concept: "Israelites standing still on dry seabed between towering walls of water, enemy army distant in dust, peaceful golden light ahead, wide horizontal Exodus scene, no text"
+    alt: "Stand still and see salvation — miracles are easy"
+
+  freedom-from-troubles-righteousness-apart-from-works:
+    post_id: 240549
+    concept: "Person walking out of heavy stone tablets and chains into open green pasture with shepherd staff and still waters, storm clouds behind sunshine ahead, Deuteronomy curse breaking into blessing, wide horizontal"
+    alt: "Breaking curse into blessing through righteousness"
+
+  full-restoration-hundred-percent-in-christ:
+    post_id: 240551
+    concept: "Sunrise valley with gentle wind breath spiralling over green pasture, radiant figure standing whole and strong, eagle soaring above, restoration and abundant life metaphor, wide horizontal biblical landscape"
+    alt: "Full restoration — dry bones live again"
+
+  be-fruitful-and-multiply-every-area:
+    post_id: 240553
+    concept: "Single great tree with abundant fruit, grain, flowers, and gentle light in every branch — family, harvest, and health symbols woven naturally in branches, shalom completeness, wide horizontal garden vista"
+    alt: "Fruitful and multiply in every area of life"
+
+  why-delay-abraham-instant-blessing:
+    post_id: 240555
+    concept: "Elderly couple under starry desert sky holding a newborn promise, sand clock stopped mid-fall, sudden burst of golden light at ninety-nine years, Abraham instant blessing, wide horizontal night-to-dawn"
+    alt: "Why delay ends — Abraham's instant blessing"
+
+  freedom-in-the-spirit-son-and-father:
+    post_id: 240557
+    concept: "Two trees on a hill — withered tree of knowledge with fruit of self-effort; glowing Tree of Life with river and fruit, person choosing the living tree, wide horizontal Eden choice scene"
+    alt: "Freedom — choose the Tree of Life"
+
+  why-listen-to-the-word-of-god:
+    post_id: 240559
+    concept: "Open scroll radiating light toward attentive ear and heart silhouette, valley below filling with water without rain, prophet figure small in distance, hearing brings deliverance, wide horizontal"
+    alt: "Why listen — word brings deliverance and life"
+
+  heir-of-the-world-through-faith-not-law:
+    post_id: 240561
+    concept: "Inheritance scroll and crown resting on open hand of faith not on stone law tablets, globe and promised land vista behind, scales tipped toward grace, wide horizontal banner"
+    alt: "Heir of the world through faith not law"
+
+  holy-communion-one-reason-for-sickness:
+    post_id: 240563
+    concept: "Communion cup and broken bread on linen cloth emitting healing white-gold light, shadow of sickness lifting off silhouetted person, Passover doorframe blood mark subtle in background, wide horizontal reverent scene"
+    alt: "Holy Communion — one reason for sickness and healing"
+
+  miracles-are-easy-next-level-faith:
+    post_id: 240565
+    concept: "Person standing still on mountain plateau while staircase of light ascends to higher level above clouds, sea parting in valley below, next-level breakthrough metaphor, wide horizontal inspirational landscape"
+    alt: "Stand still and go to the next level"
