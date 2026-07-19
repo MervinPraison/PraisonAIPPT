@@ -228,7 +228,7 @@ Examples:
     parser.add_argument(
         '--upload-gdrive',
         action='store_true',
-        help='Upload the generated PowerPoint to Google Drive'
+        help='Upload the generated PowerPoint or Markdown file to Google Drive',
     )
     
     parser.add_argument(
@@ -268,7 +268,7 @@ Examples:
         'command',
         nargs='?',
         choices=[
-            'convert-pdf', 'convert-video', 'convert-json', 'convert-yaml',
+            'convert-pdf', 'convert-video', 'convert-json', 'convert-yaml', 'convert-markdown',
             'transcript-to-yaml', 'list-slides', 'export-slide-jpegs', 'build-slide-images',
             'calibrate-avatar', 'pip-face-centre', 'hero-panel-place', 'hero-panel-centre',
             'slide-transition-plan', 'slide-transition-preview',
@@ -289,6 +289,24 @@ Examples:
         '--json-output',
         metavar='PATH',
         help='Output JSON file path for convert-json command (default: <input>.json)'
+    )
+
+    parser.add_argument(
+        '--markdown-output',
+        metavar='PATH',
+        help='Output Markdown file path for convert-markdown (default: <input>.md)',
+    )
+
+    parser.add_argument(
+        '--no-highlights',
+        action='store_true',
+        help='Plain text blockquotes for convert-markdown (no **bold** highlights)',
+    )
+
+    parser.add_argument(
+        '--no-separators',
+        action='store_true',
+        help='Omit --- section separators in convert-markdown output',
     )
 
     parser.add_argument(
@@ -878,6 +896,75 @@ def handle_transcript_to_yaml_command(args):
 
     for p in paths:
         print(f"✓ Wrote {p}")
+    return 0
+
+
+def handle_convert_markdown_command(args, config=None):
+    """Handle convert-markdown command: export deck YAML/JSON to Markdown."""
+    if not args.input_file:
+        print("Error: Input file required for convert-markdown command")
+        print(
+            "Usage: praisonaippt convert-markdown <input.yaml|.json> "
+            "[--markdown-output output.md] [--upload-gdrive]"
+        )
+        return 1
+
+    input_path = Path(args.input_file)
+    if not input_path.exists():
+        print(f"Error: Input file not found: {args.input_file}")
+        return 1
+
+    suffix = input_path.suffix.lower()
+    if suffix not in ('.yaml', '.yml', '.json'):
+        print("Error: Input file must be a JSON or YAML deck file (.json/.yaml/.yml)")
+        return 1
+
+    if config is None:
+        config = load_config()
+
+    try:
+        data = load_verses_from_file(str(input_path))
+        if data is None:
+            return 1
+        data = validate_verses(data)
+    except SchemaError as e:
+        print(f"Error: Invalid schema in '{input_path}': {e}")
+        return 1
+
+    output_path = Path(args.markdown_output) if args.markdown_output else input_path.with_suffix('.md')
+
+    if data.get('auto_upload_gdrive'):
+        args.upload_gdrive = True
+
+    try:
+        from .deck_export import write_deck_markdown, write_deck_html
+
+        write_deck_markdown(
+            data,
+            output_path,
+            highlights=not getattr(args, 'no_highlights', False),
+            separators=not getattr(args, 'no_separators', False),
+        )
+        print(f"✓ Converted '{input_path.name}' to '{output_path.name}'")
+    except Exception as e:
+        print(f"Error during Markdown conversion: {e}")
+        return 1
+
+    doc_name = (data.get("presentation_title") or "").strip() or output_path.stem
+    html_path = output_path.with_suffix(".html")
+    write_deck_html(
+        data,
+        html_path,
+        highlights=not getattr(args, "no_highlights", False),
+        separators=not getattr(args, "no_separators", False),
+    )
+    handle_gdrive_upload(
+        str(html_path),
+        args,
+        config,
+        as_google_doc=True,
+        gdrive_file_name=doc_name,
+    )
     return 0
 
 
@@ -2304,8 +2391,16 @@ def handle_setup_credentials():
     return 0
 
 
-def handle_gdrive_upload(output_file, args, config, pdf_path=None):
-    """Handle Google Drive upload if requested — uploads PPTX and optionally PDF."""
+def handle_gdrive_upload(
+    output_file,
+    args,
+    config,
+    pdf_path=None,
+    *,
+    as_google_doc=False,
+    gdrive_file_name=None,
+):
+    """Handle Google Drive upload if requested — uploads PPTX, Google Doc, or PDF."""
     should_upload = args.upload_gdrive or config.should_auto_upload_gdrive()
 
     if not should_upload:
@@ -2333,19 +2428,26 @@ def handle_gdrive_upload(output_file, args, config, pdf_path=None):
 
         print("\nUploading to Google Drive...")
 
-        # --- Upload PPTX ---
+        # --- Upload primary file ---
         result = upload_to_gdrive(
             output_file,
             credentials_path=credentials_path,
             folder_id=folder_id,
             folder_name=folder_name,
             use_date_folders=use_date_folders,
-            date_format=date_format
+            date_format=date_format,
+            file_name=gdrive_file_name,
+            as_google_doc=as_google_doc,
         )
-        print("✓ Successfully uploaded to Google Drive")
+        kind = "Google Doc" if as_google_doc else "file"
+        print(f"✓ Successfully uploaded to Google Drive ({kind})")
         print(f"  File ID: {result['id']}")
         print(f"  File Name: {result['name']}")
-        if 'webViewLink' in result:
+        if as_google_doc or result.get("mimeType") == "application/vnd.google-apps.document":
+            from .gdrive_uploader import google_doc_edit_link
+
+            print(f"  Edit Link: {google_doc_edit_link(result['id'])}")
+        elif 'webViewLink' in result:
             print(f"  View Link: {result['webViewLink']}")
 
         # --- Upload PDF if provided ---
@@ -2365,7 +2467,7 @@ def handle_gdrive_upload(output_file, args, config, pdf_path=None):
 
     except Exception as e:
         print(f"\nWarning: Google Drive upload failed: {e}")
-        print("Presentation was created successfully at:", output_file)
+        print("File was saved successfully at:", output_file)
 
 
 def _convert_pdf_via_gdrive(pptx_path: str, pdf_path: str) -> str:
@@ -2441,6 +2543,9 @@ def main():
     # Handle convert-yaml command
     if args.command == 'convert-yaml':
         return handle_convert_yaml_command(args)
+
+    if args.command == 'convert-markdown':
+        return handle_convert_markdown_command(args, config)
 
     if args.command == 'transcript-to-yaml':
         return handle_transcript_to_yaml_command(args)

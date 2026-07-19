@@ -38,6 +38,9 @@ legacy/
 # Keep example files
 !examples/*.pptx
 
+# Generated deck HTML (convert-markdown → Google Doc source)
+examples/*.html
+
 # PyInstaller
 *.manifest
 *.spec

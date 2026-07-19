@@ -159,6 +159,17 @@ From repo root:
 python3 -m praisonaippt.cli -i examples/<deck>.yaml -o examples/<deck>.pptx
 ```
 
+Optional: export plain Markdown from the same YAML:
+
+```bash
+python3 -m praisonaippt.cli convert-markdown examples/<deck>.yaml
+# → examples/<deck>.md (blockquotes, **highlights**, section headings)
+# Google Doc upload uses examples/<deck>.html with yellow/green highlight colours like PPT
+# Uploads as native Google Doc when auto_upload_gdrive: true or --upload-gdrive
+```
+
+Equivalent: `praisonaippt convert-markdown examples/<deck>.yaml --markdown-output notes.md --upload-gdrive`
+
 Equivalent: `praisonaippt -i examples/<deck>.yaml -o examples/<deck>.pptx`
 
 After a successful build, the CLI **automatically prints a numbered slide outline** (same as `list-slides` below). Use that output when reporting order to the user—do not run ad-hoc `python3 -c` snippets.

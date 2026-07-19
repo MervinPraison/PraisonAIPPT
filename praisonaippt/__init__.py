@@ -32,6 +32,7 @@ from .video_sidecar import load_deck_sidecar
 from .lazy_loader import lazy_import, check_optional_dependency, LazyImportError
 from .config import load_config, init_config, Config
 from .pptx_to_json import pptx_to_json
+from .deck_export import deck_to_markdown, write_deck_markdown
 # Note: gdrive_uploader uses lazy_import internally so importing the module
 # (not the optional google-* deps) is always safe.
 from .gdrive_uploader import upload_to_gdrive, is_gdrive_available, GDriveUploader
@@ -125,6 +126,8 @@ __all__ = [
     "init_config",
     "Config",
     "pptx_to_json",
+    "deck_to_markdown",
+    "write_deck_markdown",
     "upload_to_gdrive",
     "is_gdrive_available",
     "GDriveUploader",

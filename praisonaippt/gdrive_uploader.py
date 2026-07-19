@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import Optional, Dict, Any, List, Tuple
 from .lazy_loader import lazy_import, check_optional_dependency
 
+GOOGLE_DOC_MIME = "application/vnd.google-apps.document"
+
 
 def is_gdrive_available() -> bool:
     """
@@ -259,6 +261,64 @@ class GDriveUploader:
         
         return file
     
+    def import_file_as_google_doc(
+        self,
+        file_path: str,
+        folder_id: Optional[str] = None,
+        file_name: Optional[str] = None,
+        overwrite: bool = True,
+    ) -> Dict[str, str]:
+        """Import a Markdown/text file as a native Google Doc."""
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        if file_name is None:
+            file_name = Path(file_path).stem
+
+        source_mime = self._get_mime_type(file_path)
+        if Path(file_path).suffix.lower() in (".md", ".markdown"):
+            source_mime = "text/markdown"
+        elif Path(file_path).suffix.lower() in (".html", ".htm"):
+            source_mime = "text/html"
+
+        media = self.MediaFileUpload(
+            file_path,
+            mimetype=source_mime,
+            resumable=True,
+        )
+        service = self._get_service()
+
+        if overwrite:
+            existing_file_id = self.find_file_by_name(file_name, folder_id)
+            if existing_file_id:
+                print(f"  Google Doc exists, updating: {file_name}")
+                try:
+                    return service.files().update(
+                        fileId=existing_file_id,
+                        media_body=media,
+                        fields="id, name, webViewLink, webContentLink, mimeType",
+                    ).execute()
+                except Exception:
+                    service.files().delete(fileId=existing_file_id).execute()
+                    media = self.MediaFileUpload(
+                        file_path,
+                        mimetype=source_mime,
+                        resumable=True,
+                    )
+
+        file_metadata: Dict[str, Any] = {
+            "name": file_name,
+            "mimeType": GOOGLE_DOC_MIME,
+        }
+        if folder_id:
+            file_metadata["parents"] = [folder_id]
+
+        return service.files().create(
+            body=file_metadata,
+            media_body=media,
+            fields="id, name, webViewLink, webContentLink, mimeType",
+        ).execute()
+
     def upload_file(self, file_path: str, folder_id: Optional[str] = None,
                    file_name: Optional[str] = None, overwrite: bool = True) -> Dict[str, str]:
         """
@@ -343,6 +403,10 @@ class GDriveUploader:
             '.pdf': 'application/pdf',
             '.json': 'application/json',
             '.txt': 'text/plain',
+            '.md': 'text/markdown',
+            '.markdown': 'text/markdown',
+            '.html': 'text/html',
+            '.htm': 'text/html',
         }
         return mime_types.get(extension, 'application/octet-stream')
     
@@ -467,6 +531,11 @@ class GDriveUploader:
         return folder['id']
 
 
+def google_doc_edit_link(file_id: str) -> str:
+    """Return a Google Docs editor URL for a Drive file id."""
+    return f"https://docs.google.com/document/d/{file_id}/edit"
+
+
 def upload_to_gdrive(file_path: str, 
                     credentials_path: Optional[str] = None,
                     credentials_dict: Optional[Dict[str, Any]] = None,
@@ -475,7 +544,8 @@ def upload_to_gdrive(file_path: str,
                     file_name: Optional[str] = None,
                     use_date_folders: bool = False,
                     date_format: str = "YYYY/MM",
-                    overwrite: bool = True) -> Dict[str, str]:
+                    overwrite: bool = True,
+                    as_google_doc: bool = False) -> Dict[str, str]:
     """
     Upload a file to Google Drive (convenience function).
     
@@ -489,6 +559,7 @@ def upload_to_gdrive(file_path: str,
         use_date_folders: If True, creates date-based subfolders (e.g., 2024/12)
         date_format: Date format pattern (YYYY/MM, YYYY-MM, YYYY/MM/DD, etc.)
         overwrite: If True, updates existing file instead of creating duplicate (default: True)
+        as_google_doc: Import Markdown/text as a native Google Doc (not a .md file)
     
     Returns:
         Dictionary with file information
@@ -526,4 +597,8 @@ def upload_to_gdrive(file_path: str,
             print(f"Using date folder: {date_path}")
     
     # Upload file
+    if as_google_doc:
+        return uploader.import_file_as_google_doc(
+            file_path, target_folder_id, file_name, overwrite,
+        )
     return uploader.upload_file(file_path, target_folder_id, file_name, overwrite)
