@@ -1,0 +1,198 @@
+# New King James Version (NKJV) throughout — see references on each slide.
+presentation_title: Give life to your mortal bodies
+presentation_subtitle: ''
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+sections:
+- section: ''
+  verses:
+  - reference: Isaiah 51:3 (NKJV)
+    split_max_length: 500
+    text: >-
+      For the Lord will comfort Zion, He will comfort all her waste places;
+      He will make her wilderness like Eden, And her desert like the garden
+      of the Lord; Joy and gladness will be found in it, Thanksgiving and
+      the voice of melody.
+    highlights:
+    - wilderness like Eden
+  - reference: Isaiah 51:5 (NKJV)
+    text: >-
+      My righteousness is near, My salvation has gone forth, And My arms will
+      judge the peoples; The coastlands will wait upon Me, And on My arm they
+      will trust.
+    highlights:
+    - My righteousness
+  - reference: Romans 7:24 (NKJV)
+    text: O wretched man that I am! Who will deliver me from this body of death?
+    highlights:
+    - body of death
+  - reference: Romans 8:9 (NKJV)
+    split_max_length: 500
+    text: >-
+      But you are not in the flesh but in the Spirit, if indeed the Spirit of
+      God dwells in you. Now if anyone does not have the Spirit of Christ, he
+      is not His.
+    highlights:
+    - in the Spirit
+  - reference: Romans 8:10 (NKJV)
+    text: >-
+      And if Christ is in you, the body is dead because of sin, but the Spirit
+      is life because of righteousness.
+    highlights:
+    - righteousness
+    - life
+  - reference: Romans 8:11 (NKJV)
+    split_max_length: 500
+    text: >-
+      But if the Spirit of Him who raised Jesus from the dead dwells in you, He
+      who raised Christ from the dead will also give life to your mortal bodies
+      through His Spirit who dwells in you.
+    highlights:
+    - life to your mortal bodies
+  - reference: 1 Corinthians 15:55 (NKJV)
+    text: >-
+      "O Death, where is your sting? O Hades, where is your victory?"
+    highlights:
+    - sting
+  - reference: 1 Corinthians 15:56 (NKJV)
+    text: The sting of death is sin, and the strength of sin is the law.
+    highlights:
+    - sin
+    - law
+- section: 1. Keep sin dead
+  verses:
+  - reference: Romans 7:8 (NKJV)
+    text: >-
+      But sin, taking opportunity by the commandment, produced in me all manner
+      of evil desire. For apart from the law sin was dead.
+    highlights:
+    - sin was dead
+  - reference: Romans 7:9 (NKJV)
+    text: >-
+      I was alive once without the law, but when the commandment came, sin
+      revived and I died.
+    highlights:
+    - sin revived
+  - reference: Romans 5:20 (NKJV)
+    text: >-
+      Moreover the law entered that the offense might abound. But where sin
+      abounded, grace abounded much more,
+    highlights:
+    - offense might abound
+- section: 2. Be Powerful
+  verses:
+  - reference: Romans 7:15 (NKJV)
+    text: >-
+      For what I am doing, I do not understand. For what I will to do, that I
+      do not practice; but what I hate, that I do.
+  - reference: Romans 7:16 (NKJV)
+    text: >-
+      If, then, I do what I will not to do, I agree with the law that it is good.
+  - reference: Romans 7:17 (NKJV)
+    text: >-
+      But now, it is no longer I who do it, but sin that dwells in me.
+    highlights:
+    - sin that dwells in me
+  - reference: Romans 7:18 (NKJV)
+    split_max_length: 500
+    text: >-
+      For I know that in me (that is, in my flesh) nothing good dwells; for to
+      will is present with me, but how to perform what is good I do not find.
+    highlights:
+    - nothing good dwells
+  - reference: Romans 7:19 (NKJV)
+    text: >-
+      For the good that I will to do, I do not do; but the evil I will not to
+      do, that I practice.
+  - reference: Romans 7:20 (NKJV)
+    text: >-
+      Now if I do what I will not to do, it is no longer I who do it, but sin
+      that dwells in me.
+    highlights:
+    - no longer I who do it
+  - reference: Romans 8:3 (NKJV)
+    split_max_length: 500
+    text: >-
+      For what the law could not do in that it was weak through the flesh, God
+      did by sending His own Son in the likeness of sinful flesh, on account of
+      sin: He condemned sin in the flesh,
+    highlights:
+    - condemned sin in the flesh
+- section: 3. Value Christ
+  verses:
+  - reference: Galatians 2:21 (NKJV)
+    text: >-
+      I do not set aside the grace of God; for if righteousness comes through
+      the law, then Christ died in vain.
+    highlights:
+    - Christ died in vain
+  - reference: Galatians 5:4 (NKJV)
+    text: >-
+      You have become estranged from Christ, you who attempt to be justified by
+      law; you have fallen from grace.
+    highlights:
+    - estranged from Christ
+    - fallen from grace
+- section: 4. Receive life to your mortal body
+  verses:
+  - reference: Romans 8:9 (NKJV)
+    split_max_length: 500
+    text: >-
+      But you are not in the flesh but in the Spirit, if indeed the Spirit of
+      God dwells in you. Now if anyone does not have the Spirit of Christ, he
+      is not His.
+    highlights:
+    - in the Spirit
+  - reference: Romans 8:10 (NKJV)
+    text: >-
+      And if Christ is in you, the body is dead because of sin, but the Spirit
+      is life because of righteousness.
+    highlights:
+    - righteousness
+    - life
+  - reference: Romans 8:11 (NKJV)
+    split_max_length: 500
+    text: >-
+      But if the Spirit of Him who raised Jesus from the dead dwells in you, He
+      who raised Christ from the dead will also give life to your mortal bodies
+      through His Spirit who dwells in you.
+    highlights:
+    - life to your mortal bodies
+  - reference: Galatians 3:2 (NKJV)
+    text: >-
+      This only I want to learn from you: Did you receive the Spirit by the
+      works of the law, or by the hearing of faith?
+    highlights:
+    - Spirit
+    - faith
+- section: Walking in the Flesh vs. Walking in the Spirit
+  verses:
+  - reference: Romans 7:5 (NKJV)
+    text: >-
+      For when we were in the flesh, the sinful passions which were aroused by
+      the law were at work in our members to bear fruit to death.
+    highlights:
+    - in the flesh
+  - reference: Galatians 3:2–3 (NKJV)
+    split_max_length: 450
+    text: >-
+      This only I want to learn from you: Did you receive the Spirit by the
+      works of the law, or by the hearing of faith? Are you so foolish? Having
+      begun in the Spirit, are you now being made perfect by the flesh?
+    highlights:
+    - Spirit
+    - flesh
+  - reference: Galatians 3:5–6 (NKJV)
+    split_max_length: 500
+    text: >-
+      Therefore He who supplies the Spirit to you and works miracles among you,
+      does He do it by the works of the law, or by the hearing of faith?—just as
+      Abraham "believed God, and it was accounted to him for righteousness."
+    highlights:
+    - faith
+    - righteousness
