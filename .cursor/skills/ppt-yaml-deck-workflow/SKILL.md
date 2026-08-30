@@ -26,7 +26,7 @@ Progress:
 - [ ] 4) Regenerate matching PPTX with CLI
 - [ ] 5) Confirm build success; paste slide outline + Google Drive View Link to user
 - [ ] 6) Slack notify with the same Google Drive View Link (required)
-- [ ] 7) Commit/push YAML (+ PPTX if tracked) when requested
+- [ ] 7) Commit and push to **main**; merge the PR if you opened one
 ```
 
 ## YAML document structure
@@ -221,7 +221,8 @@ Confirm in chat: "Slack notification sent". Do not log tokens.
 
 - Stage only intended files (typically YAML; include `.pptx` if the repo tracks regenerated decks).
 - Commit with a clear one-line message.
-- Push the current branch only when the user requested it.
+- **Always push to `main`** (`git push origin main`). Do not leave work only on a feature branch.
+- If you created a pull request, **merge it** into `main` in the same turn (then push `main` if the merge was local).
 
 ## Common YAML pitfalls
 

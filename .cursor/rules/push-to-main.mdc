@@ -1,0 +1,11 @@
+---
+description: Always push to main; merge any PR this agent opened
+alwaysApply: true
+---
+
+# Push to main
+
+- After committing, **always push to `main`**.
+- If this agent created a pull request, **merge it into `main`** in the same turn. Do not leave the PR open.
+- Prefer `git checkout main && git merge <branch> && git push origin main` when `gh` write/merge is unavailable.
+- Do not include unrelated working-tree files in the merge.
