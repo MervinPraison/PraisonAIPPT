@@ -162,3 +162,23 @@ sections:
       the law. For they stumbled at that stumbling stone.
     highlights:
     - by faith
+  - reference: Romans 10:2 (NKJV)
+    text: >-
+      For I bear them witness that they have a zeal for God, but not according
+      to knowledge.
+    highlights:
+    - a zeal for God
+    - not according to knowledge
+  - reference: Romans 10:3 (NKJV)
+    split_max_length: 500
+    text: >-
+      For they being ignorant of God's righteousness, and seeking to establish
+      their own righteousness, have not submitted to the righteousness of God.
+    highlights:
+    - God's righteousness
+    - their own righteousness
+  - reference: Romans 10:4 (NKJV)
+    text: >-
+      For Christ is the end of the law for righteousness to everyone who believes.
+    highlights:
+    - everyone who believes
