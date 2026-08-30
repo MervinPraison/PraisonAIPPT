@@ -1,0 +1,23 @@
+---
+description: Slack the user when a task finishes; include the Google Drive View Link
+alwaysApply: true
+---
+
+# Slack notify on finish
+
+When a user task is finished (deck built, upload done, or they asked to be notified), send Slack before ending the turn.
+
+Read and follow `~/.cursor/skills/slack-notification/SKILL.md`.
+
+```bash
+source ~/.zshrc 2>/dev/null || true
+# Fallback: ~/.config/automation/slack.env
+~/.cursor/skills/slack-notification/scripts/send-slack.sh \
+  --title "PraisonAIPPT: <short outcome>" \
+  --body "<2–5 lines>
+View Link: <full https://docs.google.com/... URL>"
+```
+
+Always include the Google Drive **View Link** (or **Edit Link** for a Google Doc) when a file was uploaded. If upload was skipped, say why and still send Slack with the local path.
+
+Confirm in chat: "Slack notification sent". Do not log tokens.

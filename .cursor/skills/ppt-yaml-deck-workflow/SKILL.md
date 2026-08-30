@@ -1,6 +1,6 @@
 ---
 name: ppt-yaml-deck-workflow
-description: Edit PraisonAIPPT YAML decks in examples, keep style consistent, regenerate matching PPTX, and verify output. Use when users request slide/verse/section/highlight updates for deck YAML files.
+description: Edit PraisonAIPPT YAML decks in examples, keep style consistent, regenerate matching PPTX, upload to Google Drive, Slack the View Link, and verify output. Use when users request slide/verse/section/highlight updates for deck YAML files.
 disable-model-invocation: true
 ---
 
@@ -25,7 +25,8 @@ Progress:
 - [ ] 3) Apply minimal YAML edits only
 - [ ] 4) Regenerate matching PPTX with CLI
 - [ ] 5) Confirm build success; paste slide outline + Google Drive View Link to user
-- [ ] 6) Commit/push YAML (+ PPTX if tracked) when requested
+- [ ] 6) Slack notify with the same Google Drive View Link (required)
+- [ ] 7) Commit and push to **main**; merge the PR if you opened one
 ```
 
 ## YAML document structure
@@ -198,11 +199,30 @@ python3 -m praisonaippt.cli -i examples/100_fold_blessing.yaml -o examples/100_f
 - If upload is skipped, say why (missing credentials, `auto_upload_gdrive: false`, or upload error) and still confirm the local `.pptx` path.
 - If YAML parse or schema errors occur, fix quoting/block-scalar/indentation and rerun immediately.
 
-## 6) Git update
+## 6) Slack notify (required)
+
+Do this **every time** a deck build finishes — do not wait for the user to ask. Follow `~/.cursor/skills/slack-notification/SKILL.md`.
+
+The Slack body **must** include the Google Drive **View Link** (or **Edit Link** for a Google Doc). If upload was skipped, say why and include the local `.pptx` path.
+
+```bash
+source ~/.zshrc 2>/dev/null || true
+# Fallback if vars missing: source ~/.config/automation/slack.env
+~/.cursor/skills/slack-notification/scripts/send-slack.sh \
+  --title "PraisonAIPPT: <deck title>" \
+  --body "<2–5 lines: slides built, what changed>
+View Link: <full https://docs.google.com/... URL>" \
+  --emoji ":white_check_mark:"
+```
+
+Confirm in chat: "Slack notification sent". Do not log tokens.
+
+## 7) Git update
 
 - Stage only intended files (typically YAML; include `.pptx` if the repo tracks regenerated decks).
 - Commit with a clear one-line message.
-- Push the current branch only when the user requested it.
+- **Always push to `main`** (`git push origin main`). Do not leave work only on a feature branch.
+- If you created a pull request, **merge it** into `main` in the same turn (then push `main` if the merge was local).
 
 ## Common YAML pitfalls
 
