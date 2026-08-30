@@ -182,3 +182,53 @@ sections:
       For Christ is the end of the law for righteousness to everyone who believes.
     highlights:
     - everyone who believes
+  - reference: Romans 10:6 (NKJV)
+    split_max_length: 500
+    text: >-
+      But the righteousness of faith speaks in this way, "Do not say in your
+      heart, 'Who will ascend into heaven?'" (that is, to bring Christ down from
+      above)
+    highlights:
+    - the righteousness of faith speaks
+  - reference: Romans 10:7 (NKJV)
+    text: >-
+      or, "'Who will descend into the abyss?'" (that is, to bring Christ up from
+      the dead).
+    highlights:
+    - bring Christ up from the dead
+  - reference: Romans 10:8 (NKJV)
+    text: >-
+      But what does it say? "The word is near you, in your mouth and in your
+      heart" (that is, the word of faith which we preach):
+    highlights:
+    - The word is near you
+    - the word of faith
+  - reference: Romans 10:9 (NKJV)
+    split_max_length: 500
+    text: >-
+      that if you confess with your mouth the Lord Jesus and believe in your
+      heart that God has raised Him from the dead, you will be saved.
+    highlights:
+    - confess with your mouth
+    - believe in your heart
+    - saved
+  - reference: Romans 10:10 (NKJV)
+    text: >-
+      For with the heart one believes unto righteousness, and with the mouth
+      confession is made unto salvation.
+    highlights:
+    - believes
+    - confession
+  - reference: Romans 10:11 (NKJV)
+    text: >-
+      For the Scripture says, "Whoever believes on Him will not be put to shame."
+    highlights:
+    - will not be put to shame
+  - reference: Romans 10:12 (NKJV)
+    split_max_length: 500
+    text: >-
+      For there is no distinction between Jew and Greek, for the same Lord over
+      all is rich to all who call upon Him.
+    highlights:
+    - no distinction
+    - call upon Him
