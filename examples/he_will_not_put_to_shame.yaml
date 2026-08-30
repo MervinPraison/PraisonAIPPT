@@ -34,3 +34,63 @@ sections:
       For "whoever calls on the name of the Lord shall be saved."
     highlights:
     - saved
+- section: '1. Sent'
+  section_subtitle: How shall they preach unless they are sent
+  verses:
+  - reference: Romans 10:15 (NKJV)
+    split_max_length: 500
+    text: >-
+      And how shall they preach unless they are sent? As it is written: "How
+      beautiful are the feet of those who preach the gospel of peace, Who bring
+      glad tidings of good things!"
+    highlights:
+    - sent
+  - reference: Malachi 3:10 (NKJV)
+    split_max_length: 500
+    text: >-
+      Bring all the tithes into the storehouse, That there may be food in My
+      house, And try Me now in this," Says the Lord of hosts, "If I will not
+      open for you the windows of heaven And pour out for you such blessing That
+      there will not be room enough to receive it."
+    highlights:
+    - storehouse
+    - food
+- section: '2. Hear'
+  section_subtitle: How shall they hear without a preacher
+  verses:
+  - reference: Romans 10:14 (NKJV)
+    split_max_length: 500
+    text: >-
+      How then shall they call on Him in whom they have not believed? And how
+      shall they believe in Him of whom they have not heard? And how shall they
+      hear without a preacher?
+    highlights:
+    - hear without a preacher
+- section: '3. See'
+  section_subtitle: How shall they believe without being heard
+  verses:
+  - reference: Romans 10:14 (NKJV)
+    split_max_length: 500
+    text: >-
+      How then shall they call on Him in whom they have not believed? And how
+      shall they believe in Him of whom they have not heard? And how shall they
+      hear without a preacher?
+    highlights:
+    - believe in Him of whom they have not heard
+- section: '4. Speak'
+  section_subtitle: Faith speaks
+  verses:
+  - reference: Romans 10:6 (NKJV)
+    split_max_length: 500
+    text: >-
+      But the righteousness of faith speaks in this way, "Do not say in your
+      heart, 'Who will ascend into heaven?'" (that is, to bring Christ down from
+      above)
+    highlights:
+    - faith speaks
+  - reference: Romans 10:8 (NKJV)
+    text: >-
+      But what does it say? "The word is near you, in your mouth and in your
+      heart" (that is, the word of faith which we preach):
+    highlights:
+    - in your mouth
