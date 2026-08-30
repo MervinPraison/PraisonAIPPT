@@ -18,8 +18,20 @@ sections:
       offense, And whoever believes on Him will not be put to shame."
     highlights:
     - will not be put to shame
+  - reference: Romans 10:9 (NKJV)
+    split_max_length: 500
+    text: >-
+      that if you confess with your mouth the Lord Jesus and believe in your
+      heart that God has raised Him from the dead, you will be saved.
+    highlights:
+    - saved
   - reference: Romans 10:11 (NKJV)
     text: >-
       For the Scripture says, "Whoever believes on Him will not be put to shame."
     highlights:
     - will not be put to shame
+  - reference: Romans 10:13 (NKJV)
+    text: >-
+      For "whoever calls on the name of the Lord shall be saved."
+    highlights:
+    - saved
