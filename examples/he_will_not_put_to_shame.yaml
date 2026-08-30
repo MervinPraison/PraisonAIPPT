@@ -103,3 +103,12 @@ sections:
       heart" (that is, the word of faith which we preach):
     highlights:
     - in your mouth
+  - reference: Mark 11:23 (NKJV)
+    split_max_length: 500
+    text: >-
+      For assuredly, I say to you, whoever says to this mountain, 'Be removed
+      and be cast into the sea,' and does not doubt in his heart, but believes
+      that those things he says will be done, he will have whatever he says.
+    highlights:
+    - whoever says
+    - whatever he says
