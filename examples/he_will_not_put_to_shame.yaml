@@ -114,3 +114,29 @@ sections:
     highlights:
     - say
     - believe
+- section: Hearing
+  verses:
+  - reference: Romans 10:18 (NKJV)
+    split_max_length: 500
+    text: >-
+      But I say, have they not heard? Yes indeed: "Their sound has gone out to
+      all the earth, And their words to the ends of the world."
+    highlights:
+    - have they not heard
+  - reference: Hebrews 4:2 (NKJV)
+    split_max_length: 500
+    text: >-
+      For indeed the gospel was preached to us as well as to them; but the word
+      which they heard did not profit them, not being mixed with faith in those
+      who heard it.
+    highlights:
+    - the gospel was preached
+    - they heard
+  - reference: Hebrews 4:2 (NKJV)
+    split_max_length: 500
+    text: >-
+      For indeed the gospel was preached to us as well as to them; but the word
+      which they heard did not profit them, not being mixed with faith in those
+      who heard it.
+    highlights:
+    - not being mixed with faith
