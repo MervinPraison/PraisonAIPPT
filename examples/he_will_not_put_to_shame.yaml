@@ -140,3 +140,25 @@ sections:
       who heard it.
     highlights:
     - not being mixed with faith
+- section: What is True Faith?
+  verses:
+  - reference: Romans 9:30 (NKJV)
+    split_max_length: 500
+    text: >-
+      What shall we say then? That Gentiles, who did not pursue righteousness,
+      have attained to righteousness, even the righteousness of faith;
+    highlights:
+    - the righteousness of faith
+  - reference: Romans 9:31 (NKJV)
+    text: >-
+      but Israel, pursuing the law of righteousness, has not attained to the law
+      of righteousness.
+    highlights:
+    - the law of righteousness
+  - reference: Romans 9:32 (NKJV)
+    split_max_length: 500
+    text: >-
+      Why? Because they did not seek it by faith, but as it were, by the works of
+      the law. For they stumbled at that stumbling stone.
+    highlights:
+    - by faith
