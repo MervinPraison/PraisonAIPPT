@@ -17,19 +17,9 @@ sections:
       As it is written: "Behold, I lay in Zion a stumbling stone and rock of
       offense, And whoever believes on Him will not be put to shame."
     highlights:
-    - text: stumbling stone
-      color: '#fecaca'
-    - text: rock of offense
-      color: '#fecaca'
-    - text: whoever believes on Him
-      color: green
-    - text: will not be put to shame
-      color: '#fde68a'
+    - will not be put to shame
   - reference: Romans 10:11 (NKJV)
     text: >-
       For the Scripture says, "Whoever believes on Him will not be put to shame."
     highlights:
-    - text: Whoever believes on Him
-      color: green
-    - text: will not be put to shame
-      color: '#fde68a'
+    - will not be put to shame
