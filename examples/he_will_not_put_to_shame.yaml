@@ -34,6 +34,12 @@ sections:
       For "whoever calls on the name of the Lord shall be saved."
     highlights:
     - saved
+  - reference: Romans 10:17 (NKJV)
+    text: >-
+      So then faith comes by hearing, and hearing by the word of God.
+    highlights:
+    - faith comes by hearing
+    - hearing
 - section: '1. Sent'
   section_subtitle: How shall they preach unless they are sent
   verses:
