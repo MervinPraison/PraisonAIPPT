@@ -1,0 +1,225 @@
+presentation_title: Nourishment
+presentation_subtitle: ''
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+
+sections:
+  - section: ''
+    verses:
+      - reference: Romans 11:17–18
+        leading_title: Nourishment from the Root
+        text: >-
+          You, though a wild olive shoot, have been grafted in among the others
+          and now share in the nourishing sap from the olive root… You do not
+          support the root, but the root supports you.
+        highlights:
+          - text: root supports you
+            annotation: 1
+          - text: grafted in
+            annotation: 2
+          - text: nourishing sap
+            annotation: 3
+
+      - reference: Romans 11:12
+        leading_title: Riches for the World
+        text: >-
+          If their transgression means riches for the world, and their loss means
+          riches for the Gentiles, how much greater riches will their full inclusion bring!
+        highlights:
+          - riches for the world
+          - riches for the Gentiles
+
+  - section: 1. His Strength Is the Root
+    verses:
+      - reference: Romans 11:2–4
+        leading_title: Remnant Chosen by Grace
+        split_max_length: 300
+        text: >-
+          God did not reject his people, whom he foreknew. Don’t you know what
+          Scripture says in the passage about Elijah—how he appealed to God against
+          Israel: "Lord, they have killed your prophets and torn down your altars;
+          I am the only one left, and they are trying to kill me"? And what was God’s
+          answer to him? "I have reserved for myself seven thousand who have not bowed
+          the knee to Baal."
+        highlights:
+          - reserved for myself
+          - only one left
+
+      - reference: Romans 11:5–6
+        leading_title: Chosen by Grace, Not by Works
+        split_max_length: 300
+        text: >-
+          So too, at the present time there is a remnant chosen by grace. And if by grace,
+          then it cannot be based on works; if it were, grace would no longer be grace.
+        highlights:
+          - remnant chosen by grace
+          - cannot be based on works
+
+      - reference: 1 Kings 19:10,14
+        leading_title: "Elijah's Focus: 'I Have Done; I Alone Remain'"
+        text: >-
+          I have been very zealous for the LORD… I am the only one left.
+        highlights:
+          - very zealous
+          - only one left
+
+      - reference: Galatians 3:12
+        text: The law is not of faith.
+        highlights:
+          - law
+          - faith
+
+      - reference: Romans 11:18
+        leading_title: The Root Supports Us
+        text: >-
+          You do not support the root, but the root supports you.
+        highlights:
+          - root supports you
+
+      - reference: Romans 5:19
+        leading_title: Made Righteous by One Man's Obedience
+        text: >-
+          For as by one man’s disobedience many were made sinners, so also by one Man’s obedience many will be made righteous.
+        highlights:
+          - one Man’s obedience
+          - made righteous
+
+  - section: 2. Rest Is Remaining in Him
+    verses:
+      - reference: John 15:5 (NKJV)
+        leading_title: Remain in Christ
+        text: >-
+          I am the vine, you are the branches. He who abides in Me, and I in him,
+          bears much fruit; for without Me you can do nothing.
+        highlights:
+          - I am the vine, you are the branches
+          - abides in Me
+          - bears much fruit
+          - without Me you can do nothing
+
+      - reference: Hebrews 4:1 (NKJV)
+        leading_title: Promise of Entering His Rest
+        text: >-
+          Therefore, since a promise remains of entering His rest, let us fear lest
+          any of you seem to have come short of it.
+        highlights:
+          - promise remains of entering His rest
+
+      - reference: Hebrews 4:3 (NKJV)
+        leading_title: Believers Enter Into Rest
+        split_max_length: 300
+        text: >-
+          For we who have believed do enter rest, as He has said: "So I swore in My wrath,
+          They shall not enter My rest," although the works were finished from the foundation of the world.
+        highlights:
+          - we who have believed do enter rest
+          - works were finished
+
+      - reference: Hebrews 4:9–10 (NKJV)
+        leading_title: Rest from Your Own Works
+        text: >-
+          There remains therefore a rest for the people of God. For he who has entered
+          His rest has himself also ceased from his works as God did from His.
+        highlights:
+          - rest for the people of God
+          - ceased from his works
+
+      - reference: Hebrews 3:19 (NKJV)
+        leading_title: Enter Rest Through Faith
+        text: >-
+          So we see that they could not enter in because of unbelief.
+        highlights:
+          - could not enter in because of unbelief
+
+  - section: 3. The Word Is Nourishing
+    verses:
+      - reference: Romans 11:16 (NKJV)
+        leading_title: Holy Root, Holy Branches
+        text: >-
+          For if the firstfruit is holy, the lump is also holy; and if the root is holy,
+          so are the branches.
+        highlights:
+          - firstfruit is holy
+          - lump is also holy
+          - root is holy
+          - so are the branches
+
+      - reference: 1 Timothy 4:6
+        leading_title: Nourished by the Word of Faith
+        text: >-
+          Nourished in the words of faith and of the good doctrine.
+        highlights:
+          - Nourished in the words of faith
+          - good doctrine
+
+      - reference: Colossians 2:19
+        leading_title: Hold Fast to Christ, the Head
+        text: >-
+          From Christ, the Head, the whole body is nourished and grows with the growth that comes from God.
+        highlights:
+          - Christ, the Head
+          - nourished and grows
+
+      - reference: Psalm 92:13–14
+        leading_title: Flourishing in the House of the LORD
+        text: >-
+          Those who are planted in the house of the LORD shall flourish… They shall still bear fruit in old age.
+        highlights:
+          - planted in the house of the LORD
+          - bear fruit in old age
+
+      - reference: Colossians 2:6–7
+        leading_title: Remain Rooted in Christ
+        text: >-
+          As you therefore have received Christ Jesus the Lord, so walk in Him, rooted and built up in Him.
+        highlights:
+          - walk in Him
+          - rooted and built up
+
+      - reference: Psalm 1:3
+        leading_title: Stay Planted and Bear Fruit
+        text: >-
+          He shall be like a tree planted by the rivers of water, that brings forth its fruit in its season.
+        highlights:
+          - tree planted by the rivers of water
+          - fruit in its season
+
+      - reference: Acts 20:32
+        leading_title: Built Up by the Word of Grace
+        text: >-
+          I commend you to God and to the word of His grace, which is able to build you up.
+        highlights:
+          - word of His grace
+          - build you up
+
+  - section: Summary
+    verses:
+      - reference: Core Progression
+        leading_title: Summary
+        text: >-
+          His strength is the Root → Rest is remaining in Him → The Word nourishes us → Fruit grows naturally.
+        highlights:
+          - His strength is the Root
+          - Rest is remaining in Him
+          - Word nourishes us
+          - Fruit grows naturally
+
+      - reference: Key Themes
+        leading_title: Keywords from Romans 11
+        list_type: bullet
+        text: |-
+          Nourishment from the Root
+          The Root supports you
+          Riches for the world & for the Gentiles
+          Grafted in by Grace, not works
+          Remnant chosen by grace
+          Faith, God's kindness & faithfulness
+        highlights:
+          - Nourishment from the Root
+          - Root supports you
+          - Remnant chosen by grace
