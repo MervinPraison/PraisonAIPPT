@@ -28,32 +28,13 @@ sections:
     highlights:
     - My righteousness
   - reference: Romans 7:24 (NKJV)
+    leading_title: '"Who," not "What" — Person (Jesus), not self-effort'
     text: O wretched man that I am! Who will deliver me from this body of death?
     highlights:
-    - body of death
-  - reference: Romans 8:9 (NKJV)
-    split_max_length: 500
-    text: >-
-      But you are not in the flesh but in the Spirit, if indeed the Spirit of
-      God dwells in you. Now if anyone does not have the Spirit of Christ, he
-      is not His.
-    highlights:
-    - in the Spirit
-  - reference: Romans 8:10 (NKJV)
-    text: >-
-      And if Christ is in you, the body is dead because of sin, but the Spirit
-      is life because of righteousness.
-    highlights:
-    - righteousness
-    - life
-  - reference: Romans 8:11 (NKJV)
-    split_max_length: 500
-    text: >-
-      But if the Spirit of Him who raised Jesus from the dead dwells in you, He
-      who raised Christ from the dead will also give life to your mortal bodies
-      through His Spirit who dwells in you.
-    highlights:
-    - life to your mortal bodies
+    - text: Who
+      color: '#fde68a'
+    - text: will deliver me
+      color: green
   - reference: 1 Corinthians 15:55 (NKJV)
     text: >-
       "O Death, where is your sting? O Hades, where is your victory?"
@@ -63,7 +44,10 @@ sections:
     text: The sting of death is sin, and the strength of sin is the law.
     highlights:
     - sin
-    - law
+    - text: the strength of sin
+      color: '#fecaca'
+    - text: the law
+      color: green
 - section: 1. Keep sin dead
   verses:
   - reference: Romans 7:8 (NKJV)
@@ -71,19 +55,28 @@ sections:
       But sin, taking opportunity by the commandment, produced in me all manner
       of evil desire. For apart from the law sin was dead.
     highlights:
-    - sin was dead
+    - text: apart from the law
+      color: green
+    - text: sin was dead
+      color: '#fde68a'
   - reference: Romans 7:9 (NKJV)
     text: >-
       I was alive once without the law, but when the commandment came, sin
       revived and I died.
     highlights:
-    - sin revived
+    - text: the commandment came
+      color: green
+    - text: sin revived
+      color: '#fecaca'
   - reference: Romans 5:20 (NKJV)
     text: >-
       Moreover the law entered that the offense might abound. But where sin
       abounded, grace abounded much more,
     highlights:
-    - offense might abound
+    - text: the law entered
+      color: green
+    - text: the offense might abound
+      color: '#fecaca'
 - section: 2. Be Powerful
   verses:
   - reference: Romans 7:15 (NKJV)
@@ -138,7 +131,7 @@ sections:
     highlights:
     - estranged from Christ
     - fallen from grace
-- section: 4. Receive life to your mortal body
+- section: 4. Conclusion — Receive life to your mortal body
   verses:
   - reference: Romans 8:9 (NKJV)
     split_max_length: 500
@@ -168,8 +161,29 @@ sections:
       This only I want to learn from you: Did you receive the Spirit by the
       works of the law, or by the hearing of faith?
     highlights:
-    - Spirit
-    - faith
+    - text: receive the Spirit
+      color: green
+    - text: the hearing of faith
+      color: '#bfdbfe'
+- section: Does no law mean go and sin?
+  verses:
+  - reference: Romans 5:19 (NKJV)
+    text: >-
+      For as by one man's disobedience many were made sinners, so also by one
+      Man's obedience many will be made righteous.
+    highlights:
+    - text: one Man's obedience
+      color: '#fde68a'
+    - many will be made righteous
+  - reference: Romans 2:4 (NKJV)
+    split_max_length: 500
+    text: >-
+      Or do you despise the riches of His goodness, forbearance, and
+      longsuffering, not knowing that the goodness of God leads you to
+      repentance?
+    highlights:
+    - text: the goodness of God leads you to repentance
+      color: green
 - section: Walking in the Flesh vs. Walking in the Spirit
   verses:
   - reference: Romans 7:5 (NKJV)
@@ -178,6 +192,10 @@ sections:
       the law were at work in our members to bear fruit to death.
     highlights:
     - in the flesh
+    - text: sinful passions
+      color: '#fecaca'
+    - text: aroused by the law
+      color: green
   - reference: Galatians 3:2–3 (NKJV)
     split_max_length: 450
     text: >-
@@ -185,8 +203,14 @@ sections:
       works of the law, or by the hearing of faith? Are you so foolish? Having
       begun in the Spirit, are you now being made perfect by the flesh?
     highlights:
-    - Spirit
-    - flesh
+    - text: receive the Spirit
+      color: green
+    - text: the hearing of faith
+      color: '#bfdbfe'
+    - text: begun in the Spirit
+      color: green
+    - text: perfect by the flesh
+      color: '#fecaca'
   - reference: Galatians 3:5–6 (NKJV)
     split_max_length: 500
     text: >-
@@ -194,5 +218,7 @@ sections:
       does He do it by the works of the law, or by the hearing of faith?—just as
       Abraham "believed God, and it was accounted to him for righteousness."
     highlights:
-    - faith
-    - righteousness
+    - text: He who supplies the Spirit to you and works miracles among you
+      color: green
+    - text: the hearing of faith
+      color: '#bfdbfe'

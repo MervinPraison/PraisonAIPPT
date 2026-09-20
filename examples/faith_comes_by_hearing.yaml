@@ -1,0 +1,135 @@
+# From new_recording_377 sermon — NKJV. Faith comes by hearing the crucified Christ.
+presentation_title: Faith Comes by Hearing
+presentation_subtitle: விசுவாசம் கேள்வியினாலே வரும் — Romans 10:17
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+sections:
+- section: '1. Mary chose the good part'
+  section_subtitle: நல்ல பங்கைத் தெரிந்துகொண்டாள்
+  verses:
+  - reference: Luke 10:38–42 (NKJV)
+    split_max_length: 500
+    text: >-
+      Now it happened as they went that He entered a certain village; and a certain
+      woman named Martha welcomed Him into her house. And she had a sister called
+      Mary, who also sat at Jesus' feet and heard His word. But Martha was distracted
+      with much serving… "Martha, Martha, you are worried and troubled about many
+      things. But one thing is needed, and Mary has chosen that good part, which
+      will not be taken away from her."
+    highlights:
+    - sat at Jesus' feet
+    - heard His word
+    - chosen that good part
+- section: '2. Faith-filled prayer saves the sick'
+  section_subtitle: விசுவாசமுள்ள ஜெபம் பிணியாளியை இரட்சிக்கும்
+  verses:
+  - reference: James 5:14–15 (NKJV)
+    split_max_length: 500
+    text: >-
+      Is anyone among you sick? Let him call for the elders of the church, and let
+      them pray over him, anointing him with oil in the name of the Lord. And the
+      prayer of faith will save the sick, and the Lord will raise him up. And if he
+      has committed sins, he will be forgiven.
+    highlights:
+    - prayer of faith
+    - save the sick
+  - reference: Mark 11:22–24 (NKJV)
+    split_max_length: 500
+    text: >-
+      So Jesus answered and said to them, "Have faith in God. For assuredly, I say
+      to you, whoever says to this mountain, 'Be removed and be cast into the sea,'
+      and does not doubt in his heart, but believes that those things he says will
+      be done, he will have whatever he says. Therefore I say to you, whatever things
+      you ask when you pray, believe that you receive them, and you will have them."
+    highlights:
+    - Have faith in God
+    - believe that you receive them
+- section: '3. Faith and hope are different'
+  section_subtitle: விசுவாசமும் நம்பிக்கையும் வேறு
+  verses:
+  - reference: Hebrews 11:1 (NKJV)
+    text: >-
+      Now faith is the substance of things hoped for, the evidence of things not seen.
+    highlights:
+    - substance of things hoped for
+    - evidence of things not seen
+  - reference: Romans 8:24–25 (NKJV)
+    split_max_length: 500
+    text: >-
+      For we were saved in this hope, but hope that is seen is not hope; for why does
+      one still hope for what he sees? But if we hope for what we do not see, we
+      eagerly wait for it with perseverance.
+    highlights:
+    - hope that is seen is not hope
+    - eagerly wait for it
+  - reference: 1 Corinthians 13:13 (NKJV)
+    text: >-
+      And now abide faith, hope, love, these three; but the greatest of these is love.
+    highlights:
+    - faith, hope, love
+  - reference: 2 Corinthians 4:13 (NKJV)
+    text: >-
+      And since we have the same spirit of faith, according to what is written, "I
+      believed and therefore I spoke," we also believe and therefore speak.
+    highlights:
+    - spirit of faith
+    - believed and therefore I spoke
+- section: '4. Faith comes by hearing'
+  section_subtitle: விசுவாசம் கேள்வியினாலே வரும்
+  verses:
+  - reference: Romans 10:14, 17 (NKJV)
+    split_max_length: 500
+    text: >-
+      How then shall they call on Him in whom they have not believed? And how shall
+      they believe in Him of whom they have not heard? And how shall they hear
+      without a preacher? So then faith comes by hearing, and hearing by the word
+      of God.
+    highlights:
+    - faith comes by hearing
+    - word of God
+  - reference: Hebrews 12:1–2 (NKJV)
+    split_max_length: 500
+    text: >-
+      Therefore we also, since we are surrounded by so great a cloud of witnesses,
+      let us lay aside every weight, and the sin which so easily ensnares us, and let
+      us run with endurance the race that is set before us, looking unto Jesus, the
+      author and finisher of our faith.
+    highlights:
+    - author and finisher of our faith
+    - looking unto Jesus
+- section: '5. Hearing the crucified Christ'
+  section_subtitle: சிலுவையில் அறையப்பட்ட கிறிஸ்துவைக் கேட்பது
+  verses:
+  - reference: Galatians 3:1–5 (NKJV)
+    split_max_length: 500
+    text: >-
+      O foolish Galatians! Who has bewitched you that you should not obey the truth,
+      before whose eyes Jesus Christ was clearly portrayed among you as crucified?
+      This only I want to learn from you: Did you receive the Spirit by the works
+      of the law, or by the hearing of faith?… He who supplies the Spirit to you and
+      works miracles among you, does He do it by the works of the law, or by the
+      hearing of faith?
+    highlights:
+    - portrayed among you as crucified
+    - hearing of faith
+    - works miracles among you
+  - reference: 1 Corinthians 2:2 (NKJV)
+    text: >-
+      For I determined not to know anything among you except Jesus Christ and Him
+      crucified.
+    highlights:
+    - Jesus Christ and Him crucified
+  - reference: 1 Corinthians 1:23–24 (NKJV)
+    split_max_length: 500
+    text: >-
+      but we preach Christ crucified, to the Jews a stumbling block and to the Greeks
+      foolishness, but to those who are called, both Jews and Greeks, Christ the
+      power of God and the wisdom of God.
+    highlights:
+    - preach Christ crucified
+    - power of God and the wisdom of God

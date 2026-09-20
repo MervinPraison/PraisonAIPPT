@@ -1,0 +1,88 @@
+# From recording_150926_tr1 sermon — NKJV. Inherit easily by spirit eyes; speak easy over the mountain.
+presentation_title: Inherit Easily
+presentation_subtitle: எளிதாய் சுதந்தரிப்போம் — Zechariah 4:7, Matthew 11:28–30
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+sections:
+- section: '1. God fashioned you to inherit easily'
+  section_subtitle: மலை பெரிதாகத் தோன்றும் — ஆவியின் கண்களால் பார்
+  verses:
+  - reference: Zechariah 4:7 (NKJV)
+    text: >-
+      Who are you, O great mountain? Before Zerubbabel you shall become a plain!
+      And he shall bring forth the capstone With shouts of "Grace, grace to it!"
+    highlights:
+    - O great mountain
+    - become a plain
+    - Grace, grace to it
+- section: '2. Rest in the storm — Jesus asleep'
+  section_subtitle: புயலின் மத்தில் இளைப்பாறுதல் — Mark 4:37–39
+  verses:
+  - reference: Mark 4:37–39 (NKJV)
+    split_max_length: 500
+    text: >-
+      And a great windstorm arose, and the waves beat into the boat, so that it
+      was already filling. But He was in the stern, asleep on a pillow. And they
+      awoke Him and said to Him, "Teacher, do You not care that we are perishing?"
+      Then He arose and rebuked the wind, and said to the sea, "Peace, be still!"
+      And the wind ceased and there was a great calm.
+    highlights:
+    - asleep on a pillow
+    - Peace, be still
+    - great calm
+- section: '3. Joshua and Caleb — bread in spirit eyes'
+  section_subtitle: அப்பம் போல் தோன்றியது — Numbers 13:30
+  verses:
+  - reference: Numbers 13:30 (NKJV)
+    text: >-
+      Then Caleb quieted the people before Moses, and said, "Let us go up at once
+      and take possession, for we are well able to overcome it."
+    highlights:
+    - go up at once
+    - take possession
+    - well able to overcome it
+- section: '4. Hope believes unseen; faith speaks unseen'
+  section_subtitle: காணாததை நம்பு; காணாததை பேசு
+  verses:
+  - reference: Romans 8:24–25 (NKJV)
+    split_max_length: 500
+    text: >-
+      For we were saved in this hope, but hope that is seen is not hope; for why
+      does one still hope for what he sees? But if we hope for what we do not see,
+      we eagerly wait for it with perseverance.
+    highlights:
+    - hope for what we do not see
+    - eagerly wait for it with perseverance
+  - reference: Hebrews 11:1 (NKJV)
+    text: >-
+      Now faith is the substance of things hoped for, the evidence of things not
+      seen.
+    highlights:
+    - substance of things hoped for
+    - evidence of things not seen
+  - reference: 2 Corinthians 4:13 (NKJV)
+    text: >-
+      And since we have the same spirit of faith, according to what is written, "I
+      believed and therefore I spoke," we also believe and therefore speak,
+    highlights:
+    - I believed and therefore I spoke
+    - believe and therefore speak
+- section: '5. My yoke is easy — Matthew 11'
+  section_subtitle: என் நுகம் மெதுவாயும், என் சுமை இலகுவாயும்
+  verses:
+  - reference: Matthew 11:28–30 (NKJV)
+    split_max_length: 500
+    text: >-
+      Come to Me, all you who labor and are heavy laden, and I will give you rest.
+      Take My yoke upon you and learn from Me, for I am gentle and lowly in heart,
+      and you will find rest for your souls. For My yoke is easy and My burden is
+      light.
+    highlights:
+    - I will give you rest
+    - My yoke is easy
+    - My burden is light

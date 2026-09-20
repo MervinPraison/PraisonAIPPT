@@ -1,0 +1,95 @@
+# From new_recording_383 sermon — NKJV. Not by might nor by power but by My Spirit.
+presentation_title: By My Spirit
+presentation_subtitle: பலத்தினாலுமல்ல, தேவனுடைய ஆவியினாலே — Zechariah 4:6
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+sections:
+- section: '1. Not by might nor by power'
+  section_subtitle: பலத்தினாலுமல்ல, பராக்கிரமத்தினாலுமல்ல
+  verses:
+  - reference: Zechariah 4:6–7 (NKJV)
+    split_max_length: 500
+    text: >-
+      So he answered and said to me: "This is the word of the Lord to Zerubbabel:
+      'Not by might nor by power, but by My Spirit,' Says the Lord of hosts. 'Who
+      are you, O great mountain? Before Zerubbabel you shall become a plain! And he
+      shall bring forth the capstone With shouts of "Grace, grace to it!" ' "
+    highlights:
+    - Not by might nor by power
+    - but by My Spirit
+    - O great mountain
+    - Grace, grace to it
+- section: '2. The lampstand and golden oil'
+  section_subtitle: குத்துவரக்கை — ஆவியினால் ஊற்றப்படும் ஆசீர்வாதம்
+  verses:
+  - reference: Zechariah 4:2–3 (NKJV)
+    split_max_length: 500
+    text: >-
+      And he said to me, "What do you see?" So I said, "I am looking, and there is
+      a lampstand of solid gold with a bowl on top of it, and on the stand seven
+      lamps with seven pipes to the seven lamps. Two olive trees are by it, one at
+      the right of the bowl and the other at its left."
+    highlights:
+    - lampstand of solid gold
+    - seven lamps
+    - Two olive trees
+  - reference: Zechariah 4:12 (NKJV)
+    split_max_length: 500
+    text: >-
+      And I further answered and said to him, "What are these two olive branches that
+      drip into the receptacles of the two gold pipes from which the golden oil drains?"
+    highlights:
+    - olive branches
+    - golden oil drains
+- section: '3. Filthy garments removed'
+  section_subtitle: யோசுவா — அழுக்கான ஆடைகள்
+  verses:
+  - reference: Zechariah 3:3–4 (NKJV)
+    split_max_length: 500
+    text: >-
+      Now Joshua was clothed with filthy garments, and was standing before the Angel.
+      Then He answered and spoke to those who stood before Him, saying, "Take away
+      the filthy garments from him." And to him He said, "See, I have removed your
+      iniquity from you, and I will clothe you with rich robes."
+    highlights:
+    - filthy garments
+    - removed your iniquity
+    - clothe you with rich robes
+- section: '4. Cornerstone and be still'
+  section_subtitle: தலைக்கல் — சும்மா இருங்கள்
+  verses:
+  - reference: Isaiah 28:16 (NKJV)
+    text: >-
+      Therefore thus says the Lord God: "Behold, I lay in Zion a stone for a
+      foundation, a tried stone, a precious cornerstone, a sure foundation; whoever
+      believes will not act hastily."
+    highlights:
+    - precious cornerstone
+    - sure foundation
+  - reference: Isaiah 30:15 (NKJV)
+    split_max_length: 500
+    text: >-
+      For thus says the Lord God, the Holy One of Israel: "In returning and rest
+      you shall be saved; in quietness and confidence shall be your strength." But
+      you would not,
+    highlights:
+    - returning and rest
+    - quietness and confidence
+  - reference: Exodus 14:14 (NKJV)
+    text: >-
+      The Lord will fight for you, and you shall hold your peace."
+    highlights:
+    - The Lord will fight for you
+    - hold your peace
+  - reference: Psalm 46:10 (NKJV)
+    text: >-
+      Be still, and know that I am God; I will be exalted among the nations, I will
+      be exalted in the earth!"
+    highlights:
+    - Be still
+    - know that I am God
