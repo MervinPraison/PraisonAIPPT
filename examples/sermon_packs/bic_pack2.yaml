@@ -270,3 +270,45 @@ jobs:
     topic: great faith and faith comes by hearing
     skip: true
     skip_reason: "Article already published — do not recreate or update"
+
+  - slug: he-will-not-put-to-shame-romans-10-faith-chain
+    title: "He Will Not Be Put to Shame: The Romans 10 Faith Chain"
+    video_id: GRAeUIUBRYA
+    pack_name: He will not put to shame
+    transcript_file: He will not put to shame.transcript.txt
+    yaml_file: He will not put to shame.yaml
+    yaml_deck: he_will_not_put_to_shame.yaml
+    topic: Romans 10 faith — sent, hear, see, speak, not ashamed
+    excerpt: "Romans 10 faith chain — sent, hear, see, speak. Whoever believes will not be put to shame."
+    categories: Gospel,Redemption
+    post_id: 241147
+    builder: generic
+    reference_slug: receive-a-hundredfold-now
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-receive-a-hundredfold-now.html
+    takeaway:
+      - "📤 <strong>Sent</strong> — how shall they preach unless they are sent?"
+      - "👂 <strong>Hear</strong> — faith comes by hearing the word of God."
+      - "👁️ <strong>See</strong> — eyes of the heart enlightened to hope."
+      - "🗣️ <strong>Speak</strong> — righteousness of faith speaks from the heart."
+      - "🛡️ <strong>Not ashamed</strong> — whoever believes on Him will not be put to shame."
+
+  - slug: renewing-mind-obedience-love-forgiveness-romans-12
+    title: "Renewing the Mind: Obedience, the Father's Love, and Forgiveness"
+    video_id: 93IRCvfEHWc
+    pack_name: Renewing the Mind
+    transcript_file: Renewing the Mind.transcript.txt
+    yaml_file: Renewing the Mind.yaml
+    yaml_deck: renewing_the_mind.yaml
+    topic: Romans 12 mind renewal through Christ's obedience, the Father's love, and God's forgiveness
+    excerpt: "Romans 12 — be transformed by renewing your mind through obedience, the Father's love, and forgiveness."
+    categories: Gospel,Wisdom
+    post_id: 241151
+    builder: generic
+    reference_slug: reign-in-life
+    reference_html: ~/praisonai-audio-editor/.agent/biblerevelation-reign-in-life.html
+    takeaway:
+      - "🧠 <strong>Renew your mind</strong> — do not be conformed to this world."
+      - "✝️ <strong>Obedience of Christ</strong> — many made righteous by one Man's obedience."
+      - "💛 <strong>Love of the Father</strong> — poured out in our hearts by the Spirit."
+      - "🕊️ <strong>Forgiveness of God</strong> — much forgiven, much love."
+      - "🛡️ <strong>Whole armour</strong> — wrestle not against flesh and blood."

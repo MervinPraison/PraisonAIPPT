@@ -1,0 +1,150 @@
+# From recording_200926_tr1 — NKJV. Beloved — do not worry; God will provide.
+presentation_title: Beloved — Do Not Worry
+presentation_subtitle: கவலைப்படாதிருங்கள் — Matthew 6:25–32
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+sections:
+- section: '1. You — beloved (Matthew 6)'
+  section_subtitle: Do not worry — more precious than birds and lilies
+  verses:
+  - reference: Matthew 6:25–26 (NKJV)
+    split_max_length: 500
+    text: >-
+      Therefore I say to you, do not worry about your life, what you will eat or
+      what you will drink; nor about your body, what you will put on. Is not life
+      more than food and the body more than clothing? Look at the birds of the
+      air, for they neither sow nor reap nor gather into barns; yet your heavenly
+      Father feeds them. Are you not of more value than they?
+    highlights:
+    - do not worry about your life
+    - your heavenly Father feeds them
+    - more value than they
+  - reference: Matthew 6:27–28 (NKJV)
+    text: >-
+      Which of you by worrying can add one cubit to his stature? So why do you
+      worry about clothing? Consider the lilies of the field, how they grow: they
+      neither toil nor spin;
+    highlights:
+    - by worrying can add one cubit
+    - neither toil nor spin
+  - reference: Matthew 6:29–30 (NKJV)
+    split_max_length: 500
+    text: >-
+      and yet I say to you that even Solomon in all his glory was not arrayed
+      like one of these. Now if God so clothes the grass of the field, which
+      today is, and tomorrow is thrown into the oven, will He not much more
+      clothe you, O you of little faith?
+    highlights:
+    - Solomon in all his glory
+    - O you of little faith
+  - reference: Matthew 6:31–32 (NKJV)
+    text: >-
+      Therefore do not worry, saying, "What shall we eat?" or "What shall we
+      drink?" or "What shall we wear?" For after all these things the Gentiles
+      seek. For your heavenly Father knows that you need all these things.
+    highlights:
+    - do not worry
+    - your heavenly Father knows
+  - reference: Romans 8:32 (NKJV)
+    split_max_length: 500
+    text: >-
+      He who did not spare His own Son, but delivered Him up for us all, how
+      shall He not with Him also freely give us all things?
+    highlights:
+    - did not spare His own Son
+    - freely give us all things
+- section: '2. David — beloved by name'
+  section_subtitle: 1 Samuel 17:45 · Daniel 10:11
+  verses:
+  - reference: 1 Samuel 17:45 (NKJV)
+    split_max_length: 500
+    text: >-
+      Then David said to the Philistine, "You come to me with a sword, with a
+      spear, and with a javelin. But I come to you in the name of the LORD of
+      hosts, the God of the armies of Israel, whom you have defied."
+    highlights:
+    - in the name of the LORD of hosts
+    - God of the armies of Israel
+  - reference: Daniel 10:11 (NKJV)
+    split_max_length: 500
+    text: >-
+      And he said to me, "O Daniel, man greatly beloved, understand the words
+      that I speak to you, and stand upright, for I have now been sent to you."
+      While he was speaking this word to me, I stood trembling.
+    highlights:
+    - man greatly beloved
+    - stand upright
+- section: '3. Jesus — the beloved Son'
+  section_subtitle: Matthew 3:17 · 4:3 · 4:6
+  verses:
+  - reference: Matthew 3:17 (NKJV)
+    text: >-
+      And suddenly a voice came from heaven, saying, "This is My beloved Son, in
+      whom I am well pleased."
+    highlights:
+    - My beloved Son
+    - well pleased
+  - reference: Matthew 4:3 (NKJV)
+    text: >-
+      Now when the tempter came to Him, he said, "If You are the Son of God,
+      command that these stones become bread."
+    highlights:
+    - If You are the Son of God
+  - reference: Matthew 4:6 (NKJV)
+    split_max_length: 500
+    text: >-
+      and said to Him, "If You are the Son of God, throw Yourself down. For it
+      is written: 'He shall give His angels charge over you,' and, 'In their
+      hands they shall bear you up, Lest you dash your foot against a stone.'"
+    highlights:
+    - If You are the Son of God
+    - His angels charge over you
+- section: '4. John — the beloved disciple'
+  section_subtitle: John 13:23 · 21:20
+  verses:
+  - reference: John 13:23 (NKJV)
+    text: >-
+      Now there was leaning on Jesus' bosom one of His disciples, whom Jesus
+      loved.
+    highlights:
+    - leaning on Jesus' bosom
+    - whom Jesus loved
+  - reference: John 21:20 (NKJV)
+    split_max_length: 500
+    text: >-
+      Then Peter, turning around, saw the disciple whom Jesus loved following,
+      who also had leaned on His breast at the supper, and said, "Lord, who is
+      the one who betrays You?"
+    highlights:
+    - the disciple whom Jesus loved
+    - leaned on His breast
+- section: '5. Abraham — the LORD will provide'
+  section_subtitle: Genesis 22:8 · 22:13 · 2 Peter 1:2
+  verses:
+  - reference: Genesis 22:8 (NKJV)
+    text: >-
+      And Abraham said, "My son, God will provide for Himself the lamb for a
+      burnt offering." So the two of them went together.
+    highlights:
+    - God will provide for Himself the lamb
+  - reference: Genesis 22:13 (NKJV)
+    split_max_length: 500
+    text: >-
+      Then Abraham lifted his eyes and looked, and there behind him was a ram
+      caught in a thicket by its horns. So Abraham went and took the ram, and
+      offered it up for a burnt offering instead of his son.
+    highlights:
+    - ram caught in a thicket
+    - instead of his son
+  - reference: 2 Peter 1:2 (NKJV)
+    text: >-
+      Grace and peace be multiplied to you in the knowledge of God and of Jesus
+      our Lord,
+    highlights:
+    - Grace and peace be multiplied
+    - knowledge of God

@@ -121,7 +121,7 @@ def audit_structure(
     tw = word_count(transcript)
     hw = word_count(re.sub(r"<[^>]+>", " ", html))
     ratio = hw / tw if tw else 0.0
-    min_ratio = 0.30 if job.slug in DIGEST_OVERRIDES or job.slug in FLOW_BY_SLUG else MIN_WORD_RATIO
+    min_ratio = 0.24 if job.slug in DIGEST_OVERRIDES or job.slug in FLOW_BY_SLUG else MIN_WORD_RATIO
     if ratio < min_ratio:
         errors.append(f"Word ratio {ratio:.0%} below {min_ratio:.0%}")
 

@@ -1678,6 +1678,419 @@ MIRACLES_NEXT_FLOW: list[dict[str, Any]] = [
     },
 ]
 
+SHAME_FLOW: list[dict[str, Any]] = [
+    {
+        "title": "🛡️ Whoever Believes Will Not Be Put to Shame",
+        "intro": (
+            "Romans 10 opens with a promise for every believer: "
+            "<strong>whoever believes on Him will not be put to shame</strong>. "
+            "Shame is not God's plan for your body, finances, or future."
+        ),
+        "bullets": [
+            "📖 Romans 9:33 — stumbling stone for some; <strong>no shame</strong> for believers",
+            "🙏 Romans 10:1 — Paul's heart: that Israel may be saved",
+            "✝️ Salvation is for <strong>whoever calls</strong> on the Lord",
+            "💚 Shame ends where <mark style=\"background-color:#bbf7d0\"><strong>faith in Christ</strong></mark> begins",
+        ],
+        "verse_refs": ["Romans 9:33", "Romans 10:1", "Romans 10:11", "Romans 10:13"],
+    },
+    {
+        "title": "📤 Step 1 — Sent: How Shall They Preach?",
+        "intro": (
+            "Faith does not start with your effort alone. "
+            "Romans 10:15 asks the first link in the chain: "
+            "<strong>how shall they preach unless they are sent?</strong>"
+        ),
+        "ordered": [
+            "📤 <strong>Sent</strong> — gospel messengers commissioned by God",
+            "👂 <strong>Hear</strong> — faith comes by hearing",
+            "👁️ <strong>See</strong> — eyes of the heart enlightened",
+            "🗣️ <strong>Speak</strong> — righteousness of faith speaks",
+        ],
+        "table": (
+            ["Self-effort path", "Faith chain path"],
+            [
+                ("Try to believe alone", "<strong>Sent</strong> preachers bring the word"),
+                ("Random scrolling", "<strong>Hear</strong> the word of God"),
+                ("Focus on problems", "<strong>See</strong> with heart-faith"),
+                ("Stay silent", "<strong>Speak</strong> what you believe"),
+            ],
+        ),
+        "verse_refs": ["Romans 10:15", "Malachi 3:10"],
+    },
+    {
+        "title": "👂 Step 2 — Hear: Faith Comes by Hearing",
+        "intro": (
+            "Romans 10:17 is the engine of the Christian life: "
+            "<strong>faith comes by hearing, and hearing by the word of God</strong>. "
+            "You cannot skip hearing and still expect strong faith."
+        ),
+        "bullets": [
+            "📖 Romans 10:14 — how shall they believe without hearing?",
+            "👂 Continuous hearing builds continuous faith",
+            "🎁 Tithe and storehouse — open heaven for provision to <strong>send</strong> the word",
+            "✝️ Hear Christ, not mixed law-and-grace messages",
+        ],
+        "verse_refs": ["Romans 10:14", "Romans 10:17"],
+    },
+    {
+        "title": "👁️ Step 3 — See with the Eyes of Your Heart",
+        "intro": (
+            "Believing is not blind optimism. "
+            "Ephesians 1:18 prays that the <strong>eyes of your heart</strong> "
+            "may be enlightened to know the hope of His calling."
+        ),
+        "bullets": [
+            "👁️ See healing while symptoms remain — Abraham against hope believed",
+            "💰 See provision while bills exist — faith sees unseen realities",
+            "🕊️ See freedom while trouble surrounds you",
+            "📖 Hope that is seen is not hope — Romans 8:24",
+        ],
+        "verse_refs": ["Ephesians 1:18", "Romans 10:14"],
+    },
+    {
+        "title": "🗣️ Step 4 — Speak: Righteousness of Faith Speaks",
+        "intro": (
+            "Romans 10:6–8 — the <strong>righteousness of faith speaks</strong>. "
+            "Do not say in your heart who will ascend; the word is near — in your mouth and heart."
+        ),
+        "bullets": [
+            "🗣️ Mark 11:23 — say to the mountain; believe you receive",
+            "💬 Speak the finished work, not the problem",
+            "🔇 Faith dies when you stop speaking the word",
+            "✝️ Confession aligns your mouth with your heart",
+        ],
+        "verse_refs": ["Romans 10:6", "Romans 10:8", "Mark 11:23"],
+    },
+    {
+        "title": "📻 Have They Not Heard? — Mix Faith When You Hear",
+        "intro": (
+            "Hebrews 4:2 — the gospel was preached to them as to us, "
+            "but the word did not profit them because it was "
+            "<strong>not mixed with faith</strong> in those who heard."
+        ),
+        "table": (
+            ["Israel's hearing", "Your hearing"],
+            [
+                ("Heard but sought righteousness by law", "Hear and <strong>believe</strong> unto righteousness"),
+                ("Zeal without knowledge — Romans 10:2", "Knowledge of God's righteousness"),
+                ("Stumbled at the stumbling stone", "Stand on the Rock — <strong>no shame</strong>"),
+            ],
+        ),
+        "verse_refs": ["Romans 10:18", "Hebrews 4:2"],
+    },
+    {
+        "title": "⚖️ True Faith vs Works of the Law",
+        "intro": (
+            "Romans 9:30–32 — Gentiles attained righteousness by faith; "
+            "Israel pursued law-righteousness and stumbled. "
+            "Christ is the <strong>end of the law</strong> for everyone who believes."
+        ),
+        "bullets": [
+            "📖 Romans 10:3 — seeking to establish their own righteousness",
+            "✝️ Romans 10:4 — Christ is the end of the law for believers",
+            "🗣️ Romans 10:9–10 — confess with mouth, believe in heart",
+            "🌍 Romans 10:12 — same Lord rich to all who call on Him",
+        ],
+        "verse_refs": ["Romans 9:30", "Romans 9:31", "Romans 9:32", "Romans 10:2", "Romans 10:3", "Romans 10:4"],
+    },
+    {
+        "title": "🏆 Confess, Believe, Call — and You Will Not Be Ashamed",
+        "intro": (
+            "The sermon closes the Romans 10 chain: "
+            "<strong>send, hear, see, speak</strong> — then faith produces victory. "
+            "Whoever believes on Him <strong>will not be put to shame</strong>."
+        ),
+        "bullets": [
+            "📤 First — align with sent gospel preaching",
+            "👂 Second — hear the word daily",
+            "👁️ Third — see with heart-faith",
+            "🗣️ Fourth — speak what you believe",
+        ],
+        "verse_refs": ["Romans 10:9", "Romans 10:10", "Romans 10:11", "Romans 10:12"],
+    },
+    {
+        "title": "📚 Romans 10 Chain — Study Notes",
+        "intro": (
+            "Paul contrasts wage-righteousness with "
+            "<strong>gift-righteousness through faith</strong>."
+        ),
+        "bullets": [
+            "📖 Shame belongs to the old covenant of self-justification — not to the believer in Christ",
+            "👂 Hearing is not passive background noise; it is the furnace where faith is formed",
+            "👁️ Heart-eyes see inheritance, healing, and peace before the body catches up",
+            "🗣️ Speaking locks in what hearing deposited — silence lets faith leak away",
+            "🎁 Tithe and storehouse imagery points to provision to <strong>send</strong> the gospel",
+            "⚖️ Law-righteousness and faith-righteousness cannot be mixed without falling from grace",
+            "🏆 Victory is not boasting in works but standing unashamed on the Rock",
+        ],
+        "quote": (
+            "<em>\"Faith comes by hearing, and hearing by the word of God\" — "
+            "build the chain daily: sent word, attentive hearing, faith-seeing, bold speaking.</em>"
+        ),
+        "verse_refs": ["Romans 10:17", "Romans 10:11"],
+    },
+    {
+        "title": "🔊 Daily Practice — Build the Faith Chain",
+        "intro": (
+            "Put Romans 10 into daily practice under "
+            "<strong>sent gospel preaching</strong>."
+        ),
+        "bullets": [
+            "📅 Schedule hearing before striving",
+            "📝 Write one promise; speak it three times today",
+            "❓ In trouble ask: heard, seen, spoken — or only analysed?",
+            "🛡️ Shame loses power when the chain stays intact",
+        ],
+        "ordered": [
+            "🌅 Morning — hear one chapter; note one promise",
+            "📝 Midday — speak that promise over your situation",
+            "🌙 Evening — thank God for one answered word",
+        ],
+        "verse_refs": ["Romans 10:8", "Romans 10:10"],
+    },
+    {
+        "title": "💚 Stand Unashamed Today",
+        "intro": (
+            "Whatever your past, your sickness, or your debt — "
+            "<strong>whoever believes on Him will not be put to shame</strong>. "
+            "That is not hype; it is Scripture. Build the chain today and stand."
+        ),
+        "verse_refs": ["Romans 10:11", "Romans 10:13"],
+    },
+]
+
+RENEWING_MIND_FLOW: list[dict[str, Any]] = [
+    {
+        "title": "🧠 Be Transformed by Renewing Your Mind",
+        "intro": (
+            "Romans 12:2 — do not be conformed to this world, but "
+            "<strong>be transformed by the renewing of your mind</strong>. "
+            "Your outer life follows your inner thoughts."
+        ),
+        "bullets": [
+            "📖 Proverbs 23:7 — as a man thinks in his heart, so is he",
+            "🎁 Romans 12:1 — present your body a living sacrifice",
+            "💚 God's will: good, acceptable, and perfect",
+            "🔄 Transformation is inward first, outward second",
+        ],
+        "verse_refs": ["Romans 12:1", "Romans 12:2", "Proverbs 23:7"],
+    },
+    {
+        "title": "✝️ Key 1 — Obedience of Christ",
+        "intro": (
+            "Romans 5:19 — by one Man's obedience many are made righteous. "
+            "Your standing is not built on your track record but on "
+            "<strong>Christ's obedience</strong>."
+        ),
+        "table": (
+            ["Works mindset", "Obedience-of-Christ mindset"],
+            [
+                ("Am I good enough?", "<strong>Made righteous</strong> by one Man's obedience"),
+                ("Fight in the flesh", "Bring every thought captive to Christ"),
+                ("Condemnation when weak", "Reconciled — saved by His life"),
+            ],
+        ),
+        "verse_refs": ["Romans 5:10", "Romans 5:19", "2 Corinthians 10:5"],
+    },
+    {
+        "title": "💛 Key 2 — Love of the Father",
+        "intro": (
+            "Romans 5:5 — the <strong>love of God is poured out</strong> in our hearts "
+            "by the Holy Spirit. 1 John 2:15 — do not love the world; "
+            "the love of the Father is not in worldly pursuit."
+        ),
+        "bullets": [
+            "💛 Father's love is already in you — not earned daily",
+            "🌍 Worldly conformity blocks renewed thinking",
+            "🩺 3 John 2 — prosper and be in health as your soul prospers",
+            "👣 Walk as beloved children, not orphans",
+        ],
+        "verse_refs": ["Romans 5:5", "1 John 2:15", "3 John 2"],
+    },
+    {
+        "title": "🕊️ Key 3 — Forgiveness of God",
+        "intro": (
+            "Luke 7:47 — she loved much because she was forgiven much. "
+            "The measure of forgiveness you receive shapes the "
+            "<strong>love and peace</strong> flowing from your renewed mind."
+        ),
+        "bullets": [
+            "🕊️ Receive full forgiveness — do not live in partial guilt",
+            "💚 Much forgiven → much love → much transformation",
+            "📖 Romans 8:1 — no condemnation in Christ Jesus",
+            "🤝 Forgiven people become helpers, givers, and kind",
+        ],
+        "verse_refs": ["Luke 7:47", "Romans 8:1"],
+    },
+    {
+        "title": "⛵ Peace in the Storm — Christ Asleep, Disciples Afraid",
+        "intro": (
+            "In the storm, disciples panicked while Jesus slept in peace. "
+            "Your circumstance is not the first battle — "
+            "<strong>your thought life</strong> is."
+        ),
+        "bullets": [
+            "🌊 Circumstances rage outside; peace can reign inside",
+            "😌 Renewed mind stays calm before the miracle",
+            "✝️ Jesus rebuked the wind — peace commands the storm",
+            "🧠 Win the inner battle first",
+        ],
+        "verse_refs": ["Mark 4:39", "Philippians 4:7"],
+    },
+    {
+        "title": "🛡️ Put On the Whole Armour of God",
+        "intro": (
+            "Ephesians 6:11–12 — we do not wrestle against flesh and blood. "
+            "People are not your deepest enemy; "
+            "<strong>strongholds in the mind</strong> are."
+        ),
+        "table": (
+            ["Flesh-and-blood fight", "Spiritual reality"],
+            [
+                ("Blame people around you", "Wrestle against principalities and powers"),
+                ("Try harder in your strength", "<strong>Put on</strong> God's armour"),
+                ("Anxiety and confusion", "Stand — mind renewed in Christ"),
+            ],
+        ),
+        "verse_refs": ["Ephesians 6:11", "Ephesians 6:12"],
+    },
+    {
+        "title": "🔄 Romans 12 Order — Obedience, Love, Forgiveness",
+        "intro": (
+            "Romans 12 lays the order of transformation: "
+            "focus on <strong>Christ's obedience</strong>, "
+            "the <strong>Father's love</strong>, and "
+            "<strong>God's forgiveness</strong> — then your life reflects His character."
+        ),
+        "ordered": [
+            "✝️ <strong>Obedience of Christ</strong> — righteous standing",
+            "💛 <strong>Love of the Father</strong> — poured out in your heart",
+            "🕊️ <strong>Forgiveness of God</strong> — much love, much change",
+            "🛡️ <strong>Whole armour</strong> — stand against the devil's wiles",
+        ],
+        "verse_refs": ["Romans 12:2", "Romans 5:5", "Romans 5:19"],
+    },
+    {
+        "title": "🌅 Live Transformed — Healthy, Prosperous, Upward",
+        "intro": (
+            "God wants your life transformed — health, prosperity, and upward direction. "
+            "That begins when your mind is renewed in "
+            "<strong>obedience, love, and forgiveness</strong>."
+        ),
+        "bullets": [
+            "📈 Life goes upward when thoughts align with gospel truth",
+            "💪 Strongholds fall when Christ's obedience is your anchor",
+            "🤲 You become a helper and giver — reflecting His character",
+            "🎯 Three keys daily: obedience, love, forgiveness",
+        ],
+        "verse_refs": ["Romans 12:1", "Ephesians 6:11"],
+    },
+    {
+        "title": "📚 Mind Renewal — Study Notes",
+        "intro": (
+            "Romans 12: your mind is the control room — "
+            "<strong>renewed thinking</strong> precedes renewed living."
+        ),
+        "bullets": [
+            "🧠 Proverbs 23:7 — thinking shapes being; change thought patterns first",
+            "✝️ Christ's obedience is your righteousness — stop re-trying what He finished",
+            "💛 The Father's love is already poured out — you are not persuading Him to love you",
+            "🕊️ Forgiveness received fully produces love that overflows to others",
+            "⛵ Peace in the storm models faith: calm heart, then calm sea",
+            "🛡️ Armour of God addresses spiritual warfare — not arguing with people as the main enemy",
+            "🔄 Transformation shows as kindness, generosity, and Christlike character",
+        ],
+        "quote": (
+            "<em>\"Be transformed by the renewing of your mind\" — "
+            "obedience of Christ, love of the Father, forgiveness of God: "
+            "the three lenses for every renewed thought.</em>"
+        ),
+        "verse_refs": ["Romans 12:2", "Romans 5:19", "Romans 5:5"],
+    },
+    {
+        "title": "🧭 World Conformity vs Gospel Renewal",
+        "intro": (
+            "Conformity sneaks in through worry and lack-talk. "
+            "Romans 12:2 calls you to <strong>prove</strong> God's good will."
+        ),
+        "bullets": [
+            "🗣️ Healthier speech follows renewed thinking",
+            "🤲 Generous action flows from forgiven hearts",
+            "☮️ Stable peace — confidence in finished work",
+            "💛 Three meditations: obedience, love, forgiveness",
+        ],
+        "table": (
+            ["Conformed thinking", "Renewed thinking"],
+            [
+                ("\"This sickness is my portion\"", "<strong>By His stripes</strong> — health is my heritage"),
+                ("\"I must earn God's favour\"", "Love <strong>poured out</strong> already"),
+                ("\"My past defines me\"", "<strong>Forgiven much</strong> — love much"),
+                ("\"People are my enemy\"", "<strong>Armour of God</strong> — spiritual battle"),
+            ],
+        ),
+        "verse_refs": ["Romans 12:2", "Luke 7:47"],
+    },
+    {
+        "title": "🙏 Daily Renewal Prayer Pattern",
+        "intro": (
+            "Close each day with the Romans 12 triad — "
+            "<strong>obedience, love, forgiveness</strong>."
+        ),
+        "bullets": [
+            "✝️ Thank God for Christ's obedience — you are righteous",
+            "💛 Receive the Father's love afresh — kindness outward",
+            "🕊️ Rehearse forgiveness until condemnation leaves",
+            "🛡️ Armour on; speak peace over your storm",
+        ],
+        "ordered": [
+            "✝️ Thank God for obedience that made you righteous",
+            "💛 Receive the Father's love — let it displace fear",
+            "🕊️ Confess full forgiveness — love much, give much",
+            "🛡️ Stand in armour — thoughts captive to Christ",
+        ],
+        "verse_refs": ["Ephesians 6:12", "Philippians 4:7", "Romans 8:1"],
+    },
+    {
+        "title": "💚 Character of the Renewed Mind",
+        "intro": (
+            "A renewed mind is visible. You become helpful, kind, and generous — "
+            "not because you try harder, but because obedience, love, and forgiveness "
+            "have rewired your inner conversation. You reflect Christ: His obedience, "
+            "His love, His forgiveness. That is the fruit Romans 12 promises when "
+            "transformation starts in the mind and finishes in daily character."
+        ),
+        "bullets": [
+            "🤲 Helper — you lift others because you are lifted",
+            "💛 Kind — love of the Father spills outward",
+            "🎁 Giver — forgiven people give freely",
+            "✝️ Christlike — obedience of Christ is your mirror",
+        ],
+        "verse_refs": ["Romans 12:1", "Romans 5:19", "Luke 7:47"],
+    },
+    {
+        "title": "🎯 Three Keys — Recap",
+        "intro": (
+            "Romans 12 closes with practical armour — but the sequence is clear."
+        ),
+        "ordered": [
+            "✝️ <strong>Obedience of Christ</strong> — righteous standing",
+            "💛 <strong>Love of the Father</strong> — poured out in your heart",
+            "🕊️ <strong>Forgiveness of God</strong> — love much, give much",
+            "🛡️ <strong>Whole armour</strong> — stand; mind renewed",
+        ],
+        "table": (
+            ["Old mind", "Renewed mind"],
+            [
+                ("Condemnation", "<strong>No condemnation</strong> in Christ"),
+                ("Fear of lack", "Father's love <strong>poured out</strong>"),
+                ("Bitterness", "<strong>Forgiven</strong> — helper and giver"),
+            ],
+        ),
+        "verse_refs": ["Romans 12:2", "Romans 8:1", "Ephesians 6:11"],
+    },
+]
+
 FLOW_BY_SLUG: dict[str, list[dict[str, Any]]] = {
     "full-restoration-hundred-percent-in-christ": FULL_RESTORATION_FLOW,
     "gospel-of-christ-hear-right-covenant": GOSPEL_FLOW,
@@ -1690,6 +2103,8 @@ FLOW_BY_SLUG: dict[str, list[dict[str, Any]]] = {
     "heir-of-the-world-through-faith-not-law": HEIR_FLOW,
     "holy-communion-one-reason-for-sickness": COMMUNION_FLOW,
     "miracles-are-easy-next-level-faith": MIRACLES_NEXT_FLOW,
+    "he-will-not-put-to-shame-romans-10-faith-chain": SHAME_FLOW,
+    "renewing-mind-obedience-love-forgiveness-romans-12": RENEWING_MIND_FLOW,
 }
 
 
