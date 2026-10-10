@@ -32,6 +32,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+bilingual = ["uharfbuzz>=0.37", "fonttools>=4.40"]   # exact Tamil text measurement for bilingual cards
 pdf-aspose = ["aspose.slides>=24.0.0"]
 pdf-all = ["aspose.slides>=24.0.0", "psutil>=5.9.0", "tqdm>=4.64.0"]
 video-tts = ["edge-tts>=6.0"]
@@ -42,6 +43,7 @@ gdrive = [
     "google-auth-oauthlib>=1.0.0",
     "google-api-python-client>=2.80.0",
 ]
+docx = ["python-docx>=1.0.0"]
 avatar-calibrate = [
     "mediapipe>=0.10.14; python_version>='3.8'",
     "opencv-python-headless>=4.8; python_version>='3.8'",

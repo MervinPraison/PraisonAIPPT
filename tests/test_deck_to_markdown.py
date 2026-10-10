@@ -45,6 +45,38 @@ def test_apply_html_highlights_green_dict():
     assert "background-color:#32B432" in out
 
 
+def test_write_deck_docx_underlines_highlights(tmp_path):
+    pytest.importorskip("docx")
+    from zipfile import ZipFile
+
+    from praisonaippt.deck_export import write_deck_docx
+
+    data = {
+        "presentation_title": "Highlight test",
+        "sections": [
+            {
+                "section": "S",
+                "verses": [
+                    {
+                        "reference": "Romans 10:17 (NKJV)",
+                        "text": "So then faith comes by hearing.",
+                        "highlights": [
+                            {"text": "faith comes", "color": "green"},
+                            "hearing",
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+    out = tmp_path / "hl.docx"
+    write_deck_docx(data, out)
+    xml = ZipFile(out).read("word/document.xml").decode()
+    assert "faith comes" in xml
+    assert 'w:u w:val="single"' in xml
+    assert "w:highlight" in xml
+
+
 def test_being_fruitful_structure():
     if not BEING_FRUITFUL.is_file():
         pytest.skip("being_fruitful.yaml missing")

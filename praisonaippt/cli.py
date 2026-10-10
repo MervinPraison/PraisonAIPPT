@@ -311,6 +311,18 @@ Examples:
     )
 
     parser.add_argument(
+        '--docx-output',
+        metavar='PATH',
+        help='Output Word file for convert-markdown (default: <input>.docx)',
+    )
+
+    parser.add_argument(
+        '--with-pdf',
+        action='store_true',
+        help='convert-markdown: after DOCX, build PDF (LibreOffice or Google Drive; use --pdf-output)',
+    )
+
+    parser.add_argument(
         '--no-highlights',
         action='store_true',
         help='Plain text blockquotes for convert-markdown (no **bold** highlights)',
@@ -944,24 +956,49 @@ def handle_convert_markdown_command(args, config=None):
         print(f"Error: Invalid schema in '{input_path}': {e}")
         return 1
 
+    if getattr(args, "bilingual", None):
+        data = _apply_bilingual_flag(data, args.bilingual)
+
     output_path = Path(args.markdown_output) if args.markdown_output else input_path.with_suffix('.md')
 
     if data.get('auto_upload_gdrive') and not getattr(args, 'no_upload', False):
         args.upload_gdrive = True
 
-    try:
-        from .deck_export import write_deck_markdown, write_deck_html
+    export_kw = dict(
+        highlights=not getattr(args, 'no_highlights', False),
+        separators=not getattr(args, 'no_separators', False),
+    )
 
-        write_deck_markdown(
-            data,
-            output_path,
-            highlights=not getattr(args, 'no_highlights', False),
-            separators=not getattr(args, 'no_separators', False),
-        )
+    try:
+        from .deck_export import write_deck_markdown, write_deck_html, write_deck_docx
+
+        write_deck_markdown(data, output_path, **export_kw)
         print(f"✓ Converted '{input_path.name}' to '{output_path.name}'")
     except Exception as e:
         print(f"Error during Markdown conversion: {e}")
         return 1
+
+    docx_path = Path(args.docx_output) if getattr(args, 'docx_output', None) else input_path.with_suffix('.docx')
+    pdf_path: Optional[Path] = None
+    try:
+        write_deck_docx(data, docx_path, **export_kw)
+        print(f"✓ Converted '{input_path.name}' to '{docx_path.name}' (underlined highlights)")
+    except ImportError:
+        print("Warning: python-docx not installed; skipped .docx export (pip install python-docx)")
+    except Exception as e:
+        print(f"Warning: DOCX export failed: {e}")
+    else:
+        want_pdf = getattr(args, "with_pdf", False) or getattr(args, "pdf_output", None)
+        if want_pdf and docx_path.is_file():
+            pdf_path = Path(args.pdf_output) if getattr(args, "pdf_output", None) else input_path.with_suffix(".pdf")
+            try:
+                from .deck_export.docx_pdf import convert_docx_to_pdf_with_fallback
+
+                convert_docx_to_pdf_with_fallback(str(docx_path), str(pdf_path))
+                print(f"✓ Converted '{docx_path.name}' to '{pdf_path.name}' (print PDF)")
+            except Exception as e:
+                print(f"Warning: PDF export failed: {e}")
+                pdf_path = None
 
     doc_name = (data.get("presentation_title") or "").strip() or output_path.stem
     html_path = output_path.with_suffix(".html")
@@ -977,7 +1014,20 @@ def handle_convert_markdown_command(args, config=None):
         config,
         as_google_doc=True,
         gdrive_file_name=doc_name,
+        pdf_path=str(pdf_path) if pdf_path and pdf_path.is_file() else None,
     )
+    if docx_path.is_file() and (args.upload_gdrive or config.should_auto_upload_gdrive()) and not getattr(args, "no_upload", False):
+        try:
+            from .gdrive_uploader import upload_to_gdrive
+
+            docx_result = upload_to_gdrive(
+                str(docx_path),
+                folder_id=getattr(args, "gdrive_folder_id", None) or config.get_gdrive_folder_id(),
+                file_name=f"{doc_name}.docx",
+            )
+            print(f"✓ Uploaded Word export: {docx_result.get('webViewLink') or docx_result.get('name')}")
+        except Exception as e:
+            print(f"Warning: DOCX upload failed: {e}")
     return 0
 
 
