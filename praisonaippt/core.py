@@ -1267,7 +1267,8 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                     large_text=None, alignment='left', font_size=32, style=None,
                     reference_font_size=None, leading_title=None,
                     text_below_reference=None, text_below_reference_highlights=None,
-                    text_below_reference_large_text=None, reference_position=None):
+                    text_below_reference_large_text=None, reference_position=None,
+                    secondary_font_name=None):
     """
     Add a verse slide. All colors and font resolved via slide_style.
     Supported slide_style keys: background_image, background_color,
@@ -1397,7 +1398,10 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
         verse_top = Inches(ref_top_in + ref_h_in + body_gap_in)
         verse_height = Inches(default_body_h_in)
     else:
-        verse_top, verse_height = Inches(no_ref_top_in), Inches(no_ref_h_in)
+        body_h_in = no_ref_h_in
+        if extra_ref and not leading:
+            body_h_in = min(body_h_in, 2.65)
+        verse_top, verse_height = Inches(no_ref_top_in), Inches(body_h_in)
 
     textbox = verse_slide.shapes.add_textbox(left, verse_top, content_w, verse_height)
     tf = textbox.text_frame
@@ -1465,6 +1469,37 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
             ex_run.font.color.rgb = theme['body']
             if fn:
                 ex_run.font.name = fn
+    elif extra_ref and not (
+        leading and leading_verse_top_in is not None and leading_verse_h_in is not None
+    ):
+        body_h_in = _estimate_verse_body_height_in(verse_text, content_w_in, font_size)
+        below_top = verse_top.inches + min(body_h_in, max(verse_height.inches - 0.15, 1.0)) + body_gap_in
+        below_fs = max(int(font_size) - 4, 18)
+        sec_fn = secondary_font_name or fn
+        ex_h_in = max(slide_h_in - below_top - bottom_margin_in - 0.55, 0.55)
+        ex_tb = verse_slide.shapes.add_textbox(left, Inches(below_top), content_w, Inches(ex_h_in))
+        ex_tf = ex_tb.text_frame
+        ex_tf.word_wrap = True
+        ex_tf.vertical_anchor = MSO_ANCHOR.TOP
+        ex_p = ex_tf.paragraphs[0]
+        ex_p.alignment = align
+        hl2 = text_below_reference_highlights
+        lt2 = text_below_reference_large_text
+        if (hl2 and len(hl2) > 0) or (lt2 and len(lt2) > 0):
+            _apply_highlights(ex_p, extra_ref, hl2, lt2,
+                              body_rgb=theme['body'],
+                              highlight_rgb=theme['highlight'],
+                              annotation_rgb=theme['annotation'],
+                              font_name=sec_fn,
+                              base_font_size=below_fs,
+                              annotation_size_pt=ann_pt)
+        else:
+            ex_run = ex_p.add_run()
+            ex_run.text = extra_ref
+            ex_run.font.size = Pt(below_fs)
+            ex_run.font.color.rgb = theme['body']
+            if sec_fn:
+                ex_run.font.name = sec_fn
     elif reference and ref_position == 'below':
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
         body_h_in = _estimate_verse_body_height_in(verse_text, content_w_in, font_size)

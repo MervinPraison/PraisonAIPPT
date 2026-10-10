@@ -342,6 +342,23 @@ class TableRenderer:
         _finish_slide(slide, verse, style, prs, source_file=source_file)
 
 
+def _verse_with_tamil_below(verse: dict) -> dict:
+    """Map ``reference_ta`` / ``text_ta`` / ``highlights_ta`` onto below-reference fields."""
+    text_ta = (verse.get("text_ta") or "").strip()
+    if not text_ta:
+        return verse
+    ref_ta = (verse.get("reference_ta") or "").strip()
+    tamil_block = f"{ref_ta}\n{text_ta}" if ref_ta else text_ta
+    merged = dict(verse)
+    existing = (merged.get("text_below_reference") or "").strip()
+    merged["text_below_reference"] = (
+        f"{existing}\n\n{tamil_block}".strip() if existing else tamil_block
+    )
+    if verse.get("highlights_ta") is not None and merged.get("text_below_reference_highlights") is None:
+        merged["text_below_reference_highlights"] = verse.get("highlights_ta")
+    return merged
+
+
 class VerseRenderer:
     kind = "verse"
 
@@ -355,6 +372,7 @@ class VerseRenderer:
         from .core import add_verse_slide
         from .utils import split_long_text
 
+        verse = _verse_with_tamil_below(verse)
         style = resolve_deck_style(style, verse, self.kind)
         highlights = verse.get("highlights")
         large_text = verse.get("large_text")
@@ -363,6 +381,7 @@ class VerseRenderer:
         max_len = int(verse.get("split_max_length") or split_max_length_default(style))
         parts = split_long_text(verse.get("text", ""), max_length=max(max_len, 50))
         notes = verse.get("notes")
+        has_ta = bool((verse.get("text_ta") or "").strip())
 
         for i, part in enumerate(parts):
             slide = add_verse_slide(
@@ -385,6 +404,7 @@ class VerseRenderer:
                 text_below_reference_large_text=(
                     verse.get("text_below_reference_large_text") if i == 0 else None
                 ),
+                secondary_font_name=(style.get("tamil_font_name") if has_ta else None),
             )
             if verse.get("avatar_video_path"):
                 _finish_slide(slide, verse, style, prs, source_file=source_file)
