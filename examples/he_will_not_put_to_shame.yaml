@@ -250,6 +250,8 @@ sections:
     highlights:
     - no distinction
     - call upon Him
+- section: ''
+  verses:
   - reference: Deuteronomy 6:11 (NKJV)
     leading_title: Houses Full of Good Things
     split_max_length: 500
