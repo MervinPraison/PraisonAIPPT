@@ -2,6 +2,7 @@
 Data loading and validation functions for Bible verses.
 """
 
+import copy
 import json
 import yaml
 from pathlib import Path
@@ -54,6 +55,34 @@ def write_deck_mapping(filepath: str | Path, data: dict) -> None:
         )
 
 
+def resolve_sections_from(data: dict, deck_path, _depth: int = 0) -> dict:
+    """Replace ``sections_from: other.yaml`` with that deck's ``sections``.
+
+    Lets a variant (e.g. the bilingual deck) reuse the sermon's sections
+    without copying them, so an edit to the English deck reaches both.
+    """
+    ref = data.get("sections_from")
+    if not ref:
+        return data
+    if data.get("sections"):
+        raise SchemaError("use either 'sections' or 'sections_from', not both")
+    if _depth > 5:
+        raise SchemaError("sections_from chain is too deep (or circular)")
+    deck_path = Path(deck_path)
+    src = Path(str(ref)).expanduser()
+    if not src.is_absolute():
+        src = deck_path.resolve().parent / src
+    src = src.resolve()
+    if src == deck_path.resolve():
+        raise SchemaError("sections_from points at the deck itself")
+    if not src.is_file():
+        raise SchemaError(f"sections_from file not found: {src}")
+    other = resolve_sections_from(load_deck_mapping(src), src, _depth + 1)
+    out = {k: v for k, v in data.items() if k != "sections_from"}
+    out["sections"] = copy.deepcopy(other.get("sections") or [])
+    return out
+
+
 def load_verses_from_file(filepath, template=None):
     """
     Load verses data from a JSON or YAML file.
@@ -83,6 +112,7 @@ def load_verses_from_file(filepath, template=None):
             return None
 
         try:
+            data = resolve_sections_from(data, file_path)
             data = apply_template_layers(data, deck_path=file_path, cli_template=template)
         except SchemaError as e:
             print(f"Error: Template resolution failed for '{filepath}': {e}")

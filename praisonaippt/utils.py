@@ -43,13 +43,15 @@ def resolve_asset_path(
     return str((Path.cwd() / raw).resolve())
 
 
-def split_long_text(text, max_length=200):
+def split_long_text(text, max_length=200, clause_fallback=False):
     """
     Split long text into multiple parts at sentence boundaries.
     
     Args:
         text (str): The text to split
         max_length (int): Maximum length for each part (default: 200)
+        clause_fallback (bool): also break a single over-long sentence at
+            ``; : ,`` (used for Tamil, which runs clauses together)
     
     Returns:
         list: List of text parts
@@ -72,7 +74,23 @@ def split_long_text(text, max_length=200):
     
     if current_part:
         parts.append(current_part.strip())
-    
+
+    if not clause_fallback:
+        return parts if parts else [text]
+
+    # A single sentence longer than max_length (common in Tamil, which runs
+    # clauses together with ';' and ','): break it at clause boundaries too.
+    out = []
+    for part in parts:
+        if len(part) <= max_length:
+            out.append(part)
+            continue
+        from .text_measure import split_balanced
+
+        n = -(-len(part) // max_length)
+        out.extend(split_balanced(part, n))
+    parts = out
+
     return parts if parts else [text]
 
 

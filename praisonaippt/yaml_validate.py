@@ -95,8 +95,13 @@ _SLIDE_STYLE_BASE_KEYS = frozenset({
     "title_color", "subtitle_color", "section_title_color", "highlight_color",
     "annotation_color", "font_name", "alignment", "reference_position",
     "split_max_length", "avatar_pip", "layouts", "typography", "preset",
-    "overrides", "color_scheme",
+    "overrides", "color_scheme", "background_fit",
+    "tamil_font_name", "bilingual_layout", "bilingual_primary", "bilingual_overflow",
 })
+_BACKGROUND_FIT = frozenset({"cover", "stretch"})
+_BILINGUAL_LAYOUT = frozenset({"cards", "paired", "below"})
+_BILINGUAL_PRIMARY = frozenset({"english", "tamil", "en", "ta"})
+_BILINGUAL_OVERFLOW = frozenset({"split", "paired"})
 
 # Keys used by deck colour presets (allowed on slide_style without warning).
 def _deck_style_colour_keys() -> Set[str]:
@@ -212,6 +217,10 @@ def validate_slide_style(slide_style: Any, path: str = "slide_style") -> None:
 
     _check_enum(style.get("alignment"), _ALIGNMENT, f"{path}.alignment")
     _check_enum(style.get("reference_position"), _REFERENCE_POSITION, f"{path}.reference_position")
+    _check_enum(style.get("background_fit"), _BACKGROUND_FIT, f"{path}.background_fit")
+    _check_enum(style.get("bilingual_layout"), _BILINGUAL_LAYOUT, f"{path}.bilingual_layout")
+    _check_enum(style.get("bilingual_primary"), _BILINGUAL_PRIMARY, f"{path}.bilingual_primary")
+    _check_enum(style.get("bilingual_overflow"), _BILINGUAL_OVERFLOW, f"{path}.bilingual_overflow")
 
     if style.get("split_max_length") is not None:
         try:

@@ -372,14 +372,23 @@ class VerseRenderer:
         from .core import add_verse_slide
         from .utils import split_long_text
 
-        verse = _verse_with_tamil_below(verse)
         style = resolve_deck_style(style, verse, self.kind)
+        if (verse.get("text_ta") or "").strip():
+            from .bilingual_slides import bilingual_layout, render_bilingual_verse
+
+            if bilingual_layout(style) != "below":
+                render_bilingual_verse(prs, verse, style, source_file=source_file)
+                return
+        verse = _verse_with_tamil_below(verse)
         highlights = verse.get("highlights")
         large_text = verse.get("large_text")
         alignment = verse.get("alignment", style.get("alignment", "left"))
         font_size = body_font_size(style, verse)
         max_len = int(verse.get("split_max_length") or split_max_length_default(style))
-        parts = split_long_text(verse.get("text", ""), max_length=max(max_len, 50))
+        from .text_measure import is_tamil
+
+        text = verse.get("text", "")
+        parts = split_long_text(text, max_length=max(max_len, 50), clause_fallback=is_tamil(text))
         notes = verse.get("notes")
         has_ta = bool((verse.get("text_ta") or "").strip())
 

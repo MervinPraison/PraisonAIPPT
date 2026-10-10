@@ -42,9 +42,12 @@ _TOP_LEVEL_KEYS = {
     "slide_transitions",
     "_slide_transitions",
     "pipeline",
+    "bilingual",
+    "sections_from",
+    "_bilingual",
 }
 
-_SECTION_KEYS = {"section", "section_subtitle", "verses"}
+_SECTION_KEYS = {"section", "section_subtitle", "section_ta", "section_subtitle_ta", "verses"}
 
 _VERSE_KEYS = {
     "reference",
@@ -71,6 +74,8 @@ _VERSE_KEYS = {
     "reference_ta",
     "text_ta",
     "highlights_ta",
+    "leading_title_ta",
+    "bilingual",
     "notes",
     "columns",
     "left",
@@ -146,8 +151,10 @@ def validate_verses(data: Any) -> Dict[str, Any]:
     _warn_unknown(data.keys(), _TOP_LEVEL_KEYS, "top-level")
 
     from .yaml_validate import validate_deck_options
+    from .bilingual import validate_bilingual_block
 
     validate_deck_options(data)
+    validate_bilingual_block(data.get("bilingual"))
 
     sections = data.get("sections")
     if sections is None:

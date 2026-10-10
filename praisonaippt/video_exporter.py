@@ -273,6 +273,9 @@ class SlideVideoEntry:
 
 def iter_slide_plan(data: dict, custom_title: Optional[str] = None):
     """Mirror create_presentation slide order for manifest building."""
+    from .bilingual import prepare_bilingual_deck
+
+    data, _ = prepare_bilingual_deck(data)
     if not data.get("skip_title_slide"):
         yield {"slide_role": "title", "verse": None, "slide_type": "title"}
     for section in data.get("sections", []):
@@ -290,17 +293,18 @@ def iter_slide_plan(data: dict, custom_title: Optional[str] = None):
 
             renderer = resolve_renderer(verse)
             if renderer.kind == "verse":
-                from .layout_tokens import split_max_length_default
-                from .utils import split_long_text
+                from .bilingual_slides import (
+                    bilingual_layout, bilingual_slide_count, legacy_part_count,
+                )
+                from .core import slide_size_inches
+                from .deck_slides import resolve_deck_style
 
-                style = data.get("slide_style") or {}
-                max_len = int(
-                    verse.get("split_max_length") or split_max_length_default(style)
-                )
-                parts = split_long_text(
-                    verse.get("text", ""), max_length=max(max_len, 50)
-                )
-                for part_idx in range(len(parts)):
+                style = resolve_deck_style(data.get("slide_style") or {}, verse, "verse")
+                if (verse.get("text_ta") or "").strip() and bilingual_layout(style) != "below":
+                    n_parts = bilingual_slide_count(verse, style, *slide_size_inches(data))
+                else:
+                    n_parts = legacy_part_count(verse, style)
+                for part_idx in range(n_parts):
                     yield {
                         "slide_role": "content",
                         "verse": verse,

@@ -315,6 +315,27 @@ LAYOUT_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "media_fit": "cover",
         "color_scheme": "forecast_grey",
     },
+    # English + Tamil "Twin cards" (bilingual_layout: cards)
+    "bilingual_cards": {
+        "margin_in": 0.45,
+        "max_width_in": 11.4,
+        "top_in": 0.38,
+        "bottom_in": 0.38,
+        "card_gap_in": 0.2,
+        "pad_x_in": 0.28,
+        "pad_top_in": 0.16,
+        "pad_bottom_in": 0.16,
+        "ref_gap_in": 0.06,
+        "title_gap_in": 0.16,
+        "corner_in": 0.16,
+        "card_fill": "#0B1A33",
+        "card_opacity_top": 0.70,
+        "card_opacity_bottom": 0.82,
+        "card_outline_opacity": 0.15,
+        "reference_color": "#F2A65A",
+        "tamil_text_color": "#FFF1D6",
+        "max_parts": 6,
+    },
 }
 
 TYPOGRAPHY_DEFAULTS: Dict[str, Any] = {
@@ -338,6 +359,13 @@ TYPOGRAPHY_DEFAULTS: Dict[str, Any] = {
     "big_number_label_size_pt": 32,
     "quote_size_pt": 36,
     "comparison_heading_size_pt": 28,
+    "bilingual_en_size_pt": 28,
+    "bilingual_ta_size_pt": 26,
+    "bilingual_min_size_pt": 24,
+    "bilingual_ref_size_pt": 16,
+    "bilingual_title_size_pt": 24,
+    "section_title_ta_size_pt": 34,
+    "section_subtitle_ta_size_pt": 22,
 }
 
 

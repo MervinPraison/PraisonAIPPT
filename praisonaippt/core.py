@@ -43,6 +43,8 @@ def _apply_slide_background(slide, style: dict, prs=None):
             else:
                 w, h = Inches(13.33), Inches(7.5)
             pic = slide.shapes.add_picture(img_path, 0, 0, w, h)
+            if str(style.get('background_fit') or 'cover').lower() == 'cover':
+                _crop_to_cover(pic, img_path, w, h)
             # Move picture to back
             sp_tree = slide.shapes._spTree
             sp_tree.remove(pic._element)
@@ -55,6 +57,27 @@ def _apply_slide_background(slide, style: dict, prs=None):
         hex_c = bg_color.lstrip('#')
         r, g, b = int(hex_c[0:2], 16), int(hex_c[2:4], 16), int(hex_c[4:6], 16)
         fill.fore_color.rgb = RGBColor(r, g, b)
+
+
+def _crop_to_cover(pic, img_path, box_w, box_h):
+    """Crop a picture to the box aspect (like CSS ``cover``) instead of stretching it."""
+    try:
+        from PIL import Image
+        with Image.open(img_path) as im:
+            iw, ih = im.size
+    except Exception:
+        return
+    if not iw or not ih or not box_w or not box_h:
+        return
+    img_ar, box_ar = iw / ih, int(box_w) / int(box_h)
+    if abs(img_ar - box_ar) < 1e-3:
+        return
+    if img_ar > box_ar:
+        trim = (1 - box_ar / img_ar) / 2
+        pic.crop_left = pic.crop_right = trim
+    else:
+        trim = (1 - img_ar / box_ar) / 2
+        pic.crop_top = pic.crop_bottom = trim
 
 
 def _apply_speaker_notes(slide, notes):
@@ -510,15 +533,24 @@ def add_table_slide(prs, rows, style=None, font_size=24, header_row=True, refere
     return slide
 
 
+_TAMIL_CHARS = __import__('re').compile(r'[\u0B80-\u0BFF]')
+
+
 def _estimate_text_lines(text, width_in, pt_size):
     """Rough line count for word-wrapped text in a textbox."""
+    # Deliberately conservative (about 3x the real line count): many layouts
+    # size boxes from it with small per-line heights tuned to this value.
+    # Use _wrapped_line_count when the real number of lines matters.
     chars_per_line = max(14, int(width_in * 72 / max(pt_size, 1) * 0.5))
     lines = 0
     for part in (text or '').split('\n'):
         part = part.strip()
         if not part:
             continue
-        lines += max(1, (len(part) + chars_per_line - 1) // chars_per_line)
+        # Tamil letters (with their vowel signs) set ~1.45x wider than Latin.
+        tamil = len(_TAMIL_CHARS.findall(part))
+        width = len(part) - tamil + int(tamil * 1.45)
+        lines += max(1, (width + chars_per_line - 1) // chars_per_line)
     return max(1, lines)
 
 
@@ -530,11 +562,25 @@ def _normalize_ref_position(value: str | None) -> str:
     return 'bottom'
 
 
+def _wrapped_line_count(text, width_in, pt_size):
+    """Realistic wrapped line count (average glyph ≈ 0.5 em; Tamil ≈ 0.7 em)."""
+    chars_per_line = max(8, int(width_in * 72 / (max(pt_size, 1) * 0.5)))
+    lines = 0
+    for part in (text or '').split('\n'):
+        part = part.strip()
+        if not part:
+            continue
+        tamil = len(_TAMIL_CHARS.findall(part))
+        width = len(part) - tamil + int(tamil * 1.45)
+        lines += max(1, (width + chars_per_line - 1) // chars_per_line)
+    return max(1, lines)
+
+
 def _estimate_verse_body_height_in(verse_text, content_w_in, font_size):
     """Approximate rendered verse body height in inches."""
     lines = 0
     for _, v_text in _parse_verse_lines(verse_text):
-        lines += _estimate_text_lines(v_text, content_w_in, font_size)
+        lines += _wrapped_line_count(v_text, content_w_in, font_size)
     line_h_in = (float(font_size) / 72.0) * 1.45
     return max(0.35, lines * line_h_in + 0.12)
 
@@ -597,14 +643,22 @@ def add_title_slide(prs, title, subtitle="", style=None):
     return slide
 
 
-def add_section_slide(prs, section_name, style=None, section_subtitle=None):
+def add_section_slide(prs, section_name, style=None, section_subtitle=None,
+                      section_ta=None, section_subtitle_ta=None):
     """
     Add a section title slide — centred, same layout for all themes.
     Background image/color applied when present in slide_style.
 
     Optional ``section_subtitle`` (str): second line below the title, smaller type
     (e.g. ``Section 1``). Set from YAML as ``section_subtitle`` next to ``section``.
+
+    Bilingual decks pass ``section_ta`` / ``section_subtitle_ta``; the language
+    named by ``slide_style.bilingual_primary`` is set first and largest.
     """
+    if (section_ta or '').strip() or (section_subtitle_ta or '').strip():
+        return _add_bilingual_section_slide(
+            prs, section_name, section_subtitle, section_ta, section_subtitle_ta, style or {},
+        )
     style = style or {}
     theme = _resolve_theme(style)
 
@@ -656,6 +710,56 @@ def add_section_slide(prs, section_name, style=None, section_subtitle=None):
         if theme['font_name']:
             sp.font.name = theme['font_name']
 
+    return slide
+
+
+def _add_bilingual_section_slide(prs, name, subtitle, name_ta, subtitle_ta, style):
+    from .bilingual_slides import bilingual_primary, set_tamil_run_font, tamil_font
+
+    theme = _resolve_theme(style)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _apply_slide_background(slide, style, prs)
+    left, tb_w, tb_w_in, _ = content_box(prs, style, 'section')
+    ta_face = tamil_font(style)
+    big = int(typography_pt(style, 'section_title_size_pt', 44))
+    second = int(typography_pt(style, 'section_title_ta_size_pt', 34))
+    sub_pt = int(typography_pt(style, 'section_subtitle_size_pt', 24))
+    sub_ta_pt = int(typography_pt(style, 'section_subtitle_ta_size_pt', 22))
+    titles = [((name or '').strip(), 'en'), ((name_ta or '').strip(), 'ta')]
+    subs = [((subtitle or '').strip(), 'en'), ((subtitle_ta or '').strip(), 'ta')]
+    if bilingual_primary(style) == 'ta':
+        titles.reverse()
+        subs.reverse()
+    dim = float(layout_in(style, 'section', 'subtitle_dim_factor', 0.76))
+    sub_rgb = RGBColor(*[max(0, min(255, int(c * dim))) for c in theme['section']])
+    lines = [(titles[0], big, True, theme['section']), (titles[1], second, True, theme['section'])]
+    lines += [(subs[0], sub_pt, False, sub_rgb), (subs[1], sub_ta_pt, False, sub_rgb)]
+    lines = [entry for entry in lines if entry[0][0]]
+    est_h = sum(
+        _estimate_text_lines(t, tb_w_in, pt) * pt * (1.6 if lang == 'ta' else 1.35) / 72.0 + 0.12
+        for (t, lang), pt, _, _ in lines
+    )
+    tb_h_in = min(est_h + 0.3, prs.slide_height.inches - 0.6)
+    top = (prs.slide_height - Inches(tb_h_in)) / 2
+    tf = slide.shapes.add_textbox((prs.slide_width - tb_w) / 2, top, tb_w, Inches(tb_h_in)).text_frame
+    tf.word_wrap = True
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    for i, ((text, lang), pt, bold, rgb) in enumerate(lines):
+        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        p.alignment = PP_ALIGN.CENTER
+        if i == 1 and not bold:
+            p.space_before = Pt(14)
+        run = p.add_run()
+        run.text = text
+        run.font.size = Pt(pt)
+        run.font.bold = bold
+        run.font.color.rgb = rgb
+        if lang == 'ta':
+            set_tamil_run_font(run, ta_face)
+        elif theme['font_name']:
+            run.font.name = theme['font_name']
+        if bold and i + 1 < len(lines) and not lines[i + 1][2]:
+            p.space_after = Pt(16)
     return slide
 
 
@@ -1263,6 +1367,34 @@ def _add_superscript_num_run(paragraph, num_str, font_size, body_rgb, font_name)
     rPr.set('baseline', '30000')
 
 
+def _write_text_block(slide, left, top, width, height, text, highlights, large_text, *,
+                      font_size, font_name, theme, align, ann_pt):
+    """A text block with one paragraph per line (never a raw newline inside a run)."""
+    tf = slide.shapes.add_textbox(left, top, width, height).text_frame
+    tf.word_wrap = True
+    tf.vertical_anchor = MSO_ANCHOR.TOP
+    lines = [ln for ln in str(text).split('\n') if ln.strip()] or ['']
+    for i, line in enumerate(lines):
+        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        p.alignment = align
+        if (highlights and len(highlights) > 0) or (large_text and len(large_text) > 0):
+            _apply_highlights(p, line, highlights, large_text,
+                              body_rgb=theme['body'],
+                              highlight_rgb=theme['highlight'],
+                              annotation_rgb=theme['annotation'],
+                              font_name=font_name,
+                              base_font_size=font_size,
+                              annotation_size_pt=ann_pt)
+        else:
+            run = p.add_run()
+            run.text = line
+            run.font.size = Pt(font_size)
+            run.font.color.rgb = theme['body']
+            if font_name:
+                run.font.name = font_name
+    return tf
+
+
 def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
                     large_text=None, alignment='left', font_size=32, style=None,
                     reference_font_size=None, leading_title=None,
@@ -1442,65 +1574,26 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
             if fn:
                 run.font.name = fn
 
-    if leading and extra_ref and leading_verse_top_in is not None and leading_verse_h_in is not None:
-        below_top = leading_verse_top_in + leading_verse_h_in + 0.06
-        below_fs = max(int(font_size) - 2, 22)
-        ex_h_in = max(slide_h_in - below_top - bottom_margin_in, 0.5)
-        ex_tb = verse_slide.shapes.add_textbox(left, Inches(below_top), content_w, Inches(ex_h_in))
-        ex_tf = ex_tb.text_frame
-        ex_tf.word_wrap = True
-        ex_tf.vertical_anchor = MSO_ANCHOR.TOP
-        ex_p = ex_tf.paragraphs[0]
-        ex_p.alignment = align
-        hl2 = text_below_reference_highlights
-        lt2 = text_below_reference_large_text
-        if (hl2 and len(hl2) > 0) or (lt2 and len(lt2) > 0):
-            _apply_highlights(ex_p, extra_ref, hl2, lt2,
-                              body_rgb=theme['body'],
-                              highlight_rgb=theme['highlight'],
-                              annotation_rgb=theme['annotation'],
-                              font_name=fn,
-                              base_font_size=below_fs,
-                              annotation_size_pt=ann_pt)
-        else:
-            ex_run = ex_p.add_run()
-            ex_run.text = extra_ref
-            ex_run.font.size = Pt(below_fs)
-            ex_run.font.color.rgb = theme['body']
-            if fn:
-                ex_run.font.name = fn
-    elif extra_ref and not (
-        leading and leading_verse_top_in is not None and leading_verse_h_in is not None
-    ):
-        body_h_in = _estimate_verse_body_height_in(verse_text, content_w_in, font_size)
-        below_top = verse_top.inches + min(body_h_in, max(verse_height.inches - 0.15, 1.0)) + body_gap_in
-        below_fs = max(int(font_size) - 4, 18)
-        sec_fn = secondary_font_name or fn
-        ex_h_in = max(slide_h_in - below_top - bottom_margin_in - 0.55, 0.55)
-        ex_tb = verse_slide.shapes.add_textbox(left, Inches(below_top), content_w, Inches(ex_h_in))
-        ex_tf = ex_tb.text_frame
-        ex_tf.word_wrap = True
-        ex_tf.vertical_anchor = MSO_ANCHOR.TOP
-        ex_p = ex_tf.paragraphs[0]
-        ex_p.alignment = align
-        hl2 = text_below_reference_highlights
-        lt2 = text_below_reference_large_text
-        if (hl2 and len(hl2) > 0) or (lt2 and len(lt2) > 0):
-            _apply_highlights(ex_p, extra_ref, hl2, lt2,
-                              body_rgb=theme['body'],
-                              highlight_rgb=theme['highlight'],
-                              annotation_rgb=theme['annotation'],
-                              font_name=sec_fn,
-                              base_font_size=below_fs,
-                              annotation_size_pt=ann_pt)
-        else:
-            ex_run = ex_p.add_run()
-            ex_run.text = extra_ref
-            ex_run.font.size = Pt(below_fs)
-            ex_run.font.color.rgb = theme['body']
-            if sec_fn:
-                ex_run.font.name = sec_fn
-    elif reference and ref_position == 'below':
+    bottom_ref = bool(reference) and ref_position in ('bottom', 'below') and (
+        ref_position == 'bottom' or bool(extra_ref)
+    )
+    if extra_ref:
+        # Second passage (e.g. Tamil) directly under the measured end of the verse body.
+        body_top_in = verse_top.inches
+        body_h_in = min(
+            _estimate_verse_body_height_in(verse_text, content_w_in, font_size),
+            max(verse_height.inches - 0.15, 1.0),
+        )
+        below_top = body_top_in + body_h_in + body_gap_in
+        reserve_in = bottom_ref_h_in if bottom_ref else 0.0
+        ex_h_in = max(slide_h_in - below_top - bottom_margin_in - reserve_in, 0.5)
+        _write_text_block(
+            verse_slide, left, Inches(below_top), content_w, Inches(ex_h_in), extra_ref,
+            text_below_reference_highlights, text_below_reference_large_text,
+            font_size=max(int(font_size) - 2, 20), font_name=secondary_font_name or fn,
+            theme=theme, align=align, ann_pt=ann_pt,
+        )
+    if reference and ref_position == 'below' and not bottom_ref:
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
         body_h_in = _estimate_verse_body_height_in(verse_text, content_w_in, font_size)
         if leading and leading_verse_top_in is not None:
@@ -1513,7 +1606,7 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
             left, Inches(ref_y_in), content_w, Inches(ref_h_in),
         )
         _set_ref(ref_tb, ref_text, align, ref_pt_bottom, italic=True)
-    elif reference and ref_position == 'bottom':
+    elif bottom_ref:
         ref_text = reference + (f' (Part {part_num})' if part_num is not None else '')
         ref_tb = verse_slide.shapes.add_textbox(
             left, Inches(bottom_ref_top_in), content_w, Inches(bottom_ref_h_in),
@@ -1521,6 +1614,25 @@ def add_verse_slide(prs, verse_text, reference, part_num=None, highlights=None,
         _set_ref(ref_tb, ref_text, PP_ALIGN.CENTER, ref_pt_bottom, italic=True)
 
     return verse_slide
+
+
+_SLIDE_SIZE_PRESETS = {
+    "widescreen": (13.33, 7.5),
+    "16:9":       (13.33, 7.5),
+    "standard":   (10.0,  7.5),
+    "4:3":        (10.0,  7.5),
+    "16:10":      (12.8,  8.0),
+}
+
+
+def slide_size_inches(data, default_w=10.0, default_h=7.5):
+    """(width, height) in inches from the deck's ``slide_size`` (preset or {width, height})."""
+    slide_size = (data or {}).get("slide_size")
+    if isinstance(slide_size, str) and slide_size.lower() in _SLIDE_SIZE_PRESETS:
+        return _SLIDE_SIZE_PRESETS[slide_size.lower()]
+    if isinstance(slide_size, dict):
+        return float(slide_size.get("width", default_w)), float(slide_size.get("height", default_h))
+    return default_w, default_h
 
 
 def create_presentation(data, output_file=None, custom_title=None, 
@@ -1561,23 +1673,17 @@ def create_presentation(data, output_file=None, custom_title=None,
 
     # Apply slide size if specified in JSON
     # Supported: "widescreen"/"16:9", "standard"/"4:3", or {"width": W, "height": H} in inches
-    slide_size = data.get("slide_size")
-    if slide_size:
-        from pptx.util import Inches as _Inches
-        PRESETS = {
-            "widescreen": (13.33, 7.5),
-            "16:9":       (13.33, 7.5),
-            "standard":   (10.0,  7.5),
-            "4:3":        (10.0,  7.5),
-            "16:10":      (12.8,  8.0),
-        }
-        if isinstance(slide_size, str) and slide_size.lower() in PRESETS:
-            w, h = PRESETS[slide_size.lower()]
-            prs.slide_width  = _Inches(w)
-            prs.slide_height = _Inches(h)
-        elif isinstance(slide_size, dict):
-            if "width"  in slide_size: prs.slide_width  = _Inches(slide_size["width"])
-            if "height" in slide_size: prs.slide_height = _Inches(slide_size["height"])
+    if data.get("slide_size"):
+        w, h = slide_size_inches(data, prs.slide_width.inches, prs.slide_height.inches)
+        prs.slide_width = Inches(w)
+        prs.slide_height = Inches(h)
+
+    from .bilingual import prepare_bilingual_deck
+
+    data, bilingual_report = prepare_bilingual_deck(data)
+    is_bilingual = bilingual_report is not None
+    if bilingual_report is not None:
+        print(bilingual_report.summary())
 
     # Get verses data from JSON
     verses_data = data.get("sections", [])
@@ -1605,6 +1711,8 @@ def create_presentation(data, output_file=None, custom_title=None,
             add_section_slide(
                 prs, section_data["section"], style=slide_style,
                 section_subtitle=section_data.get("section_subtitle"),
+                section_ta=section_data.get("section_ta") if is_bilingual else None,
+                section_subtitle_ta=section_data.get("section_subtitle_ta") if is_bilingual else None,
             )
 
         # Add verse slides if there are any verses
@@ -1618,6 +1726,11 @@ def create_presentation(data, output_file=None, custom_title=None,
                     prs, verse, slide_style, source_file=source_file,
                 )
     
+    if is_bilingual or slide_style.get("tamil_font_name"):
+        from .bilingual_slides import apply_tamil_fonts, tamil_font
+
+        apply_tamil_fonts(prs, tamil_font(slide_style))
+
     # Generate output filename if not provided
     if not output_file:
         if custom_title:

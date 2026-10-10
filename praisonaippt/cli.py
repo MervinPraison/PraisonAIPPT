@@ -230,6 +230,19 @@ Examples:
         action='store_true',
         help='Upload the generated PowerPoint or Markdown file to Google Drive',
     )
+
+    parser.add_argument(
+        '--no-upload',
+        action='store_true',
+        help='Never upload to Google Drive, even when the deck sets auto_upload_gdrive',
+    )
+
+    parser.add_argument(
+        '--bilingual',
+        metavar='LANG',
+        help='Show each scripture verse in a second language too (e.g. "ta": Tamil O.V. '
+             'looked up from the local Tamil Bible unless the YAML gives text_ta)',
+    )
     
     parser.add_argument(
         '--gdrive-credentials',
@@ -273,7 +286,7 @@ Examples:
             'calibrate-avatar', 'pip-face-centre', 'hero-panel-place', 'hero-panel-centre',
             'slide-transition-plan', 'slide-transition-preview',
             'pipeline', 'sync-variants', 'plan-slides', 'approve-plan',
-            'validate-deck', 'transcribe',
+            'validate-deck', 'transcribe', 'bilingual-fill',
             'config', 'template', 'setup-oauth', 'setup-credentials', 'secure-credentials',
         ],
         help='Command to execute (e.g., list-slides, convert-pdf, convert-video, export-slide-jpegs, template, config)'
@@ -933,7 +946,7 @@ def handle_convert_markdown_command(args, config=None):
 
     output_path = Path(args.markdown_output) if args.markdown_output else input_path.with_suffix('.md')
 
-    if data.get('auto_upload_gdrive'):
+    if data.get('auto_upload_gdrive') and not getattr(args, 'no_upload', False):
         args.upload_gdrive = True
 
     try:
@@ -1954,7 +1967,7 @@ def handle_convert_pdf_command(args):
 
         # Upload PDF to Google Drive if requested
         config = load_config()
-        if pdf_result and (args.upload_gdrive or config.should_auto_upload_gdrive()):
+        if pdf_result and (args.upload_gdrive or config.should_auto_upload_gdrive()) and not getattr(args, 'no_upload', False):
             handle_gdrive_upload(args.input_file, args, config, pdf_path=pdf_result)
 
         return 0
@@ -2401,7 +2414,7 @@ def handle_gdrive_upload(
     gdrive_file_name=None,
 ):
     """Handle Google Drive upload if requested — uploads PPTX, Google Doc, or PDF."""
-    should_upload = args.upload_gdrive or config.should_auto_upload_gdrive()
+    should_upload = (args.upload_gdrive or config.should_auto_upload_gdrive()) and not getattr(args, 'no_upload', False)
 
     if not should_upload:
         return
@@ -2474,6 +2487,44 @@ def _convert_pdf_via_gdrive(pptx_path: str, pdf_path: str) -> str:
     """Backward-compat shim. The real implementation lives in pdf_converter."""
     from .pdf_converter import convert_pptx_to_pdf_via_gdrive
     return convert_pptx_to_pdf_via_gdrive(pptx_path, pdf_path)
+
+
+def _apply_bilingual_flag(data, lang):
+    """``--bilingual ta`` turns any deck bilingual (deck settings still win)."""
+    raw = data.get('bilingual')
+    if isinstance(raw, dict):
+        merged = {**raw, 'enabled': True}
+        merged.setdefault('language', lang)
+    else:
+        merged = {'language': lang}
+    out = dict(data)
+    out['bilingual'] = merged
+    return out
+
+
+def handle_bilingual_fill_command(args):
+    """Write a copy of the deck with every Tamil verse filled in from the Tamil Bible."""
+    from .bilingual import freeze_bilingual
+    from .loader import load_deck_mapping, resolve_sections_from, write_deck_mapping
+
+    src = args.input_file or args.input
+    if not src or not Path(src).exists():
+        print(f"Error: Input file not found: {src}")
+        print("Usage: praisonaippt bilingual-fill deck.yaml -o deck_filled.yaml")
+        return 1
+    try:
+        data = resolve_sections_from(load_deck_mapping(src), src)
+        if getattr(args, 'bilingual', None):
+            data = _apply_bilingual_flag(data, args.bilingual)
+        filled, report = freeze_bilingual(data)
+    except SchemaError as e:
+        print(f"Error: {e}")
+        return 1
+    print(report.summary())
+    out = args.output or str(Path(src).with_name(Path(src).stem + '_filled' + Path(src).suffix))
+    write_deck_mapping(out, filled)
+    print(f"✓ Wrote {out}")
+    return 0 if not report.missing else 2
 
 
 def main():
@@ -2598,6 +2649,9 @@ def main():
     if args.command == 'transcribe':
         return handle_transcribe_command(args)
 
+    if args.command == 'bilingual-fill':
+        return handle_bilingual_fill_command(args)
+
     # List templates if requested
     if args.list_templates:
         entries = list_templates()
@@ -2652,6 +2706,9 @@ def main():
     if not data:
         return 1
 
+    if getattr(args, 'bilingual', None):
+        data = _apply_bilingual_flag(data, args.bilingual)
+
     data, pre_rc = _preflight_before_build(args, data, input_file)
     if pre_rc is not None:
         return pre_rc
@@ -2697,7 +2754,7 @@ def main():
         if hint:
             print(hint)
 
-    if data.get('auto_upload_gdrive'):
+    if data.get('auto_upload_gdrive') and not getattr(args, 'no_upload', False):
         args.upload_gdrive = True
     
     # Create presentation
