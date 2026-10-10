@@ -121,6 +121,33 @@ sections:
     highlights:
     - the eyes of your heart
 
+  - reference: Romans 10:9 (NIV)
+    split_max_length: 500
+    text: >-
+      If you declare with your mouth, "Jesus is Lord," and believe in your heart
+      that God raised him from the dead, you will be saved.
+    highlights:
+    - declare with your mouth
+    - Jesus is Lord
+    - believe in your heart
+    - saved
+
+  - reference: Romans 10:10 (NIV)
+    split_max_length: 500
+    text: >-
+      For it is with your heart that you believe and are justified, and it is with
+      your mouth that you profess your faith and are saved.
+    highlights:
+    - believe and are justified
+    - profess your faith
+    - saved
+
+  - reference: Romans 10:11 (NIV)
+    text: >-
+      As Scripture says, "Anyone who believes in him will never be put to shame."
+    highlights:
+    - believes in him
+    - never be put to shame
 
 - section: '4. Speak'
   section_subtitle: Faith speaks

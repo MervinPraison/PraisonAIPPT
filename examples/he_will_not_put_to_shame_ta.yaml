@@ -119,7 +119,7 @@ sections:
     reference_ta: ரோமர் 10:14 (TAOVBSI)
     text_ta: அவரை விசுவாசியாதவர்கள் எப்படி அவரைத் தொழுதுகொள்ளுவார்கள்? அவரைக் குறித்துக் கேள்விப்படாதவர்கள் எப்படி விசுவாசிப்பார்கள்? பிரசங்கிக்கிறவன் இல்லாவிட்டால் எப்படிக் கேள்விப்படுவார்கள்?
     highlights_ta:
-    - பிரசங்கிக்கிறவன் இல்லாவிட்டால் எப்படிக் கேள்விப்படுவார்கள்
+    - கேள்விப்படாதவர்கள் எப்படி விசுவாசிப்பார்கள்
 - section: 3. See
   section_subtitle: How shall they believe without being heard
   verses:
@@ -142,6 +142,41 @@ sections:
     text_ta: தாம் நம்மை அழைத்ததினாலே நமக்கு உண்டாயிருக்கிற நம்பிக்கை இன்னதென்றும், பரிசுத்தவான்களிடத்தில் தமக்கு உண்டாயிருக்கிற சுதந்தரத்தினுடைய மகிமையின் ஐசுவரியம் இன்னதென்றும்; தாம் கிறிஸ்துவை மரித்தோரிலிருந்து எழுப்பி, அவரிடத்தில் நடப்பித்த தமது பலத்த சத்துவத்தின் வல்லமைப்படியே விசுவாசிக்கிறவர்களாகிய நம்மிடத்திலே காண்பிக்கும் தம்முடைய வல்லமையின் மகா மேன்மையான மகத்துவம் இன்னதென்றும், நீங்கள் அறியும்படிக்கு, அவர் உங்களுக்குப் பிரகாசமுள்ள மனக்கண்களைக் கொடுக்கவேண்டுமென்றும் வேண்டிக்கொள்ளுகிறேன்.
     highlights_ta:
     - பிரகாசமுள்ள மனக்கண்களை
+  - reference: Romans 10:9 (NIV)
+    split_max_length: 500
+    text: If you declare with your mouth, "Jesus is Lord," and believe in your heart that God raised him from the dead, you will be saved.
+    highlights:
+    - declare with your mouth
+    - Jesus is Lord
+    - believe in your heart
+    - saved
+    reference_ta: ரோமர் 10:9 (TAOVBSI)
+    text_ta: என்னவென்றால், கர்த்தராகிய இயேசுவை நீ உன் வாயினாலே அறிக்கையிட்டு, தேவன் அவரை மரித்தோரிலிருந்து எழுப்பினாரென்று உன் இருதயத்திலே விசுவாசித்தால் இரட்சிக்கப்படுவாய்.
+    highlights_ta:
+    - வாயினாலே அறிக்கையிட்டு
+    - இருதயத்திலே விசுவாசித்தால்
+    - இரட்சிக்கப்படுவாய்
+  - reference: Romans 10:10 (NIV)
+    split_max_length: 500
+    text: For it is with your heart that you believe and are justified, and it is with your mouth that you profess your faith and are saved.
+    highlights:
+    - believe and are justified
+    - profess your faith
+    - saved
+    reference_ta: ரோமர் 10:10 (TAOVBSI)
+    text_ta: நீதியுண்டாக இருதயத்திலே விசுவாசிக்கப்படும், இரட்சிப்புண்டாக வாயினாலே அறிக்கைபண்ணப்படும்.
+    highlights_ta:
+    - விசுவாசிக்கப்படும்
+    - அறிக்கைபண்ணப்படும்
+  - reference: Romans 10:11 (NIV)
+    text: As Scripture says, "Anyone who believes in him will never be put to shame."
+    highlights:
+    - believes in him
+    - never be put to shame
+    reference_ta: ரோமர் 10:11 (TAOVBSI)
+    text_ta: அவரை விசுவாசிக்கிறவன் எவனோ அவன் வெட்கப்படுவதில்லையென்று வேதம் சொல்லுகிறது.
+    highlights_ta:
+    - வெட்கப்படுவதில்லை
 - section: 4. Speak
   section_subtitle: Faith speaks
   verses:
