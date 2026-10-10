@@ -60,6 +60,7 @@ nav:
       - Slide style reference: slide-style-reference.md
       - Deck reference (YAML or JSON): yaml-reference.md
       - Rich text formatting: formatting.md
+      - English + Tamil slides: bilingual.md
       - Theme templates: templates.md
   - Video & media:
       - Video + transcript workflow: workflow-video-transcript-to-deck.md

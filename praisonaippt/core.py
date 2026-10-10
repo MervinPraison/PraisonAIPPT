@@ -1730,6 +1730,12 @@ def create_presentation(data, output_file=None, custom_title=None,
         from .bilingual_slides import apply_tamil_fonts, tamil_font
 
         apply_tamil_fonts(prs, tamil_font(slide_style))
+    elif "tamil" in str(slide_style.get("font_name") or "").lower():
+        # Tamil-only deck (font_name: Tamil MN): still set the complex-script
+        # slot, or PowerPoint draws the Tamil in the theme's Latha.
+        from .bilingual_slides import apply_tamil_fonts
+
+        apply_tamil_fonts(prs, slide_style["font_name"])
 
     # Generate output filename if not provided
     if not output_file:
