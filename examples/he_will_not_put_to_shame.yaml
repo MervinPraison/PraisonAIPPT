@@ -38,7 +38,8 @@ sections:
     text: >-
       So then faith comes by hearing, and hearing by the word of God.
     highlights:
-    - faith comes by hearing
+    - text: faith comes
+      color: green
     - hearing
 - section: '1. Sent'
   section_subtitle: How shall they preach unless they are sent
