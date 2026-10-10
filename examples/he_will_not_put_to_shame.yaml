@@ -51,7 +51,16 @@ sections:
       glad tidings of good things!"
     highlights:
     - sent
+  - reference: Malachi 3:8 (NKJV)
+    leading_title: Tithes and Offerings
+    split_max_length: 500
+    text: >-
+      "Will a man rob God? Yet you have robbed Me! But you say, 'In what way have
+      we robbed You?' In tithes and offerings."
+    highlights:
+    - tithes and offerings
   - reference: Malachi 3:10 (NKJV)
+    leading_title: Bring the Tithes and Offering
     split_max_length: 500
     text: >-
       Bring all the tithes into the storehouse, That there may be food in My
@@ -59,7 +68,7 @@ sections:
       open for you the windows of heaven And pour out for you such blessing That
       there will not be room enough to receive it."
     highlights:
-    - tithes into the storehouse
+    - Bring all the tithes into the storehouse
     - food in My house
     - pour out for you such blessing
   - reference: Hebrews 11:4 (NKJV)
