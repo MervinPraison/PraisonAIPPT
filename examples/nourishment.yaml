@@ -89,30 +89,6 @@ sections:
           - one Man’s obedience
           - made righteous
 
-      - reference: Malachi 3:10 (NKJV)
-        leading_title: Tithes and Offering — Food in His House
-        split_max_length: 500
-        text: >-
-          Bring all the tithes into the storehouse, That there may be food in My
-          house, And try Me now in this," Says the Lord of hosts, "If I will not
-          open for you the windows of heaven And pour out for you such blessing That
-          there will not be room enough to receive it."
-        highlights:
-          - tithes into the storehouse
-          - food in My house
-          - pour out for you such blessing
-
-      - reference: Hebrews 11:4 (NKJV)
-        leading_title: By Faith Abel Offered
-        text: >-
-          By faith Abel offered to God a more excellent sacrifice than Cain, through
-          which he obtained witness that he was righteous, God testifying of his gifts;
-          and through it he being dead still speaks.
-        highlights:
-          - By faith Abel offered
-          - a more excellent sacrifice
-          - he being dead still speaks
-
   - section: 2. Rest Is Remaining in Him
     verses:
       - reference: John 15:5 (NKJV)
@@ -220,17 +196,6 @@ sections:
         highlights:
           - word of His grace
           - build you up
-
-      - reference: Deuteronomy 6:11 (NKJV)
-        leading_title: Houses Full of Good Things
-        text: >-
-          houses full of all good things, which you did not fill, wells dug, which you
-          did not dig, vineyards and olive trees, which you did not plant—when you have
-          eaten and are full,
-        highlights:
-          - houses full of all good things
-          - vineyards and olive trees
-          - eaten and are full
 
   - section: Summary
     verses:

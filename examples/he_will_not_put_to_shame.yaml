@@ -59,8 +59,20 @@ sections:
       open for you the windows of heaven And pour out for you such blessing That
       there will not be room enough to receive it."
     highlights:
-    - storehouse
-    - food
+    - tithes into the storehouse
+    - food in My house
+    - pour out for you such blessing
+  - reference: Hebrews 11:4 (NKJV)
+    leading_title: By Faith Abel Offered
+    split_max_length: 500
+    text: >-
+      By faith Abel offered to God a more excellent sacrifice than Cain, through
+      which he obtained witness that he was righteous, God testifying of his gifts;
+      and through it he being dead still speaks.
+    highlights:
+    - By faith Abel offered
+    - a more excellent sacrifice
+    - he being dead still speaks
 - section: '2. Hear'
   section_subtitle: How shall they hear without a preacher
   verses:
@@ -238,3 +250,14 @@ sections:
     highlights:
     - no distinction
     - call upon Him
+  - reference: Deuteronomy 6:11 (NKJV)
+    leading_title: Houses Full of Good Things
+    split_max_length: 500
+    text: >-
+      houses full of all good things, which you did not fill, wells dug, which you
+      did not dig, vineyards and olive trees, which you did not plant—when you have
+      eaten and are full,
+    highlights:
+    - houses full of all good things
+    - vineyards and olive trees
+    - eaten and are full
