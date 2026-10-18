@@ -1,4 +1,4 @@
-# New King James Version (NKJV) unless noted on the slide reference line.
+# NKJV for repentance/healing block; KJV where noted on reference lines.
 presentation_title: Repentance
 presentation_subtitle: ''
 auto_upload_gdrive: true
@@ -49,8 +49,14 @@ sections:
     - text: one sinner who repents
       color: green
     - more joy in heaven
-- section: The LORD Who Heals
-  section_subtitle: Healing on the Sabbath
+- section: Benefits of resting
+  section_subtitle: Three gifts when we cease striving in our own strength
+  verses:
+  - slide_type: title_only
+    text: 1. Healing · 2. The Lord fighting your battle · 3. Grace and soul rest
+    reference: Overview — see the sections that follow
+- section: '1. Healing'
+  section_subtitle: Benefit of resting
   verses:
   - reference: Exodus 15:26 (NKJV)
     split_max_length: 500
@@ -99,24 +105,17 @@ sections:
     - daughter of Abraham
     - be loosed from this bond
     - on the Sabbath
-- section: Rapha and Raphah
-  section_subtitle: Two Hebrew words — heal and be still
-  verses:
   - slide_type: comparison
     reference: Word study
     columns:
     - heading: רָפָא — rapha
       text: >-
-        To heal. Exodus 15:26 — "For I am the Lord who heals you" when Israel
-        heeds His voice and keeps His statutes.
+        To heal. Exodus 15:26 — the Lord who heals you when Israel heeds His
+        voice.
     - heading: רָפָה — raphah
       text: >-
-        To relax, let go, be still. Psalm 46:10 — "Be still, and know that I am
-        God; I will be exalted among the nations, I will be exalted in the
-        earth."
-    highlights:
-    - heals you
-    - Be still
+        To relax, let go, be still. Psalm 46:10 — Be still, and know that I am
+        God.
   - reference: Psalm 46:10 (NKJV)
     text: >-
       Be still, and know that I am God; I will be exalted among the nations, I
@@ -125,8 +124,8 @@ sections:
     - text: Be still
       color: green
     - know that I am God
-- section: Steady at Rephidim
-  section_subtitle: Jehovahnissi — The Lord Is My Banner
+- section: '2. The Lord fighting your battle'
+  section_subtitle: Benefit of resting — you need not hold up your own arms
   verses:
   - reference: Exodus 17:8 (NKJV)
     text: Now Amalek came and fought with Israel in Rephidim.
@@ -158,3 +157,130 @@ sections:
       And Moses built an altar and called its name, The-Lord-Is-My-Banner.
     highlights:
     - The-Lord-Is-My-Banner
+  - reference: Psalm 110:1–2 (KJV)
+    split_max_length: 500
+    text: >-
+      The LORD said unto my Lord, Sit thou at my right hand, until I make thine
+      enemies thy footstool. The LORD shall send the rod of thy strength out of
+      Zion: rule thou in the midst of thine enemies.
+    highlights:
+    - Sit thou at my right hand
+    - thine enemies thy footstool
+    - rule thou in the midst of thine enemies
+- section: '3. Grace, direction, and soul rest'
+  section_subtitle: Benefit of resting — trust, grace, and entering His rest (core verses follow)
+  verses:
+  - slide_type: title_only
+    text: Grace without works · Paths directed · Rest for your soul
+    reference: Matthew 11 · Romans 11 · Proverbs 3 · Hebrews 4
+- section: Core rest verses
+  section_subtitle: KJV — sit still, trust, and enter His rest
+  verses:
+  - reference: Ruth 3:1 (KJV)
+    text: >-
+      Then Naomi her mother in law said unto her, My daughter, shall I not seek
+      rest for thee, that it may be well with thee?
+    highlights:
+    - seek rest for thee
+    - well with thee
+  - reference: Ruth 3:18 (KJV)
+    split_max_length: 500
+    text: >-
+      Then said she, Sit still, my daughter, until thou know how the matter will
+      fall: for the man will not be in rest, until he have finished the thing
+      this day.
+    highlights:
+    - text: Sit still
+      color: green
+    - until he have finished the thing
+  - reference: Psalm 110:1–2 (KJV)
+    split_max_length: 500
+    text: >-
+      The LORD said unto my Lord, Sit thou at my right hand, until I make thine
+      enemies thy footstool. The LORD shall send the rod of thy strength out of
+      Zion: rule thou in the midst of thine enemies.
+    highlights:
+    - Sit thou at my right hand
+    - thine enemies thy footstool
+  - reference: Proverbs 3:5–6 (KJV)
+    split_max_length: 500
+    text: >-
+      Trust in the LORD with all thine heart; and lean not unto thine own
+      understanding. In all thy ways acknowledge him, and he shall direct thy
+      paths.
+    highlights:
+    - Trust in the LORD
+    - lean not unto thine own understanding
+    - he shall direct thy paths
+  - reference: Matthew 11:28–30 (KJV)
+    split_max_length: 500
+    text: >-
+      Come unto me, all ye that labour and are heavy laden, and I will give you
+      rest. Take my yoke upon you, and learn of me; for I am meek and lowly in
+      heart: and ye shall find rest unto your souls. For my yoke is easy, and my
+      burden is light.
+    highlights:
+    - text: I will give you rest
+      color: green
+    - rest unto your souls
+  - reference: Romans 11:6 (KJV)
+    text: >-
+      And if by grace, then is it no more of works: otherwise grace is no more
+      grace. But if it be of works, then is it no more grace: otherwise work is
+      no more work.
+    highlights:
+    - by grace
+    - no more of works
+  - reference: Hebrews 3:11 (KJV)
+    text: So I sware in my wrath, They shall not enter into my rest.
+    highlights:
+    - text: enter into my rest
+      color: green
+  - reference: Hebrews 4:1 (KJV)
+    text: >-
+      Let us therefore fear, lest, a promise being left us of entering into his
+      rest, any of you should seem to come short of it.
+    highlights:
+    - text: entering into his rest
+      color: green
+- section: 'Reason — I will'
+  section_subtitle: Hebrews 8 and Hebrews 10
+  verses:
+  - reference: Hebrews 8:8–12 (KJV)
+    split_max_length: 480
+    text: >-
+      For finding fault with them, he saith, Behold, the days come, saith the
+      Lord, when I will make a new covenant with the house of Israel and with
+      the house of Judah: Not according to the covenant that I made with their
+      fathers in the day when I took them by the hand to lead them out of the
+      land of Egypt; because they continued not in my covenant, and I regarded
+      them not, saith the Lord. For this is the covenant that I will make with
+      the house of Israel after those days, saith the Lord; I will put my laws
+      into their mind, and write them in their hearts: and I will be to them a
+      God, and they shall be to me a people: And they shall not teach every man
+      his neighbour, and every man his brother, saying, Know the Lord: for all
+      shall know me, from the least to the greatest. For I will be merciful to
+      their unrighteousness, and their sins and their iniquities will I remember
+      no more.
+    highlights:
+    - text: I will make a new covenant
+      color: green
+    - text: I will put my laws
+      color: green
+    - text: I will be to them a God
+      color: green
+    - text: I will be merciful
+      color: green
+    - will I remember no more
+  - reference: Hebrews 10:11–14 (KJV)
+    split_max_length: 500
+    text: >-
+      And every priest standeth daily ministering and offering oftentimes the
+      same sacrifices, which can never take away sins: But this man, after he
+      had offered one sacrifice for sins for ever, sat down on the right hand of
+      God; From henceforth expecting till his enemies be made his footstool. For
+      by one offering he hath perfected for ever them that are sanctified.
+    highlights:
+    - sat down on the right hand of God
+    - perfected for ever
+    - one sacrifice for sins for ever
