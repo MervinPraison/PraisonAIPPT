@@ -1,0 +1,160 @@
+# New King James Version (NKJV) unless noted on the slide reference line.
+presentation_title: Repentance
+presentation_subtitle: ''
+auto_upload_gdrive: true
+slide_style:
+  background_image: assets/background_alt.jpg
+  text_color: white
+  alignment: left
+  reference_position: top
+  font_name: Palatino
+sections:
+- section: ''
+  verses:
+  - reference: Romans 2:4 (NKJV)
+    split_max_length: 500
+    text: >-
+      Or do you despise the riches of His goodness, forbearance, and
+      longsuffering, not knowing that the goodness of God leads you to
+      repentance?
+    highlights:
+    - text: the goodness of God leads you to repentance
+      color: green
+- section: The Parable of the Lost Sheep
+  verses:
+  - reference: Luke 15:1–2 (NKJV)
+    split_max_length: 500
+    text: >-
+      Then all the tax collectors and sinners drew near to Him to hear Him. And
+      the Pharisees and scribes complained, saying, "This Man receives sinners
+      and eats with them."
+    highlights:
+    - sinners
+    - receives sinners
+  - reference: Luke 15:3–7 (NKJV)
+    leading_title: The Parable of the Lost Sheep
+    split_max_length: 450
+    text: >-
+      So He spoke this parable to them, saying: "What man of you, having a
+      hundred sheep, if he loses one of them, does not leave the ninety-nine in
+      the wilderness, and go after the one which is lost until he finds it? And
+      when he has found it, he lays it on his shoulders, rejoicing. And when he
+      comes home, he calls together his friends and neighbors, saying to them,
+      'Rejoice with me, for I have found my sheep which was lost.' I say to you
+      that likewise there will be more joy in heaven over one sinner who repents
+      than over ninety-nine just persons who need no repentance."
+    highlights:
+    - lost
+    - rejoicing
+    - text: one sinner who repents
+      color: green
+    - more joy in heaven
+- section: The LORD Who Heals
+  section_subtitle: Healing on the Sabbath
+  verses:
+  - reference: Exodus 15:26 (NKJV)
+    split_max_length: 500
+    text: >-
+      If you diligently heed the voice of the Lord your God and do what is right
+      in His sight, give ear to His commandments and keep all His statutes, I
+      will put none of the diseases on you which I have brought on the
+      Egyptians. For I am the Lord who heals you.
+    highlights:
+    - text: I am the Lord who heals you
+      color: green
+  - reference: John 5:8–9 (NKJV)
+    text: >-
+      Jesus said to him, "Rise, take up your bed and walk." And immediately the
+      man was made well, took up his bed, and walked. And that day was the
+      Sabbath.
+    highlights:
+    - made well
+    - the Sabbath
+  - reference: John 5:10–12 (NKJV)
+    split_max_length: 500
+    text: >-
+      The Jews therefore said to him who was cured, "It is the Sabbath; it is
+      not lawful for you to carry your bed." He answered them, "He who made me
+      well said to me, 'Take up your bed and walk.'" Then they asked him, "Who
+      is the Man who said to you, 'Take up your bed and walk'?"
+    highlights:
+    - made me well
+    - the Sabbath
+  - reference: John 5:16 (NKJV)
+    text: >-
+      For this reason the Jews persecuted Jesus, and sought to kill Him, because
+      He had done these things on the Sabbath.
+    highlights:
+    - persecuted Jesus
+    - on the Sabbath
+  - reference: Luke 13:15–16 (NKJV)
+    split_max_length: 500
+    text: >-
+      The Lord then answered him and said, "Hypocrite! Does not each one of you
+      on the Sabbath loose his ox or donkey from the stall, and lead it away to
+      water it? So ought not this woman, being a daughter of Abraham, whom Satan
+      has bound—think of it—for eighteen years, be loosed from this bond on the
+      Sabbath?"
+    highlights:
+    - daughter of Abraham
+    - be loosed from this bond
+    - on the Sabbath
+- section: Rapha and Raphah
+  section_subtitle: Two Hebrew words — heal and be still
+  verses:
+  - slide_type: comparison
+    reference: Word study
+    columns:
+    - heading: רָפָא — rapha
+      text: >-
+        To heal. Exodus 15:26 — "For I am the Lord who heals you" when Israel
+        heeds His voice and keeps His statutes.
+    - heading: רָפָה — raphah
+      text: >-
+        To relax, let go, be still. Psalm 46:10 — "Be still, and know that I am
+        God; I will be exalted among the nations, I will be exalted in the
+        earth."
+    highlights:
+    - heals you
+    - Be still
+  - reference: Psalm 46:10 (NKJV)
+    text: >-
+      Be still, and know that I am God; I will be exalted among the nations, I
+      will be exalted in the earth.
+    highlights:
+    - text: Be still
+      color: green
+    - know that I am God
+- section: Steady at Rephidim
+  section_subtitle: Jehovahnissi — The Lord Is My Banner
+  verses:
+  - reference: Exodus 17:8 (NKJV)
+    text: Now Amalek came and fought with Israel in Rephidim.
+    highlights:
+    - Rephidim
+    - Amalek
+  - reference: Exodus 17:11 (NKJV)
+    text: >-
+      And so it was, when Moses held up his hand, that Israel prevailed; and
+      when he let down his hand, Amalek prevailed.
+    highlights:
+    - held up his hand
+    - Israel prevailed
+    - let down his hand
+  - reference: Exodus 17:12 (NKJV)
+    split_max_length: 500
+    text: >-
+      But Moses' hands became heavy; so they took a stone and put it under him,
+      and he sat on it. And Aaron and Hur supported his hands, one on one side,
+      and the other on the other; and his hands were steady until the going down
+      of the sun.
+    highlights:
+    - hands became heavy
+    - supported his hands
+    - text: hands were steady
+      color: green
+  - reference: Exodus 17:15 (NKJV)
+    text: >-
+      And Moses built an altar and called its name, The-Lord-Is-My-Banner.
+    highlights:
+    - The-Lord-Is-My-Banner
